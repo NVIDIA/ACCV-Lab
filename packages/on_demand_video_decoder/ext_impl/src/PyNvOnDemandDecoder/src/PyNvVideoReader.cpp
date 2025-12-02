@@ -140,8 +140,9 @@ PyNvVideoReader::PyNvVideoReader(const std::string filename, int iGpu, CUcontext
         CUdevice cuDevice = 0;
         ck(cuDeviceGet(&cuDevice, this->gpu_id));
         ck(cuDevicePrimaryCtxRetain(&this->cu_context, cuDevice));
-        ck(cuCtxPushCurrent(this->cu_context));
         this->destroy_context = true;
+        // Temporarily push context for stream creation, then immediately pop.
+        ck(cuCtxPushCurrent(this->cu_context));
         if (cu_stream == nullptr) {
             ck(cuStreamCreate(&this->cu_stream, CU_STREAM_DEFAULT));
             this->owner_stream = true;
@@ -149,6 +150,7 @@ PyNvVideoReader::PyNvVideoReader(const std::string filename, int iGpu, CUcontext
             this->cu_stream = cu_stream;
             this->owner_stream = false;
         }
+        ck(cuCtxPopCurrent(NULL));
     }
     if (!this->cu_context) {
         throw std::domain_error(
@@ -162,9 +164,12 @@ PyNvVideoReader::PyNvVideoReader(const std::string filename, int iGpu, CUcontext
     this->demuxer.reset(new PyNvGopDemuxer(filename.c_str()));
     nvtxRangePop();
     nvtxRangePushA("Reset Decoder");
+    // Temporarily push context for NvDecoder creation
+    ck(cuCtxPushCurrent(this->cu_context));
     // Check the param for NvDecoder [TODO]
     this->decoder.reset(
         new NvDecoder(this->cu_stream, this->cu_context, true, demuxer->GetNvCodecId(), false, false, false));
+    ck(cuCtxPopCurrent(NULL));
     nvtxRangePop();
     std::vector<int> key_frame_ids;
     std::map<int, int64_t> frame2pts;
@@ -187,12 +192,44 @@ PyNvVideoReader::~PyNvVideoReader() {
 #endif
     // Maybe this part can be replaced by ReleasePacket
     this->releasePacketArray();
-    if (this->owner_stream && this->cu_stream) {
-        ck(cuStreamDestroy(this->cu_stream));
+
+    // Temporarily push context for GPU resource cleanup.
+    // This ensures the destructor works correctly on any thread.
+    if (this->cu_context) {
+        ck(cuCtxPushCurrent(this->cu_context));
+
+        // Explicitly release GPU memory pool before automatic member destruction
+        // (gpu_mem_pool destructor would run after this, but HardRelease is idempotent)
+        gpu_mem_pool.HardRelease();
+
+        if (this->owner_stream && this->cu_stream) {
+            ck(cuStreamDestroy(this->cu_stream));
+        }
+
+        ck(cuCtxPopCurrent(NULL));
     }
+
     if (this->destroy_context) {
-        ck(cuCtxPopCurrent(&this->cu_context));
+        // Only release the primary context reference.
+        // No need to pop - we use temporary push/pop pattern instead.
         ck(cuDevicePrimaryCtxRelease(this->gpu_id));
+    }
+}
+
+void PyNvVideoReader::ReleaseMemPools() {
+    // Only release GPU memory pool, preserve decoder state (cur_frame_, packet_queue, etc.)
+    // This allows efficient forward decoding after memory release.
+    //
+    // Note: After release, requesting frame_id <= cur_frame_ will trigger re-decode
+    // because the decoded frame data is no longer available in the memory pool.
+
+    // Temporarily push context for GPU memory release
+    if (this->cu_context) {
+        ck(cuCtxPushCurrent(this->cu_context));
+    }
+    gpu_mem_pool.HardRelease();
+    if (this->cu_context) {
+        ck(cuCtxPopCurrent(NULL));
     }
 }
 
@@ -498,7 +535,12 @@ void PyNvVideoReader::run_single_frame_internal(const int frame_id, bool convert
             this->fetchNewGop(cur_keyframe_);
         }
     }
-    if (frame_id < this->cur_frame_) {
+    // Use <= instead of < to handle:
+    // 1. Requesting the same frame again (frame_id == cur_frame_): re-decode needed
+    //    because memory pool may have been released or data may have been modified
+    //    by user's in-place operations (e.g., PyTorch tensor += 1)
+    // 2. Requesting a previous frame (frame_id < cur_frame_): re-decode needed
+    if (frame_id <= this->cur_frame_) {
         auto cur_keyframe_ = demuxer->getKeyFrameId(frame_id);
         this->cur_frame_ = cur_keyframe_ - 1;
 

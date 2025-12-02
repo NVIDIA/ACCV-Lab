@@ -580,7 +580,12 @@ int PyNvGopDecoder::InitGpuMemPool(const std::vector<int>& heights, const std::v
             needed_size += frame_sizes[i];
         }
     }
+
+    // Temporarily push context for GPU memory allocation
+    ck(cuCtxPushCurrent(this->cu_context));
     this->gpu_mem_pool.EnsureSizeAndSoftReset(needed_size, false);
+    ck(cuCtxPopCurrent(NULL));
+
     return 0;
 }
 
@@ -591,6 +596,9 @@ int PyNvGopDecoder::InitializeDecoders(const std::vector<int>& codec_ids) {
 
     ensureCudaContextInitialized();
     ensureDecodeRunnersInitialized();
+
+    // Temporarily push context for decoder creation
+    ck(cuCtxPushCurrent(this->cu_context));
 
     // Create decoders only
     for (int i = 0; i < num_of_files; ++i) {
@@ -603,6 +611,8 @@ int PyNvGopDecoder::InitializeDecoders(const std::vector<int>& codec_ids) {
         }
         nvtxRangePop();  //Decoder creation
     }
+
+    ck(cuCtxPopCurrent(NULL));
 
     nvtxRangePop();  //Initialize Decoders
     return 0;
@@ -679,3 +689,24 @@ template void PyNvGopDecoder::DecProc<DecodedFrameExt>(
     std::vector<uint8_t*> p_frames, ConcurrentQueue<std::tuple<uint8_t*, int, int>>* packet_queue,
     const std::vector<int> sorted_frame_ids, bool use_bgr_format, const std::string& filename,
     LastDecodedFrameInfo& last_decoded_frame_info);
+
+void PyNvGopDecoder::ReleaseMemPools() {
+    // Temporarily push context for GPU memory release
+    if (this->cu_context) {
+        ck(cuCtxPushCurrent(this->cu_context));
+    }
+    // Release only the GPU memory pool
+    gpu_mem_pool.HardRelease();
+    if (this->cu_context) {
+        ck(cuCtxPopCurrent(NULL));
+    }
+}
+
+void PyNvGopDecoder::ReleaseDecoder() {
+    // Clear all decoder instances to release their GPU memory
+    // (NvDecoder instances allocate GPU memory for frame buffers)
+    for (auto& decoder : vdec) {
+        decoder.reset();
+    }
+    vdec.clear();
+}

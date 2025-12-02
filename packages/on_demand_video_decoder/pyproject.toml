@@ -21,6 +21,8 @@ dependencies = [
 [project.optional-dependencies]
 optional = [
     "pytest",
+    "pynvml",
+    "pytest-timeout",
 ]
 
 [tool.skbuild]

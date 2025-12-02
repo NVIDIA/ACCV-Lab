@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import pytest
+import sys
 
 import random
 
@@ -45,4 +46,4 @@ def test_random_access_single():
 
 
 if __name__ == "__main__":
-    pytest.main([__file__])
+    sys.exit(pytest.main([__file__, "-v"]))

@@ -24,6 +24,7 @@ section helps you quickly locate the sample code that matches your requirements.
 | [SampleDecodeFromGopFiles.py](../samples/SampleDecodeFromGopFiles.py) | GOP data persistence to disk | {py:func}`~accvlab.on_demand_video_decoder.SavePacketsToFile`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.LoadGops` |
 | [SampleDecodeFromGopFilesToListAPI.py](../samples/SampleDecodeFromGopFilesToListAPI.py) | Selective GOP loading | {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.LoadGopsToList`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOPListRGB` |
 | [SampleDecodeFromGopList.py](../samples/SampleDecodeFromGopList.py) | Batch decode from multiple demux results (N demux → 1 decode) | {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOPListRGB` |
+| [SampleStreamAsyncAccess.py](../samples/SampleStreamAsyncAccess.py) | Async stream decoding with prefetching | {py:func}`~accvlab.on_demand_video_decoder.CreateSampleReader`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvSampleReader.DecodeN12ToRGBAsync`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvSampleReader.DecodeN12ToRGBAsyncGetBuffer` |
 
 For details on the **Key APIs**, please refer to the API documentation of the corresponding functions and classes.
 
@@ -41,7 +42,10 @@ If you need random frame access:
         → Use SampleRandomAccess
 
 If you need sequential frame decoding:
-    → Use SampleStreamAccess
+    If you need async decoding with prefetching for lower latency:
+        → Use SampleStreamAsyncAccess
+    Otherwise:
+        → Use SampleStreamAccess
 
 If you need to separate demuxing and decoding:
     If per-video GOP management is required (i.e., use of separate per-video GOP data):
@@ -397,6 +401,148 @@ This reduces overhead for sequential access patterns compared to Random Access m
 ```bash
 cd packages/on_demand_video_decoder/samples
 python SampleStreamAccess.py
+```
+
+#### 3.2.3 Sample: Async Stream Access
+
+**File:** `packages/on_demand_video_decoder/samples/SampleStreamAsyncAccess.py`
+
+**When to Use**
+
+Async Stream Access is beneficial when:
+- Lower latency is required for streaming applications
+- Prefetching next frame while processing current frame improves latency
+- Labeling task model need high-performance inference
+- GPU utilization needs to be maximized through overlapped operations
+
+**Key Advantages Over Basic Stream Access**
+
+| Feature | Stream Access | Async Stream Access |
+|---------|---------------|---------------------|
+| Decode mode | Synchronous | Asynchronous with prefetching |
+| Latency | Standard | Lower (prefetched frames ready) |
+| GPU utilization | Standard | Better (decode/process overlap) |
+
+**Core APIs**
+
+- {py:func}`~accvlab.on_demand_video_decoder.CreateSampleReader`: Initialize the sample reader
+- {py:meth}`~accvlab.on_demand_video_decoder.PyNvSampleReader.DecodeN12ToRGBAsync`: Start asynchronous decoding
+- {py:meth}`~accvlab.on_demand_video_decoder.PyNvSampleReader.DecodeN12ToRGBAsyncGetBuffer`: Retrieve decoded frames from buffer
+
+**Code Walkthrough**
+
+Initialize the sample reader:
+
+```python
+import accvlab.on_demand_video_decoder as nvc
+
+nv_stream_dec = nvc.CreateSampleReader(
+    num_of_set=1,              # Cache for this many video sets
+    num_of_file=6,             # Maximum number of files per set
+    iGpu=0                     # Target GPU device ID
+)
+```
+
+**Async Decoding Pattern**
+
+The async pattern consists of two main operations:
+
+1. **`DecodeN12ToRGBAsync`**: Start asynchronous decoding (non-blocking)
+2. **`DecodeN12ToRGBAsyncGetBuffer`**: Get decoded frames (waits if not ready)
+
+First iteration - start async decode and get result:
+
+```python
+# Start async decode
+nv_stream_dec.DecodeN12ToRGBAsync(
+    file_path_list,
+    frame_id_list,
+    False,  # Output in RGB format (False=RGB, True=BGR)
+)
+
+# Get the result (will wait for async decode to complete)
+decoded_frames = nv_stream_dec.DecodeN12ToRGBAsyncGetBuffer(
+    file_path_list,
+    frame_id_list,
+    False,  # Output in RGB format
+)
+```
+
+Subsequent iterations - get prefetched result:
+
+```python
+# Get prefetched result from buffer (already decoded in background)
+decoded_frames = nv_stream_dec.DecodeN12ToRGBAsyncGetBuffer(
+    file_path_list,
+    frame_id_list,
+    False,  # Output in RGB format
+)
+```
+
+**Prefetching Pattern**
+
+The key optimization is prefetching the next frame while processing the current one:
+
+```python
+# Process current frame
+tensor_list = [torch.as_tensor(frame, device='cuda') for frame in decoded_frames]
+rgb_batch = torch.stack(tensor_list, dim=0)
+
+# Prefetch next frame (non-blocking, happens in background)
+if idx < len(frames_to_decode) - 1:
+    next_frame = frames_to_decode[idx + 1]
+    next_frame_id_list = [next_frame] * len(file_path_list)
+    nv_stream_dec.DecodeN12ToRGBAsync(
+        file_path_list,
+        next_frame_id_list,
+        False,
+    )
+
+# Continue processing current frame...
+# Next iteration will get prefetched frame immediately
+```
+
+**Important: Zero-Copy Frame Management**
+
+> **⚠️ Warning**: The decoded frames returned by `DecodeN12ToRGBAsyncGetBuffer` are zero-copy 
+> references to internal buffers. You **must** deep copy the frames before calling 
+> `DecodeN12ToRGBAsync` again, otherwise the data will be overwritten.
+
+```python
+# CORRECT: Deep copy frames before next async call
+tensor_list = [torch.as_tensor(frame, device='cuda').clone() for frame in decoded_frames]
+# or
+rgb_batch = torch.stack([torch.as_tensor(frame, device='cuda') for frame in decoded_frames], dim=0)
+
+# Now safe to call DecodeN12ToRGBAsync for next frame
+nv_stream_dec.DecodeN12ToRGBAsync(...)
+```
+
+**Complete Async Workflow**
+
+```
+Iteration 1:
+  DecodeN12ToRGBAsync(frame_0)     → Start decode
+  DecodeN12ToRGBAsyncGetBuffer()   → Wait & get frame_0
+  Process frame_0
+  DecodeN12ToRGBAsync(frame_1)     → Prefetch frame_1
+
+Iteration 2:
+  DecodeN12ToRGBAsyncGetBuffer()   → Get prefetched frame_1 (fast!)
+  Process frame_1
+  DecodeN12ToRGBAsync(frame_2)     → Prefetch frame_2
+
+Iteration N:
+  DecodeN12ToRGBAsyncGetBuffer()   → Get prefetched frame_N
+  Process frame_N
+  (No prefetch for last frame)
+```
+
+**Running the Sample**
+
+```bash
+cd packages/on_demand_video_decoder/samples
+python SampleStreamAsyncAccess.py
 ```
 
 ### 3.3 Separation Access Decoding

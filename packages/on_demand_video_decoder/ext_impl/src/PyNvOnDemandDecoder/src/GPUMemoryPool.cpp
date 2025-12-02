@@ -63,7 +63,11 @@ void GPUMemoryPool::EnsureSizeAndSoftReset(size_t num_bytes_to_store, bool shrin
 void GPUMemoryPool::SoftRelease() { curr_size_ = 0; }
 
 void GPUMemoryPool::HardRelease() {
-    cuMemFree(reinterpret_cast<CUdeviceptr>(data_));
+    // Only free if memory was actually allocated
+    // cuMemFree(0) is undefined behavior, unlike free(NULL) in C
+    if (data_ != nullptr) {
+        cuMemFree(reinterpret_cast<CUdeviceptr>(data_));
+    }
     data_ = nullptr;
     curr_size_ = 0;
     allocated_size_ = 0;

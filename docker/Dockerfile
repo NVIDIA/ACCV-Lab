@@ -116,7 +116,8 @@ RUN pip install pandas==1.5.3 \
 RUN pip install nuscenes-devkit && \
     pip install shapely tqdm pillow networkx fire
 
-RUN pip install pytest
+RUN pip install pytest pytest-timeout
+RUN pip install pynvml
 
 RUN apt-get install -y libjpeg-dev zlib1g-dev
 

@@ -15,22 +15,8 @@
 
 cmake_minimum_required(VERSION 3.20)
 
-# This must be set before enabling CUDA. Otherwise it will be set to the default ARCH by nvcc (e.g. 52 by nvcc 11.7)
-if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.24")
-    set(CMAKE_CUDA_ARCHITECTURES native)
-endif()
-if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-    # Define Volta / Turing / Ampere / Ada if not set by the user
-    set(CMAKE_CUDA_ARCHITECTURES
-        60
-        70
-        72
-        75
-        80
-        86
-        #89 # Require CUDA 11.8 for CC 89 or cmake 3.23 for CMAKE_CUDA_ARCHITECTURES_{ALL,ALL_MAJOR}
-    )
-endif()
+# NOTE: CMAKE_CUDA_ARCHITECTURES is inherited from parent ext_impl/CMakeLists.txt
+# To customize, set CUSTOM_CUDA_ARCHS environment variable before building.
 
 project(VideoCodecSDKUtils LANGUAGES CXX CUDA)
 

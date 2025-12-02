@@ -78,6 +78,40 @@ class FixedSizeVideoReaderMap {
         nextIdx = 0;  // Reset the next index since we're clearing everything
     }
 
+    /**
+     * Release GPU device memory from all video readers.
+     * 
+     * This releases the GPU memory pools from all PyNvVideoReader instances
+     * without destroying the readers themselves. The memory will be re-allocated
+     * automatically on the next decode operation.
+     */
+    void releaseAllMemPools() {
+        for (size_t i = 0; i < value_vec.size(); i++) {
+            if (value_vec[i]) {
+                value_vec[i]->ReleaseMemPools();
+            }
+        }
+    }
+
+    /**
+     * Check if a key exists in the cache.
+     */
+    bool contains(const std::string& key) { return findStringIndex(key) >= 0; }
+
+    /**
+     * Find or add a video reader for the given key.
+     * 
+     * IMPORTANT: Ownership semantics:
+     * - If value is used (added to cache), this class takes ownership
+     * - If value is NOT used (cache hit or replaced), caller retains ownership
+     *   and is responsible for deleting it
+     * 
+     * To avoid ownership confusion, prefer using contains() first:
+     *   if (!map.contains(key) && map.notFull()) {
+     *       value = new PyNvVideoReader(...);
+     *   }
+     *   auto reader = map.find(key, value);
+     */
     PyNvVideoReader* find(const std::string& key, PyNvVideoReader* value = nullptr) {
         auto index = findStringIndex(key);
         if (index < 0) {
@@ -95,11 +129,12 @@ class FixedSizeVideoReaderMap {
 #ifdef IS_DEBUG_BUILD
                 std::cout << "Replace with file: " << key << std::endl;
 #endif
+                // NOTE: value is NOT used here, caller should delete it if not null
                 auto tmpIndex = nextIdx;                  // Get the index of the oldest key
                 nextIdx = (nextIdx + 1) % this->maxSize;  // Update the index of the oldest key
                 return value_vec[tmpIndex];               // Return the value of the oldest key
             } else {
-                // Add new entry
+                // Add new entry - ownership of value is transferred to this class
                 key_vec.push_back(key);
                 value_vec.push_back(value);
                 return value_vec.back();
@@ -108,6 +143,7 @@ class FixedSizeVideoReaderMap {
 #ifdef IS_DEBUG_BUILD
             std::cout << "Cache hit for file: " << key << std::endl;
 #endif
+            // NOTE: value is NOT used here, caller should delete it if not null
             return value_vec[index];
         }
     }

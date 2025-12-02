@@ -251,6 +251,31 @@ class PyNvGopDecoder {
      */
     int InitializeDecoders(const std::vector<int>& codec_ids);
 
+    /**
+     * Release GPU device memory pool to free up GPU memory
+     * 
+     * This method releases the GPU memory pool by calling HardRelease(),
+     * which frees all allocated GPU memory and resets the pool state.
+     * This is useful for temporarily freeing excessive GPU memory usage.
+     * 
+     * Note: After calling this method, the memory pool will need to be
+     * re-allocated on the next decode operation.
+     */
+    void ReleaseMemPools();
+
+    /**
+     * Release all decoder instances to free up GPU memory
+     * 
+     * This method clears all decoder instances, which releases:
+     * - NvDecoder instances and their GPU frame buffers
+     * 
+     * This is useful for freeing GPU memory occupied by decoder instances.
+     * 
+     * Note: After calling this method, decoder instances will need to be
+     * re-created on the next decode operation.
+     */
+    void ReleaseDecoder();
+
    protected:
     int main_decode(
         const std::vector<int>& color_ranges, const std::vector<int>& codec_ids, std::vector<int>& widths,

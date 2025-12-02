@@ -108,7 +108,7 @@ class IndexingDemuxerOndemand:
         if use_cache == False:
             try:
                 nvtx.range_push("get_packets")
-                (gop_packets, first_frame_ids, gop_lens) = self._nv_gop_dec.GetGOP(
+                gop_packets, first_frame_ids, gop_lens = self._nv_gop_dec.GetGOP(
                     self._video_file_paths, frame_idx_list
                 )
                 nvtx.range_pop()  # get_packets

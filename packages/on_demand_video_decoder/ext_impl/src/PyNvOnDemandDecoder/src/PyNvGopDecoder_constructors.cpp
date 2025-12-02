@@ -125,7 +125,6 @@ void PyNvGopDecoder::ensureCudaContextInitialized() {
         CUdevice cuDevice = 0;
         ck(cuDeviceGet(&cuDevice, this->gpu_id));
         ck(cuDevicePrimaryCtxRetain(&this->cu_context, cuDevice));
-        ck(cuCtxPushCurrent(this->cu_context));
         this->destroy_context = true;
     }
     if (!this->cu_context) {
@@ -135,7 +134,11 @@ void PyNvGopDecoder::ensureCudaContextInitialized() {
             "named argument 'cudacontext = app_ctx'");
     }
 
+    // Temporarily push context for stream creation, then immediately pop.
+    // This ensures the destructor can run on any thread without issues.
+    ck(cuCtxPushCurrent(this->cu_context));
     ck(cuStreamCreate(&this->cu_stream, CU_STREAM_DEFAULT));
+    ck(cuCtxPopCurrent(NULL));
 }
 
 void PyNvGopDecoder::ensureDemuxRunnersInitialized() {
@@ -205,16 +208,32 @@ PyNvGopDecoder::~PyNvGopDecoder() {
 #ifdef IS_DEBUG_BUILD
     std::cout << "Delete PyNvGopDecoder object" << std::endl;
 #endif
-    for (int i = 0; i < this->max_num_files; ++i) {
-        if (i < this->vdec.size()) {
-            this->vdec[i].reset();
+
+    // Temporarily push context for GPU resource cleanup.
+    // This ensures the destructor works correctly on any thread.
+    if (this->cu_context) {
+        ck(cuCtxPushCurrent(this->cu_context));
+
+        // Clean up NvDecoder instances (they need context for GPU memory release)
+        for (int i = 0; i < this->max_num_files; ++i) {
+            if (i < this->vdec.size()) {
+                this->vdec[i].reset();
+            }
         }
+
+        // Explicitly release GPU memory pool before automatic member destruction
+        gpu_mem_pool.HardRelease();
+
+        if (this->cu_stream) {
+            ck(cuStreamDestroy(this->cu_stream));
+        }
+
+        ck(cuCtxPopCurrent(NULL));
     }
-    if (this->cu_stream) {
-        ck(cuStreamDestroy(this->cu_stream));
-    }
+
     if (this->destroy_context) {
-        ck(cuCtxPopCurrent(&this->cu_context));
+        // Only release the primary context reference.
+        // No need to pop - we use temporary push/pop pattern instead.
         ck(cuDevicePrimaryCtxRelease(this->gpu_id));
     }
 
@@ -302,7 +321,7 @@ void Init_PyNvGopDecoder(py::module& m) {
                 throw std::runtime_error(e.what());
             }
         },
-        py::arg("filepaths"),
+        py::arg("filepaths"), py::call_guard<py::gil_scoped_release>(),
         R"pbdoc(
         Extracts FastStreamInfo from video files automatically.
         
@@ -328,10 +347,15 @@ void Init_PyNvGopDecoder(py::module& m) {
         "SavePacketsToFile",
         [](const py::array_t<uint8_t>& numpy_data, const std::string& dst_filepath) {
             try {
+                // Extract data pointer and size while holding GIL (accessing Python object)
                 const uint8_t* data_ptr = static_cast<const uint8_t*>(numpy_data.data());
                 size_t data_size = numpy_data.size();
 
-                SaveBinaryDataToFile(data_ptr, data_size, dst_filepath);
+                // Release GIL for file I/O operation
+                {
+                    py::gil_scoped_release release;
+                    SaveBinaryDataToFile(data_ptr, data_size, dst_filepath);
+                }
             } catch (const std::exception& e) {
                 throw std::runtime_error(e.what());
             }
@@ -386,6 +410,7 @@ void Init_PyNvGopDecoder(py::module& m) {
             },
             py::arg("filepaths"), py::arg("frame_ids"),
             py::arg("fastStreamInfos") = std::vector<FastStreamInfo>{},
+            py::call_guard<py::gil_scoped_release>(),
             R"pbdoc(
             Decodes video file stream into uncompressed YUV data.
             
@@ -431,6 +456,7 @@ void Init_PyNvGopDecoder(py::module& m) {
             },
             py::arg("filepaths"), py::arg("frame_ids"), py::arg("as_bgr") = false,
             py::arg("fastStreamInfos") = std::vector<FastStreamInfo>{},
+            py::call_guard<py::gil_scoped_release>(),
             R"pbdoc(
             Decodes video file stream into uncompressed RGB/BGR data.
             
@@ -466,9 +492,14 @@ void Init_PyNvGopDecoder(py::module& m) {
             [](std::shared_ptr<PyNvGopDecoder>& dec, const std::vector<std::string>& filepaths,
                const std::vector<int> frame_ids, std::vector<FastStreamInfo> fastStreamInfos) {
                 try {
-                    // Get the serialized packet bundle with gop_lens and first_frame_ids
-                    SerializedPacketBundle serialized_data = dec->get_gop(
-                        filepaths, frame_ids, fastStreamInfos.empty() ? nullptr : fastStreamInfos.data());
+                    SerializedPacketBundle serialized_data;
+                    // Release GIL for file I/O and demuxing
+                    {
+                        py::gil_scoped_release release;
+                        serialized_data = dec->get_gop(
+                            filepaths, frame_ids, fastStreamInfos.empty() ? nullptr : fastStreamInfos.data());
+                    }
+                    // GIL is re-acquired here for creating Python objects
 
                     // Create numpy array from serialized data
                     auto capsule = py::capsule(serialized_data.data.release(),
@@ -528,9 +559,14 @@ void Init_PyNvGopDecoder(py::module& m) {
             [](std::shared_ptr<PyNvGopDecoder>& dec, const std::vector<std::string>& filepaths,
                const std::vector<int> frame_ids, std::vector<FastStreamInfo> fastStreamInfos) {
                 try {
-                    // Call C++ method to get separate bundles for each video
-                    std::vector<SerializedPacketBundle> bundles = dec->get_gop_list(
-                        filepaths, frame_ids, fastStreamInfos.empty() ? nullptr : fastStreamInfos.data());
+                    std::vector<SerializedPacketBundle> bundles;
+                    // Release GIL for file I/O and demuxing
+                    {
+                        py::gil_scoped_release release;
+                        bundles = dec->get_gop_list(
+                            filepaths, frame_ids, fastStreamInfos.empty() ? nullptr : fastStreamInfos.data());
+                    }
+                    // GIL is re-acquired here for creating Python objects
 
                     // Create Python list to hold results
                     py::list result_list;
@@ -606,9 +642,17 @@ void Init_PyNvGopDecoder(py::module& m) {
             [](std::shared_ptr<PyNvGopDecoder>& dec, const py::array_t<uint8_t>& numpy_data,
                const std::vector<std::string>& filepaths, const std::vector<int> frame_ids) {
                 try {
+                    // Extract data pointer while holding GIL
+                    const uint8_t* data_ptr = static_cast<const uint8_t*>(numpy_data.data());
+                    size_t data_size = numpy_data.size();
+
                     std::vector<DecodedFrameExt> result;
-                    dec->decode_from_gop(static_cast<const uint8_t*>(numpy_data.data()), numpy_data.size(),
-                                         filepaths, frame_ids, false, false, &result, nullptr);
+                    // Release GIL for GPU decoding
+                    {
+                        py::gil_scoped_release release;
+                        dec->decode_from_gop(data_ptr, data_size, filepaths, frame_ids, false, false, &result,
+                                             nullptr);
+                    }
                     return result;
                 } catch (const std::exception& e) {
                     throw std::runtime_error(e.what());
@@ -643,9 +687,17 @@ void Init_PyNvGopDecoder(py::module& m) {
             [](std::shared_ptr<PyNvGopDecoder>& dec, const py::array_t<uint8_t>& numpy_data,
                const std::vector<std::string>& filepaths, const std::vector<int> frame_ids, bool as_bgr) {
                 try {
+                    // Extract data pointer while holding GIL
+                    const uint8_t* data_ptr = static_cast<const uint8_t*>(numpy_data.data());
+                    size_t data_size = numpy_data.size();
+
                     std::vector<RGBFrame> result;
-                    dec->decode_from_gop(static_cast<const uint8_t*>(numpy_data.data()), numpy_data.size(),
-                                         filepaths, frame_ids, true, as_bgr, nullptr, &result);
+                    // Release GIL for GPU decoding
+                    {
+                        py::gil_scoped_release release;
+                        dec->decode_from_gop(data_ptr, data_size, filepaths, frame_ids, true, as_bgr, nullptr,
+                                             &result);
+                    }
                     return result;
                 } catch (const std::exception& e) {
                     throw std::runtime_error(e.what());
@@ -686,7 +738,7 @@ void Init_PyNvGopDecoder(py::module& m) {
                const std::vector<std::vector<int>>& packet_idxs, const std::vector<int>& widths,
                const std::vector<int>& heights, const std::vector<int>& frame_ids, bool as_bgr) {
                 try {
-                    // Extract packets_bytes and packet_binary_data_ptrs from numpy_datas
+                    // Extract packets_bytes and packet_binary_data_ptrs from numpy_datas (requires GIL)
                     std::vector<std::vector<int>> packets_bytes;
                     std::vector<std::vector<const uint8_t*>> packet_binary_data_ptrs;
 
@@ -714,14 +766,19 @@ void Init_PyNvGopDecoder(py::module& m) {
                         packet_binary_data_ptrs.push_back(std::move(frame_packet_ptrs));
                     }
 
-                    std::vector<RGBFrame> result;
                     std::vector<std::vector<int>> packet_idxs_fix = packet_idxs;
                     for (auto& packet_idx : packet_idxs_fix) {
                         packet_idx.push_back(0);
                         packet_idx.push_back(0);
                     }
-                    dec->decode_from_packet_list(packets_bytes, packet_idxs_fix, widths, heights,
-                                                 packet_binary_data_ptrs, frame_ids, as_bgr, &result);
+
+                    std::vector<RGBFrame> result;
+                    // Release GIL for GPU decoding
+                    {
+                        py::gil_scoped_release release;
+                        dec->decode_from_packet_list(packets_bytes, packet_idxs_fix, widths, heights,
+                                                     packet_binary_data_ptrs, frame_ids, as_bgr, &result);
+                    }
                     return result;
                 } catch (const std::exception& e) {
                     throw std::runtime_error(e.what());
@@ -766,7 +823,7 @@ void Init_PyNvGopDecoder(py::module& m) {
             [](std::shared_ptr<PyNvGopDecoder>& dec, const std::vector<py::array_t<uint8_t>>& numpy_datas,
                const std::vector<std::string>& filepaths, const std::vector<int>& frame_ids, bool as_bgr) {
                 try {
-                    // Convert numpy arrays to pointers and sizes
+                    // Convert numpy arrays to pointers and sizes (requires GIL)
                     std::vector<const uint8_t*> datas;
                     std::vector<size_t> sizes;
                     datas.reserve(numpy_datas.size());
@@ -778,7 +835,11 @@ void Init_PyNvGopDecoder(py::module& m) {
                     }
 
                     std::vector<RGBFrame> result;
-                    dec->decode_from_gop_list(datas, sizes, filepaths, frame_ids, as_bgr, &result);
+                    // Release GIL for GPU decoding
+                    {
+                        py::gil_scoped_release release;
+                        dec->decode_from_gop_list(datas, sizes, filepaths, frame_ids, as_bgr, &result);
+                    }
                     return result;
                 } catch (const std::exception& e) {
                     throw std::runtime_error(e.what());
@@ -818,8 +879,12 @@ void Init_PyNvGopDecoder(py::module& m) {
                     std::unique_ptr<uint8_t[]> merged_data;
                     size_t merged_size;
 
-                    // Use the decoder instance's member function with its thread pool
-                    dec->MergeBinaryFilesToPacketData(file_paths, merged_data, merged_size);
+                    // Release GIL for file I/O
+                    {
+                        py::gil_scoped_release release;
+                        dec->MergeBinaryFilesToPacketData(file_paths, merged_data, merged_size);
+                    }
+                    // GIL is re-acquired here for creating Python objects
 
                     // Create numpy array from merged data
                     auto capsule = py::capsule(merged_data.release(),
@@ -857,9 +922,13 @@ void Init_PyNvGopDecoder(py::module& m) {
             "LoadGopsToList",
             [](std::shared_ptr<PyNvGopDecoder>& dec, const std::vector<std::string>& file_paths) {
                 try {
-                    // Call public LoadGOPFromFiles method
                     std::vector<std::vector<uint8_t>> gop_data_list;
-                    dec->LoadGOPFromFiles(file_paths, gop_data_list);
+                    // Release GIL for file I/O
+                    {
+                        py::gil_scoped_release release;
+                        dec->LoadGOPFromFiles(file_paths, gop_data_list);
+                    }
+                    // GIL is re-acquired here for creating Python objects
 
                     py::list result_list;
 
@@ -966,7 +1035,7 @@ void Init_PyNvGopDecoder(py::module& m) {
                     throw std::runtime_error(e.what());
                 }
             },
-            py::arg("codec_ids"),
+            py::arg("codec_ids"), py::call_guard<py::gil_scoped_release>(),
             R"pbdoc(
             Initializes NvDecoder instances for video files.
             
@@ -1072,7 +1141,7 @@ void Init_PyNvGopDecoder(py::module& m) {
                         throw std::runtime_error("packet_data_arrays cannot be empty");
                     }
 
-                    // Convert numpy arrays to C++ pointers and sizes
+                    // Convert numpy arrays to C++ pointers and sizes (requires GIL)
                     std::vector<uint8_t*> buffer_pointers;
                     std::vector<size_t> buffer_sizes;
 
@@ -1085,11 +1154,15 @@ void Init_PyNvGopDecoder(py::module& m) {
                         buffer_sizes.push_back(numpy_array.size());
                     }
 
-                    // Call the C++ method
                     std::unique_ptr<uint8_t[]> merged_data;
                     size_t merged_size;
 
-                    dec->MergePacketDataToOne(buffer_pointers, buffer_sizes, merged_data, merged_size);
+                    // Release GIL for memory operation
+                    {
+                        py::gil_scoped_release release;
+                        dec->MergePacketDataToOne(buffer_pointers, buffer_sizes, merged_data, merged_size);
+                    }
+                    // GIL is re-acquired here for creating Python objects
 
                     // Create numpy array from merged data
                     auto capsule = py::capsule(merged_data.release(),
@@ -1124,5 +1197,41 @@ void Init_PyNvGopDecoder(py::module& m) {
             Note:
                 This method is designed to work efficiently with large datasets and uses
                 parallel processing for optimal performance.
+            )pbdoc")
+        .def(
+            "release_device_memory", [](std::shared_ptr<PyNvGopDecoder>& dec) { dec->ReleaseMemPools(); },
+            py::call_guard<py::gil_scoped_release>(),
+            R"pbdoc(
+            Release GPU device memory pool to free up GPU memory.
+            
+            This method releases the GPU memory pool and resets the pool state.
+            This is useful for temporarily freeing excessive GPU memory usage.
+            
+            Note: After calling this method, the memory pool will need to be
+            re-allocated on the next decode operation.
+            
+            Example:
+                >>> decoder = PyNvGopDecoder(maxfiles=10)
+                >>> frames = decoder.Decode(['video1.mp4'], [0, 10, 20])
+                >>> decoder.release_device_memory()  # Free GPU memory pool
+            )pbdoc")
+        .def(
+            "release_decoder", [](std::shared_ptr<PyNvGopDecoder>& dec) { dec->ReleaseDecoder(); },
+            py::call_guard<py::gil_scoped_release>(),
+            R"pbdoc(
+            Release all decoder instances to free up GPU memory.
+            
+            This method clears all decoder instances, which releases:
+            - NvDecoder instances and their GPU frame buffers
+            
+            This is useful for freeing GPU memory occupied by decoder instances.
+            
+            Note: After calling this method, decoder instances will need to be
+            re-created on the next decode operation.
+            
+            Example:
+                >>> decoder = PyNvGopDecoder(maxfiles=10)
+                >>> frames = decoder.Decode(['video1.mp4'], [0, 10, 20])
+                >>> decoder.release_decoder()  # Free decoder instances
             )pbdoc");
 }

@@ -97,6 +97,23 @@ Be transparent about limitations:
 - Follow the documentation structure described in the 
   [Documentation Setup Guide](DOCUMENTATION_SETUP_GUIDE.md).
 
+### Documentation Checks
+
+Before submitting your contribution, please ensure that the documentation can be build successfully without 
+errors. Please also check any warnings as these may indicate issues which may make the documentation 
+hard to read or understand (such as broken links, missing images or code, ...), and fix the warnings where 
+feasible. This helps to ensure that the documentation is of high quality, and also helps with pinpointing any
+warnings introduced by future changes to the documentation.
+
+Please also check for spelling errors (see 
+the [section on spell-checking](DOCUMENTATION_SETUP_GUIDE.md#spell-checking) in the 
+[Documentation Setup Guide](DOCUMENTATION_SETUP_GUIDE.md)).
+Note that some of the reported errors may not represent actual spelling errors, but rather words picked up 
+from the code, file path, specific abbreviations, etc. However, if actual spelling errors are present, they 
+should be fixed. If correctly spelled words are picked up as errors, they should be added to the spelling
+word list (see the [section on spell-checking](DOCUMENTATION_SETUP_GUIDE.md#spell-checking) in the 
+[Documentation Setup Guide](DOCUMENTATION_SETUP_GUIDE.md)).
+
 ## Examples and Tutorials
 
 Provide practical demonstrations of your contribution through one or more of the following:
@@ -153,30 +170,15 @@ Note that demos for the contained packages will be added in the future.
 - Use `[project.optional-dependencies]` in `pyproject.toml` for non-essential or optional features
 - Follow the dependency management patterns established in the project
 
-## Review Process
-
-Before submitting your contribution:
-
-1. **Self-Review**: Ensure your code meets all the requirements outlined in this guide
-2. **Testing**:
-   - Verify that all tests pass and cover the required scenarios
-   - In the end, run the repository test runner to execute tests for all namespace packages 
-     (`scripts/run_tests.sh`). See the 
-     [Repository Test Runner](DEVELOPMENT_GUIDE.md#repository-test-runner-scriptsrun_testssh)
-     section in the setup guide for details.
-3. **Documentation**: Confirm that documentation is complete and accurate
-4. **Examples**: Test that all examples and tutorials work correctly
-5. **Formatting**: Run the formatting tools to ensure consistent style
-
 ## Getting Help
 
-If you need assistance with any aspect of contributing:
+If you need assistance with any aspect of contributing, please consider the following options:
 
 - Check the existing guides for technical implementation details
-- Review existing packages for examples of good practices
-- Consult the project maintainers for guidance on complex contributions
+- Review existing contained packages for examples of good practices and patterns
+- Consult the project maintainers for further questions and/or guidance on complex contributions
 
-## Signing Your Work
+## Signing Your Work & Developer Certificate of Origin (DCO)
 
 * We require that all contributors "sign-off" on their commits. This certifies that the contribution is your 
   original work, or you have rights to submit it under the same license, or a compatible license.
@@ -221,21 +223,23 @@ If you need assistance with any aspect of contributing:
 
 ## Summary Checklist
 
-Before submitting your contribution, ensure you have:
+Before submitting your contribution, please consider the following checklist:
 
 - [ ] **Comprehensive Unit Tests**: Covering core functionality, edge cases, and error handling
-- [ ] **Complete Documentation**: General description, detailed specifications, and performance metrics
+- [ ] **Complete Documentation**: General description, detailed specifications, and performance metrics (where relevant)
 - [ ] **Limitations Documented**: Clear explanation of constraints and trade-offs
-- [ ] **Examples Provided**: Simple demonstrations of basic usage
-- [ ] **Tutorials Created**: Detailed guides for learning and understanding
-- [ ] **Demos Available**: Interactive showcases of key features
+- [ ] **Examples Provided**: Simple demonstrations of basic usage (where relevant)
+- [ ] **Tutorials Created**: Detailed guides for learning and understanding (where relevant)
+- [ ] **Demos Available**: Real-world showcases of key features (where relevant)
 - [ ] **Code Formatted**: Following project formatting standards
-- [ ] **Dependencies Managed**: Properly documented and minimized
+- [ ] **Dependencies Managed**: Properly configured in `pyproject.toml`
 - [ ] **Repository Test Runner Passing**: Verified functionality and integration across all namespace 
   packages (scripts/run_tests.sh). Note that this will be automated in the future
+- [ ] **Documentation Build Checked**: Documentation building successful and the checks outlined in the 
+  [Documentation Checks](#documentation-checks) section above are performed.
 - [ ] **Signed-Off Commits**: All contained commits are signed-off
 
-Note that the checklist is a guideline. Individual points may be omitted if this makes sense for the 
+Note that the **checklist is a guideline**. Individual points may be omitted if this makes sense for the 
 contribution (e.g. no tutorials are provided because the functionality is easy to use and examples are 
 sufficient for comprehensive understanding of how to use the package). Please use your best judgment and 
 add comments in merge requests to explain why you have omitted certain points where this may be not obvious.

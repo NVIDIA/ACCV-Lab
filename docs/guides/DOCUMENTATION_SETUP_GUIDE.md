@@ -193,6 +193,26 @@ cd docs
 make livehtml
 ```
 
+**Build Process Details**:
+- The build process automatically runs the necessary scripts (see [Generation Scripts](#generation-scripts)) 
+  in sequence
+- The `html` target ensures all scripts run before building
+- The `livehtml` target also runs the scripts for development builds
+- When running spelling via the script, the generation scripts are executed first to ensure mirrored package 
+  docs are up to date
+
+> **ℹ️ Note**:
+> `make livehtml` watches the `docs/` tree and mirrored package documentation, but:
+>  - It does **not** rerun the `sync_root_readme_for_docs.py` script when you edit the project root 
+>    `README.md`. This means that if you change the root `README.md` and want to see those changes reflected 
+>    in `docs/project_overview/README.md`, you need to restart `make livehtml` (or run `make sync-readme` 
+>    once before continuing to work).
+>  - It does **not** reinstall or rebuild packages for you. This means that if you change the docstrings in 
+>    the source tree of a package, you need to reinstall the package (for example via 
+>    `./scripts/install_local.sh`) and then restart `make livehtml` to see updated docstrings.
+
+### Spell-checking
+
 **Spell-checking with sphinxcontrib-spelling**:
 - Quick run using the script:
   ```bash
@@ -211,29 +231,11 @@ make livehtml
   The spelling report will be at `_build/spelling/output.txt`.
 
 - **Note**: On some Linux systems you may need a system-level Enchant library. If you see errors related to 
-  Enchant, install it via your package manager (e.g., `sudo apt install enchant-2` on Debian/Ubuntu).
+Enchant, install it via your package manager (e.g., `sudo apt install enchant-2` on Debian/Ubuntu).
 
 - Whitelisting words (project-specific words or general words which are not part of the used dictionary):
   - Add words (one per line) to `docs/spelling_wordlist.txt` (e.g., `namespace`, `ACCV-Lab`).
   - Re-run the spelling check. These words will no longer be flagged.
-
-**Build Process Details**:
-- The build process automatically runs the necessary scripts (see [Generation Scripts](#generation-scripts)) 
-  in sequence
-- The `html` target ensures all scripts run before building
-- The `livehtml` target also runs the scripts for development builds
-- When running spelling via the script, the generation scripts are executed first to ensure mirrored package 
-  docs are up to date
-
-> **ℹ️ Note**:
-> `make livehtml` watches the `docs/` tree and mirrored package documentation, but:
->  - It does **not** rerun the `sync_root_readme_for_docs.py` script when you edit the project root 
-     `README.md`. This means that if you change the root `README.md` and want to see those changes reflected 
-     in `docs/project_overview/README.md`, you need to restart `make livehtml` (or run `make sync-readme` 
-     once before continuing to work).
->  - It does **not** reinstall or rebuild packages for you. This means that if you change the docstrings in 
->    the source tree of a package, you need to reinstall the package (for example via 
->    `./scripts/install_local.sh`) and then restart `make livehtml` to see updated docstrings.
 
 ### Customizing Documentation
 

@@ -337,7 +337,7 @@ Stream Access mode is optimized for sequential frame processing with intelligent
 Stream Access uses {py:func}`~accvlab.on_demand_video_decoder.CreateSampleReader` instead of 
 {py:func}`~accvlab.on_demand_video_decoder.CreateGopDecoder`. The key advantage is the use of 
 caching-based optimizations. There is also the ability to iterate over individual sets of video file sets, 
-each set being accessed sequencially (with the number of sets being controlled by the `num_of_set` parameter).
+each set being accessed sequentially (with the number of sets being controlled by the `num_of_set` parameter).
 
 **Code Walkthrough**
 

@@ -1,0 +1,425 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Runtime Performance Evaluation and NVTX Profiling &mdash; ACCV-Lab 0.2.0.post1.dev84+gcbeeef9c7 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=0be6cc5f" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=0fa214d3"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Dumping the Training Data (for Debugging/Demonstration)" href="dumping_training_data.html" />
+    <link rel="prev" title="Optimization Testing Tools Demo" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/multi_tensor_copier/docs/index.html">Multi-Tensor Copier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/lane_helpers/docs/index.html">Lane Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Demos</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../demos.html">Demos</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../demos.html#streampetr">StreamPETR</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../demos.html#demos-for-contained-packages">Demos for Contained Packages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../batching_helpers/index.html">Batching Helpers Demo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dali_pipeline_framework/index.html">DALI Pipeline Framework Demo</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="index.html">Optimization Testing Tools Demo</a><ul class="current">
+<li class="toctree-l5 current"><a class="current reference internal" href="#">Runtime Performance Evaluation and NVTX Profiling</a></li>
+<li class="toctree-l5"><a class="reference internal" href="dumping_training_data.html">Dumping the Training Data (for Debugging/Demonstration)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#running-the-demos">Running the Demos</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#choosing-a-configuration">Choosing a Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#running-all-evaluations">Running All Evaluations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#measurement-and-profiling">Measurement and Profiling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../release_notes_page.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../third_party_licenses.html">Third-Party Licenses</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../demos.html">Demos</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Optimization Testing Tools Demo</a></li>
+      <li class="breadcrumb-item active">Runtime Performance Evaluation and NVTX Profiling</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/demo_docs/streampetr/optim_test_tools/performance_eval_and_profiling.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="runtime-performance-evaluation-and-nvtx-profiling">
+<h1>Runtime Performance Evaluation and NVTX Profiling<a class="headerlink" href="#runtime-performance-evaluation-and-nvtx-profiling" title="Link to this heading"></a></h1>
+<p>This page explains how to use the <code class="docutils literal notranslate"><span class="pre">optim_test_tools</span></code> to measure runtime and add NVTX ranges for profiling.
+We focus on the most important measurements for the training iteration and loss/optimizer computation.</p>
+<p>We rely on two singletons from <code class="docutils literal notranslate"><span class="pre">accvlab.optim_test_tools</span></code>:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/api.html#accvlab.optim_test_tools.Stopwatch" title="accvlab.optim_test_tools.Stopwatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">Stopwatch</span></code></a>: lightweight runtime measurements with optional CPU usage
+sampling</p></li>
+<li><p><a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/api.html#accvlab.optim_test_tools.NVTXRangeWrapper" title="accvlab.optim_test_tools.NVTXRangeWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">NVTXRangeWrapper</span></code></a>: NVTX push/pop helpers with additional functionality to
+annotate critical sections for Nsight Systems (&amp; Nsight Compute).</p></li>
+</ul>
+<section id="enable-configure-in-the-training-script">
+<h2>Enable &amp; Configure in the Training Script<a class="headerlink" href="#enable-configure-in-the-training-script" title="Link to this heading"></a></h2>
+<p>The configuration is centralized in the main training script (<code class="docutils literal notranslate"><span class="pre">demos/streampetr/tools/train.py</span></code>). The
+runtime measurement and NVTX range wrapper are enabled based on the <code class="docutils literal notranslate"><span class="pre">runtime_meas_config</span></code> section in the
+config. The use of the configuration file enables us to use different configurations for different types of
+runs, e.g.:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Training (actual usage): All disabled</p></li>
+<li><p>Evaluation: Only Stopwatch enabled</p></li>
+<li><p>Profiling: All enabled, nvtx range mismatches not checked (to avoid overhead)</p></li>
+<li><p>(Debugging: All enabled, nvtx range mismatches checked (to help debugging range mismatches))</p></li>
+</ul>
+</div></blockquote>
+<p>Note that the <code class="docutils literal notranslate"><span class="pre">Stopwatch</span></code> and <code class="docutils literal notranslate"><span class="pre">NVTXRangeWrapper</span></code> are enabled &amp; configured centrally here, and can be used
+throughout the codebase relying on this configuration.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/tools/train.py</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">281</span>    <span class="c1"># ===== Runtime Measurement &amp; Profiling Configuration =====</span>
+<span class="hll"><span class="linenos">282</span>    <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">283</span>    <span class="c1"># Whether to use the runtime measurements and the nvtx ranges is configurable. Here, we read the</span>
+</span><span class="hll"><span class="linenos">284</span>    <span class="c1"># configuration from the config file and enable the corresponding signletons if needed.</span>
+</span><span class="linenos">285</span>    <span class="n">runtime_meas_cfg</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;runtime_meas_config&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="linenos">286</span>    <span class="k">if</span> <span class="n">runtime_meas_cfg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">287</span>        <span class="n">stopwatch_cfg</span> <span class="o">=</span> <span class="n">runtime_meas_cfg</span><span class="o">.</span><span class="n">stopwatch</span>
+<span class="linenos">288</span>        <span class="n">nvtx_rng_wrp_cfg</span> <span class="o">=</span> <span class="n">runtime_meas_cfg</span><span class="o">.</span><span class="n">nvtx_range_wrapper</span>
+<span class="linenos">289</span>        <span class="k">if</span> <span class="n">stopwatch_cfg</span><span class="o">.</span><span class="n">enable</span> <span class="ow">and</span> <span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">290</span>            <span class="n">stopwatch</span><span class="o">.</span><span class="n">enable</span><span class="p">(</span><span class="n">stopwatch_cfg</span><span class="o">.</span><span class="n">num_warmup_iters</span><span class="p">,</span> <span class="n">stopwatch_cfg</span><span class="o">.</span><span class="n">print_every_n_iters</span><span class="p">,</span> <span class="n">stopwatch_cfg</span><span class="o">.</span><span class="n">do_cuda_sync</span><span class="p">)</span>
+<span class="linenos">291</span>        <span class="k">if</span> <span class="n">nvtx_rng_wrp_cfg</span><span class="o">.</span><span class="n">enable</span><span class="p">:</span>
+<span class="linenos">292</span>            <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">enable</span><span class="p">(</span><span class="n">nvtx_rng_wrp_cfg</span><span class="o">.</span><span class="n">sync_on_push</span><span class="p">,</span> <span class="n">nvtx_rng_wrp_cfg</span><span class="o">.</span><span class="n">sync_on_pop</span><span class="p">,</span> <span class="n">nvtx_rng_wrp_cfg</span><span class="o">.</span><span class="n">keep_track_of_range_order</span><span class="p">)</span>
+<span class="linenos">293</span>    <span class="c1"># ===== End of Runtime Measurement &amp; Profiling Configuration =====</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="measuring-the-training-iteration">
+<h2>Measuring the Training Iteration<a class="headerlink" href="#measuring-the-training-iteration" title="Link to this heading"></a></h2>
+<p>The core iteration timings are implemented in the custom runner
+(<code class="docutils literal notranslate"><span class="pre">IterBasedRunnerWithTime</span></code>) to capture the outer training loop and the inner training step,
+including optional CPU usage measurement. Note that this means that this runner needs to be used instead
+of the original implementation (from the <code class="docutils literal notranslate"><span class="pre">mmcv</span></code> package) to enable the runtime measurements. The selection
+can be done by setting <code class="docutils literal notranslate"><span class="pre">runner.type</span></code> in the config file to <code class="docutils literal notranslate"><span class="pre">IterBasedRunnerWithTime</span></code>.</p>
+<p>Outer loop timing with CPU usage sampling in <code class="docutils literal notranslate"><span class="pre">run()</span></code>:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/core/adjusted_impl/iter_based_runner_with_time.py</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">184</span>        <span class="c1"># ===== Training loop &amp; timing =====</span>
+<span class="linenos">185</span>
+<span class="linenos">186</span>        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_iters</span><span class="p">:</span>
+<span class="hll"><span class="linenos">187</span>            <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">188</span>            <span class="c1"># In this loop, we use the stopwatch to</span>
+</span><span class="hll"><span class="linenos">189</span>            <span class="c1">#   - Time the training loop</span>
+</span><span class="hll"><span class="linenos">190</span>            <span class="c1">#   - Measure the CPU usage of the training loop</span>
+</span><span class="hll"><span class="linenos">191</span>            <span class="c1">#   - Indicate the end of an iteration</span>
+</span><span class="hll"><span class="linenos">192</span>            <span class="c1"># Also see `train()` method in this class for further stopwatch usage.</span>
+</span><span class="linenos">193</span>
+<span class="hll"><span class="linenos">194</span>            <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">195</span>            <span class="c1"># A single measurement can be configured to also measure the CPU usage. We want to measure</span>
+</span><span class="hll"><span class="linenos">196</span>            <span class="c1"># the CPU usage for the training loop, and set it up here by (referenced by the name of the </span>
+</span><span class="hll"><span class="linenos">197</span>            <span class="c1"># measurement).</span>
+</span><span class="linenos">198</span>            <span class="n">stopwatch</span><span class="o">.</span><span class="n">set_cpu_usage_meas_name</span><span class="p">(</span><span class="s2">&quot;training loop&quot;</span><span class="p">)</span>
+<span class="linenos">199</span>            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">flow</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">workflow</span><span class="p">):</span>
+<span class="hll"><span class="linenos">200</span>                <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">201</span>                <span class="c1"># We start the measurement for the training loop (including CPU usage measurement, see above).</span>
+</span><span class="hll"><span class="linenos">202</span>                <span class="c1">#</span>
+</span><span class="hll"><span class="linenos">203</span>                <span class="c1"># Note that in the loop, the `train()` method is called internally.</span>
+</span><span class="linenos">204</span>                <span class="n">stopwatch</span><span class="o">.</span><span class="n">start_meas</span><span class="p">(</span><span class="s2">&quot;training loop&quot;</span><span class="p">)</span>
+<span class="linenos">205</span>                <span class="bp">self</span><span class="o">.</span><span class="n">_inner_iter</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="linenos">206</span>                <span class="n">mode</span><span class="p">,</span> <span class="n">iters</span> <span class="o">=</span> <span class="n">flow</span>
+<span class="linenos">207</span>                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+<span class="linenos">208</span>                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+<span class="linenos">209</span>                        <span class="s1">&#39;runner has no method named &quot;</span><span class="si">{}</span><span class="s1">&quot; to run a workflow&#39;</span><span class="o">.</span>
+<span class="linenos">210</span>                        <span class="nb">format</span><span class="p">(</span><span class="n">mode</span><span class="p">))</span>
+<span class="linenos">211</span>                <span class="n">iter_runner</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+<span class="linenos">212</span>                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iters</span><span class="p">):</span>
+<span class="linenos">213</span>                    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;train&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_iters</span><span class="p">:</span>
+<span class="linenos">214</span>                        <span class="k">break</span>
+<span class="linenos">215</span>                    <span class="n">iter_runner</span><span class="p">(</span><span class="n">iter_loaders</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="hll"><span class="linenos">216</span>                <span class="c1">#@NOTE: We end the measurement for the training loop.</span>
+</span><span class="linenos">217</span>                <span class="n">stopwatch</span><span class="o">.</span><span class="n">end_meas</span><span class="p">(</span><span class="s2">&quot;training loop&quot;</span><span class="p">)</span>
+<span class="hll"><span class="linenos">218</span>                <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">219</span>                <span class="c1"># Indicate the end of an iteration. This is important, as this allows the Stopwatch to</span>
+</span><span class="hll"><span class="linenos">220</span>                <span class="c1">#   - Average the runtime correctly for individual iterations</span>
+</span><span class="hll"><span class="linenos">221</span>                <span class="c1">#   - Decide when to end the warm-up phase and start the measurements (after warm-up phase)</span>
+</span><span class="hll"><span class="linenos">222</span>                <span class="c1">#   - Decide when to auto-print the measurements (every n iterations)</span>
+</span><span class="linenos">223</span>                <span class="n">stopwatch</span><span class="o">.</span><span class="n">finish_iter</span><span class="p">()</span>
+<span class="linenos">224</span>
+<span class="linenos">225</span>        <span class="c1"># ===== End of Training loop &amp; timing =====</span>
+</pre></div>
+</div>
+</div>
+<p>Training step timing in <code class="docutils literal notranslate"><span class="pre">train()</span></code>:</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/core/adjusted_impl/iter_based_runner_with_time.py</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 84</span>    <span class="c1"># ===== Training function &amp; timing =====</span>
+<span class="linenos"> 85</span>
+<span class="linenos"> 86</span>    <span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_loader</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="linenos"> 87</span>
+<span class="hll"><span class="linenos"> 88</span>        <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos"> 89</span>        <span class="c1"># We use the stopwatch throughout this method to time different parts of the training loop.</span>
+</span><span class="hll"><span class="linenos"> 90</span>        <span class="c1"># Also see `run()` method for further stopwatch usage (measuring CPU usage, </span>
+</span><span class="hll"><span class="linenos"> 91</span>        <span class="c1"># indicating the end of an iteration).</span>
+</span><span class="linenos"> 92</span>
+<span class="hll"><span class="linenos"> 93</span>        <span class="c1">#@NOTE: Start the measurement for the training iteration.</span>
+</span><span class="linenos"> 94</span>        <span class="n">stopwatch</span><span class="o">.</span><span class="n">start_meas</span><span class="p">(</span><span class="s2">&quot;IterBasedRunnerWithTime.train&quot;</span><span class="p">)</span>
+<span class="linenos"> 95</span>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+<span class="linenos"> 96</span>        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;train&#39;</span>
+<span class="linenos"> 97</span>        <span class="bp">self</span><span class="o">.</span><span class="n">data_loader</span> <span class="o">=</span> <span class="n">data_loader</span>
+<span class="linenos"> 98</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_epoch</span> <span class="o">=</span> <span class="n">data_loader</span><span class="o">.</span><span class="n">epoch</span>
+<span class="linenos"> 99</span>        <span class="n">data_batch</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">data_loader</span><span class="p">)</span>
+<span class="linenos">100</span>        <span class="bp">self</span><span class="o">.</span><span class="n">data_batch</span> <span class="o">=</span> <span class="n">data_batch</span>
+<span class="linenos">101</span>        <span class="bp">self</span><span class="o">.</span><span class="n">call_hook</span><span class="p">(</span><span class="s1">&#39;before_train_iter&#39;</span><span class="p">)</span>
+<span class="hll"><span class="linenos">102</span>        <span class="c1">#@NOTE: Start the measurement for the training forward step. </span>
+</span><span class="linenos">103</span>        <span class="n">stopwatch</span><span class="o">.</span><span class="n">start_meas</span><span class="p">(</span><span class="s2">&quot;Training step&quot;</span><span class="p">)</span>
+<span class="linenos">104</span>        <span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train_step</span><span class="p">(</span><span class="n">data_batch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="hll"><span class="linenos">105</span>        <span class="c1">#@NOTE: End the measurement for the training forward step.</span>
+</span><span class="linenos">106</span>        <span class="n">stopwatch</span><span class="o">.</span><span class="n">end_meas</span><span class="p">(</span><span class="s2">&quot;Training step&quot;</span><span class="p">)</span>
+<span class="linenos">107</span>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="linenos">108</span>            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;model.train_step() must return a dict&#39;</span><span class="p">)</span>
+<span class="linenos">109</span>        <span class="k">if</span> <span class="s1">&#39;log_vars&#39;</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">:</span>
+<span class="linenos">110</span>            <span class="bp">self</span><span class="o">.</span><span class="n">log_buffer</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;log_vars&#39;</span><span class="p">],</span> <span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;num_samples&#39;</span><span class="p">])</span>
+<span class="linenos">111</span>        <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span>
+<span class="linenos">112</span>        <span class="bp">self</span><span class="o">.</span><span class="n">call_hook</span><span class="p">(</span><span class="s1">&#39;after_train_iter&#39;</span><span class="p">)</span>
+<span class="linenos">113</span>        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_batch</span>
+<span class="linenos">114</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_inner_iter</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="linenos">115</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_iter</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="hll"><span class="linenos">116</span>        <span class="c1">#@NOTE: End the measurement for the training iteration.</span>
+</span><span class="linenos">117</span>        <span class="n">stopwatch</span><span class="o">.</span><span class="n">end_meas</span><span class="p">(</span><span class="s2">&quot;IterBasedRunnerWithTime.train&quot;</span><span class="p">)</span>
+<span class="linenos">118</span>
+<span class="hll"><span class="linenos">119</span>        <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">120</span>        <span class="c1"># Note that this function does not explicitly call the optimizer step. Instead, the optimizer step is</span>
+</span><span class="hll"><span class="linenos">121</span>        <span class="c1"># added as a hook, and so is called implicitly here. Further runtime measurements &amp; nvtx ranges are </span>
+</span><span class="hll"><span class="linenos">122</span>        <span class="c1"># added to the optimizer (see `optimizer_with_time.py` in the same directory as this file).</span>
+</span><span class="linenos">123</span>
+<span class="linenos">124</span>    <span class="c1"># ===== End of Training function &amp; timing =====</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="measuring-optimizer-loss-step-and-nvtx-ranges">
+<h2>Measuring Optimizer/Loss Step and NVTX Ranges<a class="headerlink" href="#measuring-optimizer-loss-step-and-nvtx-ranges" title="Link to this heading"></a></h2>
+<p>The optimizer step is instrumented with both <code class="docutils literal notranslate"><span class="pre">Stopwatch</span></code> and <code class="docutils literal notranslate"><span class="pre">NVTXRangeWrapper</span></code> to
+annotate and time the critical loss backward/step section. Note that similar to the runner, this
+implementation needs to be used instead of the original implementation by setting up the <code class="docutils literal notranslate"><span class="pre">optimizer_config</span></code>
+parameter in the config file with <code class="docutils literal notranslate"><span class="pre">type='Fp16OptimizerHookWithTime'</span></code>.</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/core/adjusted_impl/optimizer_with_time.py</span><a class="headerlink" href="#id4" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">153</span>            <span class="c1"># ===== Optimizer Step Timing and NVTX Ranges =====</span>
+<span class="linenos">154</span>            <span class="c1"># clear grads of last iteration</span>
+<span class="hll"><span class="linenos">155</span>            <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">156</span>            <span class="c1"># Start runtime measurement &amp; push NVTX range.</span>
+</span><span class="linenos">157</span>            <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;optimizer.after_train_iter&quot;</span><span class="p">)</span>
+<span class="linenos">158</span>            <span class="n">stopwatch</span><span class="o">.</span><span class="n">start_meas</span><span class="p">(</span><span class="s2">&quot;Optimizer step&quot;</span><span class="p">)</span>
+<span class="linenos">159</span>
+<span class="linenos">160</span>            <span class="n">runner</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+<span class="linenos">161</span>            <span class="n">runner</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+<span class="linenos">162</span>
+<span class="linenos">163</span>            <span class="bp">self</span><span class="o">.</span><span class="n">loss_scaler</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">runner</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;loss&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="linenos">164</span>            <span class="bp">self</span><span class="o">.</span><span class="n">loss_scaler</span><span class="o">.</span><span class="n">unscale_</span><span class="p">(</span><span class="n">runner</span><span class="o">.</span><span class="n">optimizer</span><span class="p">)</span>
+<span class="linenos">165</span>            <span class="c1"># grad clip</span>
+<span class="linenos">166</span>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">grad_clip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">167</span>                <span class="n">grad_norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clip_grads</span><span class="p">(</span><span class="n">runner</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
+<span class="linenos">168</span>                <span class="k">if</span> <span class="n">grad_norm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">169</span>                    <span class="c1"># Add grad norm to the logger</span>
+<span class="linenos">170</span>                    <span class="n">runner</span><span class="o">.</span><span class="n">log_buffer</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;grad_norm&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">grad_norm</span><span class="p">)},</span>
+<span class="linenos">171</span>                                             <span class="n">runner</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="s1">&#39;num_samples&#39;</span><span class="p">])</span>
+<span class="linenos">172</span>            <span class="c1"># backward and update scaler</span>
+<span class="linenos">173</span>            <span class="bp">self</span><span class="o">.</span><span class="n">loss_scaler</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">runner</span><span class="o">.</span><span class="n">optimizer</span><span class="p">)</span>
+<span class="linenos">174</span>            <span class="bp">self</span><span class="o">.</span><span class="n">loss_scaler</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scale_update_param</span><span class="p">)</span>
+<span class="linenos">175</span>
+<span class="linenos">176</span>            <span class="c1"># save state_dict of loss_scaler</span>
+<span class="linenos">177</span>            <span class="n">runner</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+<span class="linenos">178</span>                <span class="s1">&#39;fp16&#39;</span><span class="p">,</span> <span class="p">{})[</span><span class="s1">&#39;loss_scaler&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_scaler</span><span class="o">.</span><span class="n">state_dict</span><span class="p">()</span>
+<span class="linenos">179</span>            
+<span class="hll"><span class="linenos">180</span>            <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">181</span>            <span class="c1"># Pop NVTX range &amp; end runtime measurement.</span>
+</span><span class="linenos">182</span>            <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">183</span>            <span class="n">stopwatch</span><span class="o">.</span><span class="n">end_meas</span><span class="p">(</span><span class="s2">&quot;Optimizer step&quot;</span><span class="p">)</span>
+<span class="linenos">184</span>            <span class="c1"># ===== End of Optimizer Step Timing and NVTX Ranges =====</span>
+</pre></div>
+</div>
+</div>
+<p>NVTX ranges also identify operations in the <a class="reference internal" href="../batching_helpers/batching_matching.html"><span class="doc">matching implementation</span></a>
+and the loss computations described in the <a class="reference internal" href="../batching_helpers/index.html"><span class="doc">Batching Helpers demo</span></a>.</p>
+</section>
+<section id="nvtx-range-mismatch-checking">
+<h2>NVTX Range Mismatch Checking<a class="headerlink" href="#nvtx-range-mismatch-checking" title="Link to this heading"></a></h2>
+<p>To enable NVTX range mismatch checking, set both <code class="docutils literal notranslate"><span class="pre">enable</span></code> and <code class="docutils literal notranslate"><span class="pre">keep_track_of_range_order</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code>
+in <code class="docutils literal notranslate"><span class="pre">runtime_meas_config.nvtx_range_wrapper</span></code>. When checking is enabled, calls to
+<code class="docutils literal notranslate"><span class="pre">range_pop(expected_name)</span></code> verify that the range being closed has the expected name. Disable
+<code class="docutils literal notranslate"><span class="pre">keep_track_of_range_order</span></code> during performance profiling to avoid the checking overhead.
+For example, <code class="docutils literal notranslate"><span class="pre">HungarianAssigner2DBatched</span></code> checks its outermost range when the assignment finishes:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/core/bbox/assigners/hungarian_assigner_2d_batched.py</span><a class="headerlink" href="#id5" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="hll"><span class="linenos">320</span>        <span class="c1">#@NOTE: Types of range pops</span>
+</span><span class="hll"><span class="linenos">321</span>        <span class="c1">#@NOTE: A simple range pop to close the NVTX range, without mismatch checking.</span>
+</span><span class="linenos">322</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="hll"><span class="linenos">323</span>        <span class="c1">#@NOTE: This will check for range stack mismatches if checking is enabled (enable only for debugging).</span>
+</span><span class="linenos">324</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">(</span><span class="s2">&quot;HungarianAssigner2DBatched.assign&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="viewing-results">
+<h2>Viewing Results<a class="headerlink" href="#viewing-results" title="Link to this heading"></a></h2>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Stopwatch</span></code> results are printed from the main script at the end of training:</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/tools/train.py</span><a class="headerlink" href="#id6" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">521</span>    <span class="c1"># ===== Stopwatch: Print eval times =====</span>
+<span class="hll"><span class="linenos">522</span>    <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">523</span>    <span class="c1"># Print the run-time measurements at the end of the training. Note that depending on the setup, the </span>
+</span><span class="hll"><span class="linenos">524</span>    <span class="c1"># measurements will also be printed periodically (e.g. every 50 iterations). Here, we ensure that the</span>
+</span><span class="hll"><span class="linenos">525</span>    <span class="c1"># last printed measurement is for the complete training.</span>
+</span><span class="linenos">526</span>    <span class="n">stopwatch</span><span class="o">.</span><span class="n">print_eval_times</span><span class="p">()</span>
+<span class="linenos">527</span>    <span class="c1"># ===== End of Stopwatch: Print eval times =====</span>
+</pre></div>
+</div>
+</div>
+</li>
+<li><p>For NVTX, launch your run under Nsight Systems/Compute. The training script additionally uses
+<code class="docutils literal notranslate"><span class="pre">torch.cuda.cudart().cudaProfilerStart()</span></code> and <code class="docutils literal notranslate"><span class="pre">torch.cuda.cudart().cudaProfilerStop()</span></code> to start and stop
+the profiling session. Note that this is done only if the use of NVTX is enabled in the config (and
+therefore, the NVTX range wrapper is enabled).</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/tools/train.py</span><a class="headerlink" href="#id7" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">486</span>    <span class="c1"># ===== Start profiling (if running with nsys) =====</span>
+<span class="hll"><span class="linenos">487</span>    <span class="c1">#@NOTE: Indicate that profiling should be started if the NVTX range wrapper is enabled.</span>
+</span><span class="linenos">488</span>    <span class="k">if</span> <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">is_enabled</span><span class="p">:</span>
+<span class="linenos">489</span>        <span class="k">if</span> <span class="s2">&quot;RANK&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;RANK&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">490</span>            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting profiling&quot;</span><span class="p">)</span>
+<span class="linenos">491</span>            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">cudart</span><span class="p">()</span><span class="o">.</span><span class="n">cudaProfilerStart</span><span class="p">()</span>
+<span class="linenos">492</span>    <span class="c1"># ===== End of Start profiling (if running with nsys) =====</span>
+<span class="linenos">493</span>
+<span class="linenos">494</span>
+<span class="linenos">495</span>    <span class="c1"># ===== Train the model =====</span>
+<span class="hll"><span class="linenos">496</span>    <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">497</span>    <span class="c1"># Call the training function. Note that datasets is passed to the model. As this now may be a DALI </span>
+</span><span class="hll"><span class="linenos">498</span>    <span class="c1"># iterator, one needs to make sure that the training function is able to handle this (by using it directly</span>
+</span><span class="hll"><span class="linenos">499</span>    <span class="c1"># as a drop-in replacement for a PyTorch DataLoader, instead of creating a PyTorch DataLoader from it). </span>
+</span><span class="hll"><span class="linenos">500</span>    <span class="c1"># This is done in `projects/mmdet3d_plugin/core/apis/mmdet_train.py`.</span>
+</span><span class="linenos">501</span>    <span class="n">custom_train_model</span><span class="p">(</span>
+<span class="linenos">502</span>        <span class="n">model</span><span class="p">,</span>
+<span class="linenos">503</span>        <span class="n">datasets</span><span class="p">,</span>
+<span class="linenos">504</span>        <span class="n">cfg</span><span class="p">,</span>
+<span class="linenos">505</span>        <span class="n">distributed</span><span class="o">=</span><span class="n">distributed</span><span class="p">,</span>
+<span class="linenos">506</span>        <span class="n">validate</span><span class="o">=</span><span class="p">(</span><span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">no_validate</span><span class="p">),</span>
+<span class="linenos">507</span>        <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>
+<span class="linenos">508</span>        <span class="n">meta</span><span class="o">=</span><span class="n">meta</span><span class="p">)</span>
+<span class="linenos">509</span>    <span class="c1"># ===== End of Train the model =====</span>
+<span class="linenos">510</span>
+<span class="linenos">511</span>
+<span class="linenos">512</span>    <span class="c1"># ===== Stop profiling (if running with nsys) =====</span>
+<span class="hll"><span class="linenos">513</span>    <span class="c1">#@NOTE: Indicate that profiling should be stopped if the NVTX range wrapper is enabled.</span>
+</span><span class="linenos">514</span>    <span class="k">if</span> <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">is_enabled</span><span class="p">:</span>
+<span class="linenos">515</span>        <span class="k">if</span> <span class="s2">&quot;RANK&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;RANK&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">516</span>            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Stopping profiling&quot;</span><span class="p">)</span>
+<span class="linenos">517</span>            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">cudart</span><span class="p">()</span><span class="o">.</span><span class="n">cudaProfilerStop</span><span class="p">()</span>
+<span class="linenos">518</span>    <span class="c1"># ===== End of Stop profiling (if running with nsys) =====</span>
+</pre></div>
+</div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Optimization Testing Tools Demo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dumping_training_data.html" class="btn btn-neutral float-right" title="Dumping the Training Data (for Debugging/Demonstration)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,304 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dumping the Training Data (for Debugging/Demonstration) &mdash; ACCV-Lab 0.2.0.post1.dev84+gcbeeef9c7 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=0be6cc5f" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=0fa214d3"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Docker Setup &amp; Running StreamPETR" href="../docker_setup.html" />
+    <link rel="prev" title="Runtime Performance Evaluation and NVTX Profiling" href="performance_eval_and_profiling.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/multi_tensor_copier/docs/index.html">Multi-Tensor Copier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/lane_helpers/docs/index.html">Lane Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Demos</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../demos.html">Demos</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../demos.html#streampetr">StreamPETR</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../demos.html#demos-for-contained-packages">Demos for Contained Packages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../batching_helpers/index.html">Batching Helpers Demo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../dali_pipeline_framework/index.html">DALI Pipeline Framework Demo</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="index.html">Optimization Testing Tools Demo</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="performance_eval_and_profiling.html">Runtime Performance Evaluation and NVTX Profiling</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">Dumping the Training Data (for Debugging/Demonstration)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#running-the-demos">Running the Demos</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#choosing-a-configuration">Choosing a Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#running-all-evaluations">Running All Evaluations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#measurement-and-profiling">Measurement and Profiling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../release_notes_page.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../third_party_licenses.html">Third-Party Licenses</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../demos.html">Demos</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Optimization Testing Tools Demo</a></li>
+      <li class="breadcrumb-item active">Dumping the Training Data (for Debugging/Demonstration)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/demo_docs/streampetr/optim_test_tools/dumping_training_data.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dumping-the-training-data-for-debugging-demonstration">
+<h1>Dumping the Training Data (for Debugging/Demonstration)<a class="headerlink" href="#dumping-the-training-data-for-debugging-demonstration" title="Link to this heading"></a></h1>
+<p>For debugging/demonstration purposes, the training data can be dumped to a file. This is not strictly needed
+to use the DALI pipeline, but it is useful to have the option to do so. For that, we use the
+<a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/api.html#accvlab.optim_test_tools.TensorDumper" title="accvlab.optim_test_tools.TensorDumper"><code class="xref py py-class docutils literal notranslate"><span class="pre">accvlab.optim_test_tools.TensorDumper</span></code></a>. Please also see the
+<a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/index.html"><span class="doc">Optimization Testing Tools</span></a> documentation for more details.</p>
+<dl class="simple">
+<dt>Here, we will focus on two points regarding the dumping:</dt><dd><ul class="simple">
+<li><p>How to enable the dumping and configure the dumping (e.g. dump custom data types).</p></li>
+<li><p>How to perform the dumping, including some advanced features (e.g. draw bounding boxes into the images
+using custom code which is only executed when the dumping is enabled).</p></li>
+</ul>
+</dd>
+</dl>
+<section id="enable-configure-the-dumping">
+<h2>Enable &amp; Configure the Dumping<a class="headerlink" href="#enable-configure-the-dumping" title="Link to this heading"></a></h2>
+<p>Note that one key point of the <code class="docutils literal notranslate"><span class="pre">optim_test_tools</span></code> package is that the functionality can be centrally
+controlled (enabled/disabled and configured; also see the
+<a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/index.html"><span class="doc">Optimization Testing Tools</span></a> documentation). Here, this is done
+in the main training script (<code class="docutils literal notranslate"><span class="pre">demos/streampetr/tools/train.py</span></code>) as demonstrated in the following snippet.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/tools/train.py</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">50</span><span class="c1"># ===== Profiling and Dumping Configuration =====</span>
+<span class="linenos">51</span>
+<span class="hll"><span class="linenos">52</span><span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">53</span><span class="c1"># Set `enable_dumper` to `True` to enable the dumper. The number of iterations </span>
+</span><span class="hll"><span class="linenos">54</span><span class="c1"># to dump is set by `dumper_iter_count`. Note that this is hard-coded here instead</span>
+</span><span class="hll"><span class="linenos">55</span><span class="c1"># of being part of the config because the dumper is only used for debugging purposes </span>
+</span><span class="hll"><span class="linenos">56</span><span class="c1"># and should be kept disabled during actual training.</span>
+</span><span class="linenos">57</span><span class="n">ENABLE_DUMPER</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="linenos">58</span><span class="n">DUMPER_ITER_COUNT</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="linenos">59</span>
+<span class="hll"><span class="linenos">60</span><span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">61</span><span class="c1"># If the dumper should be enabled, do so and also register custom converters for the non-standard </span>
+</span><span class="hll"><span class="linenos">62</span><span class="c1"># types that need to be dumped.</span>
+</span><span class="linenos">63</span><span class="k">if</span> <span class="n">ENABLE_DUMPER</span><span class="p">:</span>
+<span class="linenos">64</span>    <span class="n">rank</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;RANK&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;RANK&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="k">else</span> <span class="p">(</span>
+<span class="linenos">65</span>        <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;LOCAL_RANK&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;LOCAL_RANK&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="k">else</span> <span class="mi">0</span>
+<span class="linenos">66</span>    <span class="p">)</span>
+<span class="hll"><span class="linenos">67</span>    <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">68</span>    <span class="c1"># Enable the dumper and set the dump directory according to the rank. This will allow dumping from all</span>
+</span><span class="hll"><span class="linenos">69</span>    <span class="c1"># worker processes, without introducing conflicts.</span>
+</span><span class="linenos">70</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">enable</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;/streampetr/dumps/rank</span><span class="si">{</span><span class="n">rank</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="hll"><span class="linenos">71</span>    <span class="c1">#@NOTE: Perform dumping for a fixed number of iterations and then exit.</span>
+</span><span class="linenos">72</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">perform_after_dump_count</span><span class="p">(</span><span class="n">DUMPER_ITER_COUNT</span><span class="p">,</span> <span class="n">exit</span><span class="p">)</span>
+<span class="hll"><span class="linenos">73</span>    <span class="c1">#@NOTE: Register custom converters for the non-standard types that need to be dumped.</span>
+</span><span class="linenos">74</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">mmdet3d.models.detectors.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">DC</span>
+<span class="linenos">75</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">mmdet3d.core.bbox.structures.lidar_box3d</span><span class="w"> </span><span class="kn">import</span> <span class="n">LiDARInstance3DBoxes</span>
+<span class="linenos">76</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">register_custom_converter</span><span class="p">(</span><span class="n">LiDARInstance3DBoxes</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;tensor&quot;</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">tensor</span><span class="p">})</span>
+<span class="linenos">77</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">register_custom_converter</span><span class="p">(</span><span class="n">DC</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">data</span><span class="p">})</span>
+<span class="linenos">78</span>
+<span class="linenos">79</span><span class="c1"># ===== End of Profiling and Dumping Configuration =====</span>
+</pre></div>
+</div>
+</div>
+<p>Note that the configuration whether to perform dumping and for how many iterations could be easily done using
+config files as well. However, as this is a debugging tool, we keep the configuration in the main training
+script, and leave it disabled by default.</p>
+</section>
+<section id="perform-the-dumping">
+<h2>Perform the Dumping<a class="headerlink" href="#perform-the-dumping" title="Link to this heading"></a></h2>
+<p>The dumping itself is performed in the <code class="docutils literal notranslate"><span class="pre">forward_train</span></code> method of the model
+(<code class="docutils literal notranslate"><span class="pre">demos/streampetr/projects/mmdet3d_plugin/models/detectors/petr3d.py</span></code>). This demonstrates how we can
+separate the actual dumping from the configuration. Note that here, we can focus on the dumping itself,
+without caring where or how the configuration is done.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/models/detectors/petr3d.py</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">284</span>            <span class="c1"># ===== Data dumping =====</span>
+<span class="hll"><span class="linenos">285</span>            <span class="c1">#@NOTE: Adding data and bounding boxes to be dumped</span>
+</span><span class="hll"><span class="linenos">286</span>            <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">287</span>            <span class="c1"># First, add the data as-is. Note that we set up &#39;img&#39; as a special case, as it should be dumped </span>
+</span><span class="hll"><span class="linenos">288</span>            <span class="c1"># as an image and needs to be permuted to be in the correct format (color channels last).</span>
+</span><span class="linenos">289</span>            <span class="n">dumper</span><span class="o">.</span><span class="n">add_tensor_data</span><span class="p">(</span>
+<span class="linenos">290</span>                <span class="s2">&quot;data&quot;</span><span class="p">,</span> 
+<span class="linenos">291</span>                <span class="n">data</span><span class="p">,</span> 
+<span class="linenos">292</span>                <span class="n">dump_type</span><span class="o">=</span><span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">JSON</span><span class="p">,</span> 
+<span class="hll"><span class="linenos">293</span>                <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">294</span>                <span class="c1"># Set up &#39;img&#39; as a special case, as it should be dumped as an image and needs to be permuted </span>
+</span><span class="hll"><span class="linenos">295</span>                <span class="c1"># to be in the correct format (color channels last).</span>
+</span><span class="linenos">296</span>                <span class="n">dump_type_override</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;img&quot;</span><span class="p">:</span> <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">IMAGE_BGR</span><span class="p">},</span> 
+<span class="linenos">297</span>                <span class="n">permute_axes_override</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;img&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">)}</span>
+<span class="linenos">298</span>            <span class="p">)</span>
+<span class="linenos">299</span>            <span class="c1"># NOTE </span>
+<span class="linenos">300</span>            <span class="c1"># Then, add the drawn bboxes to the dump. There is a custom implementation for drawing the </span>
+<span class="linenos">301</span>            <span class="c1"># bboxes &amp; centers into the image, and it is called here, but only if the dumper is enabled.</span>
+<span class="linenos">302</span>            <span class="c1"># Note that `add_drawn_bboxes_to_dump` creates the images and adds them to the dump. If</span>
+<span class="linenos">303</span>            <span class="c1"># dumping is not enabled, the function is not called, avoiding unnecessary overhead.</span>
+<span class="linenos">304</span>            <span class="c1"># Also note that as the function expects the current data as input, we use a lambda function </span>
+<span class="linenos">305</span>            <span class="c1"># to pass that input and obtain a function without arguments, which is passed to `run_if_enabled`.</span>
+<span class="linenos">306</span>            <span class="n">dumper</span><span class="o">.</span><span class="n">run_if_enabled</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">Petr3D</span><span class="o">.</span><span class="n">add_drawn_bboxes_to_dump</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+<span class="linenos">307</span>            <span class="c1"># NOTE: Dump the data (if enabled, and at the location specified when enabling the dumper).</span>
+<span class="linenos">308</span>            <span class="n">dumper</span><span class="o">.</span><span class="n">dump</span><span class="p">()</span>
+<span class="linenos">309</span>            <span class="c1"># ===== End of data dumping =====</span>
+</pre></div>
+</div>
+</div>
+<p>The function <code class="docutils literal notranslate"><span class="pre">add_drawn_bboxes_to_dump</span></code> is a custom function that draws the bounding boxes into the images
+and adds them to the dump. Note that it is only called if the dumper is enabled, avoiding unnecessary
+overhead. The function is implemented as follows:</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/models/detectors/petr3d.py</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">424</span>    <span class="c1"># ===== Custom code for dumping the bounding boxes =====</span>
+<span class="linenos">425</span>    <span class="nd">@staticmethod</span>
+<span class="linenos">426</span>    <span class="k">def</span><span class="w"> </span><span class="nf">add_drawn_bboxes_to_dump</span><span class="p">(</span><span class="n">data_dict</span><span class="p">):</span>
+<span class="linenos">427</span>        <span class="kn">import</span><span class="w"> </span><span class="nn">cv2</span>
+<span class="linenos">428</span>        <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="linenos">429</span>
+<span class="hll"><span class="linenos">430</span>        <span class="c1">#@NOTE: This is a function that draws bouding boxed into an iamge.</span>
+</span><span class="linenos">431</span>        <span class="k">def</span><span class="w"> </span><span class="nf">draw_bboxes_into_image</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">bboxes</span><span class="p">,</span> <span class="n">centers</span><span class="p">):</span>
+<span class="linenos">432</span>            <span class="n">img_min</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+<span class="linenos">433</span>            <span class="n">img_max</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="linenos">434</span>            <span class="n">image</span> <span class="o">=</span> <span class="p">(</span><span class="n">image</span> <span class="o">-</span> <span class="n">img_min</span><span class="p">)</span> <span class="o">/</span> <span class="nb">max</span><span class="p">(</span><span class="n">img_max</span> <span class="o">-</span> <span class="n">img_min</span><span class="p">,</span> <span class="mf">1e-6</span><span class="p">)</span> <span class="o">*</span> <span class="mi">255</span>
+<span class="linenos">435</span>            <span class="n">image_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">))</span>
+<span class="linenos">436</span>            <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">bboxes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+<span class="linenos">437</span>                <span class="k">try</span><span class="p">:</span>
+<span class="linenos">438</span>                    <span class="n">bboxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bboxes</span><span class="p">)</span>
+<span class="linenos">439</span>                <span class="k">except</span><span class="p">:</span>
+<span class="linenos">440</span>                    <span class="n">bboxes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bboxes</span><span class="o">.</span><span class="n">cpu</span><span class="p">())</span>
+<span class="linenos">441</span>                <span class="k">try</span><span class="p">:</span>
+<span class="linenos">442</span>                    <span class="n">centers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">centers</span><span class="p">)</span>
+<span class="linenos">443</span>                <span class="k">except</span><span class="p">:</span>
+<span class="linenos">444</span>                    <span class="n">centers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">centers</span><span class="o">.</span><span class="n">cpu</span><span class="p">())</span>
+<span class="linenos">445</span>                <span class="n">color</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+<span class="linenos">446</span>                <span class="n">image_np</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">rectangle</span><span class="p">(</span><span class="n">image_np</span><span class="p">,</span> <span class="p">(</span><span class="n">bboxes</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="p">(</span><span class="n">bboxes</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="mi">2</span><span class="p">:]</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+<span class="linenos">447</span>                <span class="n">image_np</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span><span class="n">image_np</span><span class="p">,</span> <span class="p">(</span><span class="n">centers</span><span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">448</span>                <span class="n">image</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">image_np</span><span class="p">)</span>
+<span class="linenos">449</span>            <span class="k">return</span> <span class="n">image</span>
+<span class="linenos">450</span>
+<span class="hll"><span class="linenos">451</span>        <span class="c1">#@NOTE: Perform the drawing</span>
+</span><span class="linenos">452</span>        <span class="n">img</span> <span class="o">=</span> <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;img&quot;</span><span class="p">]</span>
+<span class="linenos">453</span>        <span class="n">img_shape</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span>
+<span class="hll"><span class="linenos">454</span>        <span class="c1">#@NOTE: Generate a nested list for the individual images</span>
+</span><span class="linenos">455</span>        <span class="n">res</span> <span class="o">=</span> <span class="p">[[[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">img_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">img_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">img_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+<span class="hll"><span class="linenos">456</span>        <span class="c1">#@NOTE: Iterate over the individual images</span>
+</span><span class="linenos">457</span>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">img_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+<span class="linenos">458</span>            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">img_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+<span class="linenos">459</span>                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">img_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+<span class="hll"><span class="linenos">460</span>                    <span class="c1">#@NOTE: Ensure the expected format (channels last)</span>
+</span><span class="linenos">461</span>                    <span class="n">img_channels_last</span> <span class="o">=</span> <span class="n">img</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="hll"><span class="linenos">462</span>                    <span class="c1">#@NOTE: Draw the bboxes into the image and store the result</span>
+</span><span class="linenos">463</span>                    <span class="n">drawn_image</span> <span class="o">=</span> <span class="n">draw_bboxes_into_image</span><span class="p">(</span>
+<span class="linenos">464</span>                        <span class="n">img_channels_last</span><span class="p">,</span> <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;gt_bboxes&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">],</span> <span class="n">data_dict</span><span class="p">[</span><span class="s2">&quot;centers2d&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span>
+<span class="linenos">465</span>                    <span class="p">)</span>
+<span class="linenos">466</span>                    <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">drawn_image</span>
+<span class="linenos">467</span>
+<span class="hll"><span class="linenos">468</span>        <span class="c1">#@NOTE: Add the drawn images to the dump. Note that we can directly add the nested list.</span>
+</span><span class="linenos">469</span>        <span class="n">dumper</span><span class="o">.</span><span class="n">add_tensor_data</span><span class="p">(</span><span class="s2">&quot;data_dict.drawn_gt_bboxes&quot;</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">dump_type</span><span class="o">=</span><span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">IMAGE_BGR</span><span class="p">)</span>
+<span class="linenos">470</span>        <span class="c1"># ===== End of custom code for dumping the bounding boxes =====</span>
+</pre></div>
+</div>
+</div>
+<p>As demonstrated in the snippet above, the function is called in the <code class="docutils literal notranslate"><span class="pre">forward_train</span></code> method of the model.
+Here, it is only called if the dumper is enabled, avoiding unnecessary overhead.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="performance_eval_and_profiling.html" class="btn btn-neutral float-left" title="Runtime Performance Evaluation and NVTX Profiling" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../docker_setup.html" class="btn btn-neutral float-right" title="Docker Setup &amp; Running StreamPETR" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

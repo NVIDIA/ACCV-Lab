@@ -1,0 +1,437 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Batching Matching &mdash; ACCV-Lab 0.2.0.post1.dev84+gcbeeef9c7 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=0be6cc5f" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=0fa214d3"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Batching Loss — Focal Head" href="batching_loss_focal_head.html" />
+    <link rel="prev" title="Overview" href="overview.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/multi_tensor_copier/docs/index.html">Multi-Tensor Copier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/lane_helpers/docs/index.html">Lane Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Demos</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../demos.html">Demos</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../demos.html#streampetr">StreamPETR</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../demos.html#demos-for-contained-packages">Demos for Contained Packages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="index.html">Batching Helpers Demo</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">Batching Matching</a></li>
+<li class="toctree-l5"><a class="reference internal" href="batching_loss_focal_head.html">Batching Loss — Focal Head</a></li>
+<li class="toctree-l5"><a class="reference internal" href="batching_loss_stream_petr_head.html">Batching Loss — StreamPETR Head</a></li>
+<li class="toctree-l5"><a class="reference internal" href="evaluation.html">Evaluation</a></li>
+<li class="toctree-l5"><a class="reference internal" href="summary.html">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../dali_pipeline_framework/index.html">DALI Pipeline Framework Demo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../optim_test_tools/index.html">Optimization Testing Tools Demo</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#running-the-demos">Running the Demos</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#choosing-a-configuration">Choosing a Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#running-all-evaluations">Running All Evaluations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#measurement-and-profiling">Measurement and Profiling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../release_notes_page.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../third_party_licenses.html">Third-Party Licenses</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../demos.html">Demos</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Batching Helpers Demo</a></li>
+      <li class="breadcrumb-item active">Batching Matching</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/demo_docs/streampetr/batching_helpers/batching_matching.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="batching-matching">
+<h1>Batching Matching<a class="headerlink" href="#batching-matching" title="Link to this heading"></a></h1>
+<p>This page documents the batched matching (<code class="docutils literal notranslate"><span class="pre">HungarianAssigner2DBatched</span></code>) used by
+<code class="docutils literal notranslate"><span class="pre">FocalHeadBatched</span></code>.</p>
+<dl class="simple">
+<dt>You can find the implementation in the repository here:</dt><dd><ul class="simple">
+<li><p>HungarianAssigner2DBatched:
+<code class="docutils literal notranslate"><span class="pre">demos/streampetr/projects/mmdet3d_plugin/core/bbox/assigners/hungarian_assigner_2d_batched.py</span></code></p></li>
+<li><p>HungarianAssigner2D (non-batched reference):
+<code class="docutils literal notranslate"><span class="pre">demos/streampetr/projects/mmdet3d_plugin/core/bbox/assigners/hungarian_assigner_2d.py</span></code></p></li>
+<li><p>FocalHeadBatched: <code class="docutils literal notranslate"><span class="pre">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/focal_head_batched.py</span></code></p></li>
+<li><p>FocalHead (reference): <code class="docutils literal notranslate"><span class="pre">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/focal_head.py</span></code></p></li>
+</ul>
+</dd>
+</dl>
+<section id="overview-and-goals">
+<h2>Overview and Goals<a class="headerlink" href="#overview-and-goals" title="Link to this heading"></a></h2>
+<div class="docutils container">
+<p>The batched Hungarian 2D matcher (<code class="docutils literal notranslate"><span class="pre">HungarianAssigner2DBatched</span></code>) is used in the focal head with batched loss 
+computation (<code class="docutils literal notranslate"><span class="pre">FocalHeadBatched</span></code>).</p>
+<p>The matcher is designed to enable batched processing of parts of the matching process. Most notably, the 
+cost matrix computation is performed in a batched manner, while the actual Hungarian matching is performed
+on a per-sample basis on the CPU (as the used implementation of the Hungarian matching algorithm requires 
+this).</p>
+<p>The implementation is very similar to the matcher implementation in the <code class="docutils literal notranslate"><span class="pre">batched-processing</span></code> example
+(see <a class="reference internal" href="../../../contained_package_docs_mirror/batching_helpers/docs/example.html"><span class="doc">Example</span></a> and the comments in <code class="docutils literal notranslate"><span class="pre">matcher.py</span></code> in
+the implementation).</p>
+<p>For implementation details, see notes in the <code class="docutils literal notranslate"><span class="pre">assign()</span></code> method of this class.</p>
+</div>
+</section>
+<section id="pre-processing">
+<h2>Pre-processing<a class="headerlink" href="#pre-processing" title="Link to this heading"></a></h2>
+<p>In contrast to the original implementation, the matching is performed for the whole batch at once.
+<a class="reference internal" href="../../../contained_package_docs_mirror/batching_helpers/docs/api.html#accvlab.batching_helpers.RaggedBatch" title="accvlab.batching_helpers.RaggedBatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code></a> objects are used to handle the input data.</p>
+<p>The following code snippet shows the pre-processing step, which is the first step performed inside the
+<code class="docutils literal notranslate"><span class="pre">assign</span></code> method (which performs the matching). Please refer to the highlighted comments (marked with
+<code class="docutils literal notranslate"><span class="pre">#&#64;NOTE</span></code>) for more details.</p>
+<p>(As a side note, we use NVTX ranges to annotate major phases for profiling, using the
+<a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/api.html#accvlab.optim_test_tools.NVTXRangeWrapper" title="accvlab.optim_test_tools.NVTXRangeWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">NVTXRangeWrapper</span></code></a> class.)</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/core/bbox/assigners/hungarian_assigner_2d_batched.py</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">146</span>        <span class="c1"># ===== Pre-processing =====</span>
+<span class="linenos">147</span>
+<span class="linenos">148</span>        
+<span class="linenos">149</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;HungarianAssigner2DBatched.assign&quot;</span><span class="p">)</span>
+<span class="linenos">150</span>        <span class="k">assert</span> <span class="n">gt_bboxes_ignore</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> \
+<span class="linenos">151</span>            <span class="s1">&#39;Only case when gt_bboxes_ignore is None is supported.&#39;</span>
+<span class="linenos">152</span>
+<span class="hll"><span class="linenos">153</span>        <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">154</span>        <span class="c1">#   If multiple batch dimensions are used, we flatten them into a single dimension.</span>
+</span><span class="hll"><span class="linenos">155</span>        <span class="c1"># This is done as</span>
+</span><span class="hll"><span class="linenos">156</span>        <span class="c1">#   - We do not care about the batch shape, so we can flatten it.</span>
+</span><span class="hll"><span class="linenos">157</span>        <span class="c1">#   - The cost functions used to compute the cost matrices may expect a single batch dimension.</span>
+</span><span class="hll"><span class="linenos">158</span>        <span class="c1"># After the matching is done, we restore the original batch shape for the results.</span>
+</span><span class="hll"><span class="linenos">159</span>        <span class="c1"># Please also see the comments at the end of the function for more details on the restoration.</span>
+</span><span class="linenos">160</span>        <span class="n">batch_shape_orig</span> <span class="o">=</span> <span class="n">gt_bboxes</span><span class="o">.</span><span class="n">batch_shape</span>
+<span class="linenos">161</span>        <span class="n">num_batch_dims_orig</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_shape_orig</span><span class="p">)</span>
+<span class="linenos">162</span>
+<span class="linenos">163</span>        <span class="n">max_num_gts</span> <span class="o">=</span> <span class="n">gt_bboxes</span><span class="o">.</span><span class="n">max_sample_size</span>
+<span class="linenos">164</span>        <span class="n">num_bboxes</span> <span class="o">=</span> <span class="n">bbox_pred</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">num_batch_dims_orig</span><span class="p">)</span>
+<span class="linenos">165</span>        <span class="c1"># Handle empty inputs &amp; return without further processing.</span>
+<span class="linenos">166</span>        <span class="k">if</span> <span class="n">max_num_gts</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">num_bboxes</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">167</span>            <span class="n">matched_indices</span> <span class="o">=</span> <span class="n">bhl</span><span class="o">.</span><span class="n">RaggedBatch</span><span class="o">.</span><span class="n">Empty</span><span class="p">(</span>
+<span class="linenos">168</span>                <span class="n">num_dims</span><span class="o">=</span><span class="n">num_batch_dims_orig</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+<span class="linenos">169</span>                <span class="n">non_uniform_dim</span><span class="o">=</span><span class="n">num_batch_dims_orig</span><span class="p">,</span>
+<span class="linenos">170</span>                <span class="n">device</span><span class="o">=</span><span class="n">bbox_pred</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
+<span class="linenos">171</span>                <span class="n">batch_shape</span><span class="o">=</span><span class="n">batch_shape_orig</span><span class="p">,</span>
+<span class="linenos">172</span>                <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span>
+<span class="linenos">173</span>            <span class="p">)</span>
+<span class="linenos">174</span>            <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">(</span><span class="s2">&quot;HungarianAssigner2DBatched.assign&quot;</span><span class="p">)</span>
+<span class="linenos">175</span>            <span class="k">return</span> <span class="n">matched_indices</span><span class="p">,</span> <span class="n">matched_indices</span>
+<span class="linenos">176</span>
+<span class="linenos">177</span>        <span class="n">needs_reshape</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_shape_orig</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+<span class="linenos">178</span>        <span class="k">if</span> <span class="n">needs_reshape</span><span class="p">:</span>
+<span class="hll"><span class="linenos">179</span>            <span class="c1">#@NOTE: Flatten the batch dimensions.</span>
+</span><span class="linenos">180</span>            <span class="n">gt_bboxes</span> <span class="o">=</span> <span class="n">gt_bboxes</span><span class="o">.</span><span class="n">flatten_batch_dims</span><span class="p">()</span>
+<span class="linenos">181</span>            <span class="n">gt_labels</span> <span class="o">=</span> <span class="n">gt_labels</span><span class="o">.</span><span class="n">flatten_batch_dims</span><span class="p">()</span>
+<span class="linenos">182</span>            <span class="n">centers2d</span> <span class="o">=</span> <span class="n">centers2d</span><span class="o">.</span><span class="n">flatten_batch_dims</span><span class="p">()</span>
+<span class="hll"><span class="linenos">183</span>            <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">184</span>            <span class="c1"># Flatten the batch dimensions for the tensor inputs which</span>
+</span><span class="hll"><span class="linenos">185</span>            <span class="c1">#   - Are expected to have the same batch shape as the `RaggedBatch` instances.</span>
+</span><span class="hll"><span class="linenos">186</span>            <span class="c1">#   - Do not have built-in helper functions for this.</span>
+</span><span class="linenos">187</span>            <span class="n">bbox_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flatten_batch_dims_for_tensor</span><span class="p">(</span><span class="n">bbox_pred</span><span class="p">,</span> <span class="n">num_batch_dims_orig</span><span class="p">)</span>
+<span class="linenos">188</span>            <span class="n">cls_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flatten_batch_dims_for_tensor</span><span class="p">(</span><span class="n">cls_pred</span><span class="p">,</span> <span class="n">num_batch_dims_orig</span><span class="p">)</span>
+<span class="linenos">189</span>            <span class="n">pred_centers2d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flatten_batch_dims_for_tensor</span><span class="p">(</span><span class="n">pred_centers2d</span><span class="p">,</span> <span class="n">num_batch_dims_orig</span><span class="p">)</span>
+<span class="linenos">190</span>            
+<span class="linenos">191</span>        <span class="n">batch_size</span><span class="p">,</span> <span class="n">max_num_gts</span><span class="p">,</span> <span class="n">num_bboxes</span> <span class="o">=</span> <span class="n">gt_bboxes</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">gt_bboxes</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">bbox_pred</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">192</span>
+<span class="linenos">193</span>        <span class="n">img_h</span><span class="p">,</span> <span class="n">img_w</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">img_meta</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;pad_shape&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos">194</span>        <span class="n">factor</span> <span class="o">=</span> <span class="n">gt_bboxes</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">new_tensor</span><span class="p">([</span><span class="n">img_w</span><span class="p">,</span> <span class="n">img_h</span><span class="p">,</span> <span class="n">img_w</span><span class="p">,</span>
+<span class="linenos">195</span>                                       <span class="n">img_h</span><span class="p">])</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">196</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="cost-matrix-computation">
+<h2>Cost Matrix Computation<a class="headerlink" href="#cost-matrix-computation" title="Link to this heading"></a></h2>
+<p>The cost matrices are obtained by applying multiple cost functions to the input data. For each cost function,
+a matrix is computed which contains the cost for each possible prediction-GT pair. In the original
+implementation, the cost matrices are computed for a single sample at a time. Here, we show the code
+for the computation of the cost matrices in a batched manner. Note that the size of the cost matrices depends
+on the number of GTs, and so varies between samples.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/core/bbox/assigners/hungarian_assigner_2d_batched.py</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">197</span>        <span class="c1"># ===== Compute the cost matrices =====</span>
+<span class="linenos">198</span>
+<span class="hll"><span class="linenos">199</span>        <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">200</span>        <span class="c1">#   Overall, the cost matrix computation implementation is very similar to the original implementation.</span>
+</span><span class="hll"><span class="linenos">201</span>        <span class="c1"># Note that we expect the individual cost functions to be able to handle batched data. However, they</span>
+</span><span class="hll"><span class="linenos">202</span>        <span class="c1"># do not need to handle non-uniform sample sizes and may assume a uniform batch size. This means that </span>
+</span><span class="hll"><span class="linenos">203</span>        <span class="c1"># costs functions can be re-used as is if they support basic batching.</span>
+</span><span class="hll"><span class="linenos">204</span>        <span class="c1"># The output of the cost functions is a tensor of shape `[batch_size, num_preds, max_num_gts]`,</span>
+</span><span class="hll"><span class="linenos">205</span>        <span class="c1"># i.e. the cost matrices are padded to the same size (`max_num_gts`) for a given batch.</span>
+</span><span class="hll"><span class="linenos">206</span>        <span class="c1">#</span>
+</span><span class="hll"><span class="linenos">207</span>        <span class="c1">#   The handling of the non-uniform sample sizes is done after the cost matrix is computed by using</span>
+</span><span class="hll"><span class="linenos">208</span>        <span class="c1"># `gt_bboxes.create_with_sample_sizes_like_self(cost, 2)`. See comments below for more details).</span>
+</span><span class="linenos">209</span>
+<span class="hll"><span class="linenos">210</span>        <span class="c1">#@NOTE: Compute the cost matrices in a batched manner.</span>
+</span><span class="linenos">211</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;HungarianAssigner2DBatched.assign:cost matrices&quot;</span><span class="p">)</span>
+<span class="linenos">212</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;HungarianAssigner2DBatched.assign:cls_cost&quot;</span><span class="p">)</span>
+<span class="linenos">213</span>        <span class="n">cls_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cls_cost</span><span class="p">(</span><span class="n">cls_pred</span><span class="p">,</span> <span class="n">gt_labels</span><span class="o">.</span><span class="n">tensor</span><span class="p">)</span>
+<span class="linenos">214</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">215</span>        <span class="c1"># regression L1 cost</span>
+<span class="hll"><span class="linenos">216</span>        <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">217</span>        <span class="c1">#   The `apply` method is a convenience method to apply a function to the underlying `tensor` </span>
+</span><span class="hll"><span class="linenos">218</span>        <span class="c1"># data of the `RaggedBatch`. Note that while here, only the data tensor (i.e. `tensor`) is </span>
+</span><span class="hll"><span class="linenos">219</span>        <span class="c1"># input to the lambda function, the passed function (lambda in this case) can accept more inputs. </span>
+</span><span class="hll"><span class="linenos">220</span>        <span class="c1"># If more inputs are defined, the function will also receive the `sample_sizes` and `mask` </span>
+</span><span class="hll"><span class="linenos">221</span>        <span class="c1"># of the `RaggedBatch`.</span>
+</span><span class="linenos">222</span>        <span class="n">normalized_gt_bboxes</span> <span class="o">=</span> <span class="n">gt_bboxes</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">bboxs</span><span class="p">:</span> <span class="n">bboxs</span> <span class="o">/</span> <span class="n">factor</span><span class="p">)</span>
+<span class="linenos">223</span>        
+<span class="hll"><span class="linenos">224</span>        <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">225</span>        <span class="c1">#  Here, the `normalized_gt_bboxes.tensor` is used as input to the cost function. The function expects</span>
+</span><span class="hll"><span class="linenos">226</span>        <span class="c1">#  tensor inputs and is not implmentented with the `RaggedBatch` format in mind.</span>
+</span><span class="linenos">227</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;HungarianAssigner2DBatched.assign:reg_cost&quot;</span><span class="p">)</span>
+<span class="linenos">228</span>        <span class="n">reg_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reg_cost</span><span class="p">(</span><span class="n">bbox_pred</span><span class="p">,</span> <span class="n">normalized_gt_bboxes</span><span class="o">.</span><span class="n">tensor</span><span class="p">)</span>
+<span class="linenos">229</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">230</span>
+<span class="linenos">231</span>        <span class="c1"># regression iou cost, defaultly giou is used in official DETR.</span>
+<span class="linenos">232</span>        <span class="n">bboxes</span> <span class="o">=</span> <span class="n">bbox_cxcywh_to_xyxy</span><span class="p">(</span><span class="n">bbox_pred</span><span class="p">)</span> <span class="o">*</span> <span class="n">factor</span>
+<span class="linenos">233</span>
+<span class="linenos">234</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;HungarianAssigner2DBatched.assign:iou_cost&quot;</span><span class="p">)</span>
+<span class="linenos">235</span>        <span class="n">iou_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iou_cost</span><span class="p">(</span><span class="n">bboxes</span><span class="p">,</span> <span class="n">gt_bboxes</span><span class="o">.</span><span class="n">tensor</span><span class="p">)</span>
+<span class="linenos">236</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">237</span>
+<span class="linenos">238</span>        <span class="c1"># center2d L1 cost</span>
+<span class="hll"><span class="linenos">239</span>        <span class="c1">#@NOTE: The `apply` method is used again here.</span>
+</span><span class="linenos">240</span>        <span class="n">normalized_centers2d</span> <span class="o">=</span> <span class="n">centers2d</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">ctr2d</span><span class="p">:</span> <span class="n">ctr2d</span> <span class="o">/</span> <span class="n">factor</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+<span class="linenos">241</span>
+<span class="linenos">242</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;HungarianAssigner2DBatched.assign:centers2d_cost&quot;</span><span class="p">)</span>
+<span class="linenos">243</span>        <span class="n">centers2d_cost</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">centers2d_cost</span><span class="p">(</span><span class="n">pred_centers2d</span><span class="p">,</span> <span class="n">normalized_centers2d</span><span class="o">.</span><span class="n">tensor</span><span class="p">)</span>
+<span class="linenos">244</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">245</span>
+<span class="linenos">246</span>        <span class="c1"># weighted sum of above four costs</span>
+<span class="linenos">247</span>        <span class="n">cost</span> <span class="o">=</span> <span class="n">cls_cost</span> <span class="o">+</span> <span class="n">reg_cost</span> <span class="o">+</span> <span class="n">iou_cost</span> <span class="o">+</span> <span class="n">centers2d_cost</span>
+<span class="linenos">248</span>        <span class="n">cost</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span> <span class="n">posinf</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span> <span class="n">neginf</span><span class="o">=-</span><span class="mf">100.0</span><span class="p">)</span>
+<span class="linenos">249</span>        
+<span class="hll"><span class="linenos">250</span>        <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">251</span>        <span class="c1">#   During cost matrix computation, we assume uniform batch size (and use filler values). However, the</span>
+</span><span class="hll"><span class="linenos">252</span>        <span class="c1"># valid cost matrices are non-uniform in size. Along the GT object dimension, the sample sizes </span>
+</span><span class="hll"><span class="linenos">253</span>        <span class="c1"># correspond to the sample sizes of the GT inputs. However, the dimension iterating over the GT </span>
+</span><span class="hll"><span class="linenos">254</span>        <span class="c1"># objects (i.e. the `non_uniform_dim`) is `dim==2` for the matrices (`dim==1` corresponds to the </span>
+</span><span class="hll"><span class="linenos">255</span>        <span class="c1"># predictions). Thererefore, we create a RaggedBatch containing the matrices, with the non-uniform </span>
+</span><span class="hll"><span class="linenos">256</span>        <span class="c1"># dimension set to `dim==2` (instead of `dim==1` in `gt_bboxes`).</span>
+</span><span class="linenos">257</span>        <span class="n">cost</span> <span class="o">=</span> <span class="n">gt_bboxes</span><span class="o">.</span><span class="n">create_with_sample_sizes_like_self</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="n">non_uniform_dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos">258</span>
+<span class="linenos">259</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">260</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="perform-the-matching">
+<h2>Perform the Matching<a class="headerlink" href="#perform-the-matching" title="Link to this heading"></a></h2>
+<p>While the cost matrices are computed in a batched manner, the matching is performed one sample at a time.
+This is done because the matching is implemented on the CPU and does not support batched operation.</p>
+<p>As the rest of the function is batched, we need to iterate over the samples and perform the matching for each
+sample individually. After that, the results are combined into a single <cite>RaggedBatch</cite> object.</p>
+<p>Note that this is equivalent to the matching used in the original implementation. However, as there, the
+<code class="docutils literal notranslate"><span class="pre">assign</span></code> method processes one sample at a time, no loop is used there.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/core/bbox/assigners/hungarian_assigner_2d_batched.py</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">261</span>        <span class="c1"># ===== Perform the matching =====</span>
+<span class="linenos">262</span>
+<span class="linenos">263</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;HungarianAssigner2DBatched.assign:matching&quot;</span><span class="p">)</span>
+<span class="linenos">264</span>        <span class="n">cost</span> <span class="o">=</span> <span class="n">cost</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+<span class="linenos">265</span>        <span class="k">if</span> <span class="n">linear_sum_assignment</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">266</span>            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Please run &quot;pip install scipy&quot; &#39;</span>
+<span class="linenos">267</span>                              <span class="s1">&#39;to install scipy first.&#39;</span><span class="p">)</span>
+<span class="linenos">268</span>        
+<span class="hll"><span class="linenos">269</span>        <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">270</span>        <span class="c1">#   Move the cost matrices to the CPU. This is needed to run the Hungarian</span>
+</span><span class="hll"><span class="linenos">271</span>        <span class="c1"># matching on the CPU. Note that this is performed before splitting the cost matrices into individual</span>
+</span><span class="hll"><span class="linenos">272</span>        <span class="c1"># samples, so that data for all samples is moved in one go.</span>
+</span><span class="linenos">273</span>        <span class="n">cost_cpu</span> <span class="o">=</span> <span class="n">cost</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+<span class="hll"><span class="linenos">274</span>        <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">275</span>        <span class="c1">#   Split the cost matrices into individual samples. Note that `split()` removes the padding,</span>
+</span><span class="hll"><span class="linenos">276</span>        <span class="c1"># so that the valid matrices without any filler regions are returned.</span>
+</span><span class="linenos">277</span>        <span class="n">per_sample_costs</span> <span class="o">=</span> <span class="n">cost_cpu</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+<span class="hll"><span class="linenos">278</span>        <span class="c1">#@NOTE: Perform matching for each sample individually in a loop.</span>
+</span><span class="linenos">279</span>        <span class="n">matched_gt_list</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">batch_size</span>
+<span class="linenos">280</span>        <span class="n">matched_pred_list</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">batch_size</span>
+<span class="linenos">281</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;assigner loop [HungarianAssigner2DBatched.assign]&quot;</span><span class="p">)</span>
+<span class="linenos">282</span>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">):</span>
+<span class="linenos">283</span>            <span class="n">cost_i</span> <span class="o">=</span> <span class="n">per_sample_costs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+<span class="linenos">284</span>
+<span class="linenos">285</span>            <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;hungarian [HungarianAssigner2DBatched]&quot;</span><span class="p">)</span>
+<span class="linenos">286</span>            <span class="n">matched_row_inds</span><span class="p">,</span> <span class="n">matched_col_inds</span> <span class="o">=</span> <span class="n">linear_sum_assignment</span><span class="p">(</span><span class="n">cost_i</span><span class="p">)</span>
+<span class="linenos">287</span>            <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">288</span>
+<span class="linenos">289</span>            <span class="n">matched_gt_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">matched_col_inds</span><span class="p">)</span>
+<span class="linenos">290</span>            <span class="n">matched_pred_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">from_numpy</span><span class="p">(</span><span class="n">matched_row_inds</span><span class="p">)</span>
+<span class="linenos">291</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">292</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="combine-results-and-post-processing">
+<h2>Combine Results and Post-processing<a class="headerlink" href="#combine-results-and-post-processing" title="Link to this heading"></a></h2>
+<p>After performing the matching, the results are combined into <code class="docutils literal notranslate"><span class="pre">RaggedBatch</span></code> objects. In addition, note that</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The original batch shape is restored using the <code class="docutils literal notranslate"><span class="pre">reshape_batch_dims</span></code> method.</p></li>
+<li><p>The result format is different from the original implementation. Here, we return the matching results
+as index pairs (in two separate <code class="docutils literal notranslate"><span class="pre">RaggedBatch</span></code> objects, one containing indices in the predictions, and
+one containing corresponding indices in the GTs). In the original implementation, an <code class="docutils literal notranslate"><span class="pre">AssignResult</span></code>
+object is returned.</p></li>
+</ul>
+</div></blockquote>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/core/bbox/assigners/hungarian_assigner_2d_batched.py</span><a class="headerlink" href="#id4" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">293</span>        <span class="c1"># ===== Combine the matching results &amp; post-processing =====</span>
+<span class="linenos">294</span>
+<span class="hll"><span class="linenos">295</span>        <span class="c1">#@NOTE: Combine the matching results for all samples into a single `RaggedBatch`.</span>
+</span><span class="linenos">296</span>        <span class="n">gt_matched_indices</span> <span class="o">=</span> <span class="n">bhl</span><span class="o">.</span><span class="n">combine_data</span><span class="p">(</span><span class="n">matched_gt_list</span><span class="p">)</span>
+<span class="hll"><span class="linenos">297</span>        <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">298</span>        <span class="c1">#   Note the `other_with_same_sample_sizes` argument, which is used to specify that the</span>
+</span><span class="hll"><span class="linenos">299</span>        <span class="c1"># second `RaggedBatch` (here `matched_pred_list`) has the same sample sizes as the first one</span>
+</span><span class="hll"><span class="linenos">300</span>        <span class="c1"># (here `gt_matched_indices`). This is not required, but results in a more efficient implementation</span>
+</span><span class="hll"><span class="linenos">301</span>        <span class="c1"># as the `sample_sizes` and `mask` tensors can be shared between the two `RaggedBatch` instances.</span>
+</span><span class="linenos">302</span>        <span class="n">pred_matched_indices</span> <span class="o">=</span> <span class="n">bhl</span><span class="o">.</span><span class="n">combine_data</span><span class="p">(</span>
+<span class="linenos">303</span>            <span class="n">matched_pred_list</span><span class="p">,</span> <span class="n">other_with_same_sample_sizes</span><span class="o">=</span><span class="n">gt_matched_indices</span>
+<span class="linenos">304</span>        <span class="p">)</span>
+<span class="linenos">305</span>
+<span class="hll"><span class="linenos">306</span>        <span class="c1">#@NOTE: Convert to the expected format and transfer to the correct device.</span>
+</span><span class="linenos">307</span>        <span class="n">device</span> <span class="o">=</span> <span class="n">bbox_pred</span><span class="o">.</span><span class="n">device</span>
+<span class="linenos">308</span>        <span class="n">pred_matched_indices</span> <span class="o">=</span> <span class="n">pred_matched_indices</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+<span class="linenos">309</span>        <span class="n">gt_matched_indices</span> <span class="o">=</span> <span class="n">gt_matched_indices</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+<span class="linenos">310</span>
+<span class="hll"><span class="linenos">311</span>        <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">312</span>        <span class="c1"># If the batch dimensions were flattened, restore the original shape.</span>
+</span><span class="hll"><span class="linenos">313</span>        <span class="c1"># Note that the overall shape of the results is different from the shape of the original.</span>
+</span><span class="hll"><span class="linenos">314</span>        <span class="c1"># However, as here, we are only concerned with the batch shape, it is the same and </span>
+</span><span class="hll"><span class="linenos">315</span>        <span class="c1"># we can easily reshape into the needed format.</span>
+</span><span class="linenos">316</span>        <span class="k">if</span> <span class="n">needs_reshape</span><span class="p">:</span>
+<span class="linenos">317</span>            <span class="n">pred_matched_indices</span> <span class="o">=</span> <span class="n">pred_matched_indices</span><span class="o">.</span><span class="n">reshape_batch_dims</span><span class="p">(</span><span class="n">batch_shape_orig</span><span class="p">)</span>
+<span class="linenos">318</span>            <span class="n">gt_matched_indices</span> <span class="o">=</span> <span class="n">gt_matched_indices</span><span class="o">.</span><span class="n">reshape_batch_dims</span><span class="p">(</span><span class="n">batch_shape_orig</span><span class="p">)</span>
+<span class="linenos">319</span>
+<span class="hll"><span class="linenos">320</span>        <span class="c1">#@NOTE: Types of range pops</span>
+</span><span class="hll"><span class="linenos">321</span>        <span class="c1">#@NOTE: A simple range pop to close the NVTX range, without mismatch checking.</span>
+</span><span class="linenos">322</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="hll"><span class="linenos">323</span>        <span class="c1">#@NOTE: This will check for range stack mismatches if checking is enabled (enable only for debugging).</span>
+</span><span class="linenos">324</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">(</span><span class="s2">&quot;HungarianAssigner2DBatched.assign&quot;</span><span class="p">)</span>
+<span class="linenos">325</span>
+<span class="hll"><span class="linenos">326</span>        <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">327</span>        <span class="c1">#   Return the matching results. In contrast to the original implementation, here, the results</span>
+</span><span class="hll"><span class="linenos">328</span>        <span class="c1"># of the matching (i.e. pairs of indices) are returned directly (as `RaggedBatch` instances). This </span>
+</span><span class="hll"><span class="linenos">329</span>        <span class="c1"># is different from the original implementation, where an `AssignResult` instance is returned. </span>
+</span><span class="hll"><span class="linenos">330</span>        <span class="c1"># See the comments in `focal_head_batched.py` for a discussion of the approach used here instead.</span>
+</span><span class="linenos">331</span>        <span class="k">return</span> <span class="n">pred_matched_indices</span><span class="p">,</span> <span class="n">gt_matched_indices</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="note-on-the-3d-assigner-implementation">
+<h2>Note on the 3D Assigner Implementation<a class="headerlink" href="#note-on-the-3d-assigner-implementation" title="Link to this heading"></a></h2>
+<p>Note that apart from the HungarianAssigner2DBatched implementation, there is also a
+<code class="docutils literal notranslate"><span class="pre">HungarianAssigner3DBatched</span></code> implementation, which is used by the <code class="docutils literal notranslate"><span class="pre">StreamPETRHeadBatched</span></code> class.
+The implementation is very similar to the <code class="docutils literal notranslate"><span class="pre">HungarianAssigner2DBatched</span></code> implementation, and so we will not
+discuss it here. Please refer to the <code class="docutils literal notranslate"><span class="pre">HungarianAssigner3DBatched</span></code> implementation for more details.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="overview.html" class="btn btn-neutral float-left" title="Overview" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="batching_loss_focal_head.html" class="btn btn-neutral float-right" title="Batching Loss — Focal Head" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

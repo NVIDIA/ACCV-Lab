@@ -1,0 +1,370 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code Formatting Guide &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Sphinx Documentation Setup Guide" href="DOCUMENTATION_SETUP_GUIDE.html" />
+    <link rel="prev" title="Development Guide" href="DEVELOPMENT_GUIDE.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../guides_index.html">Guides</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="INSTALLATION_GUIDE.html">Installation Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DOCKER_GUIDE.html">Docker Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DEVELOPMENT_GUIDE.html">Development Guide</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Code Formatting Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#running-code-formatting">Running Code Formatting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#main-formatting-script">Main Formatting Script</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#language-specific-options">Language-Specific Options</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#python-formatting-black">Python Formatting (Black)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#c-cuda-formatting-clang-format">C++/CUDA Formatting (clang-format)</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#advanced-usage">Advanced Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#external-implementation-support">External Implementation Support</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#style-configuration">Style Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#c-cuda-style-configuration-clang-format">C++/CUDA Style Configuration (clang-format)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#python-style-configuration-black">Python Style Configuration (Black)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#preventing-list-collapse-with-trailing-commas">Preventing List Collapse with Trailing Commas</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#exceptions-disabling-formatting">Exceptions: Disabling Formatting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#disabling-for-code-snippets-inside-a-file">Disabling for Code Snippets Inside a File</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#c-cuda-clang-format">C++/CUDA (clang-format)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#python-black">Python (black)</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#disabling-for-whole-directories">Disabling for Whole Directories</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#id1">C++/CUDA (clang-format)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id2">Python (black)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html">Sphinx Documentation Setup Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CONTRIBUTION_GUIDE.html">Contribution Guide</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../guides_index.html">Guides</a></li>
+      <li class="breadcrumb-item active">Code Formatting Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/guides/FORMATTING_GUIDE.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="code-formatting-guide">
+<h1>Code Formatting Guide<a class="headerlink" href="#code-formatting-guide" title="Link to this heading"></a></h1>
+<p>The ACCV-Lab project uses automated code formatting to maintain consistent code style across all namespace
+packages. The formatting system integrates with the shared configuration system and automatically discovers
+all namespace packages. The project uses <code class="docutils literal notranslate"><span class="pre">clang-format</span></code> for C++/CUDA code formatting and <code class="docutils literal notranslate"><span class="pre">black</span></code> for Python
+code formatting.</p>
+<section id="running-code-formatting">
+<h2>Running Code Formatting<a class="headerlink" href="#running-code-formatting" title="Link to this heading"></a></h2>
+<p>The project provides a unified formatting script that automatically discovers namespace packages and handles
+both Python and C++/CUDA code formatting.</p>
+<section id="main-formatting-script">
+<h3>Main Formatting Script<a class="headerlink" href="#main-formatting-script" title="Link to this heading"></a></h3>
+<p>The primary script for all formatting operations is <code class="docutils literal notranslate"><span class="pre">scripts/format.sh</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Format everything (common code + all namespace packages)</span>
+./scripts/format.sh
+
+<span class="c1"># Format Python code only</span>
+./scripts/format.sh<span class="w"> </span>--python
+
+<span class="c1"># Format C++/CUDA code only</span>
+./scripts/format.sh<span class="w"> </span>--cpp
+
+<span class="c1"># Format common code only (root files, docs, shared build_config)</span>
+./scripts/format.sh<span class="w"> </span>--common-only
+
+<span class="c1"># Format common code + all namespace packages</span>
+./scripts/format.sh<span class="w"> </span>--include-packages
+
+<span class="c1"># Format a specific namespace package</span>
+./scripts/format.sh<span class="w"> </span>--package<span class="w"> </span>&lt;package_name&gt;
+
+<span class="c1"># Examples:</span>
+./scripts/format.sh<span class="w"> </span>--package<span class="w"> </span>example_package
+./scripts/format.sh<span class="w"> </span>--package<span class="w"> </span>example_skbuild_package
+./scripts/format.sh<span class="w"> </span>--cpp<span class="w"> </span>--package<span class="w"> </span>batching_helpers
+./scripts/format.sh<span class="w"> </span>--python<span class="w"> </span>--common-only
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">scripts/format.sh</span></code> script provides:</p>
+<ul class="simple">
+<li><p><strong>Unified interface</strong>: Single script for all formatting operations</p></li>
+<li><p><strong>Flexible targeting</strong>: Format everything, common code only, specific packages, or language-specific</p></li>
+<li><p><strong>Automatic discovery</strong>: Finds all namespace packages automatically</p></li>
+<li><p><strong>Combined formatting</strong>: Handles both Python (<code class="docutils literal notranslate"><span class="pre">black</span></code>) and C++/CUDA (<code class="docutils literal notranslate"><span class="pre">clang-format</span></code>) formatting</p></li>
+<li><p><strong>Help system</strong>: Use <code class="docutils literal notranslate"><span class="pre">--help</span></code> for detailed usage information</p></li>
+</ul>
+</section>
+<section id="language-specific-options">
+<h3>Language-Specific Options<a class="headerlink" href="#language-specific-options" title="Link to this heading"></a></h3>
+<p>The main script supports language-specific formatting:</p>
+<section id="python-formatting-black">
+<h4>Python Formatting (Black)<a class="headerlink" href="#python-formatting-black" title="Link to this heading"></a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Format Python code only (common + all packages)</span>
+./scripts/format.sh<span class="w"> </span>--python
+
+<span class="c1"># Format Python code in common areas only</span>
+./scripts/format.sh<span class="w"> </span>--python<span class="w"> </span>--common-only
+
+<span class="c1"># Format Python code for specific namespace package</span>
+./scripts/format.sh<span class="w"> </span>--python<span class="w"> </span>--package<span class="w"> </span>&lt;package_name&gt;
+</pre></div>
+</div>
+</section>
+<section id="c-cuda-formatting-clang-format">
+<h4>C++/CUDA Formatting (clang-format)<a class="headerlink" href="#c-cuda-formatting-clang-format" title="Link to this heading"></a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Format C++ code only (all packages, since no common C++ exists)</span>
+./scripts/format.sh<span class="w"> </span>--cpp
+
+<span class="c1"># Format C++ code for specific namespace package</span>
+./scripts/format.sh<span class="w"> </span>--cpp<span class="w"> </span>--package<span class="w"> </span>&lt;package_name&gt;
+</pre></div>
+</div>
+</section>
+</section>
+<section id="advanced-usage">
+<h3>Advanced Usage<a class="headerlink" href="#advanced-usage" title="Link to this heading"></a></h3>
+<p>For more granular control, you can also use the individual formatting scripts directly:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Individual scripts (located in scripts/formatting/)</span>
+./scripts/formatting/black_format_package.sh<span class="w"> </span>--include-subpackages
+./scripts/formatting/black_format_subpackage.sh<span class="w"> </span>&lt;package_name&gt;
+./scripts/formatting/clang_format_package.sh<span class="w"> </span>--include-subpackages
+./scripts/formatting/clang_format_subpackage.sh<span class="w"> </span>&lt;package_name&gt;
+./scripts/formatting/format_subpackage.sh<span class="w"> </span>&lt;package_name&gt;
+</pre></div>
+</div>
+</section>
+<section id="external-implementation-support">
+<h3>External Implementation Support<a class="headerlink" href="#external-implementation-support" title="Link to this heading"></a></h3>
+<p>The formatting scripts automatically include external implementation files located in
+<code class="docutils literal notranslate"><span class="pre">packages/&lt;package&gt;/ext_impl/</span></code>. These directories contain namespace package-specific external implementations
+(e.g., custom CUDA kernels) and are formatted alongside the corresponding namespace package code:</p>
+<ul class="simple">
+<li><p>When formatting a specific namespace package, its external implementation in <code class="docutils literal notranslate"><span class="pre">packages/&lt;package&gt;/ext_impl/</span></code>
+is also formatted</p></li>
+<li><p>When using <code class="docutils literal notranslate"><span class="pre">--include-packages</span></code>, all external implementations are formatted along with their respective
+namespace packages</p></li>
+<li><p>Both C++/CUDA and Python files in external implementations are supported</p></li>
+</ul>
+</section>
+</section>
+<section id="style-configuration">
+<h2>Style Configuration<a class="headerlink" href="#style-configuration" title="Link to this heading"></a></h2>
+<p>The project uses custom style configurations for both Python and C++/CUDA formatters to maintain consistent
+code style across all namespace packages.</p>
+<section id="c-cuda-style-configuration-clang-format">
+<h3>C++/CUDA Style Configuration (clang-format)<a class="headerlink" href="#c-cuda-style-configuration-clang-format" title="Link to this heading"></a></h3>
+<p><strong>Location</strong>: <code class="docutils literal notranslate"><span class="pre">.clang-format</span></code> file in the project root</p>
+<p>The C++/CUDA formatting style is based on Google style with custom overrides for indentation, column limits,
+pointer alignment, and other formatting preferences.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>If the configuration needs to be adjusted for a specific directory, a <code class="docutils literal notranslate"><span class="pre">.clang_format</span></code> file can
+be placed there, and adjustments to the style made there will be applied to that directory (including
+sub-directories).</p>
+</div>
+</section>
+<section id="python-style-configuration-black">
+<h3>Python Style Configuration (Black)<a class="headerlink" href="#python-style-configuration-black" title="Link to this heading"></a></h3>
+<p><strong>Location</strong>: <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file in the project root</p>
+<p>The Python formatting style uses Black formatter with custom settings for line length, Python version targets,
+and exclusion patterns.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>The <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file at the project root is dedicated to defining the formatting style.
+Black detects the project root by looking for a <code class="docutils literal notranslate"><span class="pre">.git</span></code> directory, <code class="docutils literal notranslate"><span class="pre">.hg</span></code> directory, or a <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>
+file containing a <code class="docutils literal notranslate"><span class="pre">[tool.black]</span></code> section. It uses the configuration from the root <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file,
+even when formatting files in subdirectories. Individual namespace packages have their own <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>
+files for build configuration, but these do not contain <code class="docutils literal notranslate"><span class="pre">[tool.black]</span></code> sections. This ensures Black
+consistently uses the root configuration across all namespace packages, maintaining uniform formatting
+throughout the project.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>Unlike <code class="docutils literal notranslate"><span class="pre">clang-format</span></code>, the format is defined in the top-level <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> and cannot be
+adjusted in sub-directories (except for excluding them).</p>
+</div>
+</section>
+</section>
+<section id="preventing-list-collapse-with-trailing-commas">
+<h2>Preventing List Collapse with Trailing Commas<a class="headerlink" href="#preventing-list-collapse-with-trailing-commas" title="Link to this heading"></a></h2>
+<p>For multi-line lists, arrays, or similar structures, you can prevent them from being collapsed into a single
+line by adding a trailing comma after the last element. This is particularly useful when initializing
+multi-dimensional data structures such as tensors or arrays.</p>
+<p><strong>PyTorch tensor initialization:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># This will stay multi-line due to the trailing comma</span>
+<span class="n">tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span>
+    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span>
+<span class="p">])</span>
+
+<span class="c1"># Without trailing comma, this might be collapsed to a single line</span>
+<span class="n">tensor</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span>
+    <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span>
+    <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">]</span>  <span class="c1"># No trailing comma</span>
+<span class="p">])</span>
+</pre></div>
+</div>
+<p>This technique works with both <code class="docutils literal notranslate"><span class="pre">black</span></code> (Python) and <code class="docutils literal notranslate"><span class="pre">clang-format</span></code> (C++) formatters and is often preferable to
+completely disabling formatting for the entire block (see below).</p>
+</section>
+<section id="exceptions-disabling-formatting">
+<h2>Exceptions: Disabling Formatting<a class="headerlink" href="#exceptions-disabling-formatting" title="Link to this heading"></a></h2>
+<section id="disabling-for-code-snippets-inside-a-file">
+<h3>Disabling for Code Snippets Inside a File<a class="headerlink" href="#disabling-for-code-snippets-inside-a-file" title="Link to this heading"></a></h3>
+<p>In rare cases, automated formatting may result in code that is more difficult to read (for example for complex
+macros in C++). In such situations, you can disable formatting for specific code regions to preserve or
+improve readability. Use this sparingly, and only when automated formatting would significantly reduce code
+readability. Always prefer the project’s standard formatting unless there is a strong reason to opt out for a
+specific region.</p>
+<section id="c-cuda-clang-format">
+<h4>C++/CUDA (clang-format)<a class="headerlink" href="#c-cuda-clang-format" title="Link to this heading"></a></h4>
+<p>Wrap the code region you want to exclude from formatting with:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// clang-format off</span>
+<span class="p">...</span><span class="w"> </span><span class="n">your</span><span class="w"> </span><span class="n">code</span><span class="w"> </span><span class="p">...</span>
+<span class="c1">// clang-format on</span>
+</pre></div>
+</div>
+</section>
+<section id="python-black">
+<h4>Python (black)<a class="headerlink" href="#python-black" title="Link to this heading"></a></h4>
+<p>Wrap the code region you want to exclude from formatting with:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># fmt: off</span>
+<span class="o">...</span> <span class="n">your</span> <span class="n">code</span> <span class="o">...</span>
+<span class="c1"># fmt: on</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="disabling-for-whole-directories">
+<h3>Disabling for Whole Directories<a class="headerlink" href="#disabling-for-whole-directories" title="Link to this heading"></a></h3>
+<p>In rare cases, it may be advisable to disable the formatting for whole directories. This may e.g. be the
+case if the directory contains external code which should remain as-is. Note that in these cases, it
+may be advisable to obtain the external dependency as part of the setup instead of committing it as part of
+the repository.</p>
+<section id="id1">
+<h4>C++/CUDA (clang-format)<a class="headerlink" href="#id1" title="Link to this heading"></a></h4>
+<p>In the directory which should be ignored, add a <code class="docutils literal notranslate"><span class="pre">.clang-format</span></code> file with the content:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">DisableFormat</span><span class="p">:</span> <span class="n">true</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h4>Python (black)<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<p>To exclude directories from formatting using the Python <code class="docutils literal notranslate"><span class="pre">black</span></code> formatter, they need to be listed as to
+exclude in the root-level <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file. Please see the <code class="docutils literal notranslate"><span class="pre">extend-exclude</span></code> argument which is used in
+the <code class="docutils literal notranslate"><span class="pre">[tool.black]</span></code> TOML table.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="DEVELOPMENT_GUIDE.html" class="btn btn-neutral float-left" title="Development Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="DOCUMENTATION_SETUP_GUIDE.html" class="btn btn-neutral float-right" title="Sphinx Documentation Setup Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

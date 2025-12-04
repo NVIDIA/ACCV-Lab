@@ -1,0 +1,334 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.batching_helpers.batched_index_mapping_op &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.batching_helpers.batched_index_mapping_op</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.batching_helpers.batched_index_mapping_op</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.autograd.function</span><span class="w"> </span><span class="kn">import</span> <span class="n">once_differentiable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">accvlab.batching_helpers.batched_indexing_access_cuda</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">batched_indexing_access_cuda</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.data_format</span><span class="w"> </span><span class="kn">import</span> <span class="n">RaggedBatch</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">BatchedIndexMapping</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implementation of mapping values between two tensors using a mapping defined by pairs of indices as well as the corresponding backward operation.</span>
+
+<span class="sd">    Please see documentation of :func:`batched_index_mapping` for more details.</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">        This class is not intended to be used directly. It is an implementation detail of :func:`batched_index_mapping`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
+        <span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">input_data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">input_indices</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">output_indices</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">nums_indices</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">to_insert_into</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="n">input_data</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="n">input_indices</span> <span class="o">=</span> <span class="n">input_indices</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="n">output_indices</span> <span class="o">=</span> <span class="n">output_indices</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="n">nums_indices</span> <span class="o">=</span> <span class="n">nums_indices</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="n">to_insert_into</span> <span class="o">=</span> <span class="n">to_insert_into</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">batched_indexing_access_cuda</span><span class="o">.</span><span class="n">map_values_by_index_pairs</span><span class="p">(</span>
+            <span class="n">input_data</span><span class="p">,</span> <span class="n">input_indices</span><span class="p">,</span> <span class="n">output_indices</span><span class="p">,</span> <span class="n">nums_indices</span><span class="p">,</span> <span class="n">to_insert_into</span><span class="p">,</span> <span class="n">backward_accumulate</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">input_indices</span><span class="p">,</span> <span class="n">output_indices</span><span class="p">,</span> <span class="n">nums_indices</span><span class="p">)</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">num_batch_dims</span> <span class="o">=</span> <span class="n">nums_indices</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">input_max_sample_size</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">ctx</span><span class="o">.</span><span class="n">num_batch_dims</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="nd">@once_differentiable</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">grad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="kc">None</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">grad</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">forward_input_indices</span><span class="p">,</span> <span class="n">forward_output_indices</span><span class="p">,</span> <span class="n">nums_indices</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
+            <span class="c1"># The shape for `grad_input` corresponds to the shape of `grad` except for `dim==1`,</span>
+            <span class="c1"># where the size may be different. The size in this dim is known from the forward step.</span>
+            <span class="n">shape_to_set</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">grad</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">shape_to_set</span><span class="p">[</span><span class="n">ctx</span><span class="o">.</span><span class="n">num_batch_dims</span><span class="p">]</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">input_max_sample_size</span>
+
+            <span class="n">grad</span> <span class="o">=</span> <span class="n">grad</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+
+            <span class="n">grad_input</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="n">shape_to_set</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">grad</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">grad</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">requires_grad</span><span class="o">=</span><span class="n">grad</span><span class="o">.</span><span class="n">requires_grad</span>
+            <span class="p">)</span>
+            <span class="n">grad_input</span> <span class="o">=</span> <span class="n">batched_indexing_access_cuda</span><span class="o">.</span><span class="n">map_values_by_index_pairs</span><span class="p">(</span>
+                <span class="n">grad</span><span class="p">,</span>
+                <span class="n">forward_output_indices</span><span class="p">,</span>
+                <span class="n">forward_input_indices</span><span class="p">,</span>
+                <span class="n">nums_indices</span><span class="p">,</span>
+                <span class="n">grad_input</span><span class="p">,</span>
+                <span class="n">backward_accumulate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">grad_to_insert_into</span> <span class="o">=</span> <span class="n">batched_indexing_access_cuda</span><span class="o">.</span><span class="n">backward_insert_const</span><span class="p">(</span>
+                <span class="mf">0.0</span><span class="p">,</span> <span class="n">forward_output_indices</span><span class="p">,</span> <span class="n">nums_indices</span><span class="p">,</span> <span class="n">grad</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">grad_input</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">grad_to_insert_into</span>
+
+
+<div class="viewcode-block" id="batched_index_mapping">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/batching_helpers/docs/api.html#accvlab.batching_helpers.batched_index_mapping">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">batched_index_mapping</span><span class="p">(</span>
+    <span class="n">source_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">],</span>
+    <span class="n">source_indices</span><span class="p">:</span> <span class="n">RaggedBatch</span><span class="p">,</span>
+    <span class="n">target_indices</span><span class="p">:</span> <span class="n">RaggedBatch</span><span class="p">,</span>
+    <span class="n">target_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Map values between ``source_data`` and ``target_data`` using a mapping defined by pairs of indices for elements</span>
+<span class="sd">    in ``source_data`` and ``target_data``, and set the corresponding values in ``target_data``.</span>
+
+<span class="sd">    :gpu:</span>
+
+<span class="sd">    For a sample ``i`` and a valid index pair ``j`` (valid means ``target_indices.sample_sizes[i] &gt; j`` and</span>
+<span class="sd">    ``source_indices.sample_sizes[i] &gt; j``), the operation can be expressed as (assuming non-uniform dimension</span>
+<span class="sd">    ``dim == 1`` for both ``source_data`` and ``target_data``):</span>
+
+<span class="sd">        ``target_data[i, target_indices[i, j]] = source_data[i, source_indices[i, j]]``</span>
+
+<span class="sd">    This function sets the values in `target_data` in a way which corresponds to the line above</span>
+<span class="sd">    for all valid matches in all samples.</span>
+
+<span class="sd">    Warning:</span>
+
+<span class="sd">        It is expected that for each sample, the number of valid indices for the source and target matches,</span>
+<span class="sd">        i.e. ``target_indices.sample_sizes == source_indices.sample_sizes``.</span>
+
+<span class="sd">        If this is not the case, the behavior is undefined.</span>
+
+<span class="sd">    Warning:</span>
+
+<span class="sd">        This function assumes that for each sample, there are no duplicate indices in</span>
+<span class="sd">        ``target_indices``, i.e. there are no duplicates in the valid entries in:</span>
+<span class="sd">        ``target_indices[i, 0:target_indices.sample_sizes[i]]``.</span>
+
+<span class="sd">        If this is not the case, the behavior is undefined.</span>
+
+<span class="sd">        There are no such restrictions on `source_indices`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        source_data: Input data.</span>
+
+<span class="sd">            Shape in case of a tensor:</span>
+<span class="sd">                (batch_size, num_entries_input, ...)</span>
+
+<span class="sd">            In case of a RaggedBatch, the following holds:</span>
+
+<span class="sd">                - ``target_data.shape[0] == batch_size``</span>
+<span class="sd">                - ``target_data.shape[target_data.non_uniform_dim] == num_entries_input``</span>
+
+<span class="sd">            The number of dimensions needs to correspond to ``target_data``, and the shape needs</span>
+<span class="sd">            to be the same except in the non-uniform dimension (``dim == 1`` for tensors), as in</span>
+<span class="sd">            this dimension, the matching is done using the index pairs.</span>
+
+<span class="sd">        source_indices: Indices at which to get the input data. Shape: (batch_size, max_num_matches).</span>
+<span class="sd">            Note that the batch size and sample sizes need to match ``target_indices``, i.e.</span>
+<span class="sd">            ``target_indices.sample_sizes == source_indices.sample_sizes`` and ``max_num_matches``</span>
+<span class="sd">            corresponds to the maximum matches among all samples.</span>
+
+<span class="sd">        target_indices: Indices at which to fill the data. Shape: (batch_size, max_num_matches)</span>
+<span class="sd">            Note that ``max_num_matches`` corresponds to the maximum matches among all samples.</span>
+
+<span class="sd">        target_data: Data to fill the values into.</span>
+
+<span class="sd">            Shape in case of a tensor: (batch_size, num_entries_output, ...)</span>
+
+<span class="sd">            In case of a RaggedBatch, the following holds:</span>
+<span class="sd">                - ``target_data.shape[0] == batch_size``</span>
+<span class="sd">                - ``target_data.shape[target_data.non_uniform_dim] == num_entries_output``</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">            As ``target_data``, with the values from ``source_data`` inserted according to the pairs of</span>
+<span class="sd">            corresponding indices in ``source_indices`` and ``target_indices``.</span>
+
+<span class="sd">            Shape in case of a tensor:</span>
+
+<span class="sd">                ``(batch_size, num_entries_output, ...)``</span>
+
+<span class="sd">            In case of a RaggedBatch, the following holds:</span>
+
+<span class="sd">                - ``target_data_filled.shape[0] == batch_size``</span>
+<span class="sd">                - ``target_data_filled.shape[target_data_filled.non_uniform_dim] == num_entries_output``</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">        - &#39;-&#39; indicates values in the input which are not used in the mapping</span>
+<span class="sd">        - &#39;*&#39; indicates filler values in `source_indices` and `target_indices`, which are ignored.</span>
+<span class="sd">        - &#39;..&#39; indicates data which remains unchanged, i.e. is the same as in the `target_data` parameter</span>
+<span class="sd">          and the output.</span>
+
+<span class="sd">        Each depicted element in `source_data` and `target_data` may represent a single value</span>
+<span class="sd">        (in case of 2D tensors), or itself be a non-scalar entry (in case that the data has more than 2 dimensions).</span>
+
+<span class="sd">        .. image:: images/Mapping_ragged.png</span>
+<span class="sd">            :alt: Illustration of the mapping operation</span>
+<span class="sd">            :align: center</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">num_batch_dims</span> <span class="o">=</span> <span class="n">target_indices</span><span class="o">.</span><span class="n">non_uniform_dim</span>
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="n">target_indices</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">==</span> <span class="n">num_batch_dims</span> <span class="o">+</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">source_indices</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">==</span> <span class="n">num_batch_dims</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="p">),</span> <span class="s2">&quot;Indices must have exactly one dimension in addition to the batch dimensions&quot;</span>
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="n">target_indices</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="n">num_batch_dims</span><span class="p">]</span> <span class="o">==</span> <span class="n">source_indices</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="n">num_batch_dims</span><span class="p">]</span>
+    <span class="p">),</span> <span class="s2">&quot;Batch shape mismatch&quot;</span>
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="n">target_indices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">num_batch_dims</span><span class="p">]</span> <span class="o">==</span> <span class="n">source_indices</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">num_batch_dims</span><span class="p">]</span>
+    <span class="p">),</span> <span class="s2">&quot;Maximum number of indices mismatch&quot;</span>
+
+    <span class="n">is_target_data_ragged_batch</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_data</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">)</span>
+    <span class="n">is_source_data_ragged_batch</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_data</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_target_data_ragged_batch</span><span class="p">:</span>
+        <span class="n">target_data_non_uniform_dim</span> <span class="o">=</span> <span class="n">target_data</span><span class="o">.</span><span class="n">non_uniform_dim</span>
+        <span class="n">target_data</span> <span class="o">=</span> <span class="n">target_data</span><span class="o">.</span><span class="n">get_non_uniform_dimension_transposed_to</span><span class="p">(</span><span class="n">num_batch_dims</span><span class="p">)</span>
+        <span class="n">target_data_tensor</span> <span class="o">=</span> <span class="n">target_data</span><span class="o">.</span><span class="n">tensor</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">target_data_non_uniform_dim</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">target_data_tensor</span> <span class="o">=</span> <span class="n">target_data</span>
+    <span class="k">if</span> <span class="n">is_source_data_ragged_batch</span><span class="p">:</span>
+        <span class="n">source_data</span> <span class="o">=</span> <span class="n">source_data</span><span class="o">.</span><span class="n">get_non_uniform_dimension_transposed_to</span><span class="p">(</span><span class="n">num_batch_dims</span><span class="p">)</span>
+        <span class="n">source_data</span> <span class="o">=</span> <span class="n">source_data</span><span class="o">.</span><span class="n">tensor</span>
+
+    <span class="c1"># TODO: add check for consistent sample sizes (debug mode?)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">BatchedIndexMapping</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="n">source_data</span><span class="p">,</span>
+        <span class="n">source_indices</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span>
+        <span class="n">target_indices</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span>
+        <span class="n">source_indices</span><span class="o">.</span><span class="n">sample_sizes</span><span class="p">,</span>
+        <span class="n">target_data_tensor</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_target_data_ragged_batch</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">target_data</span><span class="o">.</span><span class="n">create_with_sample_sizes_like_self</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">num_batch_dims</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">get_non_uniform_dimension_transposed_to</span><span class="p">(</span><span class="n">target_data_non_uniform_dim</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">target_data_non_uniform_dim</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">target_data_non_uniform_dim</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">res</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

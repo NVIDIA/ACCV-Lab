@@ -1,0 +1,176 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.batching_helpers.batched_mask_from_indices &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.batching_helpers.batched_mask_from_indices</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.batching_helpers.batched_mask_from_indices</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">accvlab.batching_helpers.batched_processing_py</span><span class="w"> </span><span class="kn">import</span> <span class="n">RaggedBatch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">accvlab.batching_helpers.batched_indexing_access_cuda</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">batched_indexing_access_cuda</span>
+
+
+<div class="viewcode-block" id="get_mask_from_indices">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/batching_helpers/docs/api.html#accvlab.batching_helpers.get_mask_from_indices">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_mask_from_indices</span><span class="p">(</span><span class="n">mask_num_targets</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">indices</span><span class="p">:</span> <span class="n">RaggedBatch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a mask from indices, where the indices indicate which elements in the mask should be ``True``.</span>
+
+<span class="sd">    :gpu:</span>
+
+<span class="sd">    The indices for each sample define the ``True`` values in the mask for that sample</span>
+<span class="sd">    (i.e. the corresponding row in the mask).</span>
+
+<span class="sd">    For each sample ``i``, the operation performed by this function is equivalent to:</span>
+<span class="sd">        ``mask[i, indices.tensor[i, :indices.sample_sizes[i]]] = True``</span>
+
+<span class="sd">    Please also see the documentation of :class:`RaggedBatch` for more details on the format of the indices,</span>
+<span class="sd">    including the ``tensor`` and ``sample_sizes`` attributes.</span>
+
+<span class="sd">    Note:</span>
+
+<span class="sd">        This function is not the inverse of :func:`get_indices_from_mask`, as the index order is not</span>
+<span class="sd">        preserved when converting from indices to a mask.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mask_num_targets: The number of targets in the mask, i.e. the ``mask.shape[1]`` to use</span>
+<span class="sd">        indices: For each sample (element along the batch dimension), the indices of elements to set to ``True``.</span>
+<span class="sd">            Shape: (batch_size, max_num_indices)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Resulting mask. Shape: (batch_size, ``num_targets_in_mask``)</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">        In the illustration below, &#39;*&#39; indicates invalid indices, i.e. padding to make the tensor uniform for</span>
+<span class="sd">        samples where the number of indices is smaller than ``max_num_indices``. Note that the index order</span>
+<span class="sd">        does not matter for the resulting mask.</span>
+
+<span class="sd">        .. image:: images/MaskFromIndices_ragged.png</span>
+<span class="sd">            :alt: Illustration of the mask from indices operation</span>
+<span class="sd">            :align: center</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">indices</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+    <span class="n">sample_sizes</span> <span class="o">=</span> <span class="n">indices</span><span class="o">.</span><span class="n">sample_sizes</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">batched_indexing_access_cuda</span><span class="o">.</span><span class="n">get_mask_from_indices</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">sample_sizes</span><span class="p">,</span> <span class="n">mask_num_targets</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

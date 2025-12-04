@@ -1,0 +1,419 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.python_operator_functions &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.python_operator_functions</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.python_operator_functions</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cupy</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">nvidia.dali.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">do_not_convert</span>
+
+
+<div class="viewcode-block" id="apply_transform_to_points">
+<a class="viewcode-back" href="../../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/operators_impl.html#accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.apply_transform_to_points">[docs]</a>
+<span class="nd">@do_not_convert</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_transform_to_points</span><span class="p">(</span><span class="n">points</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">transform</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Apply an affine transformation to a set of points.</span>
+
+<span class="sd">    Note that the transformation is applied in homogeneous coordinates.</span>
+<span class="sd">    This is handled by the function and the input points are not expected to be in</span>
+<span class="sd">    homogeneous coordinates. Similarly, the output points are not in homogeneous coordinates.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        This function can handle concatenated points, i.e. multiple points per row, i.e.</span>
+<span class="sd">        ``[x1, y1, x2, y2, ...]``.</span>
+
+<span class="sd">    See also:</span>
+<span class="sd">        A similar function is available in the :mod:`accvlab.dali_pipeline_framework.operators_impl.numba_operators`</span>
+<span class="sd">        module. That function is faster and supports different variations of matrix multiplication (e.g.</span>
+<span class="sd">        including use of transposed input and matrices, use of the inverse matrix, etc.),</span>
+<span class="sd">        but it does not support concatenated points.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        points: A 2D array of shape ``(N, 2 * num_points_per_row)`` containing the coordinates</span>
+<span class="sd">            of the points.</span>
+<span class="sd">        transform: A 2D array of shape ``(3, 3)`` containing the affine transformation matrix.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        A 2D array of shape ``(N, 2 * num_points_per_row)`` containing the coordinates of the transformed</span>
+<span class="sd">        points.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">points</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="n">xp</span> <span class="o">=</span> <span class="n">cupy</span><span class="o">.</span><span class="n">get_array_module</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">transform</span><span class="p">)</span>
+
+    <span class="n">row_length</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">num_points_per_row</span> <span class="o">=</span> <span class="n">row_length</span> <span class="o">//</span> <span class="mi">2</span>
+
+    <span class="k">if</span> <span class="n">num_points_per_row</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="n">row_length</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;apply_transform_to_points(): One matrix row has to contain one or more points, and therefore to be divisible by 2. Got a row length of </span><span class="si">{</span><span class="n">row_length</span><span class="si">}</span><span class="s2"> instead.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_points_per_row</span><span class="p">):</span>
+        <span class="n">idx_min</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="n">idx_max</span> <span class="o">=</span> <span class="n">idx_min</span> <span class="o">+</span> <span class="mi">2</span>
+        <span class="n">points_in</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">points</span><span class="p">[:,</span> <span class="n">idx_min</span><span class="p">:</span><span class="n">idx_max</span><span class="p">])</span>
+        <span class="n">points_in_homog</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">points_in</span><span class="p">,</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="n">constant_values</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">points_out</span> <span class="o">=</span> <span class="n">transform</span> <span class="o">@</span> <span class="n">points_in_homog</span>
+        <span class="n">res</span><span class="p">[:,</span> <span class="n">idx_min</span><span class="p">:</span><span class="n">idx_max</span><span class="p">]</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">points_out</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+
+<div class="viewcode-block" id="add_post_transform_to_projection_matrix">
+<a class="viewcode-back" href="../../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/operators_impl.html#accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.add_post_transform_to_projection_matrix">[docs]</a>
+<span class="nd">@do_not_convert</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_post_transform_to_projection_matrix</span><span class="p">(</span><span class="n">proj_mat</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">transform</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Add a post-transform to a projection matrix.</span>
+
+<span class="sd">    This can e.g. be used to include 2D transformations of the image to a projection matrix, e.g.</span>
+<span class="sd">    when performing augmentations on the image.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        In case of a decomposed projection matrix (i.e. an intrinsic camera matrix and a extrinsic camera</span>
+<span class="sd">        pose matrix), the post-transform should be only applied to the intrinsic camera matrix.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        proj_mat: A 2D array of shape (3, 4) containing the projection matrix.</span>
+<span class="sd">        transform: A 2D array of shape (3, 3) containing the affine transformation matrix.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        A 2D array of shape (3, 4) containing the projection matrix with the post-transform applied.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">xp</span> <span class="o">=</span> <span class="n">cupy</span><span class="o">.</span><span class="n">get_array_module</span><span class="p">(</span><span class="n">proj_mat</span><span class="p">,</span> <span class="n">transform</span><span class="p">)</span>
+    <span class="n">to_concat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">transform</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">transform_full</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">transform</span><span class="p">,</span> <span class="n">to_concat</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">transform_full</span> <span class="o">@</span> <span class="n">proj_mat</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+
+<div class="viewcode-block" id="apply_clipping_and_get_with_clipping_info">
+<a class="viewcode-back" href="../../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/operators_impl.html#accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.apply_clipping_and_get_with_clipping_info">[docs]</a>
+<span class="nd">@do_not_convert</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_clipping_and_get_with_clipping_info</span><span class="p">(</span>
+    <span class="n">rects</span><span class="p">,</span> <span class="n">centers</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">scaling_trafo</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">image_hw</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Apply clipping to a set of rectangles and get the size, area fraction and center of the clipped rectangles.</span>
+
+<span class="sd">    Note that a scaling transformation can be defined and will be applied before the clipping. This</span>
+<span class="sd">    is e.g. useful when the bounding boxes are defined for the original image size, but need to be used</span>
+<span class="sd">    for a down-sampled image (e.g. a heatmap as used for object detection).</span>
+
+<span class="sd">    The scaling transformation is defined as a 3x3 matrix in homogeneous coordinates, and is applied to the</span>
+<span class="sd">    rectangles before the clipping.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        Note that while any affine transformation can be input to this function, the function assumes</span>
+<span class="sd">        that the input rectangles are defined by their upper left and lower right corners as provided in the input</span>
+<span class="sd">        and transformed by the scaling transformation. Some transformations (e.g. rotations) may not preserve</span>
+<span class="sd">        this property, resulting in incorrect rectangles in the output.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        rects: A 2D array of shape (N, 4) containing the coordinates of the rectangles.</span>
+<span class="sd">        centers: A 2D array of shape (N, 2) containing the centers of the rectangles.</span>
+<span class="sd">        scaling_trafo: A 2D array of shape (3, 3) containing the affine transformation matrix.</span>
+<span class="sd">        image_hw: A tuple of two integers containing the height and width of the image.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        A tuple containing:</span>
+<span class="sd">            - A 2D array of shape (N, 4) containing the coordinates of the clipped rectangles.</span>
+<span class="sd">            - A 2D array of shape (N, 2) containing the height and width of the clipped rectangles.</span>
+<span class="sd">            - A 2D array of shape (N, 1) containing the area fraction of the clipped rectangles</span>
+<span class="sd">              (compared to the full, non-clipped area).</span>
+<span class="sd">            - A 2D array of shape (N, 2) containing the centers of the clipped rectangles.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">xp</span> <span class="o">=</span> <span class="n">cupy</span><span class="o">.</span><span class="n">get_array_module</span><span class="p">(</span><span class="n">rects</span><span class="p">,</span> <span class="n">image_hw</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_homog</span><span class="p">(</span><span class="n">points</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="n">constant_values</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="n">points_1</span> <span class="o">=</span> <span class="n">make_homog</span><span class="p">(</span><span class="n">rects</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+    <span class="n">points_2</span> <span class="o">=</span> <span class="n">make_homog</span><span class="p">(</span><span class="n">rects</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+
+    <span class="n">points_1_transformed</span> <span class="o">=</span> <span class="n">scaling_trafo</span> <span class="o">@</span> <span class="n">points_1</span>
+    <span class="n">points_2_transformed</span> <span class="o">=</span> <span class="n">scaling_trafo</span> <span class="o">@</span> <span class="n">points_2</span>
+
+    <span class="n">rects_scaled</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">points_1_transformed</span><span class="p">,</span> <span class="n">points_2_transformed</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+
+    <span class="n">rects_clipped</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">rects</span><span class="p">)</span>
+    <span class="n">rects_clipped</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">rects_scaled</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">image_hw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">rects_clipped</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">rects_scaled</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">image_hw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">rects_clipped</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">rects_scaled</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">image_hw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">rects_clipped</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">rects_scaled</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">image_hw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">h_clipped</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">rects_clipped</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">rects_clipped</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">w_clipped</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">rects_clipped</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">rects_clipped</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">h_orig</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">rects_scaled</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">rects_scaled</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">w_orig</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">rects_scaled</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">rects_scaled</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">hw_clipped</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">h_clipped</span><span class="p">,</span> <span class="n">w_clipped</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">area_no_clip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">h_orig</span><span class="p">,</span> <span class="n">w_orig</span><span class="p">)</span>
+    <span class="n">area_clip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">h_clipped</span><span class="p">,</span> <span class="n">w_clipped</span><span class="p">)</span>
+
+    <span class="n">fraction_area</span> <span class="o">=</span> <span class="n">area_clip</span> <span class="o">/</span> <span class="n">area_no_clip</span>
+
+    <span class="n">centers_homog</span> <span class="o">=</span> <span class="n">make_homog</span><span class="p">(</span><span class="n">centers</span><span class="o">.</span><span class="n">transpose</span><span class="p">())</span>
+    <span class="n">centers_homog_transformed</span> <span class="o">=</span> <span class="n">scaling_trafo</span> <span class="o">@</span> <span class="n">centers_homog</span>
+    <span class="n">centers_clipped_x</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">centers_homog_transformed</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">image_hw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">centers_clipped_y</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">centers_homog_transformed</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">image_hw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">centers_clipped</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">centers_clipped_x</span><span class="p">,</span> <span class="n">centers_clipped_y</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">rects_clipped</span><span class="p">,</span> <span class="n">centers_clipped</span><span class="p">,</span> <span class="n">hw_clipped</span><span class="p">,</span> <span class="n">fraction_area</span></div>
+
+
+
+<div class="viewcode-block" id="get_is_active">
+<a class="viewcode-back" href="../../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/operators_impl.html#accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.get_is_active">[docs]</a>
+<span class="nd">@do_not_convert</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_is_active</span><span class="p">(</span>
+    <span class="n">hw</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">classes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">fraction_areas</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">min_object_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">per_class_min_object_sizes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">num_classes</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">min_fraction_area_thresh</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Get the indices of the active detections.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        This function supports using or not using class labels. If class labels are used,</span>
+<span class="sd">        per-class size thresholds can be provided. Note that this means that some of the inputs</span>
+<span class="sd">        can be None (in case they are not used). When used in a DALI</span>
+<span class="sd">        python operator, ``None`` cannot be directly passed. Therefore, unused inputs need to</span>
+<span class="sd">        be removed from the function signature. This can be achieved by wrapping this function in a lambda</span>
+<span class="sd">        function, and expose only the used inputs to the caller, while setting the unused inputs to ``None``</span>
+<span class="sd">        inside the lambda function.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        hw: A 2D array of shape (N, 2) containing the height and width of the detections.</span>
+<span class="sd">        classes: A 1D array of shape (N,) containing the classes of the detections.</span>
+<span class="sd">        fraction_areas: A 1D array of shape (N,) containing the area fraction of the detections.</span>
+<span class="sd">        min_object_size: A 1D array of shape (2,) containing the minimum object size thresholds.</span>
+<span class="sd">            Must be set to ``None`` if ``per_class_min_object_sizes`` is not ``None``. If both are ``None``,</span>
+<span class="sd">            no checks for minimum object size are performed.</span>
+<span class="sd">        per_class_min_object_sizes: A 2D array of shape (num_classes, 2) containing the minimum object size</span>
+<span class="sd">            thresholds per class. Must be set to ``None`` if ``min_object_size`` is not ``None``. If both</span>
+<span class="sd">            are ``None``, no checks for minimum object size are performed.</span>
+<span class="sd">        num_classes: An integer containing the number of classes.</span>
+<span class="sd">            If ``classes`` is ``None``, this is ignored.</span>
+<span class="sd">        min_fraction_area_thresh: A float containing the minimum fraction of the area of the detection that</span>
+<span class="sd">            needs to be present in the image.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        A 1D array of shape (N,) containing the indices of the active detections.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">classes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">xp</span> <span class="o">=</span> <span class="n">cupy</span><span class="o">.</span><span class="n">get_array_module</span><span class="p">(</span><span class="n">hw</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">fraction_areas</span><span class="p">)</span>
+        <span class="n">active_classes</span> <span class="o">=</span> <span class="n">classes</span> <span class="o">&lt;</span> <span class="n">num_classes</span>
+        <span class="n">classes_for_checking</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">classes</span><span class="p">)</span>
+        <span class="c1"># Set the elements with class IDs &gt;= num_classes (i.e. unconsidered classes) to some class &lt; num_classes.</span>
+        <span class="c1"># These elements are already not active anyway, but the classes_for_checking array is used as indices in &#39;per_class_ignore_object_sizes&#39;.</span>
+        <span class="c1"># As using unconsidered classes would lead to out-of-bounds errors, set to some considered class ID (which 0 always is). As the elements with</span>
+        <span class="c1"># uncosidered classes are already marked as inactive, the results of the following operations do not matter for these elements.</span>
+        <span class="n">classes_for_checking</span><span class="p">[</span><span class="n">xp</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">active_classes</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">per_class_min_object_sizes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">active_size_clipped</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+                <span class="n">hw</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">per_class_min_object_sizes</span><span class="p">[</span><span class="n">classes_for_checking</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                <span class="n">hw</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">per_class_min_object_sizes</span><span class="p">[</span><span class="n">classes_for_checking</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">min_object_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">active_size_clipped</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+                <span class="n">hw</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_object_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">hw</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_object_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">active_size_clipped</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">hw</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xp</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">xp</span> <span class="o">=</span> <span class="n">cupy</span><span class="o">.</span><span class="n">get_array_module</span><span class="p">(</span><span class="n">hw</span><span class="p">,</span> <span class="n">fraction_areas</span><span class="p">)</span>
+        <span class="c1"># No category information: accept all classes</span>
+        <span class="n">active_classes</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">hw</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xp</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">min_object_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">active_size_clipped</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+                <span class="n">hw</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_object_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">hw</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">min_object_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">active_size_clipped</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">hw</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">xp</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+
+    <span class="n">active_area_fraction</span> <span class="o">=</span> <span class="n">fraction_areas</span> <span class="o">&gt;=</span> <span class="n">min_fraction_area_thresh</span>
+
+    <span class="n">active</span> <span class="o">=</span> <span class="n">xp</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">active_classes</span><span class="p">,</span> <span class="n">xp</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">active_size_clipped</span><span class="p">,</span> <span class="n">active_area_fraction</span><span class="p">))</span>
+    <span class="n">active</span> <span class="o">=</span> <span class="n">active</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">xp</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">active</span></div>
+
+
+
+<div class="viewcode-block" id="pad_to_common_size">
+<a class="viewcode-back" href="../../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/operators_impl.html#accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.pad_to_common_size">[docs]</a>
+<span class="nd">@do_not_convert</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pad_to_common_size</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">,</span> <span class="n">fill_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Pad a set of inputs to the common size.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        inputs: A tuple of input arrays.</span>
+<span class="sd">        fill_value: A float containing the value to fill the padded areas with.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        A tuple of padded arrays.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">num_dims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">input_shapes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">inp</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">inputs</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">max_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">input_shapes</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">padded</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span>
+                <span class="n">inp</span><span class="p">,</span>
+                <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_shape</span><span class="p">[</span><span class="n">d</span><span class="p">]</span> <span class="o">-</span> <span class="n">inp</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">d</span><span class="p">])</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_dims</span><span class="p">)],</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;constant&#39;</span><span class="p">,</span>
+                <span class="n">constant_values</span><span class="o">=</span><span class="n">fill_value</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">inputs</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">padded</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">res_a</span><span class="p">,</span> <span class="n">res_b</span><span class="p">,</span> <span class="n">res_c</span> <span class="o">=</span> <span class="n">pad_to_common_size</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">res_a</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">res_b</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">res_c</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

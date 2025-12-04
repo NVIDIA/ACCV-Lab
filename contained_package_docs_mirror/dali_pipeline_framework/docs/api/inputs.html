@@ -1,0 +1,802 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inputs Submodule &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Pipeline Submodule" href="pipeline.html" />
+    <link rel="prev" title="Main API Reference" href="main_api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">DALI Pipeline Framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../design.html">Introduction</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="main_api.html">Main API Reference</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Inputs Submodule</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.CallableBase"><code class="docutils literal notranslate"><span class="pre">CallableBase</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.CallableBase.used_sample_data_structure"><code class="docutils literal notranslate"><span class="pre">CallableBase.used_sample_data_structure</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.CallableBase.__call__"><code class="docutils literal notranslate"><span class="pre">CallableBase.__call__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.CallableBase.length"><code class="docutils literal notranslate"><span class="pre">CallableBase.length</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.DataProvider"><code class="docutils literal notranslate"><span class="pre">DataProvider</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.DataProvider.get_data"><code class="docutils literal notranslate"><span class="pre">DataProvider.get_data()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.DataProvider.get_number_of_samples"><code class="docutils literal notranslate"><span class="pre">DataProvider.get_number_of_samples()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.DataProvider.sample_data_structure"><code class="docutils literal notranslate"><span class="pre">DataProvider.sample_data_structure</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.IterableBase"><code class="docutils literal notranslate"><span class="pre">IterableBase</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.IterableBase.used_sample_data_structure"><code class="docutils literal notranslate"><span class="pre">IterableBase.used_sample_data_structure</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.IterableBase.__iter__"><code class="docutils literal notranslate"><span class="pre">IterableBase.__iter__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.IterableBase.__next__"><code class="docutils literal notranslate"><span class="pre">IterableBase.__next__()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.IterableBase.length"><code class="docutils literal notranslate"><span class="pre">IterableBase.length</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase"><code class="docutils literal notranslate"><span class="pre">SamplerBase</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase.get_next_batch_indices"><code class="docutils literal notranslate"><span class="pre">SamplerBase.get_next_batch_indices()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase.is_epoch_based"><code class="docutils literal notranslate"><span class="pre">SamplerBase.is_epoch_based</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase.reset"><code class="docutils literal notranslate"><span class="pre">SamplerBase.reset()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase.length"><code class="docutils literal notranslate"><span class="pre">SamplerBase.length</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputCallable"><code class="docutils literal notranslate"><span class="pre">SamplerInputCallable</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputCallable.used_sample_data_structure"><code class="docutils literal notranslate"><span class="pre">SamplerInputCallable.used_sample_data_structure</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputCallable.length"><code class="docutils literal notranslate"><span class="pre">SamplerInputCallable.length</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputIterable"><code class="docutils literal notranslate"><span class="pre">SamplerInputIterable</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputIterable.used_sample_data_structure"><code class="docutils literal notranslate"><span class="pre">SamplerInputIterable.used_sample_data_structure</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputIterable.length"><code class="docutils literal notranslate"><span class="pre">SamplerInputIterable.length</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SequenceSampler"><code class="docutils literal notranslate"><span class="pre">SequenceSampler</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SequenceSampler.length"><code class="docutils literal notranslate"><span class="pre">SequenceSampler.length</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SequenceSampler.get_next_batch_indices"><code class="docutils literal notranslate"><span class="pre">SequenceSampler.get_next_batch_indices()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SequenceSampler.is_epoch_based"><code class="docutils literal notranslate"><span class="pre">SequenceSampler.is_epoch_based</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SequenceSampler.reset"><code class="docutils literal notranslate"><span class="pre">SequenceSampler.reset()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable"><code class="docutils literal notranslate"><span class="pre">ShuffledShardedInputCallable</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable.used_sample_data_structure"><code class="docutils literal notranslate"><span class="pre">ShuffledShardedInputCallable.used_sample_data_structure</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable.length"><code class="docutils literal notranslate"><span class="pre">ShuffledShardedInputCallable.length</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pipeline.html">Pipeline Submodule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="processing_steps.html">Processing Steps Submodule</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="additional_api.html">Additional API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">DALI Pipeline Framework</a></li>
+          <li class="breadcrumb-item"><a href="main_api.html">Main API Reference</a></li>
+      <li class="breadcrumb-item active">Inputs Submodule</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/contained_package_docs_mirror/dali_pipeline_framework/docs/api/inputs.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-accvlab.dali_pipeline_framework.inputs">
+<span id="inputs-submodule"></span><h1>Inputs Submodule<a class="headerlink" href="#module-accvlab.dali_pipeline_framework.inputs" title="Link to this heading"></a></h1>
+<p>This module contains classes for handling the input data to the DALI pipeline.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.CallableBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.inputs.</span></span><span class="sig-name descname"><span class="pre">CallableBase</span></span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/inputs/callable_base.html#CallableBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.CallableBase" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Abstract base class for a callable class which can be used in the pipeline.</p>
+<p>Note that callables deriving from <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.CallableBase" title="accvlab.dali_pipeline_framework.inputs.CallableBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">CallableBase</span></code></a> are expected to run with the DALI external source
+not in batch mode, i.e. return one sample at a time. This improves the distribution of the work onto the
+individual worker processes of the external source.</p>
+<p>Also see [1], and more specifically [2], for how an input callable class is used to load the input data
+into a DALI pipeline. The <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.CallableBase.__call__" title="accvlab.dali_pipeline_framework.inputs.CallableBase.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__call__()</span></code></a> operator is the interface that the DALI external source
+expects.</p>
+<p>Using a callable with the DALI parallel external source is more efficient than using an input iterable
+due to the possibility of distribution the work onto multiple workers instead of only running it async
+to the main thread, but still sequentially in a single worker.</p>
+<p>Note that an input callable must be stateless (see warning in [3]), which may make certain advanced
+sampling patterns more challenging to implement compared to an input iterable.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.CallableBase.used_sample_data_structure" title="accvlab.dali_pipeline_framework.inputs.CallableBase.used_sample_data_structure"><code class="xref py py-attr docutils literal notranslate"><span class="pre">used_sample_data_structure</span></code></a> property is used by our pipeline to obtain the data format
+blueprint used for the input. Note that the actual output of a callable is the flattened data
+from this format (see <code class="xref py py-meth docutils literal notranslate"><span class="pre">SampleDataGroup.get_data()</span></code>), and the returned blueprint can be used
+to fill the data back into its structured form (see <code class="xref py py-meth docutils literal notranslate"><span class="pre">SampleDataGroup.set_data()</span></code>).</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Note that ready-to use callable classes (<a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable" title="accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShuffledShardedInputCallable</span></code></a>,
+<a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputCallable" title="accvlab.dali_pipeline_framework.inputs.SamplerInputCallable"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerInputCallable</span></code></a>) are provided by this module and can be used in many cases,
+so that often there is no need to implement a custom callable.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Also see <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.IterableBase" title="accvlab.dali_pipeline_framework.inputs.IterableBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IterableBase</span></code></a> for an alternative to the callable interface. While the callable
+interface is potentially more efficient (allowing to distribute the work onto multiple workers),
+the iterable interface is more flexible as it is not expected to be stateless.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>To be used with the DALI parallel external source, the callable needs to be serializable.
+If it contains any objects that cannot be serialized, these objects should not be created in the
+constructor, but rather created when the <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.CallableBase.__call__" title="accvlab.dali_pipeline_framework.inputs.CallableBase.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__call__()</span></code></a> method is called for the first time.
+At this point, the callable is already in the worker process, and therefore, it does not need
+to be serializable anymore.</p>
+</div>
+<p>[1] <a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/examples/general/data_loading/parallel_external_source.html">https://docs.nvidia.com/deeplearning/dali/user-guide/docs/examples/general/data_loading/parallel_external_source.html</a></p>
+<p>[2] <a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/examples/general/data_loading/parallel_external_source.html#Adjusting-to-Callable-Object">https://docs.nvidia.com/deeplearning/dali/user-guide/docs/examples/general/data_loading/parallel_external_source.html#Adjusting-to-Callable-Object</a></p>
+<p>[3] <a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/operations/nvidia.dali.fn.external_source.html">https://docs.nvidia.com/deeplearning/dali/user-guide/docs/operations/nvidia.dali.fn.external_source.html</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.CallableBase.used_sample_data_structure">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">used_sample_data_structure</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.sample_data_group.SampleDataGroup"><span class="pre">SampleDataGroup</span></a></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.CallableBase.used_sample_data_structure" title="Link to this definition"></a></dt>
+<dd><p>Get the sample data format of the input.</p>
+<p>Get the blueprint (as defined in documentation of
+<a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a>, i.e. a
+<a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> object without any actual
+data but with the data format set up) describing the input data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> object describing the input data format.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.CallableBase.__call__">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/inputs/callable_base.html#CallableBase.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.CallableBase.__call__" title="Link to this definition"></a></dt>
+<dd><p>Get data of sample with the ID as described by sample_info.</p>
+<p>The returned data is expected to be a flattened sequence of the individual data fields contained
+in the <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.CallableBase.used_sample_data_structure" title="accvlab.dali_pipeline_framework.inputs.CallableBase.used_sample_data_structure"><code class="xref py py-attr docutils literal notranslate"><span class="pre">used_sample_data_structure</span></code></a>, i.e. if <code class="docutils literal notranslate"><span class="pre">data_group</span></code> is the <a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a>
+object containing the data, then the output of this method should be <code class="docutils literal notranslate"><span class="pre">data_group.get_data()</span></code>
+(see <a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.get_data" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.get_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SampleDataGroup.get_data()</span></code></a> for more details).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sample_info</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/data_types.html#nvidia.dali.types.SampleInfo" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleInfo</span></code></a></span>) – Info of the sample to provide the data for.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code></a>[<a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</span> – The input data fields (as flat sequence).</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#StopIteration" title="(in Python v3.14)"><strong>StopIteration</strong></a> – If the end of an epoch is encountered. Note that this is part of the
+    normal behavior once the epoch is exhausted and is expected by the external source,
+    and is not an error.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.CallableBase.length">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.CallableBase.length" title="Link to this definition"></a></dt>
+<dd><p>Length of the dataset (i.e. number of samples in one epoch).</p>
+<p>Providing the length is optional. If it is not implemented, this method still needs to be overridden.
+In this case, it has to indicate that the length is not available by returning <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The number of samples or batches in the dataset, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if not available.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.DataProvider">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.inputs.</span></span><span class="sig-name descname"><span class="pre">DataProvider</span></span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/inputs/data_provider.html#DataProvider"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.DataProvider" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Abstract base class for data providers.</p>
+<dl class="simple">
+<dt>A data provider is an object that</dt><dd><ul class="simple">
+<li><p>Defines the data format of the samples</p></li>
+<li><p>Provides samples from a dataset given sample indices</p></li>
+</ul>
+</dd>
+</dl>
+<p>It acts as an interface between the dataset and the DALI pipeline.</p>
+<p>To enable the use of a specific dataset with <a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.PipelineDefinition" title="accvlab.dali_pipeline_framework.pipeline.PipelineDefinition"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineDefinition</span></code></a>
+as well as the included input callable &amp; iterable classes, a corresponding data provider needs to be
+implemented.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Note that the data provider is not only specific to the dataset, but also specific to a
+use case (or a set of similar use cases), as it defines the data format of the individual samples.</p>
+<p>In simple cases, a single data provider can be parametrized for different use cases. However,
+in more complex cases, it is recommended to implement different data providers for different
+use cases, e.g. following the following approach:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Implement a data loader &amp; data container class which are specific to the dataset</p></li>
+<li><p>Implement a data conversion helper, which can be used by multiple data providers and performs
+repetitive tasks, e.g. converting the data to the correct format, obtaining the image data
+from individual files based on the loaded metadata, etc.</p></li>
+<li><p>Implement use case-specific data providers, using the common functionality of the data loader,
+data container and conversion helper classes.</p></li>
+</ul>
+</div></blockquote>
+<p>This approach allows to keep the data provider class simple and focused on the specific use case,
+while being able to re-use the functionality which is specific to the used dataset but common to many
+use cases, e.g. the data loader, data container and conversion helper classes.</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.DataProvider.get_data">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sample_index</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/inputs/data_provider.html#DataProvider.get_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.DataProvider.get_data" title="Link to this definition"></a></dt>
+<dd><p>Get the data for a given sample index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>sample_index</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The index of the sample to get the data for.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.sample_data_group.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a></span> – The data for the given sample index.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.DataProvider.get_number_of_samples">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_number_of_samples</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/inputs/data_provider.html#DataProvider.get_number_of_samples"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.DataProvider.get_number_of_samples" title="Link to this definition"></a></dt>
+<dd><p>Get the number of samples in the dataset.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The number of samples in the dataset not necessarily the number of samples in one epoch, as
+e.g. some samples might be skipped or repeated to ensure full batches. Here,
+the actual number of samples in the dataset is returned.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The number of samples depends on the use case (e.g. if the dataset contains images from multiple
+camera views, is the number of samples the total number of images, or do multiple views need to be
+loaded for each sample? etc.).</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span> – The number of samples in the dataset.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.DataProvider.sample_data_structure">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sample_data_structure</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.sample_data_group.SampleDataGroup"><span class="pre">SampleDataGroup</span></a></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.DataProvider.sample_data_structure" title="Link to this definition"></a></dt>
+<dd><p>Get the data structure of the samples.</p>
+<p>The data structure is a blueprint <code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code> that defines the structure
+of the data without containing the actual data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The data structure of the samples.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.IterableBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.inputs.</span></span><span class="sig-name descname"><span class="pre">IterableBase</span></span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/inputs/iterable_base.html#IterableBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.IterableBase" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Abstract base class for an iterable class which can be used in the pipeline.</p>
+<p>Classes derived from <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.IterableBase" title="accvlab.dali_pipeline_framework.inputs.IterableBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IterableBase</span></code></a> are expected to run in the DALI external source in batch-mode,
+i.e. returning one batch at a time.</p>
+<p>Also see [1] for how an input iterable class is used to load the input data into a DALI pipeline.</p>
+<p>Iterables are more flexible than callables as they can have an internal state, which is not possible for
+callables. However, they are less efficient than callables as they only allow to distribute the work onto
+a single worker when using the DALI parallel external source.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.IterableBase.used_sample_data_structure" title="accvlab.dali_pipeline_framework.inputs.IterableBase.used_sample_data_structure"><code class="xref py py-attr docutils literal notranslate"><span class="pre">used_sample_data_structure</span></code></a> property is used by our pipeline to obtain the data format
+blueprint used for the input. Note that the actual output of a callable is the flattened data
+from this format (see
+<a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.get_data" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.get_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SampleDataGroup.get_data()</span></code></a>), and the
+returned blueprint can be used
+to fill the data back into its structured form (see
+<a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.set_data" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.set_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SampleDataGroup.set_data()</span></code></a>).</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A ready-to-use <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputIterable" title="accvlab.dali_pipeline_framework.inputs.SamplerInputIterable"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerInputIterable</span></code></a> is provided. Also see <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputCallable" title="accvlab.dali_pipeline_framework.inputs.SamplerInputCallable"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerInputCallable</span></code></a>
+and <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable" title="accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShuffledShardedInputCallable</span></code></a> for more ready-to-use options.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Also see <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.CallableBase" title="accvlab.dali_pipeline_framework.inputs.CallableBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">CallableBase</span></code></a> for an alternative to the iterable interface. Note that the callable
+interface is potentially more efficient than the iterable interface (as it allows to distribute the
+work onto multiple workers), and should be preferred in general. However, for use cases requiring the
+input object to have an internal state, the iterable interface needs to be used as callables are
+expected to be stateless.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>To be used with the DALI parallel external source, the iterable needs to be serializable.
+If it contains any objects that cannot be serialized, these objects should not be created in the
+constructor, but rather created when the <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.IterableBase.__next__" title="accvlab.dali_pipeline_framework.inputs.IterableBase.__next__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__next__()</span></code></a> method is called for the first time.
+At this point, the iterable is already in the worker process, and therefore, it does not need
+to be serializable anymore.</p>
+</div>
+<p>[1] <a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/examples/general/data_loading/external_input.html#Define-the-Data-Source">https://docs.nvidia.com/deeplearning/dali/user-guide/docs/examples/general/data_loading/external_input.html#Define-the-Data-Source</a></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.IterableBase.used_sample_data_structure">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">used_sample_data_structure</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.sample_data_group.SampleDataGroup"><span class="pre">SampleDataGroup</span></a></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.IterableBase.used_sample_data_structure" title="Link to this definition"></a></dt>
+<dd><p>Sample data format of the input.</p>
+<p>Get the blueprint (as defined in documentation of
+<a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a>, i.e. a
+<a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> object without any actual data but with the
+data format set up) describing the input data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> object describing the input data format</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.IterableBase.__iter__">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/inputs/iterable_base.html#IterableBase.__iter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.IterableBase.__iter__" title="Link to this definition"></a></dt>
+<dd><p>Get the iterator (can be the same object as self) starting from the beginning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.IterableBase" title="accvlab.dali_pipeline_framework.inputs.iterable_base.IterableBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IterableBase</span></code></a></span> – The iterator starting from the beginning.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.IterableBase.__next__">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__next__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/inputs/iterable_base.html#IterableBase.__next__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.IterableBase.__next__" title="Link to this definition"></a></dt>
+<dd><p>Get the next batch of data.</p>
+<p>The data is a flattened sequence of data set according to the data format described by
+<a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.IterableBase.used_sample_data_structure" title="accvlab.dali_pipeline_framework.inputs.IterableBase.used_sample_data_structure"><code class="xref py py-attr docutils literal notranslate"><span class="pre">used_sample_data_structure</span></code></a> and then flattened. This means that
+<code class="docutils literal notranslate"><span class="pre">self.used_sample_data_structure.set_data(self.__next__())</span></code> would return a
+<a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> with the correct input data format and filled
+with the actual data.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A flat sequence is returned here as this is the format expected by the DALI external source,
+which will use this object. The flat sequence can be obtained by calling
+<a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.get_data" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.get_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">SampleDataGroup.get_data()</span></code></a> on
+the <a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> object containing the
+input data (according to <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.IterableBase.used_sample_data_structure" title="accvlab.dali_pipeline_framework.inputs.IterableBase.used_sample_data_structure"><code class="xref py py-attr docutils literal notranslate"><span class="pre">used_sample_data_structure</span></code></a>).</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></span> – The input data fields (as flat sequence)</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#StopIteration" title="(in Python v3.14)"><strong>StopIteration</strong></a> – When there are no more batches to provide. Note that this is part of the
+    normal behavior once the epoch is exhausted and is expected by the external source,
+    and is not an error.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.IterableBase.length">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.IterableBase.length" title="Link to this definition"></a></dt>
+<dd><p>Length of one epoch.</p>
+<p>Providing the length is optional. If it is not implemented, this method still needs to be overridden.
+In this case, it has to indicate that the length is not available (by returning <code class="docutils literal notranslate"><span class="pre">None</span></code>).
+:returns: The number of batches in the epoch, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if not available.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.SamplerBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.inputs.</span></span><span class="sig-name descname"><span class="pre">SamplerBase</span></span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/inputs/sampler_base.html#SamplerBase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Abstract base class for samplers that provide indices for data loading.</p>
+<p>A sampler is responsible for determining which samples from a dataset should be
+included in each batch during training. It can be epoch-based (where epochs have
+clear boundaries) or continuous (where sampling continues indefinitely).</p>
+<p>A sampler can be used with either <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputIterable" title="accvlab.dali_pipeline_framework.inputs.SamplerInputIterable"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerInputIterable</span></code></a> or <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputCallable" title="accvlab.dali_pipeline_framework.inputs.SamplerInputCallable"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerInputCallable</span></code></a>.
+Please also see the documentation of these classes.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Samplers can be used for complex sampling strategies, e.g. for sampling of sequences. For this,
+a <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SequenceSampler" title="accvlab.dali_pipeline_framework.inputs.SequenceSampler"><code class="xref py py-class docutils literal notranslate"><span class="pre">SequenceSampler</span></code></a> class is provided, which can be used to sample consecutive samples
+(for each sample index <code class="docutils literal notranslate"><span class="pre">i</span></code> in consecutive batches) from a set of sequences. See the documentation of
+the sequence sampler for more details.</p>
+<p>For simple use-cases, a sampler may not be required.
+A <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable" title="accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShuffledShardedInputCallable</span></code></a> class is provided, which can be used for random
+sampling without the need for a sampler implementation.</p>
+<p>Before implementing a custom sampler, consider whether the available ready-to-use solutions can be
+used.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>To be used with <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputIterable" title="accvlab.dali_pipeline_framework.inputs.SamplerInputIterable"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerInputIterable</span></code></a>, the sampler needs to be serializable (see the
+corresponding note in the documentation of <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.IterableBase" title="accvlab.dali_pipeline_framework.inputs.IterableBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IterableBase</span></code></a>). If the sampler contains any
+objects that cannot be serialized (e.g. generators), these objects should not be created in the
+constructor, but rather created when the <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase.get_next_batch_indices" title="accvlab.dali_pipeline_framework.inputs.SamplerBase.get_next_batch_indices"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_next_batch_indices()</span></code></a> method is called for the
+first time. At this point, the iterable is already in the worker process, and therefore, the sampler
+does not need to be serializable anymore.</p>
+<p>Note that the <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputCallable" title="accvlab.dali_pipeline_framework.inputs.SamplerInputCallable"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerInputCallable</span></code></a> does not require the sampler to be serializable as
+it is only used to generate the look-up table in advance. However, it is advisable to keep sampler
+objects compatible with both <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputIterable" title="accvlab.dali_pipeline_framework.inputs.SamplerInputIterable"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerInputIterable</span></code></a> and <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputCallable" title="accvlab.dali_pipeline_framework.inputs.SamplerInputCallable"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerInputCallable</span></code></a>, and
+therefore, to not create non-serializable objects before the first call to
+<a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase.get_next_batch_indices" title="accvlab.dali_pipeline_framework.inputs.SamplerBase.get_next_batch_indices"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_next_batch_indices()</span></code></a>.</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.SamplerBase.get_next_batch_indices">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_next_batch_indices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/inputs/sampler_base.html#SamplerBase.get_next_batch_indices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase.get_next_batch_indices" title="Link to this definition"></a></dt>
+<dd><p>Get the indices for the samples in the next batch.</p>
+<p>If the sampler is epoch-based and the next batch is not inside the current epoch,
+<a class="reference external" href="https://docs.python.org/3/library/exceptions.html#StopIteration" title="(in Python v3.14)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StopIteration</span></code></a> shall be raised instead of returning data.
+In this case, a call to <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase.reset" title="accvlab.dali_pipeline_framework.inputs.SamplerBase.reset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reset()</span></code></a> indicates the start of the next epoch. After <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase.reset" title="accvlab.dali_pipeline_framework.inputs.SamplerBase.reset"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reset()</span></code></a>
+is called, <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase.get_next_batch_indices" title="accvlab.dali_pipeline_framework.inputs.SamplerBase.get_next_batch_indices"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_next_batch_indices()</span></code></a> shall continue with returning the indices for
+the newly started epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span> – List of sample indices for the next batch.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#StopIteration" title="(in Python v3.14)"><strong>StopIteration</strong></a> – If the sampler is epoch-based and the current epoch has ended. Note that this
+    is part of the normal behavior once the epoch is exhausted and is expected by the external
+    source, and is not an error.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.SamplerBase.is_epoch_based">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_epoch_based</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase.is_epoch_based" title="Link to this definition"></a></dt>
+<dd><p>Indicate whether the sampling is epoch-based.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the sampler is epoch-based, <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.SamplerBase.reset">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/inputs/sampler_base.html#SamplerBase.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase.reset" title="Link to this definition"></a></dt>
+<dd><p>Start a new epoch.</p>
+<p>This method should be called to reset the sampler state and begin a new epoch.
+Only applicable for epoch-based samplers.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.SamplerBase.length">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase.length" title="Link to this definition"></a></dt>
+<dd><p>Length of one epoch.</p>
+<p>Providing the length is optional. If it is not implemented, this method still needs to be
+overridden. In this case, it has to indicate that the length is not available (by returning
+<code class="docutils literal notranslate"><span class="pre">None</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The number of samples in the epoch, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if not available.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.SamplerInputCallable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.inputs.</span></span><span class="sig-name descname"><span class="pre">SamplerInputCallable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_provider</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_iterations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_fetch_queue_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shard_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_shards</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/inputs/sampler_input_callable.html#SamplerInputCallable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputCallable" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.CallableBase" title="accvlab.dali_pipeline_framework.inputs.callable_base.CallableBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">CallableBase</span></code></a></p>
+<p>Input callable using a sampler to provide data according to the sampler (also see <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase" title="accvlab.dali_pipeline_framework.inputs.SamplerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerBase</span></code></a>).</p>
+<p>This callable also handles indicating the end of an epoch (by raising <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#StopIteration" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopIteration</span></code></a>).
+Information on when an epoch ends is obtained from the sampler (which in turn should indicate this
+by raising <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#StopIteration" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopIteration</span></code></a>, see documentation of <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase" title="accvlab.dali_pipeline_framework.inputs.SamplerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerBase</span></code></a>).</p>
+<p>As the sampler can have an internal state (while the callable is expected to be stateless), a look-up
+table is pre-generated at construction, leading to overhead and the need to know the maximum number of
+iterations in advance.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To avoid the overhead of pre-generating the look-up table, it is recommended to only use this class
+if a single process for data loading is not enough and prefer
+<a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputIterable" title="accvlab.dali_pipeline_framework.inputs.SamplerInputIterable"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerInputIterable</span></code></a> in general.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_provider</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.DataProvider" title="accvlab.dali_pipeline_framework.inputs.data_provider.DataProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataProvider</span></code></a></span>) – Data provider to use (following the interface defined in <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.DataProvider" title="accvlab.dali_pipeline_framework.inputs.DataProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataProvider</span></code></a>).</p></li>
+<li><p><strong>sampler</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase" title="accvlab.dali_pipeline_framework.inputs.sampler_base.SamplerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerBase</span></code></a></span>) – Sampler to use (following the interface defined in <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase" title="accvlab.dali_pipeline_framework.inputs.SamplerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerBase</span></code></a>).</p></li>
+<li><p><strong>max_num_iterations</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Maximum number of iterations that will be performed.</p></li>
+<li><p><strong>pre_fetch_queue_length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Length of the pre-fetch queue depth of the DALI pipeline using this input callable. Used together with <code class="docutils literal notranslate"><span class="pre">max_num_iterations</span></code> to ensure that
+the sampling look-up table is large enough.</p></li>
+<li><p><strong>shard_id</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">0</span></code>) – Shard ID (default value of 0 should be used if sharding is not used)</p></li>
+<li><p><strong>num_shards</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">1</span></code>) – Total of shards (default value of 1 should be used if sharding is not used)</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.SamplerInputCallable.used_sample_data_structure">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">used_sample_data_structure</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.sample_data_group.SampleDataGroup"><span class="pre">SampleDataGroup</span></a></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputCallable.used_sample_data_structure" title="Link to this definition"></a></dt>
+<dd><p>Data format blueprint used for the individual samples</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.SamplerInputCallable.length">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputCallable.length" title="Link to this definition"></a></dt>
+<dd><p>Number of batches in one epoch.</p>
+<p>If the underlying sampler is not epoch-based, the length is the overall number of batches
+that can be generated (i.e. the maximum number of iterations defined at construction plus
+the pre-fetch queue length).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.SamplerInputIterable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.inputs.</span></span><span class="sig-name descname"><span class="pre">SamplerInputIterable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_provider</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shard_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_shards</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/inputs/sampler_input_iterable.html#SamplerInputIterable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputIterable" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.IterableBase" title="accvlab.dali_pipeline_framework.inputs.iterable_base.IterableBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IterableBase</span></code></a></p>
+<p>Input iterable using a sampler to provide batches according to the sampler (also see <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase" title="accvlab.dali_pipeline_framework.inputs.SamplerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerBase</span></code></a>).</p>
+<p>The iterable can be used with a parallel external source. However, in this case, the data reading is
+performed in one worker process due to serial nature of an iterable. This means that while the data
+reading is asynchronous to the main thread, it is not further parallelized.</p>
+<p>This iterable also handles indicating the end of an epoch (by raising <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#StopIteration" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopIteration</span></code></a>). Information
+on when an epoch ends is obtained from the sampler (which in turn should indicate this by raising
+<a class="reference external" href="https://docs.python.org/3/library/exceptions.html#StopIteration" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">StopIteration</span></code></a>, see documentation of <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase" title="accvlab.dali_pipeline_framework.inputs.SamplerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerBase</span></code></a>).
+After the end of the epoch, the iterable needs to be reset (by obtaining a new iterator) before data for
+the next epoch can be obtained.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If further parallelization is desired (i.e. more than one worker thread),
+<a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputCallable" title="accvlab.dali_pipeline_framework.inputs.SamplerInputCallable"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerInputCallable</span></code></a> can be used instead of this class (at the cost of pre-computing look-up
+tables in advance, see the corresponding note in the documentation of <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputCallable" title="accvlab.dali_pipeline_framework.inputs.SamplerInputCallable"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerInputCallable</span></code></a>).</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_provider</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.DataProvider" title="accvlab.dali_pipeline_framework.inputs.data_provider.DataProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataProvider</span></code></a></span>) – Data provider to use (following the interface defined in <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.DataProvider" title="accvlab.dali_pipeline_framework.inputs.DataProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataProvider</span></code></a>).</p></li>
+<li><p><strong>sampler</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase" title="accvlab.dali_pipeline_framework.inputs.sampler_base.SamplerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerBase</span></code></a></span>) – Sampler to use (following the interface defined in <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase" title="accvlab.dali_pipeline_framework.inputs.SamplerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerBase</span></code></a>).</p></li>
+<li><p><strong>shard_id</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">0</span></code>) – Shard ID (default value of 0 should be used if sharding is not used).</p></li>
+<li><p><strong>num_shards</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">1</span></code>) – Total of shards (default value of 1 should be used if sharding is not used).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.SamplerInputIterable.used_sample_data_structure">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">used_sample_data_structure</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.sample_data_group.SampleDataGroup"><span class="pre">SampleDataGroup</span></a></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputIterable.used_sample_data_structure" title="Link to this definition"></a></dt>
+<dd><p>Data format blueprint used for the individual samples</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.SamplerInputIterable.length">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.SamplerInputIterable.length" title="Link to this definition"></a></dt>
+<dd><p>Number of batches in one epoch.</p>
+<p>If the underlying sampler is not epoch-based, <code class="docutils literal notranslate"><span class="pre">None</span></code> is returned.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.SequenceSampler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.inputs.</span></span><span class="sig-name descname"><span class="pre">SequenceSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_lenghts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">randomize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/inputs/sequence_sampler.html#SequenceSampler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.SequenceSampler" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.SamplerBase" title="accvlab.dali_pipeline_framework.inputs.sampler_base.SamplerBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerBase</span></code></a></p>
+<p>Sampler used to get consecutive samples from sequences contained in the dataset.</p>
+<p>For subsequent batches <span class="math notranslate nohighlight">\(B_t\)</span> and <span class="math notranslate nohighlight">\(B_{t+1}\)</span>, the individual samples in the batches with the
+same index <span class="math notranslate nohighlight">\(i\)</span>, i.e. <span class="math notranslate nohighlight">\(B_t[i]\)</span> and <span class="math notranslate nohighlight">\(B_{t+1}[i]\)</span>, are subsequent samples inside a sequence
+<span class="math notranslate nohighlight">\(S_j\)</span>, i.e. <span class="math notranslate nohighlight">\(B_t[i] = S_j[k]\)</span> and <span class="math notranslate nohighlight">\(B_{t+1}[i] = S_j[k+1]\)</span> (where <span class="math notranslate nohighlight">\(j\)</span> is the index
+of the sequence in the dataset and <span class="math notranslate nohighlight">\(k\)</span> is the index
+of the sample in the sequence <span class="math notranslate nohighlight">\(S_j\)</span>), except when one sequence ends and another one begins.</p>
+<a class="reference internal image-reference" href="../../../../_images/sequence_sampling.png"><img alt="Sequence sampling illustration" class="align-center" src="../../../../_images/sequence_sampling.png" style="width: 550px;" />
+</a>
+<p>The sampling is performed by assigning for each “sample index slot” <span class="math notranslate nohighlight">\(i\)</span> a set of sequences and then
+iterating through the sequences and outputting one sample at a time at the position <span class="math notranslate nohighlight">\(i\)</span>.
+For this, the sequences are shuffled (represented by <span class="math notranslate nohighlight">\(R_c\)</span> in the illustration) whenever a new cycle
+<span class="math notranslate nohighlight">\(c\)</span> is started for one of the slots (<span class="math notranslate nohighlight">\(R_0\)</span> and <span class="math notranslate nohighlight">\(R_1\)</span> in the illustration correspond to
+the first two cycles).</p>
+<p>Note that each slot may reach a new cycle at different iterations <span class="math notranslate nohighlight">\(t\)</span> as the total number of samples
+may vary for the individual slots. However, for each cycle <span class="math notranslate nohighlight">\(c\)</span>, consistent shuffled lists
+<span class="math notranslate nohighlight">\(R_c\)</span> are used for all slots (using consistent seeds for the shuffling).</p>
+<p>As the individual slots <span class="math notranslate nohighlight">\(B_t[i]\)</span> may be in different cycles for a given iteration <span class="math notranslate nohighlight">\(t\)</span>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The cycles do not exactly correspond to epochs (as the cycle border is different for each slot).
+Therefore, this sampler is not epoch-based.</p></li>
+<li><p>Although consistent shuffling is used to obtain <span class="math notranslate nohighlight">\(R_c\)</span> across slots, the same sequence may still
+appear in multiple slots at the same time if the slots are in different cycles for a given iteration
+<span class="math notranslate nohighlight">\(t\)</span> due to variable sequence length.</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>total_batch_size</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Total batch size (i.e. the combined batch size over all shards if sharding is
+used).</p></li>
+<li><p><strong>sequence_lenghts</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – The lengths of the individual sequences. Note that the indices of the samples in
+the dataset must match the order of sequence lengths given, i.e. if the sequence lengths
+<code class="docutils literal notranslate"><span class="pre">[10,</span> <span class="pre">12]</span></code> are given, then it is understood that the dataset contains 2 sequences,
+with the first containing the samples with indices in the range <span class="math notranslate nohighlight">\([0; 9]\)</span> and the
+second containing the samples with indices in the range <span class="math notranslate nohighlight">\([10; 21]\)</span>.</p></li>
+<li><p><strong>seed</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Random seed for shuffling sequences.</p></li>
+<li><p><strong>randomize</strong> (default: <code class="docutils literal notranslate"><span class="pre">True</span></code>) – Whether to shuffle sequences. If <code class="docutils literal notranslate"><span class="pre">False</span></code>, sequences are used in order.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.SequenceSampler.length">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.SequenceSampler.length" title="Link to this definition"></a></dt>
+<dd><p>Length (size of a single epoch) is not defined as there are no clear epoch boundaries.</p>
+<p>Indicate this by returning <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.SequenceSampler.get_next_batch_indices">
+<span class="sig-name descname"><span class="pre">get_next_batch_indices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/inputs/sequence_sampler.html#SequenceSampler.get_next_batch_indices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.SequenceSampler.get_next_batch_indices" title="Link to this definition"></a></dt>
+<dd><p>Get the indices for the next batch of samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of sample indices for the next batch.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.SequenceSampler.is_epoch_based">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_epoch_based</span></span><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.SequenceSampler.is_epoch_based" title="Link to this definition"></a></dt>
+<dd><p>Indicate that the sampler is not epoch-based by returning <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.SequenceSampler.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/inputs/sequence_sampler.html#SequenceSampler.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.SequenceSampler.reset" title="Link to this definition"></a></dt>
+<dd><p>Reset the sampler.</p>
+<p>Note that this method is not supported as the sampler is not epoch-based. Calling it will raise an
+error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – Will be raised if the method is called as the sampler is not epoch-based.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.inputs.</span></span><span class="sig-name descname"><span class="pre">ShuffledShardedInputCallable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_provider</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shard_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_shards</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">21</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/inputs/sfuffled_sharded_input_callable.html#ShuffledShardedInputCallable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.CallableBase" title="accvlab.dali_pipeline_framework.inputs.callable_base.CallableBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">CallableBase</span></code></a></p>
+<p>Input callable supporting shuffling and sharding.</p>
+<p>This class implements data randomization by shuffling, as well as distributing the data into multiple
+shards. The shuffling and sharding is done following the general approach outlined in [1].</p>
+<p>The randomization can be disabled, in which case the data is read in sequential order.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the data set is not divisible by the batch size (in case of sharding, the total batch size over all
+shards), the incomplete batch at the end of each epoch will be dropped.</p>
+</div>
+<p>[1] <a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/examples/general/data_loading/parallel_external_source.html#Shuffling-and-sharding">https://docs.nvidia.com/deeplearning/dali/user-guide/docs/examples/general/data_loading/parallel_external_source.html#Shuffling-and-sharding</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_provider</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.DataProvider" title="accvlab.dali_pipeline_framework.inputs.data_provider.DataProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataProvider</span></code></a></span>) – Data provider (following the interface defined in <a class="reference internal" href="#accvlab.dali_pipeline_framework.inputs.DataProvider" title="accvlab.dali_pipeline_framework.inputs.DataProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataProvider</span></code></a>) used to obtain the samples and additional data.</p></li>
+<li><p><strong>batch_size</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Batch size</p></li>
+<li><p><strong>shard_id</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">0</span></code>) – Shard ID. Needs to be set if sharding is used.</p></li>
+<li><p><strong>num_shards</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">1</span></code>) – Total number of shards. Needs to be set if sharding is used</p></li>
+<li><p><strong>shuffle</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">False</span></code>) – Whether to shuffle the data</p></li>
+<li><p><strong>seed</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">21</span></code>) – Seed used for the shuffling. If sharding is used, the input callables for all shards need to use the same seed.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable.used_sample_data_structure">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">used_sample_data_structure</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.sample_data_group.SampleDataGroup"><span class="pre">SampleDataGroup</span></a></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable.used_sample_data_structure" title="Link to this definition"></a></dt>
+<dd><p>Get the data format blueprint used for the individual samples</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable.length">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable.length" title="Link to this definition"></a></dt>
+<dd><p>Number of full iterations (complete batches) in the epoch.</p>
+<p>If the underlying sampler is not epoch-based, <code class="docutils literal notranslate"><span class="pre">None</span></code> is returned.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="main_api.html" class="btn btn-neutral float-left" title="Main API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pipeline.html" class="btn btn-neutral float-right" title="Pipeline Submodule" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

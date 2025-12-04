@@ -1,0 +1,245 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evaluation &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Draw Heatmap" href="../../draw_heatmap/docs/index.html" />
+    <link rel="prev" title="Data Loading for NuScenes" href="examples/use_case_specific/nuscenes_data_loader.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">DALI Pipeline Framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="design.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/main_api.html">Main API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/additional_api.html">Additional API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Evaluation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#experiment-setup">Experiment Setup</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data">Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#adaptation-to-dali">Adaptation to DALI</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hardware-setup">Hardware Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#results-discussion">Results &amp; Discussion</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#results">Results</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#discussion">Discussion</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">DALI Pipeline Framework</a></li>
+      <li class="breadcrumb-item active">Evaluation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/contained_package_docs_mirror/dali_pipeline_framework/docs/evaluation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="evaluation">
+<h1>Evaluation<a class="headerlink" href="#evaluation" title="Link to this heading"></a></h1>
+<p>This page summarizes the performance impact of using the DALI Pipeline Framework
+as a replacement for a conventional PyTorch <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> + <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> when training
+StreamPETR on NuScenes mini.</p>
+<section id="experiment-setup">
+<h2>Experiment Setup<a class="headerlink" href="#experiment-setup" title="Link to this heading"></a></h2>
+<section id="configuration">
+<h3>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h3>
+<p>The training is performed for the NuScenes mini dataset, using the StreamPETR model. In order to evaluate
+a realistic setup with a high pre-processing overhead, we increase both the image resolution and the batch
+size compared to the original configuration. We use the following configuration:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Image size: 1024 × 372</p></li>
+<li><p>Batch size: 8 per GPU</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="data">
+<h3>Data<a class="headerlink" href="#data" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>NuScenes mini</p></li>
+<li><p>For the multi‑GPU training, each GPU re‑uses the whole dataset instead of sharding
+(NuScenes mini is otherwise too small)</p></li>
+</ul>
+</section>
+<section id="adaptation-to-dali">
+<h3>Adaptation to DALI<a class="headerlink" href="#adaptation-to-dali" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Replace the PyTorch <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> by a DALI pipeline</p></li>
+<li><p>Code changes are limited to the pipeline setup vs. PyTorch <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> and <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code></p></li>
+<li><p>The training loop implementation remains unchanged</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We are planning to add a demo for the DALI Pipeline Framework package in the future, including the
+implementation of the experiments performed in this evaluation.</p>
+</div>
+</section>
+<section id="hardware-setup">
+<h3>Hardware Setup<a class="headerlink" href="#hardware-setup" title="Link to this heading"></a></h3>
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-text">Test Device</span><a class="headerlink" href="#id1" title="Link to this table"></a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>GPU</p></th>
+<th class="head"><p>CPU</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>8 × NVIDIA A100‑SXM4‑80GB</p></td>
+<td><p>2 × AMD EPYC 7742 64‑Core Processors</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="results-discussion">
+<h2>Results &amp; Discussion<a class="headerlink" href="#results-discussion" title="Link to this heading"></a></h2>
+<section id="results">
+<h3>Results<a class="headerlink" href="#results" title="Link to this heading"></a></h3>
+<p>The numbers report average run time per batch after the warm‑up phase.</p>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text">Runtime and CPU Usage</span><a class="headerlink" href="#id2" title="Link to this table"></a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Runtime [ms] (2‑GPU)</p></th>
+<th class="head"><p>CPU usage [%] (2‑GPU)</p></th>
+<th class="head"><p>Runtime [ms] (8‑GPU)</p></th>
+<th class="head"><p>CPU usage [%] (8‑GPU)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Reference (PyTorch DataLoader)</strong></p></td>
+<td><p>935</p></td>
+<td><p>3.3</p></td>
+<td><p>1110</p></td>
+<td><p>12.3</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>DALI pipeline</strong></p></td>
+<td><p>829</p></td>
+<td><p>1.5</p></td>
+<td><p>868</p></td>
+<td><p>5.4</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Speedup / Savings</strong></p></td>
+<td><p>× 1.13</p></td>
+<td><p>55%</p></td>
+<td><p>× 1.28</p></td>
+<td><p>56%</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="discussion">
+<h3>Discussion<a class="headerlink" href="#discussion" title="Link to this heading"></a></h3>
+<p>The results show that the DALI pipeline framework leads to a speedup of <strong>× 1.13</strong> for the 2-GPU configuration
+and <strong>× 1.28</strong> for the 8-GPU configuration, with the speedup being larger for the 8-GPU configuration.
+The CPU usage is reduced by around <strong>55%</strong> in both configurations. Note that for both DALI And the reference
+implementation, the runtime increases for the 8-GPU configuration compared to the 2-GPU configuration.
+However, the increase is much smaller for the DALI pipeline, indicating that while the CPU is not fully
+utilized in the reference approach, there are already bottlenecks present which can be overcome by the DALI
+pipeline.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="examples/use_case_specific/nuscenes_data_loader.html" class="btn btn-neutral float-left" title="Data Loading for NuScenes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../draw_heatmap/docs/index.html" class="btn btn-neutral float-right" title="Draw Heatmap" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

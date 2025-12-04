@@ -1,0 +1,194 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Introduction &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="API Reference" href="api.html" />
+    <link rel="prev" title="Optimization Testing Tools" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Optimization Testing Tools</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#design">Design</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#functionalities">Functionalities</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Optimization Testing Tools</a></li>
+      <li class="breadcrumb-item active">Introduction</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/contained_package_docs_mirror/optim_test_tools/docs/intro.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h1>
+<section id="design">
+<h2>Design<a class="headerlink" href="#design" title="Link to this heading"></a></h2>
+<p>This package contains helpers which can be used for evaluating runtime optimizations as well as for debugging.
+The helpers are designed to</p>
+<blockquote>
+<div><ul>
+<li><p>have minimal overhead if no evaluation is performed (i.e. the helper is not enabled)</p></li>
+<li><p>have a convenient way to be enabled &amp; configured if used (e.g. from main training script)</p></li>
+<li><p>being able to be used in different parts of the implementation without the need for coordination between
+the parts. This simplifies their use as e.g.,</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>it allows to configure the helpers from the main training script, without the need to propagate the
+configuration to the parts of the code which use the helpers. This includes</p>
+<ul>
+<li><p>Detail configurations such as e.g. whether to perform CUDA synchronization on starting/stopping a
+measurement</p></li>
+<li><p>Enabling/disabling the helpers from the main training script</p></li>
+</ul>
+</li>
+<li><p>it allows to use e.g. start and end measurements in different parts of the code without the need to
+coordinate the data exchange between the parts. All measurements can be combined centrally and and a
+summary can be obtained without the need to coordinate the data exchange between the parts.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</section>
+<section id="functionalities">
+<h2>Functionalities<a class="headerlink" href="#functionalities" title="Link to this heading"></a></h2>
+<dl class="simple">
+<dt>This package contains the following helper classes:</dt><dd><ul class="simple">
+<li><p><a class="reference internal" href="api.html#accvlab.optim_test_tools.Stopwatch" title="accvlab.optim_test_tools.Stopwatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">Stopwatch</span></code></a>: Can be used to conveniently measure runtime of different
+parts of the code (including defining a warm-up phase, keeping track of the
+iterations, averaging measurements etc.). Additionally, it supports measuring average CPU usage.</p></li>
+<li><p><a class="reference internal" href="api.html#accvlab.optim_test_tools.NVTXRangeWrapper" title="accvlab.optim_test_tools.NVTXRangeWrapper"><code class="xref py py-class docutils literal notranslate"><span class="pre">NVTXRangeWrapper</span></code></a>: Wrapper for NVTX ranges which (optionally)
+automatically performs CUDA synchronizations on entering/exiting a range &amp; has additional functionality to
+debug range push/pop mismatches.</p></li>
+<li><p><a class="reference internal" href="api.html#accvlab.optim_test_tools.TensorDumper" title="accvlab.optim_test_tools.TensorDumper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorDumper</span></code></a>: Can be used to dump tensors as well as gradients for
+debugging purposes. It supports different dump formats (including images, binary files, JSON) and
+additional functionality to dump different types of data, potentially processing the data first to obtain
+a more easy-to-interpret representation. Please see the API documentation and the samples usage for more
+details. Additionally, it supports comparing data from previous dumps to detect mismatches. This can be
+used to detect e.g. differences due to bugs introduced in the code while working on optimization (which
+should not change the results).</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Please see <a class="reference internal" href="api.html"><span class="doc">API Reference</span></a> for more detailed information about the classes and <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a> on how to use
+them.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This package implements the helper classes as singletons to ensure that they can be enabled from any part
+of the code, and also to e.g. ensure correct runtime measurement (consistent counting of iterations, allow
+to start &amp; end runtime measurement in different parts of the code etc.). In order for the singleton to work
+correctly, it is important to use it as a package and not to only copy the code into a project and e.g. use
+relative imports. The latter may lead to multiple instances of the helper classes to be created (as the
+import manager may handle the imports as independent packages), leading to errors/misconfigurations.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Optimization Testing Tools" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

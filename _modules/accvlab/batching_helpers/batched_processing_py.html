@@ -1,0 +1,764 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.batching_helpers.batched_processing_py &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.batching_helpers.batched_processing_py</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.batching_helpers.batched_processing_py</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NamedTuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.data_format</span><span class="w"> </span><span class="kn">import</span> <span class="n">RaggedBatch</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.batched_bool_indexing</span><span class="w"> </span><span class="kn">import</span> <span class="n">batched_bool_indexing</span>
+
+
+<div class="viewcode-block" id="average_over_targets">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/batching_helpers/docs/api.html#accvlab.batching_helpers.average_over_targets">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">average_over_targets</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">RaggedBatch</span><span class="p">,</span> <span class="n">nans_to_zero</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Average along the non-uniform dimension, considering only the valid entries.</span>
+
+<span class="sd">    The dimension to average over is ``data.non_uniform_dim``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: Data to average</span>
+<span class="sd">        nans_to_zero: Whether to replace NaNs with zeros after averaging. Default is ``True``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tensor containing per-sample averages</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_non_uniform_dimension_transposed_to</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">num_batch_dims</span><span class="p">)</span>
+    <span class="n">masked_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">with_padded_set_to</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">summed</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">masked_data</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">num_batch_dims</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">masked_data</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="c1"># When dividing, make sure that the batch dimension corresponds to the innermost dimension.</span>
+    <span class="c1"># This is so that sata.sample_sizes is broadcasted correctly.</span>
+    <span class="n">multi_dim</span> <span class="o">=</span> <span class="n">summed</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">multi_dim</span><span class="p">:</span>
+        <span class="c1"># Ensure that the batch dimensions are the innermost dimensions</span>
+        <span class="n">summed</span> <span class="o">=</span> <span class="n">summed</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="o">*</span><span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">num_batch_dims</span><span class="p">,</span> <span class="n">summed</span><span class="o">.</span><span class="n">dim</span><span class="p">()),</span> <span class="o">*</span><span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">num_batch_dims</span><span class="p">))</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">summed</span> <span class="o">/</span> <span class="n">data</span><span class="o">.</span><span class="n">sample_sizes</span>
+    <span class="k">if</span> <span class="n">multi_dim</span><span class="p">:</span>
+        <span class="c1"># Move batch dimensions back to their original positions</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="o">*</span><span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="n">data</span><span class="o">.</span><span class="n">num_batch_dims</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="o">*</span><span class="nb">range</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">num_batch_dims</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">nans_to_zero</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">posinf</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">neginf</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+
+<div class="viewcode-block" id="sum_over_targets">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/batching_helpers/docs/api.html#accvlab.batching_helpers.sum_over_targets">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sum_over_targets</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">RaggedBatch</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sum over the non-uniform dimension, considering only the valid entries.</span>
+
+<span class="sd">    The dimension to average is ``data.non_uniform_dim``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: Data to average</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tensor containing per-sample sums</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">masked_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">with_padded_set_to</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">summed</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">masked_data</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">non_uniform_dim</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">masked_data</span><span class="o">.</span><span class="n">tensor</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">summed</span></div>
+
+
+
+<div class="viewcode-block" id="apply_mask_to_tensor">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/batching_helpers/docs/api.html#accvlab.batching_helpers.apply_mask_to_tensor">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_mask_to_tensor</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">value_to_set</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply mask to tensor</span>
+
+<span class="sd">    Apply a mask to a tensor, setting any elements in the tensor corresponding to ``False`` entries in the mask</span>
+<span class="sd">    to a fixed value. The mask may have fewer dimensions than the data. In this case, it is assumed to be constant in the</span>
+<span class="sd">    remaining dimensions and the available dimensions correspond to the outer data dimensions (i.e. starting from ``dim==0``</span>
+<span class="sd">    in the data).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: Data to apply mask to</span>
+<span class="sd">        mask: Mask to apply</span>
+<span class="sd">        value_to_set: Value to set for padded entries. Default is 0.0</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Like ``data``, but with the mask applied</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Broadcast mask if possible</span>
+    <span class="n">num_extra_dims</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">-</span> <span class="n">mask</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">num_extra_dims</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">extra_shape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_extra_dims</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="p">(</span><span class="o">*</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="o">*</span><span class="n">extra_shape</span><span class="p">))</span>
+    <span class="n">mask_broadcasted</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">broadcast_to</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="c1"># mask_squeezed = squeeze_except_batch_and_sample(mask)</span>
+    <span class="c1"># Copy data to not modify the original tensor</span>
+    <span class="k">if</span> <span class="n">mask</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="c1"># Apply mask on copy</span>
+        <span class="n">res</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">mask_broadcasted</span><span class="p">)]</span> <span class="o">=</span> <span class="n">value_to_set</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">data</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+
+<div class="viewcode-block" id="squeeze_except_batch_and_sample">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/batching_helpers/docs/api.html#accvlab.batching_helpers.squeeze_except_batch_and_sample">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">squeeze_except_batch_and_sample</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Squeeze the data except the batch dimension and the non-uniform dimension representing the sample size.</span>
+
+<span class="sd">    For tensors, the batch dimension is always ``dim==0``. The non-uniform dimensions is assumed to be</span>
+<span class="sd">    ``dim==1``. For ragged batches, the batch dimensions are the first ``data.num_batch_dims`` dimensions and</span>
+<span class="sd">    the non-uniform dimension is the ``data.non_uniform_dim`` dimension.</span>
+
+<span class="sd">    This function is designed to preserve the batch and non-uniform dimensions, which have a special meaning,</span>
+<span class="sd">    while allowing to squeeze away other dimensions.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        Note that as a result of the squeezing, the non-uniform dimension may change to a different dimension.</span>
+<span class="sd">        This happens if there are any dimensions before the non-uniform dimension which are squeezed away.</span>
+<span class="sd">        For example:</span>
+
+<span class="sd">        &gt;&gt;&gt; example_batch.shape</span>
+<span class="sd">        torch.Size([4, 1, 1, 3, 4])</span>
+<span class="sd">        &gt;&gt;&gt; example_batch.num_batch_dims</span>
+<span class="sd">        2</span>
+<span class="sd">        &gt;&gt;&gt; example_batch.non_uniform_dim</span>
+<span class="sd">        3</span>
+<span class="sd">        &gt;&gt;&gt; example_batch_squeezed = squeeze_except_batch_and_sample(example_batch)</span>
+<span class="sd">        &gt;&gt;&gt; example_batch_squeezed.shape</span>
+<span class="sd">        torch.Size([4, 1, 3, 4])</span>
+<span class="sd">        &gt;&gt;&gt; example_batch_squeezed.non_uniform_dim</span>
+<span class="sd">        2</span>
+
+<span class="sd">        Note that the non-uniform dimension is now ``dim==2`` instead of ``dim==3``. Also, as ``dim==1`` is</span>
+<span class="sd">        one of the batch dimensions, it is not squeezed away. The same would be true for</span>
+<span class="sd">        any other batch dimension or the non-uniform dimension.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: Data to be squeezed</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Squeezed data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_num_squeezed_dimensions_before</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">num_batch_dims</span><span class="p">,</span> <span class="n">non_uniform_dim</span><span class="p">):</span>
+        <span class="n">num_skipped</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">shape</span><span class="p">[</span><span class="n">num_batch_dims</span><span class="p">:</span><span class="n">non_uniform_dim</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">num_skipped</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">num_skipped</span>
+
+    <span class="n">is_ragged_batch</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_ragged_batch</span><span class="p">:</span>
+        <span class="n">non_uniform_dim_orig</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">non_uniform_dim</span>
+        <span class="n">num_batch_dims</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">num_batch_dims</span>
+        <span class="c1"># We cannot simply assume that the non-uniform dimension after squeezing is the dimension it was before, as dimensions</span>
+        <span class="c1"># prior to it may be squeezed away. Therefore, check how many would be squeezed and adjust accordingly</span>
+        <span class="n">num_squeezed_dims_before_non_uniform</span> <span class="o">=</span> <span class="n">get_num_squeezed_dimensions_before</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">num_batch_dims</span><span class="p">,</span> <span class="n">non_uniform_dim_orig</span>
+        <span class="p">)</span>
+        <span class="n">data_to_use</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">tensor</span>
+        <span class="n">dims_to_squeeze</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_batch_dims</span><span class="p">,</span> <span class="n">non_uniform_dim_orig</span><span class="p">))</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="nb">range</span><span class="p">(</span><span class="n">non_uniform_dim_orig</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">dim</span><span class="p">())</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">num_batch_dims</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">data_to_use</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="n">dims_to_squeeze</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">data_to_use</span><span class="o">.</span><span class="n">dim</span><span class="p">()))</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">data_to_use</span><span class="p">,</span> <span class="n">dims_to_squeeze</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_ragged_batch</span><span class="p">:</span>
+        <span class="n">non_uniform_dim_new</span> <span class="o">=</span> <span class="n">non_uniform_dim_orig</span> <span class="o">-</span> <span class="n">num_squeezed_dims_before_non_uniform</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">create_with_sample_sizes_like_self</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">non_uniform_dim</span><span class="o">=</span><span class="n">non_uniform_dim_new</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+
+<div class="viewcode-block" id="get_compact_from_named_tuple">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/batching_helpers/docs/api.html#accvlab.batching_helpers.get_compact_from_named_tuple">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_compact_from_named_tuple</span><span class="p">(</span><span class="n">mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">NamedTuple</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NamedTuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a compact version of all tensors (as :class:`RaggedBatch` instances) in a named tuple as a new named tuple of the same type.</span>
+
+<span class="sd">    See :func:`get_compact_lists` for details on compactification and an illustration of example inputs &amp; outputs.</span>
+<span class="sd">    This function works in the same way, but using named tuples instead of plain sequences as inputs &amp; outputs.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mask: Mask indicating which elements are valid (True) or not (False). Shape: (dim_size_0, dim_size_1)</span>
+<span class="sd">        data: Named tuple containing tensors to be compactified. For each tensor, the shape is (dim_size_0, dim_size_1, ...).</span>
+<span class="sd">            Note that different tensor in the list may have a different number of dimensions and a different size</span>
+<span class="sd">            except for the first 2 dimensions, which have to correspond to the mask. The tuple may contain elements</span>
+<span class="sd">            which are not tensors, and such elements will remain unchanged in the output.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Compact data, where elements containing tensors in the input are replaces by :class:`RaggedBatch` instances,</span>
+<span class="sd">        while elements of other types remain unchanged.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">res_list</span> <span class="o">=</span> <span class="n">get_compact_lists</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="n">DataType</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">DataType</span><span class="p">(</span><span class="o">*</span><span class="n">res_list</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+
+<div class="viewcode-block" id="get_compact_lists">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/batching_helpers/docs/api.html#accvlab.batching_helpers.get_compact_lists">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_compact_lists</span><span class="p">(</span>
+    <span class="n">mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">RaggedBatch</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;For a list of data tensors and a mask indicating which entries are valid, get a compactified version of the data.</span>
+
+<span class="sd">    Compactification is performed along the second dimension (i.e. ``dim==1``). Compactification in this context means that</span>
+<span class="sd">    for this dimension:</span>
+
+<span class="sd">        - The size of the dimension is reduced so that it exactly fits the maximum number of valid elements over all samples,</span>
+<span class="sd">          i.e. the size of the dimension is ``max(sum(mask, dim==1))``.</span>
+<span class="sd">        - The data is converted to :class:`RaggedBatch` instances for further processing (see documentation of</span>
+<span class="sd">          :class:`RaggedBatch` for details of the format)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mask: Mask indicating which elements are valid (True) and which are not (False).</span>
+<span class="sd">            Shape: (dim_size_0, dim_size_1)</span>
+<span class="sd">        data: Sequence (e.g. ``list``) of tensors to be compactified. For each tensor, the shape is</span>
+<span class="sd">            (dim_size_0, dim_size_1, ...).</span>
+<span class="sd">            Note that different tensor in the sequence may have a different number of dimensions and a different size</span>
+<span class="sd">            except for the first 2 dimensions, which have to correspond to the mask. The sequence may contain elements</span>
+<span class="sd">            which are not tensors, and such elements will remain unchanged in the output.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Compact data, where elements containing lists of tensors in the input are replaces by :class:`RaggedBatch`</span>
+<span class="sd">        instances, while other elements remain unchanged.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        In the illustration below:</span>
+<span class="sd">          - Letters indicate data entries that are indexed in the input (and therefore appear in the output)</span>
+<span class="sd">          - &#39;-&#39; indicates entries where the actual values are not relevant (in the input).</span>
+<span class="sd">          - &#39;*&#39; indicates filler values in :class:`RaggedBatch` instances.</span>
+
+<span class="sd">        The illustration shows a single input entry ``data[d]``, where ``isinstance(data[d], torch.Tensor) == True``.</span>
+<span class="sd">        Note that for non-tensor elements of ``data``, the data is not changed.</span>
+
+<span class="sd">        .. image:: images/Compactification_ragged.png</span>
+<span class="sd">            :alt: Illustration of the compactification operation</span>
+<span class="sd">            :align: center</span>
+
+<span class="sd">        Each depicted element in the data may represent a single value (in case of 2D tensors),</span>
+<span class="sd">        or itself be a non-scalar entry (in case that the data has more than 2 dimensions).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">num_data</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">bool</span><span class="p">()</span>
+    <span class="n">num_vals</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">max_num_vals</span> <span class="o">=</span> <span class="n">num_vals</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+    <span class="n">num_samples</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">val_range</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_num_vals</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">mask</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="n">val_range_block</span> <span class="o">=</span> <span class="n">val_range</span><span class="o">.</span><span class="n">repeat</span><span class="p">((</span><span class="n">num_samples</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">mask_res</span> <span class="o">=</span> <span class="n">val_range_block</span> <span class="o">&lt;</span> <span class="n">num_vals</span>
+
+    <span class="c1"># Flatten the mask and sample sizes to 1D tensors</span>
+    <span class="c1"># Originally, `num_vals` is a 2D tensor with shape `(num_samples, 1)` in order to</span>
+    <span class="c1"># broadcast correctly against the 2D `mask_res`.</span>
+    <span class="n">num_vals_1d</span> <span class="o">=</span> <span class="n">num_vals</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_data</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">el</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+            <span class="n">size_res</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">el</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">size_res</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">size_res</span> <span class="o">=</span> <span class="p">[</span><span class="n">size_res</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="n">size_res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_num_vals</span>
+            <span class="n">curr_res</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">size_res</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">el</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">el</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">curr_res</span><span class="p">[</span><span class="n">mask_res</span><span class="p">]</span> <span class="o">=</span> <span class="n">el</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+            <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">RaggedBatch</span><span class="p">(</span><span class="n">curr_res</span><span class="p">,</span> <span class="n">mask_res</span><span class="p">,</span> <span class="n">num_vals_1d</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">el</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+
+<div class="viewcode-block" id="combine_data">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/batching_helpers/docs/api.html#accvlab.batching_helpers.combine_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">combine_data</span><span class="p">(</span>
+    <span class="n">data_list</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]],</span>
+    <span class="n">other_with_same_sample_sizes</span><span class="p">:</span> <span class="n">RaggedBatch</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">device</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">flatten_batch_dims</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RaggedBatch</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Combine data given as an (optionally nested) sequence of tensors to a single RaggedBatch</span>
+
+<span class="sd">    Nested sequences can be processed in two different ways:</span>
+
+<span class="sd">        - If ``flatten_batch_dims`` is ``True``, the sequence is flattened as if it were a single sequence.</span>
+<span class="sd">          In this case, the result is a single RaggedBatch instance with a single batch dimension.</span>
+<span class="sd">          The sequence of the samples in the batch is ordered as they appear in ``data_list`` when</span>
+<span class="sd">          traversed in depth-first order. In this case, there are no requirements on the length</span>
+<span class="sd">          of the sequences in `data_list` on any nesting level and the number of elements in the</span>
+<span class="sd">          sequences can vary between individual elements and from one nesting level to the next.</span>
+<span class="sd">          Also, the number of nesting levels can vary between individual elements.</span>
+<span class="sd">        </span>
+<span class="sd">        - If ``flatten_batch_dims`` is ``False``, the sequence is treated as a nested sequence and the</span>
+<span class="sd">          nesting levels are preserved as batch dimensions, i.e. each nesting level corresponds </span>
+<span class="sd">          to one batch dimension. As the batching dimensions need to be of uniform size, the number </span>
+<span class="sd">          of elements in all lists for a given nesting level needs to be identical. </span>
+<span class="sd">      </span>
+<span class="sd">          For example, the following needs to be fulfilled for the 2nd nesting level:</span>
+
+<span class="sd">          .. code-block:: python</span>
+<span class="sd">  </span>
+<span class="sd">              len(data_list[0][0]) == len(data_list[1][0]) == ... == len(data_list[n-1][0]) == \</span>
+<span class="sd">              len(data_list[0][1]) == len(data_list[1][1]) == ... == len(data_list[n-1][1]) == \</span>
+<span class="sd">              ... \</span>
+<span class="sd">              len(data_list[0][m-1]) == len(data_list[1][m-1]) == ... == len(data_list[n-1][m-1])</span>
+<span class="sd">        </span>
+<span class="sd">          where ``n`` is the number of elements in the 1st nesting level and ``m`` is the number of elements </span>
+<span class="sd">          in the 2nd nesting level. </span>
+
+<span class="sd">    The individual tensors contained in ``data_list`` need to match in size except for the dimension </span>
+<span class="sd">    ``dim==0`` (which will correspond to the non-uniform dimension in the resulting :class:`RaggedBatch` </span>
+<span class="sd">    instance).</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">        If ``other_with_same_sample_sizes`` is provided, it is assumed that the batch shape and sample</span>
+<span class="sd">        sizes are identical. If this is not the case, the behavior is undefined.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">        In the example below, the :func:`combine_data` operation is applied to a sequence of 4 tensors,</span>
+<span class="sd">        each corresponding to a single sample. As there is no nesting, a single batch dimension is created.</span>
+<span class="sd">        Note that in the image below:</span>
+
+<span class="sd">          - Letters indicate data entries that are valid (i.e. correspond to the actual data).</span>
+<span class="sd">          - &#39;*&#39; Indicates padded filler entries (i.e. invalid entries) in the data.</span>
+
+<span class="sd">        .. image:: images/Combine_ragged.png</span>
+<span class="sd">            :alt: Illustration of the combine data operation</span>
+<span class="sd">            :align: center</span>
+
+<span class="sd">        Each depicted element may represent a single value (corresponding to scalar data and 0 data dimensions),</span>
+<span class="sd">        or itself represent a non-scalar entry (in case for one or more data dimensions).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data_list: Sequence of tensors to combine.</span>
+<span class="sd">        other_with_same_sample_sizes: Other RaggedBatch instance with the same batch size and sample sizes. This is </span>
+<span class="sd">            optional and if provided, the mask and sample sizes tensors are shared between</span>
+<span class="sd">            this RaggedBatch instance and the result, reducing the amount of needed memory.</span>
+<span class="sd">        device: Device on which to create the resulting RaggedBatch. If not provided, </span>
+<span class="sd">            the device of the first element of ``data_list`` is used.</span>
+<span class="sd">        flatten_batch_dims: Whether to flatten the batch dimensions (see discussion above for details). Default is ``True``.</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        The combined data. </span>
+<span class="sd">        Shape:</span>
+
+<span class="sd">            - If ``flatten_batch_dims`` is ``True``, the batch dimension is ``dim==0`` and the non-uniform size dimension is ``dim==1``. </span>
+<span class="sd">            - If ``flatten_batch_dims`` is ``False``, the batch dimensions correspond to the nesting levels</span>
+<span class="sd">                of ``data_list``. The non-uniform size dimension is ``dim==num_batch_dims`` (i.e. the dimension</span>
+<span class="sd">                immediately following the batch dimensions).</span>
+<span class="sd">            - The remaining dimensions are as in the input tensors.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_list</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">),</span> <span class="s2">&quot;`data_list` must be a sequence&quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;`data_list` must not be empty&quot;</span>
+    <span class="n">reuse_mask_and_sample_sizes</span> <span class="o">=</span> <span class="n">other_with_same_sample_sizes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_with_flattening</span><span class="p">(</span><span class="n">data_list</span><span class="p">):</span>
+
+        <span class="k">nonlocal</span> <span class="n">device</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">get_first_nonempty_element</span><span class="p">(</span><span class="n">data_list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">el</span> <span class="ow">in</span> <span class="n">data_list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">el</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">el</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># TODO: move max_numel computation to a separate function &amp; remove the function nesting here</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">flatten_batch_dims_get_orig_dims_and_max_numel</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">flatten_recurrsion</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+                <span class="n">is_tensor</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">is_tensor</span><span class="p">:</span>
+                    <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
+                    <span class="n">max_numel</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">max_numel</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                        <span class="n">res_to_add</span><span class="p">,</span> <span class="n">max_numel_inner</span> <span class="o">=</span> <span class="n">flatten_recurrsion</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">max_numel_inner</span> <span class="o">&gt;</span> <span class="n">max_numel</span><span class="p">:</span>
+                            <span class="n">max_numel</span> <span class="o">=</span> <span class="n">max_numel_inner</span>
+                        <span class="n">res</span> <span class="o">+=</span> <span class="n">res_to_add</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span>
+                        <span class="s2">&quot;The data to combine must be a tensor or a (nested) sequence of tensors. &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">return</span> <span class="n">res</span><span class="p">,</span> <span class="n">max_numel</span>
+
+            <span class="n">res</span><span class="p">,</span> <span class="n">max_numel</span> <span class="o">=</span> <span class="n">flatten_recurrsion</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">res</span><span class="p">,</span> <span class="n">max_numel</span>
+
+        <span class="c1"># Original implementation for flatten_batch_dims=True</span>
+        <span class="n">flattened</span><span class="p">,</span> <span class="n">max_numel</span> <span class="o">=</span> <span class="n">flatten_batch_dims_get_orig_dims_and_max_numel</span><span class="p">(</span><span class="n">data_list</span><span class="p">)</span>
+        <span class="n">num_flattened</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">flattened</span><span class="p">)</span>
+        <span class="n">dims_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">num_flattened</span><span class="p">,</span> <span class="n">max_numel</span><span class="p">)</span>
+        <span class="c1"># Empty elements may not have the same number of dimensions as elements containing data.</span>
+        <span class="c1"># Therefore, do not use empty elements as examples if there are any non-empty elements available.</span>
+        <span class="n">sample_element</span> <span class="o">=</span> <span class="n">get_first_nonempty_element</span><span class="p">(</span><span class="n">flattened</span><span class="p">)</span>
+        <span class="c1"># If there are no non-empty elements, use an empty element as a sample element.</span>
+        <span class="c1"># In this case, we can still infer the batch size from the number of elements.</span>
+        <span class="k">if</span> <span class="n">sample_element</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">num_flattened</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">sample_element</span> <span class="o">=</span> <span class="n">flattened</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">device</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">device</span> <span class="o">=</span> <span class="n">sample_element</span><span class="o">.</span><span class="n">device</span> <span class="k">if</span> <span class="n">sample_element</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="c1"># If there are no elements at all, create an empty RaggedBatch instance</span>
+        <span class="k">if</span> <span class="n">sample_element</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">RaggedBatch</span><span class="o">.</span><span class="n">Empty</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">res</span>
+
+        <span class="n">dims_data_remaining_inner</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">sample_element</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="n">dims_data</span> <span class="o">=</span> <span class="n">dims_mask</span> <span class="o">+</span> <span class="n">dims_data_remaining_inner</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">dims_data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">sample_element</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">reuse_mask_and_sample_sizes</span><span class="p">:</span>
+            <span class="n">nums_vals</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">num_flattened</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">flattened</span><span class="p">):</span>
+            <span class="n">size_elem</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">el</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">el</span><span class="o">.</span><span class="n">numel</span><span class="p">())</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">reuse_mask_and_sample_sizes</span><span class="p">:</span>
+                <span class="n">nums_vals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">size_elem</span>
+            <span class="c1"># Note that this check is potentially needed for the data, as empty elements may have a number of dimensions different from</span>
+            <span class="c1"># other elements, leading to errors when trying to fill the data</span>
+            <span class="k">if</span> <span class="n">size_elem</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="n">size_elem</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">el</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">reuse_mask_and_sample_sizes</span><span class="p">:</span>
+            <span class="n">nums_vals</span> <span class="o">=</span> <span class="n">nums_vals</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">RaggedBatch</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">sample_sizes</span><span class="o">=</span><span class="n">nums_vals</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">num_flattened</span> <span class="o">==</span> <span class="n">other_with_same_sample_sizes</span><span class="o">.</span><span class="n">sample_sizes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">),</span> <span class="s2">&quot;Number of samples does not match `other_with_same_sample_sizes`&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">dims_mask</span> <span class="o">==</span> <span class="n">other_with_same_sample_sizes</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span>
+            <span class="p">),</span> <span class="s2">&quot;Needed mask dimension does not match `other_with_same_sample_sizes`&quot;</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">other_with_same_sample_sizes</span><span class="o">.</span><span class="n">create_with_sample_sizes_like_self</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">,</span> <span class="n">non_uniform_dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_as_nested</span><span class="p">(</span><span class="n">data_list</span><span class="p">):</span>
+
+        <span class="k">nonlocal</span> <span class="n">device</span>
+
+        <span class="c1"># Get the first contained tensor from a nested sequence</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">get_first_element</span><span class="p">(</span><span class="n">data_list</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_list</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">data_list</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">get_first_element</span><span class="p">(</span><span class="n">data_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># Determine the batch shape and validate consistency</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">get_batch_shape</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="s2">&quot;`data` must be a sequence&quot;</span>
+            <span class="c1"># Check first element to determine type for this level</span>
+            <span class="n">first_item</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">first_item</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+                <span class="c1"># All elements at this level must be tensors</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span>
+                            <span class="s2">&quot;The data to combine must be a tensor or a (nested) sequence of tensors. &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="si">}</span><span class="s2"> contained in the sequence at level </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch_shape</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+                        <span class="p">)</span>
+                <span class="n">batch_shape</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Get shape from first sequence</span>
+                <span class="n">sub_shape</span> <span class="o">=</span> <span class="n">get_batch_shape</span><span class="p">(</span><span class="n">first_item</span><span class="p">,</span> <span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="c1"># Verify consistency for remaining sequences</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span>
+                            <span class="s2">&quot;The data to combine must be a tensor or a (nested) sequence of tensors. &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="si">}</span><span class="s2"> contained in the sequence at level </span><span class="si">{</span><span class="n">level</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.&quot;</span>
+                        <span class="p">)</span>
+                    <span class="n">this_sub_shape</span> <span class="o">=</span> <span class="n">get_batch_shape</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">this_sub_shape</span> <span class="o">!=</span> <span class="n">sub_shape</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Inconsistent sequence length structure at level </span><span class="si">{</span><span class="n">level</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">. &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;Expected shape </span><span class="si">{</span><span class="n">sub_shape</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">this_sub_shape</span><span class="si">}</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+
+                <span class="n">batch_shape</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)]</span> <span class="o">+</span> <span class="n">sub_shape</span>
+
+            <span class="k">return</span> <span class="n">batch_shape</span>
+
+        <span class="c1"># Find maximum size along the first dimension of all tensors in the nested structure</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">find_max_numel</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">max_numel</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                    <span class="n">max_numel</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_numel</span><span class="p">,</span> <span class="n">find_max_numel</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+                <span class="k">return</span> <span class="n">max_numel</span>
+
+        <span class="c1"># Fill the nested data and sample sizes (sample_sizes is None if generate_mask_and_sample_sizes is False)</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">fill_data_and_sample_sizes</span><span class="p">(</span><span class="n">data_seq</span><span class="p">,</span> <span class="n">data_tensor</span><span class="p">,</span> <span class="n">sizes_tensor</span><span class="p">,</span> <span class="n">batch_indices</span><span class="o">=</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_seq</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+                <span class="n">size_elem</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">data_seq</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data_seq</span><span class="o">.</span><span class="n">numel</span><span class="p">())</span>
+                <span class="k">if</span> <span class="n">size_elem</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># Describe the region of the data tensor to fill</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="n">batch_indices</span> <span class="o">+</span> <span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size_elem</span><span class="p">),)</span> <span class="o">+</span> <span class="p">(</span><span class="bp">Ellipsis</span><span class="p">,)</span>
+                    <span class="c1"># Fill the defined region of the data tensor with the input tensor (&quot;leaf node&quot; of the nested input sequence)</span>
+                    <span class="n">data_tensor</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_seq</span>
+                    <span class="c1"># Set sample size (if needed)</span>
+                    <span class="k">if</span> <span class="n">sizes_tensor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">sizes_tensor</span><span class="p">[</span><span class="n">batch_indices</span><span class="p">]</span> <span class="o">=</span> <span class="n">size_elem</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># If the current element is not a &quot;leaf node&quot;, continue the recursion</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data_seq</span><span class="p">):</span>
+                    <span class="n">new_indices</span> <span class="o">=</span> <span class="n">batch_indices</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span><span class="p">,)</span>
+                    <span class="n">fill_data_and_sample_sizes</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">data_tensor</span><span class="p">,</span> <span class="n">sizes_tensor</span><span class="p">,</span> <span class="n">new_indices</span><span class="p">)</span>
+
+        <span class="c1"># Get batch shape</span>
+        <span class="n">batch_shape</span> <span class="o">=</span> <span class="n">get_batch_shape</span><span class="p">(</span><span class="n">data_list</span><span class="p">)</span>
+        <span class="n">num_batch_dims</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_shape</span><span class="p">)</span>
+
+        <span class="c1"># Find the maximum size of the non-uniform dimension across all tensors</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">reuse_mask_and_sample_sizes</span><span class="p">:</span>
+            <span class="n">max_numel</span> <span class="o">=</span> <span class="n">find_max_numel</span><span class="p">(</span><span class="n">data_list</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">max_numel</span> <span class="o">=</span> <span class="n">other_with_same_sample_sizes</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># Get a sample element to determine the data type and remaining dimensions</span>
+        <span class="n">sample_element</span> <span class="o">=</span> <span class="n">get_first_element</span><span class="p">(</span><span class="n">data_list</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sample_element</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">max_numel</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># TODO: check if this is needed</span>
+            <span class="c1"># Handle empty case</span>
+            <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">device</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">device</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="o">*</span><span class="n">batch_shape</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="o">*</span><span class="n">batch_shape</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">bool</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">sample_sizes</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">batch_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">RaggedBatch</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">sample_sizes</span><span class="p">,</span> <span class="n">non_uniform_dim</span><span class="o">=</span><span class="n">num_batch_dims</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">res</span>
+
+        <span class="k">if</span> <span class="n">device</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">device</span> <span class="o">=</span> <span class="n">sample_element</span><span class="o">.</span><span class="n">device</span>
+
+        <span class="c1"># Create the data tensor with the correct batch dimensions</span>
+        <span class="n">dims_data_remaining_inner</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">sample_element</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="n">dims_data</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">batch_shape</span><span class="p">,</span> <span class="n">max_numel</span><span class="p">)</span> <span class="o">+</span> <span class="n">dims_data_remaining_inner</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">dims_data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">sample_element</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="c1"># Create sample sizes tensor (if needed)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">reuse_mask_and_sample_sizes</span><span class="p">:</span>
+            <span class="n">sample_sizes</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">batch_shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sample_sizes</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Fill the data and sample sizes (the latter only if needed)</span>
+        <span class="n">fill_data_and_sample_sizes</span><span class="p">(</span><span class="n">data_list</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">sample_sizes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">reuse_mask_and_sample_sizes</span><span class="p">:</span>
+            <span class="n">sample_sizes</span> <span class="o">=</span> <span class="n">sample_sizes</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">reuse_mask_and_sample_sizes</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">RaggedBatch</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">sample_sizes</span><span class="o">=</span><span class="n">sample_sizes</span><span class="p">,</span> <span class="n">non_uniform_dim</span><span class="o">=</span><span class="n">num_batch_dims</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Use other_with_same_sample_sizes</span>
+            <span class="k">assert</span> <span class="n">other_with_same_sample_sizes</span><span class="o">.</span><span class="n">sample_sizes</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">batch_shape</span>
+            <span class="p">),</span> <span class="s2">&quot;Sample sizes shape does not match required batch shape&quot;</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">other_with_same_sample_sizes</span><span class="o">.</span><span class="n">create_with_sample_sizes_like_self</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">,</span> <span class="n">non_uniform_dim</span><span class="o">=</span><span class="n">num_batch_dims</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="k">if</span> <span class="n">flatten_batch_dims</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">process_with_flattening</span><span class="p">(</span><span class="n">data_list</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">process_as_nested</span><span class="p">(</span><span class="n">data_list</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+
+<div class="viewcode-block" id="get_indices_from_mask">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/batching_helpers/docs/api.html#accvlab.batching_helpers.get_indices_from_mask">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_indices_from_mask</span><span class="p">(</span><span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">RaggedBatch</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the indices from a mask.</span>
+
+<span class="sd">    :gpu:</span>
+
+<span class="sd">    For each sample, the indices correspond to the elements in the mask that are ``True``.</span>
+
+<span class="sd">    This functionality is e.g. useful when boolean indexing needs to be applied multiple times for different</span>
+<span class="sd">    data and the same mask, as the indexing using numerical indices (using :func:`batched_indexing_access`) is</span>
+<span class="sd">    more efficient than boolean indexing (using :func:`batched_bool_indexing`). Note that for a single</span>
+<span class="sd">    application of boolean indexing, the :func:`batched_bool_indexing` function is more efficient.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Only 2D masks (batch_size, num_elements) are supported.</span>
+
+<span class="sd">    See also:</span>
+<span class="sd">        :func:`batched_mask_from_indices` :func:`batched_indexing_access` :func:`batched_bool_indexing`</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mask: The mask to get the indices from.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The indices from the mask.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">        In the illustration below, &#39;*&#39; indicates invalid indices, i.e. padding to make the tensor uniform for</span>
+<span class="sd">        samples where the number of indices is smaller than ``max_num_indices``.</span>
+
+<span class="sd">        .. image:: images/IndicesFromMask_ragged.png</span>
+<span class="sd">            :alt: Illustration of the indices from mask operation</span>
+<span class="sd">            :align: center</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">mask</span><span class="o">.</span><span class="n">num_batch_dims</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="p">),</span> <span class="s2">&quot;Only RaggedBatch instances with a single batch dimension are supported&quot;</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">with_padded_set_to</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">tensor</span>
+
+    <span class="k">assert</span> <span class="n">mask</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Only 2D masks (batch_size, num_elements) are supported&quot;</span>
+
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">num_elements</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">indices_all</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_elements</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">mask</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="n">indices_all</span> <span class="o">=</span> <span class="n">indices_all</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">batched_bool_indexing</span><span class="p">(</span><span class="n">indices_all</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">indices</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

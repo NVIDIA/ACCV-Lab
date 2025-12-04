@@ -1,0 +1,281 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Format: Sample Data Group &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Pipeline &amp; Processing Steps" href="pipeline_processing_steps.html" />
+    <link rel="prev" title="Introduction" href="../design.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">DALI Pipeline Framework</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../design.html">Introduction</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../design.html#why-dali">Why DALI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#why-the-adas-dali-pipeline-framework">Why the ADAS DALI Pipeline Framework</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../design.html#overview">Overview</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Data Format: Sample Data Group</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#motivation-overview">Motivation &amp; Overview</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#field-types">Field Types</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#special-case-strings">Special Case: Strings</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="pipeline_processing_steps.html">Pipeline &amp; Processing Steps</a></li>
+<li class="toctree-l4"><a class="reference internal" href="input.html">Input – Passing Data to the Pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="output.html">Output – DALI Structured Output Iterator</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api/main_api.html">Main API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/additional_api.html">Additional API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">DALI Pipeline Framework</a></li>
+          <li class="breadcrumb-item"><a href="../design.html">Introduction</a></li>
+      <li class="breadcrumb-item active">Data Format: Sample Data Group</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/contained_package_docs_mirror/dali_pipeline_framework/docs/design/sample_data_group.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="data-format-sample-data-group">
+<h1>Data Format: Sample Data Group<a class="headerlink" href="#data-format-sample-data-group" title="Link to this heading"></a></h1>
+<section id="motivation-overview">
+<h2>Motivation &amp; Overview<a class="headerlink" href="#motivation-overview" title="Link to this heading"></a></h2>
+<p>Throughout the pipeline, an internal data format, <a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a>,
+is used to organize the training data. In the AUTO use-case, the training samples are often most naturally
+described using a hierarchy. For example:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>The training sample contains 6 cameras, where the data for each camera includes an image,
+a projection matrix, as well as image annotations, where the image annotations
+are composed of object bounding boxes... Apart from the camera data, there is also an ego-pose of the
+vehicle, as well as annotations containing (3D) bounding boxes...
+</pre></div>
+</div>
+<p>A common choice is nested dictionaries, which fit the hierarchy well. Our
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> plays a similar role but adds strict format handling
+and utilities that support DALI pipeline construction. Its design serves the following goals:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Well-defined data format</strong>: Each instance has a predefined format (what data exists, how it is
+organized, and what are the data types). The format can be changed, but only explicitly.
+Instances can also be “blueprints” (format only) used to infer a step’s output format from its input,
+track available data, detect incompatible steps, and provide convenient conversion to/from the format
+required by the underlying DALI pipeline at certain steps (data input &amp; output). All these use-cases are
+supported before actual pipeline execution, when no data is yet available (e.g. useful when creating
+iterators, e.g. a <a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/plugins/pytorch_plugin_api.html#nvidia.dali.plugin.pytorch.DALIGenericIterator" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIGenericIterator</span></code></a>, or a
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator" title="accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIStructuredOutputIterator</span></code></a>).</p></li>
+<li><p><strong>Flexible processing steps</strong>: Steps are implemented so that, for example, an image decoding step can
+automatically find and process all images without manually specifying their exact locations in the data.
+This discovery happens during DALI graph construction, so there is no runtime cost during pipeline
+execution. <a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> provides reusable utilities (e.g.,
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.find_all_occurrences" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.find_all_occurrences"><code class="xref py py-meth docutils literal notranslate"><span class="pre">find_all_occurrences()</span></code></a>), which can be directly used
+when implementing new flexible pipeline steps following that design.</p></li>
+<li><p><strong>Support of structured data accross pipeline borders</strong>: The data format can be used to pass hierarchical
+data across pipeline borders, i.e. when inputting the data into the pipeline and when outputting the data
+from the pipeline. Note that nested dictionaries cannot be easily used for this purpose, as the
+inputs/outputs to/from the underlying DALI pipeline are expected to be flat tuples of individual data
+fields. The <a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> provides utilities to handle
+conversions between the hierarchical and flat data formats in a way that is transparent to the user of the
+pipeline (see related methods, e.g.,
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.get_data" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.get_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_data()</span></code></a>,
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.set_data" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.set_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_data()</span></code></a>,
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.field_names_flat" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.field_names_flat"><code class="xref py py-meth docutils literal notranslate"><span class="pre">field_names_flat()</span></code></a>,
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.field_types_flat" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.field_types_flat"><code class="xref py py-meth docutils literal notranslate"><span class="pre">field_types_flat()</span></code></a>,
+…).</p></li>
+</ul>
+</div></blockquote>
+<figure class="align-center" id="id3">
+<a class="reference internal image-reference" href="../../../../_images/sample_data_group_example.png"><img alt="SampleDataGroup example diagram" src="../../../../_images/sample_data_group_example.png" style="width: 35%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Example of a data format definition as a <a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a>
+object.
+This example corresponds to the text example given at the beginning of this section.
+Green hexagons represent fields containing actual data (so called data fields; see <a class="reference internal" href="#field-types"><span class="std std-ref">Field Types</span></a>).
+Purple rectangles represent <a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> objects (so
+called data group fields; see <a class="reference internal" href="#field-types"><span class="std std-ref">Field Types</span></a>).</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<dl class="simple">
+<dt>Please note that:</dt><dd><ul class="simple">
+<li><p>It is configurable whether type checking should be performed at assignment time. By default, it is
+enabled.</p></li>
+<li><p>To disable type checking, use
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.set_do_check_type" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.set_do_check_type"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_do_check_type()</span></code></a>.</p></li>
+<li><p>For the pipeline, there is a corresponding option in the
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.PipelineDefinition" title="accvlab.dali_pipeline_framework.pipeline.PipelineDefinition"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineDefinition</span></code></a> constructor, which controls
+whether data format/type checking is enabled inside the DALI pipeline. By default, it is enabled.</p></li>
+<li><p>Type checking is useful when developing the pipeline/processing step, but adds some overhead.
+Therefore, it is advisable to disable it in production.</p></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+<section id="field-types">
+<span id="id1"></span><h2>Field Types<a class="headerlink" href="#field-types" title="Link to this heading"></a></h2>
+<ul>
+<li><p><strong>A</strong> <a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> <strong>contains different types of fields</strong>:</p>
+<blockquote>
+<div><ul>
+<li><p><strong>Data fields</strong>: Store actual data. Each field has a predefined type (changeable only explicitly).
+The fields may either be of the <a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a> type (inside the DALI pipeline),
+or of a type supported as input/output of the pipeline (e.g. <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>,
+<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code></a>, etc.). For the special case of <code class="docutils literal notranslate"><span class="pre">string</span></code> data, see <a class="reference internal" href="#special-case-strings"><span class="std std-ref">Special Case: Strings</span></a>.</p></li>
+<li><p><strong>Data group fields</strong>: Data group fields are intermediate hierarchy levels in the data format, and
+themselves contain multiple fields. The data group fields are themselves
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> objects.</p></li>
+<li><p><strong>Array fields</strong>: A special case of data group fields whose children have integer names covering a
+continuous range starting at 0. Any data group field meeting these conditions is treated as an array
+field (check with <a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.is_array" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.is_array"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_array()</span></code></a>). An array field is
+regarded as a more specific subtype if additional conditions are fulfilled:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Data field array</strong>: All children are data fields (check with
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.is_data_field_array" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.is_data_field_array"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_data_field_array()</span></code></a>).</p></li>
+<li><p><strong>Data group field array</strong>: All children are data group fields (check with
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.is_data_group_field_array" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.is_data_group_field_array"><code class="xref py py-meth docutils literal notranslate"><span class="pre">is_data_group_field_array()</span></code></a>).</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p><strong>Note</strong>: Although array fields are just data group fields meeting these constraints, the distinction is
+useful. <a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> provides helpers to define data field
+arrays and data group field arrays in a concise way. Also, checks if a field is an array field are
+useful for validation and error checking.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</section>
+<section id="special-case-strings">
+<span id="id2"></span><h2>Special Case: Strings<a class="headerlink" href="#special-case-strings" title="Link to this heading"></a></h2>
+<p>DALI does not directly support <code class="docutils literal notranslate"><span class="pre">string</span></code> data inside the pipeline.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Typically, strings are used in two ways during pre-processing:</p>
+<ol class="arabic simple">
+<li><p>As labels (e.g. class/category), which are converted to numeric values before training</p></li>
+<li><p>Passed through the pre-processing and used later as strings (e.g. sequence identifiers)</p></li>
+</ol>
+</li>
+<li><p><strong>The</strong> <a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> <strong>supports both use-cases by
+(respectively)</strong>:</p>
+<ol class="arabic simple">
+<li><p>User-defined mappings that automatically convert strings to numbers on assignment for selected
+fields. The mapping is defined in
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.add_data_field" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.add_data_field"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_data_field()</span></code></a> (with the type set to
+the type after mapping is applied).</p></li>
+<li><p>Transparently auto-converting strings to an internal format (<code class="docutils literal notranslate"><span class="pre">uint8</span></code> sequences) for transport
+through the pipeline, and converting back to strings on output. This is done by setting the type to
+<code class="xref py py-class docutils literal notranslate"><span class="pre">nvidia.dali.types.DALIDataType.STRING</span></code> in
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.add_data_field" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.add_data_field"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_data_field()</span></code></a>.</p></li>
+</ol>
+</li>
+</ul>
+</div></blockquote>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../design.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pipeline_processing_steps.html" class="btn btn-neutral float-right" title="Pipeline &amp; Processing Steps" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

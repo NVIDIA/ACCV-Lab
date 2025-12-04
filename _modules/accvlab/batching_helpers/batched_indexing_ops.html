@@ -1,0 +1,576 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.batching_helpers.batched_indexing_ops &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.batching_helpers.batched_indexing_ops</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.batching_helpers.batched_indexing_ops</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.autograd.function</span><span class="w"> </span><span class="kn">import</span> <span class="n">once_differentiable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">accvlab.batching_helpers.batched_indexing_access_cuda</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">batched_indexing_access_cuda</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.data_format</span><span class="w"> </span><span class="kn">import</span> <span class="n">RaggedBatch</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">BatchedIndexingAccess</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Batched indexing with non-uniform indices.</span>
+
+<span class="sd">    A wrapper function (:func:`batched_indexing_access`) is available and this class should not be used directly.</span>
+
+<span class="sd">    For details about the indexing operation, see documentation of :func:`batched_indexing_access` below, which wraps the functionality of this class</span>
+<span class="sd">    and presents it as a function.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
+        <span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">input_data</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">input_indices</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">input_nums_indices</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">fill_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Batched indexing with non-uniform indices.</span>
+
+<span class="sd">        Detailed documentation see :func:`batched_indexing_access` below, which wraps the functionality of this class</span>
+<span class="sd">        and presents it as a function (with some additional functionality).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">input_data</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="n">input_indices</span> <span class="o">=</span> <span class="n">input_indices</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="n">input_nums_indices</span> <span class="o">=</span> <span class="n">input_nums_indices</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">batched_indexing_access_cuda</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span>
+            <span class="n">input_data</span><span class="p">,</span> <span class="n">input_indices</span><span class="p">,</span> <span class="n">input_nums_indices</span><span class="p">,</span> <span class="n">fill_value</span>
+        <span class="p">)</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">input_indices</span><span class="p">,</span> <span class="n">input_nums_indices</span><span class="p">)</span>
+        <span class="n">num_batch_dim</span> <span class="o">=</span> <span class="n">input_nums_indices</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">input_num_targets</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">num_batch_dim</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="nd">@once_differentiable</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">grad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="kc">None</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform back-propagation of gradients for the performed mapping operation (see documentation of method :meth:`forward`).&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">grad</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">input_indices</span><span class="p">,</span> <span class="n">input_nums_indices</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
+            <span class="n">grad</span> <span class="o">=</span> <span class="n">grad</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+            <span class="n">grad_input</span> <span class="o">=</span> <span class="n">batched_indexing_access_cuda</span><span class="o">.</span><span class="n">backward_new_tensor</span><span class="p">(</span>
+                <span class="n">grad</span><span class="p">,</span> <span class="n">input_indices</span><span class="p">,</span> <span class="n">input_nums_indices</span><span class="p">,</span> <span class="n">ctx</span><span class="o">.</span><span class="n">input_num_targets</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">backward_accumulate</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">grad_input</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">BatchedInverseIndexingAccessNewTensor</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Batched inverse indexing access, i.e. writing data into the indexed location, with non-uniform indices</span>
+
+<span class="sd">    For details about the inverse indexing operation, see documentation of :func:`batched_inverse_indexing_access` below,</span>
+<span class="sd">    which wraps the functionality of this class and presents it as a function (with some additional functionality).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
+        <span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="nb">input</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">output_indices</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">output_nums_indices</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">output_num_targets</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
+        <span class="n">fill_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Batched indexing, i.e. writing data into the indexed location, with non-uniform indices</span>
+
+<span class="sd">        Detailed documentation see :func:`batched_inverse_indexing_access` below, which wraps the functionality of this class</span>
+<span class="sd">        and presents it as a function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">input</span> <span class="o">=</span> <span class="nb">input</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="n">output_indices</span> <span class="o">=</span> <span class="n">output_indices</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="n">output_nums_indices</span> <span class="o">=</span> <span class="n">output_nums_indices</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">batched_indexing_access_cuda</span><span class="o">.</span><span class="n">backward_new_tensor</span><span class="p">(</span>
+            <span class="nb">input</span><span class="p">,</span>
+            <span class="n">output_indices</span><span class="p">,</span>
+            <span class="n">output_nums_indices</span><span class="p">,</span>
+            <span class="n">output_num_targets</span><span class="p">,</span>
+            <span class="n">fill_value</span><span class="p">,</span>
+            <span class="n">backward_accumulate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">output_indices</span><span class="p">,</span> <span class="n">output_nums_indices</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="nd">@once_differentiable</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">grad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="kc">None</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform back-propagation of gradients for the performed mapping operation (see documentation of method :meth:`forward`).&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">grad</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">output_indices</span><span class="p">,</span> <span class="n">output_nums_indices</span><span class="p">)</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
+            <span class="n">grad</span> <span class="o">=</span> <span class="n">grad</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+            <span class="n">grad_input</span> <span class="o">=</span> <span class="n">batched_indexing_access_cuda</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">grad</span><span class="p">,</span> <span class="n">output_indices</span><span class="p">,</span> <span class="n">output_nums_indices</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">grad_input</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">BatchedInverseIndexingAccessInsert</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Batched inverse indexing access, i.e. writing data into the indexed location, with non-uniform indices</span>
+
+<span class="sd">    For details about the inverse indexing operation, see documentation of :func:`batched_inverse_indexing_access` below,</span>
+<span class="sd">    which wraps the functionality of this class and presents it as a function (with some additional functionality).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
+        <span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">to_fill</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">output_indices</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">output_nums_indices</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">to_fill_into</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Batched indexing, i.e. writing data into the indexed location, with non-uniform indices</span>
+
+<span class="sd">        Detailed documentation see :func:`batched_inverse_indexing_access` below, which wraps the functionality of this class</span>
+<span class="sd">        and presents it as a function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">to_fill</span> <span class="o">=</span> <span class="n">to_fill</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="n">to_fill_into</span> <span class="o">=</span> <span class="n">to_fill_into</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="n">output_indices</span> <span class="o">=</span> <span class="n">output_indices</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="n">output_nums_indices</span> <span class="o">=</span> <span class="n">output_nums_indices</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">batched_indexing_access_cuda</span><span class="o">.</span><span class="n">backward_insert</span><span class="p">(</span>
+            <span class="n">to_fill</span><span class="p">,</span> <span class="n">output_indices</span><span class="p">,</span> <span class="n">output_nums_indices</span><span class="p">,</span> <span class="n">to_fill_into</span>
+        <span class="p">)</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">output_indices</span><span class="p">,</span> <span class="n">output_nums_indices</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="nd">@once_differentiable</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">backward</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">grad</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="kc">None</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform back-propagation of gradients for the performed mapping operation (see documentation of method :meth:`forward`).&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">grad</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">output_indices</span><span class="p">,</span> <span class="n">output_nums_indices</span><span class="p">)</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
+            <span class="n">grad</span> <span class="o">=</span> <span class="n">grad</span><span class="o">.</span><span class="n">contiguous</span><span class="p">()</span>
+            <span class="n">grad_for_to_insert</span> <span class="o">=</span> <span class="n">batched_indexing_access_cuda</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span>
+                <span class="n">grad</span><span class="p">,</span> <span class="n">output_indices</span><span class="p">,</span> <span class="n">output_nums_indices</span><span class="p">,</span> <span class="mf">0.0</span>
+            <span class="p">)</span>
+            <span class="n">grad_for_to_insert_into</span> <span class="o">=</span> <span class="n">batched_indexing_access_cuda</span><span class="o">.</span><span class="n">backward_insert_const</span><span class="p">(</span>
+                <span class="mf">0.0</span><span class="p">,</span> <span class="n">output_indices</span><span class="p">,</span> <span class="n">output_nums_indices</span><span class="p">,</span> <span class="n">grad</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">grad_for_to_insert</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">grad_for_to_insert_into</span>
+
+
+<div class="viewcode-block" id="batched_indexing_access">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/batching_helpers/docs/api.html#accvlab.batching_helpers.batched_indexing_access">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">batched_indexing_access</span><span class="p">(</span>
+    <span class="n">input_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">RaggedBatch</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
+    <span class="n">input_indices</span><span class="p">:</span> <span class="n">RaggedBatch</span><span class="p">,</span>
+    <span class="n">filler_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">dim_to_index_in</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RaggedBatch</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Batched indexing access with non-uniform indices.</span>
+
+<span class="sd">    :gpu:</span>
+
+<span class="sd">    Note that for each sample, the number of resulting entries corresponds to the number of indices. This means that in general,</span>
+<span class="sd">    the output size will be non-uniform. Therefore, a :class:`RaggedBatch` is returned regardless of the ``input_data`` type.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Note that whether ``input_data`` is a :class:`RaggedBatch` or a :class:`torch.Tensor`, the indexing of ``input_data``</span>
+<span class="sd">        is performed along ``dim_to_index_in``, which is not necessarily the non-uniform dimension of ``input_data``.</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">        While the ``filler_value`` parameter can be used to set the value for filler values,</span>
+<span class="sd">        the filler value may change when processing the resulting :class:`RaggedBatch` further. Therefore,</span>
+<span class="sd">        care needs to be taken when assuming a certain filler value.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_data: Data to which the indexing is applied.</span>
+<span class="sd">        input_indices: For each sample (element along the batch dimension), the indices of entries to obtain from the input.</span>
+<span class="sd">            Shape: ``(*batch_shape, max_num_indices)``</span>
+<span class="sd">            Here, ``max_num_indices`` corresponds to the maximum number of indices over all samples.</span>
+<span class="sd">        filler_value: Filler values for the remaining elements in the output (corresponding to the fillers in ``input_indices``).</span>
+<span class="sd">            Default: 0.0</span>
+<span class="sd">        dim_to_index_in: Dimension on which to apply the indexing. Cannot be a batch dimension of the input indices.</span>
+<span class="sd">            If not set, will corresponds to `input_indices.non_uniform_dim`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Result containing the indexed entries from the input tensor. For a sample ``i`` and a valid</span>
+<span class="sd">        index ``j &lt; input_indices.sample_sizes[i]``, the following holds (assuming ``dim_to_index_in == 1``):</span>
+<span class="sd">        ``indexed_vals[i, j] == input_data[i, input_indices[i, j]]``</span>
+
+<span class="sd">        The shape of the resulting data is:</span>
+
+<span class="sd">            - ``indexed_vals.shape[0] == batch_size``</span>
+<span class="sd">            - ``indexed_vals.shape[dim_to_index_in] == max_num_indices``</span>
+<span class="sd">            - Remaining dimensions correspond to the input data</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        In the illustration below:</span>
+<span class="sd">          - Letters indicate data entries that are indexed in the input (and therefore appear in the output)</span>
+<span class="sd">          - &#39;-&#39; indicates entries where the actual values are not relevant (in the input).</span>
+<span class="sd">          - &#39;*&#39; indicates filler values in :class:`RaggedBatch` instances.</span>
+
+<span class="sd">        .. image:: images/BatchedIndexing_ragged.png</span>
+<span class="sd">            :alt: Illustration of the batched indexing operation</span>
+<span class="sd">            :align: center</span>
+
+<span class="sd">        Each depicted entry in the data may represent a single value (in case of</span>
+<span class="sd">        2D tensors), or itself be a non-scalar entry (in case that ``input_data`` has more than 2 dimensions).</span>
+
+<span class="sd">        Note that for ``input_indices``, the entries are always scalar.</span>
+
+<span class="sd">        Also, we do not show the ``filler_value`` in the example. It is filled into the &#39;*&#39;-entries in the output.</span>
+
+<span class="sd">        In this case, the ``dim_to_index_in`` is 1.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">is_input_ragged_batch</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_input_ragged_batch</span><span class="p">:</span>
+        <span class="n">input_data</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">tensor</span>
+
+    <span class="k">if</span> <span class="n">dim_to_index_in</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dim_to_index_in</span> <span class="o">=</span> <span class="n">input_indices</span><span class="o">.</span><span class="n">non_uniform_dim</span>
+        <span class="n">transpose_needed</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">dim_to_index_in</span> <span class="o">&gt;=</span> <span class="n">input_indices</span><span class="o">.</span><span class="n">num_batch_dims</span>
+        <span class="p">),</span> <span class="s2">&quot;Cannot index in a batch dimension of the input indices&quot;</span>
+        <span class="n">transpose_needed</span> <span class="o">=</span> <span class="n">input_indices</span><span class="o">.</span><span class="n">num_batch_dims</span> <span class="o">!=</span> <span class="n">dim_to_index_in</span>
+
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="n">dim_to_index_in</span> <span class="o">&gt;=</span> <span class="n">input_indices</span><span class="o">.</span><span class="n">num_batch_dims</span>
+    <span class="p">),</span> <span class="s2">&quot;Cannot index in a batch dimension of the input indices&quot;</span>
+
+    <span class="n">transpose_needed</span> <span class="o">=</span> <span class="n">input_indices</span><span class="o">.</span><span class="n">num_batch_dims</span> <span class="o">!=</span> <span class="n">dim_to_index_in</span>
+    <span class="k">if</span> <span class="n">transpose_needed</span><span class="p">:</span>
+        <span class="n">input_data</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">input_indices</span><span class="o">.</span><span class="n">num_batch_dims</span><span class="p">,</span> <span class="n">dim_to_index_in</span><span class="p">)</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">BatchedIndexingAccess</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="n">input_data</span><span class="p">,</span> <span class="n">input_indices</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">input_indices</span><span class="o">.</span><span class="n">sample_sizes</span><span class="p">,</span> <span class="n">filler_value</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">transpose_needed</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">input_indices</span><span class="o">.</span><span class="n">num_batch_dims</span><span class="p">,</span> <span class="n">dim_to_index_in</span><span class="p">)</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">input_indices</span><span class="o">.</span><span class="n">create_with_sample_sizes_like_self</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">dim_to_index_in</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+
+<div class="viewcode-block" id="batched_inverse_indexing_access">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/batching_helpers/docs/api.html#accvlab.batching_helpers.batched_inverse_indexing_access">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">batched_inverse_indexing_access</span><span class="p">(</span>
+    <span class="n">input_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">RaggedBatch</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
+    <span class="n">output_indices</span><span class="p">:</span> <span class="n">RaggedBatch</span><span class="p">,</span>
+    <span class="n">output_num_targets</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">filler_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">dim_to_index_in</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Batched setting of values at given indices, with non-uniform indices.</span>
+
+<span class="sd">    :gpu:</span>
+
+<span class="sd">    Non-uniform indices means that for each sample, the indices, as well as the number of indices, vary.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        This function is similar to :func:`batched_indexing_write`, but instead of using a ``to_write_into``</span>
+<span class="sd">        tensor, a tensor with a uniform filler value is created first, and the values to set are</span>
+<span class="sd">        written into that tensor.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Note that whether ``input_data`` is a :class:`RaggedBatch` instance or a tensor, the indexing</span>
+<span class="sd">        is performed along ``dim_to_index_in``, which is not necessarily the non-uniform dimension</span>
+<span class="sd">        of ``input_data``.</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">        This function assumes that for each sample, there are no duplicate indices in</span>
+<span class="sd">        ``output_indices``, i.e. there are no duplicates in the valid entries in:</span>
+<span class="sd">        ``output_indices[i, 0:output_indices.sample_sizes[i]]``.</span>
+
+<span class="sd">        If this is not the case, the behavior is undefined.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_data: Data which to write into the given indices.</span>
+<span class="sd">        output_indices: For each sample (element along the batch dimension), the indices of entries to write to in the output.</span>
+<span class="sd">            Shape: ``(batch_size, max_num_indices)``</span>
+<span class="sd">            Here, ``max_num_indices`` corresponds to the maximum number of indices over all samples.</span>
+<span class="sd">        output_num_targets: Size of the dimension corresponding to the indexed dimension in the output</span>
+<span class="sd">        filler_value: Filler values for the non-indexed elements in the output. Default: 0.0</span>
+<span class="sd">        dim_to_index_in: Dimension on which to apply the indexing. Optional, default is the non-uniform</span>
+<span class="sd">            dimension of the output indices.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Resulting tensor, containing the filled in values from the input, inserted at the corresponding indices,</span>
+<span class="sd">        and the filler values everywhere else.</span>
+
+<span class="sd">        For each sample ``i`` and each valid index ``j &lt; output_indices.sample_sizes[i]``, the following holds:</span>
+
+<span class="sd">            ``output[i, output_indices[i, j]] == input_data[i, j]``</span>
+
+<span class="sd">        The shape of the resulting data is:</span>
+
+<span class="sd">            - ``output.shape[0] == batch_size``</span>
+<span class="sd">            - ``output.shape[dim_to_index_in] == output_nums_targets``</span>
+<span class="sd">            - Remaining dimensions correspond to the input data</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        In the illustration below:</span>
+<span class="sd">          - Letters indicate data entries that are indexed in the input (and therefore appear in the output)</span>
+<span class="sd">          - &#39;-&#39; indicates entries where the actual values are not relevant (in the input).</span>
+<span class="sd">          - &#39;*&#39; indicates filler values in :class:`RaggedBatch` instances.</span>
+
+<span class="sd">        .. image:: images/BatchedInverseIndexing_ragged.png</span>
+<span class="sd">            :alt: Illustration of the batched inverse indexing operation</span>
+<span class="sd">            :align: center</span>
+
+<span class="sd">        Each depicted entry in the data may represent a single value (in case of</span>
+<span class="sd">        2D tensors), or itself be a non-scalar entry (in case that the data has more than 2 dimensions).</span>
+
+<span class="sd">        Note that for ``output_indices``, the entries are always scalar.</span>
+
+<span class="sd">        In this case, the ``dim_to_index_in`` is 1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">is_input_ragged_batch</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_input_ragged_batch</span><span class="p">:</span>
+        <span class="n">input_data</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">tensor</span>
+
+    <span class="k">if</span> <span class="n">dim_to_index_in</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dim_to_index_in</span> <span class="o">=</span> <span class="n">output_indices</span><span class="o">.</span><span class="n">non_uniform_dim</span>
+        <span class="n">transpose_needed</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">dim_to_index_in</span> <span class="o">&gt;=</span> <span class="n">output_indices</span><span class="o">.</span><span class="n">num_batch_dims</span>
+        <span class="p">),</span> <span class="s2">&quot;Cannot index in a batch dimension of the output indices&quot;</span>
+        <span class="n">transpose_needed</span> <span class="o">=</span> <span class="n">output_indices</span><span class="o">.</span><span class="n">num_batch_dims</span> <span class="o">!=</span> <span class="n">dim_to_index_in</span>
+
+    <span class="k">if</span> <span class="n">transpose_needed</span><span class="p">:</span>
+        <span class="n">input_data</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">output_indices</span><span class="o">.</span><span class="n">num_batch_dims</span><span class="p">,</span> <span class="n">dim_to_index_in</span><span class="p">)</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">BatchedInverseIndexingAccessNewTensor</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="n">input_data</span><span class="p">,</span> <span class="n">output_indices</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">output_indices</span><span class="o">.</span><span class="n">sample_sizes</span><span class="p">,</span> <span class="n">output_num_targets</span><span class="p">,</span> <span class="n">filler_value</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">transpose_needed</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">output_indices</span><span class="o">.</span><span class="n">num_batch_dims</span><span class="p">,</span> <span class="n">dim_to_index_in</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+
+<div class="viewcode-block" id="batched_indexing_write">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/batching_helpers/docs/api.html#accvlab.batching_helpers.batched_indexing_write">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">batched_indexing_write</span><span class="p">(</span>
+    <span class="n">to_write</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">RaggedBatch</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
+    <span class="n">output_indices</span><span class="p">:</span> <span class="n">RaggedBatch</span><span class="p">,</span>
+    <span class="n">to_write_into</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">RaggedBatch</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
+    <span class="n">dim_to_index_in</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">RaggedBatch</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Batched indexing write, i.e. writing data into the indexed location, with non-uniform indices.</span>
+
+<span class="sd">    Non-uniform indices means that for each sample, the indices, as well as the number of indices, vary.</span>
+
+<span class="sd">    :gpu:</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        This function is similar to :func:`batched_inverse_indexing_access`, but instead of creating a</span>
+<span class="sd">        constant tensor and filling the values in there, a ``to_write_into`` tensor is used, which</span>
+<span class="sd">        may already contain values, and only the values corresponding to the indices are updated.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Note that whether ``to_write`` and ``to_write_into`` are :class:`RaggedBatch` or :class:`torch.Tensor` instances, the indexing</span>
+<span class="sd">        is performed along ``dim_to_index_in``, which is not necessarily the non-uniform dimension</span>
+<span class="sd">        of ``to_write`` or ``to_write_into``.</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">        This function assumes that for each sample, there are no duplicate indices in</span>
+<span class="sd">        ``output_indices``, i.e. there are no duplicates in the valid entries in:</span>
+<span class="sd">        ``output_indices[i, 0:output_indices.sample_sizes[i]]``.</span>
+
+<span class="sd">        If this is not the case, the behavior is undefined.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        to_write: Data which to write into the given indices.</span>
+<span class="sd">        output_indices: For each sample (element along the batch dimension), the indices of entries to write to in the output.</span>
+<span class="sd">            Shape: ``(batch_size, max_num_indices)``</span>
+<span class="sd">            Here, ``max_num_indices`` corresponds to the maximum number of indices over all samples.</span>
+<span class="sd">        to_write_into: Tensor or RaggedBatch to write into.</span>
+<span class="sd">        dim_to_index_in: Dimension on which to apply the indexing. Optional, default is the non-uniform</span>
+<span class="sd">            dimension of the output indices.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Resulting tensor or :class:`RaggedBatch` instance. Corresponds to ``to_write_into``, with the values from</span>
+<span class="sd">        ``to_write`` inserted at the corresponding indices, and the original values from ``to_write_into``</span>
+<span class="sd">        everywhere else.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        In the illustration below:</span>
+<span class="sd">          - Letters indicate data entries that are indexed in the input (and therefore appear in the output)</span>
+<span class="sd">          - &#39;-&#39; indicates entries where the actual values are not relevant (in the input).</span>
+<span class="sd">          - &#39;*&#39; indicates filler values in :class:`RaggedBatch` instances.</span>
+<span class="sd">          - &#39;..&#39; indicates data which remains unchanged, i.e. is the same as in the ``to_write_into`` parameter</span>
+<span class="sd">            and the output.</span>
+
+<span class="sd">        .. image:: images/BatchedIndexWrite_ragged.png</span>
+<span class="sd">            :alt: Illustration of the batched indexing write operation</span>
+<span class="sd">            :align: center</span>
+
+<span class="sd">        Each depicted entry in the data may represent a single value (in case of</span>
+<span class="sd">        2D tensors), or itself be a non-scalar entry (in case that the data has more than 2 dimensions).</span>
+
+<span class="sd">        Note that for ``output_indices``, the entries are always scalar.</span>
+
+<span class="sd">        In this case, the ``dim_to_index_in`` is 1.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">is_input_ragged_batch</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">to_write</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">)</span>
+    <span class="n">is_output_ragged_batch</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">to_write_into</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dim_to_index_in</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dim_to_index_in</span> <span class="o">=</span> <span class="n">output_indices</span><span class="o">.</span><span class="n">non_uniform_dim</span>
+        <span class="n">transpose_needed</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">dim_to_index_in</span> <span class="o">&gt;=</span> <span class="n">output_indices</span><span class="o">.</span><span class="n">num_batch_dims</span>
+        <span class="p">),</span> <span class="s2">&quot;Cannot index in a batch dimension of the output indices&quot;</span>
+        <span class="n">transpose_needed</span> <span class="o">=</span> <span class="n">output_indices</span><span class="o">.</span><span class="n">num_batch_dims</span> <span class="o">!=</span> <span class="n">dim_to_index_in</span>
+
+    <span class="k">if</span> <span class="n">is_input_ragged_batch</span><span class="p">:</span>
+        <span class="n">to_write</span> <span class="o">=</span> <span class="n">to_write</span><span class="o">.</span><span class="n">tensor</span>
+    <span class="k">if</span> <span class="n">is_output_ragged_batch</span><span class="p">:</span>
+        <span class="n">to_write_into_data</span> <span class="o">=</span> <span class="n">to_write_into</span><span class="o">.</span><span class="n">tensor</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">to_write_into_data</span> <span class="o">=</span> <span class="n">to_write_into</span>
+    <span class="k">if</span> <span class="n">transpose_needed</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">dim_to_index_in</span> <span class="o">&gt;=</span> <span class="n">output_indices</span><span class="o">.</span><span class="n">num_batch_dims</span><span class="p">,</span> <span class="s2">&quot;Cannot index in any batch dimension&quot;</span>
+        <span class="n">to_write</span> <span class="o">=</span> <span class="n">to_write</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">output_indices</span><span class="o">.</span><span class="n">num_batch_dims</span><span class="p">,</span> <span class="n">dim_to_index_in</span><span class="p">)</span>
+        <span class="n">to_write_into_data</span> <span class="o">=</span> <span class="n">to_write_into_data</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">output_indices</span><span class="o">.</span><span class="n">num_batch_dims</span><span class="p">,</span> <span class="n">dim_to_index_in</span><span class="p">)</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">BatchedInverseIndexingAccessInsert</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="n">to_write</span><span class="p">,</span> <span class="n">output_indices</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">output_indices</span><span class="o">.</span><span class="n">sample_sizes</span><span class="p">,</span> <span class="n">to_write_into_data</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">transpose_needed</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">output_indices</span><span class="o">.</span><span class="n">num_batch_dims</span><span class="p">,</span> <span class="n">dim_to_index_in</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_output_ragged_batch</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">to_write_into</span><span class="o">.</span><span class="n">create_with_sample_sizes_like_self</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,302 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Dataset Preparation" href="dataset_preparation.html" />
+    <link rel="prev" title="Introduction" href="intro.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">On Demand Video Decoder</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#independent-installation">Independent Installation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#step-1-pull-base-image">Step 1: Pull Base Image</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#step-2-install-dependencies">Step 2: Install Dependencies</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#install-scikit-build">Install <code class="docutils literal notranslate"><span class="pre">scikit-build</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#install-accvlab-build-config">Install <code class="docutils literal notranslate"><span class="pre">accvlab_build_config</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#build-and-install-ffmpeg">Build and Install <code class="docutils literal notranslate"><span class="pre">FFmpeg</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#step-3-build-and-install">Step 3: Build and Install</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#dataset-preparation">Dataset Preparation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#development">Development</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#debugging">Debugging</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#performance-profiling">Performance Profiling</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#distributing">Distributing</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#build-wheel">Build Wheel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#alternative-using-uv">Alternative: Using uv</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dataset_preparation.html">Dataset Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sample.html">Sample Code Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pytorch_integration_examples/index.html">PyTorch Integration Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">On Demand Video Decoder</a></li>
+      <li class="breadcrumb-item active">Installation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/contained_package_docs_mirror/on_demand_video_decoder/docs/installation.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>This package is distributed as part of the ACCV-Lab package, and can be installed as described in the
+<a class="reference internal" href="../../../guides/INSTALLATION_GUIDE.html"><span class="std std-doc">Installation Guide</span></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>In most cases, it is recommended to follow the the general ACCV-Lab installation guide (see
+above) to install the package.</p>
+</div>
+</section>
+<section id="independent-installation">
+<h2>Independent Installation<a class="headerlink" href="#independent-installation" title="Link to this heading"></a></h2>
+<p>If needed, the package can be installed independently of the ACCV-Lab package and the default environment
+using the steps outlined in this section.</p>
+<section id="prerequisites">
+<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>CUDA</strong>: &gt;= 11.0</p></li>
+<li><p><strong>Operating System</strong>: Linux</p></li>
+<li><p><strong>Python</strong>: 3.8+</p></li>
+<li><p><strong>cmake</strong>: &gt;= 3.21</p></li>
+<li><p><strong>scikit-build</strong></p></li>
+</ul>
+</section>
+<section id="step-1-pull-base-image">
+<h3>Step 1: Pull Base Image<a class="headerlink" href="#step-1-pull-base-image" title="Link to this heading"></a></h3>
+<p>Choose an appropriate NVIDIA PyTorch container from
+<a class="reference external" href="https://docs.nvidia.com/deeplearning/frameworks/pytorch-release-notes/index.html">NVIDIA Deep Learning Framework Documentation</a>.
+Images released after 22.11 are required for successful compilation.</p>
+<p><strong>Example using PyTorch 23.02:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>pull<span class="w"> </span>nvcr.io/nvidia/pytorch:23.02-py3
+</pre></div>
+</div>
+</section>
+<section id="step-2-install-dependencies">
+<h3>Step 2: Install Dependencies<a class="headerlink" href="#step-2-install-dependencies" title="Link to this heading"></a></h3>
+<section id="install-scikit-build">
+<h4>Install <code class="docutils literal notranslate"><span class="pre">scikit-build</span></code><a class="headerlink" href="#install-scikit-build" title="Link to this heading"></a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>scikit-build
+</pre></div>
+</div>
+</section>
+<section id="install-accvlab-build-config">
+<h4>Install <code class="docutils literal notranslate"><span class="pre">accvlab_build_config</span></code><a class="headerlink" href="#install-accvlab-build-config" title="Link to this heading"></a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>build_config<span class="w">  </span><span class="c1"># ← Assuming you are in the root directory of the repository</span>
+pip<span class="w"> </span>install<span class="w"> </span>.<span class="w"> </span>--no-build-isolation
+</pre></div>
+</div>
+</section>
+<section id="build-and-install-ffmpeg">
+<h4>Build and Install <code class="docutils literal notranslate"><span class="pre">FFmpeg</span></code><a class="headerlink" href="#build-and-install-ffmpeg" title="Link to this heading"></a></h4>
+<p><a class="reference external" href="https://ffmpeg.org/">FFMpeg</a> version==4.4 has been tested, and we use this version here.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>apt<span class="w"> </span>install<span class="w"> </span>yasm<span class="w"> </span>nasm<span class="w"> </span>-y
+wget<span class="w"> </span>https://ffmpeg.org/releases/ffmpeg-4.4.6.tar.xz
+tar<span class="w"> </span>-xf<span class="w"> </span>ffmpeg-4.4.6.tar.xz
+
+<span class="nb">cd</span><span class="w"> </span>ffmpeg-4.4.6
+<span class="c1"># FFmpeg Libraries used in this package can be built using the following configure options. The configuration </span>
+<span class="c1"># ensures that the FFmpeg libraries are built with the minimum required functionality to support </span>
+<span class="c1"># the On-demand Video Decoder Package, while also ensuring that only the components of FFmpeg that are </span>
+<span class="c1"># licensed under the LGPL license is used.</span>
+<span class="nv">LDSOFLAGS</span><span class="o">=</span>-Wl,-rpath,<span class="se">\&#39;</span><span class="s1">&#39;$$$$ORIGIN&#39;</span><span class="se">\&#39;</span><span class="w">  </span>./configure<span class="w"> </span>--enable-shared<span class="w"> </span>--disable-encoders<span class="w"> </span>--disable-decoders<span class="w"> </span>--enable-decoder<span class="o">=</span>vp9<span class="w"> </span>--arch<span class="o">=</span>x86_64<span class="w"> </span>--prefix<span class="o">=</span>/PATH/TO/YOUR/FFMPEG
+
+make<span class="w"> </span>-j
+make<span class="w"> </span>install
+<span class="c1"># The FFMPEG_DIR path is used by the On-demand Video Decoder Package to find the FFmpeg libraries during </span>
+<span class="c1"># build time. </span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">FFMPEG_DIR</span><span class="o">=</span>/PATH/TO/YOUR/FFMPEG
+</pre></div>
+</div>
+</section>
+</section>
+<section id="step-3-build-and-install">
+<h3>Step 3: Build and Install<a class="headerlink" href="#step-3-build-and-install" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>packages/on_demand_video_decoder<span class="w">  </span><span class="c1"># ← Assuming you are in the root directory of the repository</span>
+pip<span class="w"> </span>install<span class="w"> </span>.<span class="w"> </span>--no-build-isolation
+</pre></div>
+</div>
+</section>
+</section>
+<section id="dataset-preparation">
+<h2>Dataset Preparation<a class="headerlink" href="#dataset-preparation" title="Link to this heading"></a></h2>
+<p>Please refer to the <a class="reference internal" href="dataset_preparation.html"><span class="std std-doc">Dataset Preparation Guide</span></a> for instructions on how to prepare
+the NuScenes (mini) dataset for testing and profiling the video decoder, as well as for potential use
+of the video dataset for training purposes.</p>
+</section>
+<section id="development">
+<h2>Development<a class="headerlink" href="#development" title="Link to this heading"></a></h2>
+<section id="debugging">
+<h3>Debugging<a class="headerlink" href="#debugging" title="Link to this heading"></a></h3>
+<p>For development and debugging purposes, you can trigger a debug build via the environment variables described
+in the main <a class="reference internal" href="../../../guides/INSTALLATION_GUIDE.html"><span class="std std-doc">Installation Guide</span></a>.
+The <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> command will internally run the CMake/scikit-build build, so you do not need to call
+<code class="docutils literal notranslate"><span class="pre">cmake</span></code> or <code class="docutils literal notranslate"><span class="pre">make</span></code> manually:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>packages/on_demand_video_decoder
+<span class="c1"># Debug build with verbose output</span>
+<span class="nv">DEBUG_BUILD</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">VERBOSE_BUILD</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.<span class="w"> </span>--no-build-isolation
+</pre></div>
+</div>
+</section>
+<section id="performance-profiling">
+<h3>Performance Profiling<a class="headerlink" href="#performance-profiling" title="Link to this heading"></a></h3>
+<p>Use NVIDIA Nsight Systems for comprehensive performance analysis:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nsys<span class="w"> </span>profile<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--trace-fork-before-exec<span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-w<span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-f<span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-t<span class="w"> </span>cuda,nvtx,osrt,cudnn,cublas,nvvideo<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--gpu-video-device<span class="w"> </span>all<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-x<span class="w"> </span><span class="nb">true</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-o<span class="w"> </span>report<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>python<span class="w"> </span>samples/ProfileNuscenesGopDecoder.py
+</pre></div>
+</div>
+<p><strong>Profile Options Explained:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--trace-fork-before-exec</span> <span class="pre">true</span></code>: Enable fork tracing</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-w</span> <span class="pre">true</span></code>: Overwrite existing output files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-f</span> <span class="pre">true</span></code>: Force profiling</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-t</span></code>: Specify trace categories</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--gpu-video-device</span> <span class="pre">all</span></code>: Profile all GPU video devices</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-x</span> <span class="pre">true</span></code>: Export results</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-o</span></code>: Output file prefix</p></li>
+</ul>
+</section>
+</section>
+<section id="distributing">
+<h2>Distributing<a class="headerlink" href="#distributing" title="Link to this heading"></a></h2>
+<p>To build a distributable wheel package, ensure you have completed <strong>Step 1/2</strong> first.</p>
+<section id="build-wheel">
+<h3>Build Wheel<a class="headerlink" href="#build-wheel" title="Link to this heading"></a></h3>
+<p>Set the target CUDA architectures for broader GPU compatibility:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">CUSTOM_CUDA_ARCHS</span><span class="o">=</span><span class="s2">&quot;60,70,75,80,86,89&quot;</span>
+<span class="nb">cd</span><span class="w"> </span>packages/on_demand_video_decoder<span class="w">  </span><span class="c1"># ← Assuming you are in the root directory of the repository</span>
+python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>wheel<span class="w"> </span>.<span class="w"> </span>-w<span class="w"> </span>./<span class="w"> </span>--no-build-isolation
+</pre></div>
+</div>
+</section>
+<section id="alternative-using-uv">
+<h3>Alternative: Using uv<a class="headerlink" href="#alternative-using-uv" title="Link to this heading"></a></h3>
+<p>If you prefer using <a class="reference external" href="https://github.com/astral-sh/uv">uv</a> as your package manager:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uv<span class="w"> </span>build<span class="w"> </span>--no-build-isolation<span class="w"> </span>--out-dir<span class="w"> </span>./
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="intro.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dataset_preparation.html" class="btn btn-neutral float-right" title="Dataset Preparation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

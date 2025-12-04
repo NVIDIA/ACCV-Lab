@@ -1,0 +1,892 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Examples" href="examples.html" />
+    <link rel="prev" title="Introduction" href="intro.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Optimization Testing Tools</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#accvlab.optim_test_tools.Stopwatch"><code class="docutils literal notranslate"><span class="pre">Stopwatch</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.Stopwatch.enable"><code class="docutils literal notranslate"><span class="pre">Stopwatch.enable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.Stopwatch.is_enabled"><code class="docutils literal notranslate"><span class="pre">Stopwatch.is_enabled</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.Stopwatch.print_eval_times"><code class="docutils literal notranslate"><span class="pre">Stopwatch.print_eval_times()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.Stopwatch.set_cpu_usage_meas_name"><code class="docutils literal notranslate"><span class="pre">Stopwatch.set_cpu_usage_meas_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.Stopwatch.start_meas"><code class="docutils literal notranslate"><span class="pre">Stopwatch.start_meas()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.Stopwatch.end_meas"><code class="docutils literal notranslate"><span class="pre">Stopwatch.end_meas()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.Stopwatch.start_one_time_measurement"><code class="docutils literal notranslate"><span class="pre">Stopwatch.start_one_time_measurement()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.Stopwatch.end_one_time_measurement"><code class="docutils literal notranslate"><span class="pre">Stopwatch.end_one_time_measurement()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.Stopwatch.finish_iter"><code class="docutils literal notranslate"><span class="pre">Stopwatch.finish_iter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.Stopwatch.get_num_nonwarmup_iters_measured"><code class="docutils literal notranslate"><span class="pre">Stopwatch.get_num_nonwarmup_iters_measured()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#accvlab.optim_test_tools.NVTXRangeWrapper"><code class="docutils literal notranslate"><span class="pre">NVTXRangeWrapper</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.NVTXRangeWrapper.enable"><code class="docutils literal notranslate"><span class="pre">NVTXRangeWrapper.enable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.NVTXRangeWrapper.is_enabled"><code class="docutils literal notranslate"><span class="pre">NVTXRangeWrapper.is_enabled</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.NVTXRangeWrapper.range_push"><code class="docutils literal notranslate"><span class="pre">NVTXRangeWrapper.range_push()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.NVTXRangeWrapper.range_pop"><code class="docutils literal notranslate"><span class="pre">NVTXRangeWrapper.range_pop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper"><code class="docutils literal notranslate"><span class="pre">TensorDumper</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.Type"><code class="docutils literal notranslate"><span class="pre">TensorDumper.Type</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.Type.JSON"><code class="docutils literal notranslate"><span class="pre">TensorDumper.Type.JSON</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.Type.BINARY"><code class="docutils literal notranslate"><span class="pre">TensorDumper.Type.BINARY</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.Type.IMAGE_RGB"><code class="docutils literal notranslate"><span class="pre">TensorDumper.Type.IMAGE_RGB</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.Type.IMAGE_BGR"><code class="docutils literal notranslate"><span class="pre">TensorDumper.Type.IMAGE_BGR</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.Type.IMAGE_I"><code class="docutils literal notranslate"><span class="pre">TensorDumper.Type.IMAGE_I</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.Type.is_image"><code class="docutils literal notranslate"><span class="pre">TensorDumper.Type.is_image()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.enable"><code class="docutils literal notranslate"><span class="pre">TensorDumper.enable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.is_enabled"><code class="docutils literal notranslate"><span class="pre">TensorDumper.is_enabled</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.add_tensor_data"><code class="docutils literal notranslate"><span class="pre">TensorDumper.add_tensor_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.add_grad_data"><code class="docutils literal notranslate"><span class="pre">TensorDumper.add_grad_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.set_dump_type_for_all"><code class="docutils literal notranslate"><span class="pre">TensorDumper.set_dump_type_for_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.dump"><code class="docutils literal notranslate"><span class="pre">TensorDumper.dump()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.compare_to_dumped_data"><code class="docutils literal notranslate"><span class="pre">TensorDumper.compare_to_dumped_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.set_gradients"><code class="docutils literal notranslate"><span class="pre">TensorDumper.set_gradients()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.reset_dump_count"><code class="docutils literal notranslate"><span class="pre">TensorDumper.reset_dump_count()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.perform_after_dump_count"><code class="docutils literal notranslate"><span class="pre">TensorDumper.perform_after_dump_count()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.register_custom_converter"><code class="docutils literal notranslate"><span class="pre">TensorDumper.register_custom_converter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.enable_ragged_batch_dumping"><code class="docutils literal notranslate"><span class="pre">TensorDumper.enable_ragged_batch_dumping()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.run_if_enabled"><code class="docutils literal notranslate"><span class="pre">TensorDumper.run_if_enabled()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Optimization Testing Tools</a></li>
+      <li class="breadcrumb-item active">API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/contained_package_docs_mirror/optim_test_tools/docs/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
+<p>Complete API documentation for the optim_test_tools package.</p>
+<dl class="py class" id="module-accvlab.optim_test_tools">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.Stopwatch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.optim_test_tools.</span></span><span class="sig-name descname"><span class="pre">Stopwatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/stopwatch.html#Stopwatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.Stopwatch" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SingletonBase</span></code></p>
+<p>Stopwatch for performing runtime evaluations.</p>
+<p>This is a singleton class for performing runtime measurements and obtaining the total as well as average
+run-time for the measurements</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>per measurement.</p></li>
+<li><p>per (training) iteration, where a single measurement can be performed multiple times, or only in some
+iterations.</p></li>
+</ol>
+</div></blockquote>
+<p>A warm-up phase can be defined when configuring the stopwatch. During the warm-up phase, no measurements
+are performed.</p>
+<p>Multiple measurements can be performed, and are distinguished by name. The end of a (training) iteration is
+indicated explicitly (by calling the method <a class="reference internal" href="#accvlab.optim_test_tools.Stopwatch.finish_iter" title="accvlab.optim_test_tools.Stopwatch.finish_iter"><code class="xref py py-meth docutils literal notranslate"><span class="pre">finish_iter()</span></code></a>). This is done to automatically start
+measurements after the warm-up phase is finished, to average the measurements over the iterations, and
+to print the measurements in certain intervals.</p>
+<p>The CPU usage can be measured for one “type” of measurement (i.e. one measurement name). This is done by
+calling the <a class="reference internal" href="#accvlab.optim_test_tools.Stopwatch.set_cpu_usage_meas_name" title="accvlab.optim_test_tools.Stopwatch.set_cpu_usage_meas_name"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_cpu_usage_meas_name()</span></code></a> before the first measurement with the corresponding name is
+started. The CPU usage is then measured whenever the measurement is running and the average CPU usage is
+printed together with the other measurements.</p>
+<p>One-time measurements can be performed at any point in the code (see <a class="reference internal" href="#accvlab.optim_test_tools.Stopwatch.start_one_time_measurement" title="accvlab.optim_test_tools.Stopwatch.start_one_time_measurement"><code class="xref py py-meth docutils literal notranslate"><span class="pre">start_one_time_measurement()</span></code></a>,
+<a class="reference internal" href="#accvlab.optim_test_tools.Stopwatch.end_one_time_measurement" title="accvlab.optim_test_tools.Stopwatch.end_one_time_measurement"><code class="xref py py-meth docutils literal notranslate"><span class="pre">end_one_time_measurement()</span></code></a>). They are not affected by the warm-up phase and are reported as such
+(i.e. in own section and without averages etc.). Each one-time measurement (i.e. measurement with a given
+name) can be performed only once.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The CPU usage is measured using <code class="xref py py-func docutils literal notranslate"><span class="pre">psutil.cpu_percent()</span></code>. To ensure that the interval for which the
+CPU usage is measured is correct, the function <code class="xref py py-func docutils literal notranslate"><span class="pre">psutil.cpu_percent()</span></code> must not be called outside
+of the stopwatch during the measurement.</p>
+</div>
+<p>The stopwatch must be first enabled before any measurements are performed. If not enabled, calls to any
+methods have minimal overhead. To ensure this, the methods are empty in disabled state and replaced with
+methods implementing the functionality when enabled. This means that the runtime overhead for using the
+stopwatch is negligible when it is not enabled. The enabling can be done from any part of the code (as
+this is a singleton).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When obtaining an object using (<code class="docutils literal notranslate"><span class="pre">Stopwatch()</span></code>) the singleton is returned if already
+created.</p>
+<p>If parameters are provided when calling <code class="docutils literal notranslate"><span class="pre">Stopwatch()</span></code>, this will enable the stopwatch
+(equivalent to calling <a class="reference internal" href="#accvlab.optim_test_tools.Stopwatch.enable" title="accvlab.optim_test_tools.Stopwatch.enable"><code class="xref py py-meth docutils literal notranslate"><span class="pre">enable()</span></code></a>). Note that enabling can only be done once, and will
+lead to an error if attempted a second time.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_warmup_iters</strong> – The number of warmup iterations to be performed before the runtime
+measurement is started.</p></li>
+<li><p><strong>print_every_n_iters</strong> – Once in how many iterations to print the measured runtime. If
+<code class="docutils literal notranslate"><span class="pre">None</span></code>, the runtime is not printed automatically (but can still be printed manually
+by calling <a class="reference internal" href="#accvlab.optim_test_tools.Stopwatch.print_eval_times" title="accvlab.optim_test_tools.Stopwatch.print_eval_times"><code class="xref py py-meth docutils literal notranslate"><span class="pre">print_eval_times()</span></code></a>).</p></li>
+<li><p><strong>do_cuda_sync</strong> – Whether to synchronize the CUDA device every time a measurement is started
+or stopped.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.Stopwatch.enable">
+<span class="sig-name descname"><span class="pre">enable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_warmup_iters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_every_n_iters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">do_cuda_sync</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/stopwatch.html#Stopwatch.enable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.Stopwatch.enable" title="Link to this definition"></a></dt>
+<dd><p>Enable the stopwatch</p>
+<p>This method can be called only once and enables the Stopwatch singleton.
+Any measurements started or performed before calling this method are ignored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_warmup_iters</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The number of warmup iterations to be performed before the runtime measurement is started</p></li>
+<li><p><strong>print_every_n_iters</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – Once in how many iterations to print the measured runtime. If <code class="docutils literal notranslate"><span class="pre">None</span></code>, the runtime is not
+printed automatically (but can be still printed manually by calling <a class="reference internal" href="#accvlab.optim_test_tools.Stopwatch.print_eval_times" title="accvlab.optim_test_tools.Stopwatch.print_eval_times"><code class="xref py py-meth docutils literal notranslate"><span class="pre">print_eval_times()</span></code></a>).</p></li>
+<li><p><strong>do_cuda_sync</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether to synchronize CUDA device every time a measurement is started or stopped.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.Stopwatch.is_enabled">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_enabled</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></em><a class="headerlink" href="#accvlab.optim_test_tools.Stopwatch.is_enabled" title="Link to this definition"></a></dt>
+<dd><p>Whether the stopwatch is enabled</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.Stopwatch.print_eval_times">
+<span class="sig-name descname"><span class="pre">print_eval_times</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/stopwatch.html#Stopwatch.print_eval_times"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.Stopwatch.print_eval_times" title="Link to this definition"></a></dt>
+<dd><p>Print the evaluation times</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.Stopwatch.set_cpu_usage_meas_name">
+<span class="sig-name descname"><span class="pre">set_cpu_usage_meas_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/stopwatch.html#Stopwatch.set_cpu_usage_meas_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.Stopwatch.set_cpu_usage_meas_name" title="Link to this definition"></a></dt>
+<dd><p>Set the name of the CPU usage measurement</p>
+<p>This method must be called before the first measurement with the corresponding name is started.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>If the CPU usage measurement is already set, it cannot be changed. Calling this method with
+a different name will raise an error.</p>
+<p>Calling this method with the same name as the current CPU usage measurement name is allowed
+and will have no effect. This is useful to set the CPU usage name right before starting
+the first measurement with the corresponding name, even if the corresponding code
+region is called iteratively.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The CPU usage is measured using <code class="xref py py-func docutils literal notranslate"><span class="pre">psutil.cpu_percent()</span></code>. To ensure that the interval for which the CPU usage is measured
+is correct, the function <code class="xref py py-func docutils literal notranslate"><span class="pre">psutil.cpu_percent()</span></code> must not be called outside of the stopwatch during the measurement.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the measurement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.Stopwatch.start_meas">
+<span class="sig-name descname"><span class="pre">start_meas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/stopwatch.html#Stopwatch.start_meas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.Stopwatch.start_meas" title="Link to this definition"></a></dt>
+<dd><p>Start a measurement with given name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name for the measurement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.Stopwatch.end_meas">
+<span class="sig-name descname"><span class="pre">end_meas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/stopwatch.html#Stopwatch.end_meas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.Stopwatch.end_meas" title="Link to this definition"></a></dt>
+<dd><p>End a measurement with given name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the measurements</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.Stopwatch.start_one_time_measurement">
+<span class="sig-name descname"><span class="pre">start_one_time_measurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/stopwatch.html#Stopwatch.start_one_time_measurement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.Stopwatch.start_one_time_measurement" title="Link to this definition"></a></dt>
+<dd><p>Start a one-time measurement with given name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the measurement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.Stopwatch.end_one_time_measurement">
+<span class="sig-name descname"><span class="pre">end_one_time_measurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/stopwatch.html#Stopwatch.end_one_time_measurement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.Stopwatch.end_one_time_measurement" title="Link to this definition"></a></dt>
+<dd><p>End a one-time measurement with given name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the measurement</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.Stopwatch.finish_iter">
+<span class="sig-name descname"><span class="pre">finish_iter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/stopwatch.html#Stopwatch.finish_iter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.Stopwatch.finish_iter" title="Link to this definition"></a></dt>
+<dd><p>Finish the current iteration.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.Stopwatch.get_num_nonwarmup_iters_measured">
+<span class="sig-name descname"><span class="pre">get_num_nonwarmup_iters_measured</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/stopwatch.html#Stopwatch.get_num_nonwarmup_iters_measured"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.Stopwatch.get_num_nonwarmup_iters_measured" title="Link to this definition"></a></dt>
+<dd><p>Get the number of non-warmup iterations performed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span> – Number of measured non-warmup iterations</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.NVTXRangeWrapper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.optim_test_tools.</span></span><span class="sig-name descname"><span class="pre">NVTXRangeWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/nvtx_range_wrapper.html#NVTXRangeWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.NVTXRangeWrapper" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SingletonBase</span></code></p>
+<p>Wrapper for NVTX ranges.</p>
+<p>This is a singleton class which allows for enabling the use of NVTX ranges and configuring how the ranges
+are used from any part of the implementation.</p>
+<p>The wrapper must be first enabled before any measurements are performed. If not enabled, calls to any
+methods have minimal overhead. Enabling can be done from any part of the code (as this is a singleton).</p>
+<p>Compared to using the NVTX range push/pop functionality directly, it offers the following advantages:</p>
+<ul class="simple">
+<li><p>It is possible to easily configure whether CUDA synchronization is performed when pushing/popping a
+range. The synchronization is part of the push/pop methods and so can be turned on and off without
+changes to the code where the ranges are used, and is not performed if not needed.</p></li>
+<li><p>If not enabled, calls to push/pop have minimal overhead (call to an empty function). Note that while the
+pushing/popping of ranges itself also has negligible overhead using NVTX directly, profiling-related
+CUDA synchronizations need to be handled manually in this case.</p></li>
+<li><p>Range mismatch checks: The wrapper allows for checks whether the popped range corresponds to the range
+that is expected to be popped. This functionality can be turned on or off as part of the configuration
+when enabling the wrapper. This functionality has an overhead, and so should be only enabled for
+debugging purposes, and be turned off when actual profiling is performed.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When obtaining an object using (<code class="docutils literal notranslate"><span class="pre">NVTXRangeWrapper()</span></code>) the singleton is returned if already
+created.</p>
+<p>If parameters are provided when calling <code class="docutils literal notranslate"><span class="pre">NVTXRangeWrapper()</span></code>, this will enable the NVTX range
+wrapper (equivalent to calling <a class="reference internal" href="#accvlab.optim_test_tools.NVTXRangeWrapper.enable" title="accvlab.optim_test_tools.NVTXRangeWrapper.enable"><code class="xref py py-meth docutils literal notranslate"><span class="pre">enable()</span></code></a>).
+Note that enabling can only be done once, and will lead to an error if attempted a second time.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sync_on_push</strong> – Whether to synchronize the CUDA device every time before pushing a range</p></li>
+<li><p><strong>sync_on_pop</strong> – Whether to synchronize the CUDA device every time before popping a range</p></li>
+<li><p><strong>keep_track_of_range_order</strong> – Whether to keep track of the range stack internally. A range name may
+be specified optionally when popping a range, and a check is performed whether the popped range
+corresponds to the range that is expected to be popped if this is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>. Note
+that this has an overhead and so should be only enabled for debugging purposes, and be turned
+off when performing the actual profiling.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.NVTXRangeWrapper.enable">
+<span class="sig-name descname"><span class="pre">enable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sync_on_push</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sync_on_pop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_track_of_range_order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/nvtx_range_wrapper.html#NVTXRangeWrapper.enable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.NVTXRangeWrapper.enable" title="Link to this definition"></a></dt>
+<dd><p>Enable the NVTX range wrapper.</p>
+<p>This method can be called only once and enables the NVTXRangeWrapper singleton.
+Any use of the singleton before enabling it is ignored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sync_on_push</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether to synchronize the CUDA device every time before pushing a range</p></li>
+<li><p><strong>sync_on_pop</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether to synchronize the CUDA device every time before popping a range</p></li>
+<li><p><strong>keep_track_of_range_order</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether to keep track of the range stack internally. A range name may
+be specified optionally when popping a range, and a check is performed whether the popped range
+corresponds to the range that is expected to be popped if this is set to <code class="docutils literal notranslate"><span class="pre">True</span></code>. Note
+that this has an overhead and so should be only enabled for debugging purposes, and be turned
+off when performing the actual profiling.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.NVTXRangeWrapper.is_enabled">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_enabled</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></em><a class="headerlink" href="#accvlab.optim_test_tools.NVTXRangeWrapper.is_enabled" title="Link to this definition"></a></dt>
+<dd><p>Whether the NVTXRangeWrapper is enabled</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.NVTXRangeWrapper.range_push">
+<span class="sig-name descname"><span class="pre">range_push</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">range_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/nvtx_range_wrapper.html#NVTXRangeWrapper.range_push"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.NVTXRangeWrapper.range_push" title="Link to this definition"></a></dt>
+<dd><p>Push a NVTX range</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>range_name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Range name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.NVTXRangeWrapper.range_pop">
+<span class="sig-name descname"><span class="pre">range_pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">range_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/nvtx_range_wrapper.html#NVTXRangeWrapper.range_pop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.NVTXRangeWrapper.range_pop" title="Link to this definition"></a></dt>
+<dd><p>Pop a NVTX range and optionally check if the popped range
+is the expected range to be popped.</p>
+<p>Note that the check is performed only if configured to be used
+when calling <cite>enable()</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>range_name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Range name. If set, will be used to check whether the popped
+range name corresponds to the given name and raise an assertion
+error if not.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.optim_test_tools.</span></span><span class="sig-name descname"><span class="pre">TensorDumper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/tensor_dumper.html#TensorDumper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SingletonBase</span></code></p>
+<p>Singleton class for dumping tensor &amp; gradient data to a directory and comparing to previously dumped
+data.</p>
+<p>This class provides a way to dump tensor data to a directory in a structured format.</p>
+<p>The dumper is able to dump tensors, gradients, <code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code> objects, as well as data with
+user-defined &amp; auto-applied converters. Furthermore, it supports custom processing prior to dumping (e.g.
+converting of bounding boxes to images containing the bounding boxes), which is performed only if the
+dumper is enabled, and does not incur overhead if the dumper is not enabled.</p>
+<p>Main JSON files are created for each dump (one for the data and one for the gradients). The individual
+tensors (or converted data) can be stored inside the main JSON file, or in separate binary/image files
+(can be configured, and can vary for individual data entries). In case of the binary/image files, the main
+JSON file contains a reference to the file, and the file is stored in the same directory as the main JSON
+file.</p>
+<p>The dumper can also be used to compare to previously dumped data, to detect mismatches. This can be useful
+for debugging e.g. to rerun the same code multiple times, while always comparing to the same dumped data.
+This can be use used when modifying (e.g. optimizing) the implementation, or to check for determinism.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The dumper is a singleton, so that it can be used in different source files without having to pass the
+instance around.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The comparison is only supported if all data is dumped in the <code class="docutils literal notranslate"><span class="pre">Type.JSON</span></code> format. This can be
+enforced by calling <a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.set_dump_type_for_all" title="accvlab.optim_test_tools.TensorDumper.set_dump_type_for_all"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_dump_type_for_all()</span></code></a> before dumping/comparing the data (so easy
+switching between dumping for manual inspection and comparison is possible).</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When in the disabled state, all dumping-related methods (dump, add data, compare to dumped data etc)
+are empty methods, which means they have no effect and minimal overhead.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When obtaining an object using (<code class="docutils literal notranslate"><span class="pre">TensorDumper()</span></code>) the singleton is returned if already
+created.</p>
+<p>If parameters are provided when calling <code class="docutils literal notranslate"><span class="pre">TensorDumper()</span></code>, this will enable the dumper
+(equivalent to calling <a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.enable" title="accvlab.optim_test_tools.TensorDumper.enable"><code class="xref py py-meth docutils literal notranslate"><span class="pre">enable()</span></code></a>). Note that enabling can only be done once, and will
+lead to an error if attempted a second time.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dump_dir</strong> – The directory to dump the data to. If provided, the dumper will be enabled automatically.
+If not provided, the dumper will be disabled and can be enabled later by calling <a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.enable" title="accvlab.optim_test_tools.TensorDumper.enable"><code class="xref py py-meth docutils literal notranslate"><span class="pre">enable()</span></code></a>.</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.Type">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/tensor_dumper.html#TensorDumper.Type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.Type" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<p>Dump format types.</p>
+<p>The format type determines how tensor data is serialized when dumped.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For binary types (<code class="docutils literal notranslate"><span class="pre">BINARY</span></code>, <code class="docutils literal notranslate"><span class="pre">IMAGE_RGB</span></code>, <code class="docutils literal notranslate"><span class="pre">IMAGE_BGR</span></code>, <code class="docutils literal notranslate"><span class="pre">IMAGE_I</span></code>), entries are added to the
+main JSON file indicating the filenames of the stored data. Also, files containing meta-data are
+created and stored in the same directory. For <code class="docutils literal notranslate"><span class="pre">BINARY</span></code>, the meta-data is the shape and dtype of
+the tensor. For <code class="docutils literal notranslate"><span class="pre">IMAGE_*</span></code>, the meta-data is the original range of the image data (min and max
+value) and the image format (RGB, BGR, Intensity).</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For <code class="docutils literal notranslate"><span class="pre">BINARY</span></code> and <code class="docutils literal notranslate"><span class="pre">IMAGE_*</span></code> formats, entries are added to the main JSON file indicating the
+filenames of the stored data. The filenames for these cases are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>blob/image data: <code class="docutils literal notranslate"><span class="pre">[&lt;main_json_file_name&gt;]&lt;path_to_data_in_dumped_structure&gt;.&lt;file_type&gt;</span></code></p></li>
+<li><p>meta-data: <code class="docutils literal notranslate"><span class="pre">[&lt;main_json_file_name&gt;]&lt;path_to_data_in_dumped_structure&gt;.&lt;file_type&gt;.meta.json</span></code></p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For images containing multiple channels, the color channel is the last dimension. If this is not
+the case, permutation of the axes needs to be applied to move the color channel to the last
+dimension. The permutation can be applied using the <code class="docutils literal notranslate"><span class="pre">permute_axes</span></code> parameter, e.g. of
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">add_tensor_data()</span></code>.</p>
+<p>If a tensor contains more than the necessary number of dimensions (3 for color images,
+2 for grayscale images), the leading dimensions are treated as iterating over the images,
+and multiple images are dumped (with the indices of the leading dimensions indicated in the
+filename).</p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.Type.JSON">
+<span class="sig-name descname"><span class="pre">JSON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.Type.JSON" title="Link to this definition"></a></dt>
+<dd><p>Tensor data is serialized into the JSON file as nested lists.
+Suitable for small tensors and provides human-readable output.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.Type.BINARY">
+<span class="sig-name descname"><span class="pre">BINARY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.Type.BINARY" title="Link to this definition"></a></dt>
+<dd><p>Tensor data saved as binary files with metadata in separate JSON files.
+Efficient for large tensors; preserves exact numerical precision.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.Type.IMAGE_RGB">
+<span class="sig-name descname"><span class="pre">IMAGE_RGB</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.Type.IMAGE_RGB" title="Link to this definition"></a></dt>
+<dd><p>Tensor data converted to PNG image format (RGB, 3 channels).
+Channel must be the last dimension; permute axes if necessary.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.Type.IMAGE_BGR">
+<span class="sig-name descname"><span class="pre">IMAGE_BGR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.Type.IMAGE_BGR" title="Link to this definition"></a></dt>
+<dd><p>Tensor data converted to PNG image format (BGR, 3 channels).
+Channel must be the last dimension; permute axes if necessary.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.Type.IMAGE_I">
+<span class="sig-name descname"><span class="pre">IMAGE_I</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.Type.IMAGE_I" title="Link to this definition"></a></dt>
+<dd><p>Tensor data converted to PNG image format (grayscale).
+Single channel; no explicit channel dimension.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.Type.is_image">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dump_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/tensor_dumper.html#TensorDumper.Type.is_image"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.Type.is_image" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.enable">
+<span class="sig-name descname"><span class="pre">enable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dump_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/tensor_dumper.html#TensorDumper.enable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.enable" title="Link to this definition"></a></dt>
+<dd><p>Enable the TensorDumper singleton.</p>
+<p>This method can be called only once and enables the TensorDumper singleton.
+Any use of the singleton before enabling it is ignored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dump_dir</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The directory to dump the data to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.is_enabled">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_enabled</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></em><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.is_enabled" title="Link to this definition"></a></dt>
+<dd><p>Whether the TensorDumper is enabled</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.add_tensor_data">
+<span class="sig-name descname"><span class="pre">add_tensor_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump_type_override</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permute_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permute_axes_override</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/tensor_dumper.html#TensorDumper.add_tensor_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.add_tensor_data" title="Link to this definition"></a></dt>
+<dd><p>Add tensor data to the dump.</p>
+<p>The data is formatted and inserted into the dump structure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Path where the data will be inserted. If the path does not exist, it will be created.
+If <cite>data</cite> is a dictionary, the path may be already present in the structure,
+but the direct children of <cite>data</cite> need to be non-existent in the element the path points to.
+If <cite>data</cite> is not a dictionary, the path must not be present in the structure and the
+data will be inserted at the path.</p></li>
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>]]]</span>) – The tensor data to add</p></li>
+<li><p><strong>dump_type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.Type" title="accvlab.optim_test_tools.tensor_dumper.TensorDumper.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a></span>) – The type of dump to use</p></li>
+<li><p><strong>dump_type_override</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.Type" title="accvlab.optim_test_tools.tensor_dumper.TensorDumper.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>]]</span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – A dictionary mapping names to dump types.
+If a name is present in the dictionary, the dump type for all tensors with that name in the path
+(i.e. either the name itself or the name of a parent along the path) will be overridden with the
+value in the dictionary. If multiple names match the path, the match closest to the tensor
+(i.e. further inside the structure) is used.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, no override is applied.</p></li>
+<li><p><strong>permute_axes</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]</span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Permutation of axes to apply to the tensor data.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, no permutation is applied.</p></li>
+<li><p><strong>permute_axes_override</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]]]</span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – A dictionary mapping names to permute axes.
+If a name is present in the dictionary, the permute axes for all tensors with that name in the path
+(i.e. either the name itself or the name of a parent along the path) will be overridden with the
+value in the dictionary. If multiple names match the path, the match closest to the tensor
+(i.e. further inside the structure) is used.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, no override is applied.</p></li>
+<li><p><strong>exclude</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]]</span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – List of entries to exclude from the dump. There entries are specified by names and may apply to any level of the data structure.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.add_grad_data">
+<span class="sig-name descname"><span class="pre">add_grad_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump_type_override</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permute_grad_axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">permute_grad_axes_override</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/tensor_dumper.html#TensorDumper.add_grad_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.add_grad_data" title="Link to this definition"></a></dt>
+<dd><p>Add gradient data of the given tensor(s) to dump.</p>
+<p>Note that if this method is called, <a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.set_gradients" title="accvlab.optim_test_tools.TensorDumper.set_gradients"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_gradients()</span></code></a> must be called before dumping the next time.</p>
+<p>The gradients are computed using <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.autograd.grad.html#torch.autograd.grad" title="(in PyTorch v2.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.autograd.grad()</span></code></a>, and do not influence the gradients
+as computed/used elsewhere in the code (e.g. in the training loop).</p>
+<p>Note that tensors which do not require gradients or which are not part of the computation graph
+can be included in the dump, but no actual gradients will be computed for them. Instead,
+a note will be written to the json dump in case that <code class="docutils literal notranslate"><span class="pre">requires_grad</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>. If the tensor
+is not part of the computation graph, the written gradient will be <code class="docutils literal notranslate"><span class="pre">null</span></code>, and no image/binary file
+will be written for that tensor regardless of the <code class="docutils literal notranslate"><span class="pre">dump_type</span></code> setting.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Path where the gradient data will be inserted. See <a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.add_tensor_data" title="accvlab.optim_test_tools.TensorDumper.add_tensor_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_tensor_data()</span></code></a> for more details.</p></li>
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>]]]</span>) – The tensor data for which to dump the gradients.</p></li>
+<li><p><strong>dump_type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.Type" title="accvlab.optim_test_tools.tensor_dumper.TensorDumper.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a></span>) – The type of dump to use</p></li>
+<li><p><strong>dump_type_override</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.Type" title="accvlab.optim_test_tools.tensor_dumper.TensorDumper.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>]]</span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – A dictionary mapping names to dump types.
+If a name is present in the dictionary, the dump type for all gradients of tensors with that
+name in the path (i.e. either the name itself or the name of a parent along the path) will be
+overridden with the value in the dictionary. If multiple names match the path, the match
+closest to the tensor (i.e. further inside the structure) is used.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, no override is applied.</p></li>
+<li><p><strong>permute_grad_axes</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]</span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Permutation of axes to apply to the gradient data.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, no permutation is applied.</p></li>
+<li><p><strong>permute_grad_axes_override</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]]]</span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – A dictionary mapping names to permute axes.
+If a name is present in the dictionary, the permute axes for all gradients of tensors with
+that name in the path (i.e. either the name itself or the name of a parent along the path)
+will be overridden with the value in the dictionary. If multiple names match the path, the
+match closest to the tensor (i.e. further inside the structure) is used.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code>, no override is applied.</p></li>
+<li><p><strong>exclude</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]]</span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – List of entries to exclude from the dump. There entries are specified by names and may
+apply to any level of the data structure.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.set_dump_type_for_all">
+<span class="sig-name descname"><span class="pre">set_dump_type_for_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dump_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_tensors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_grads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/tensor_dumper.html#TensorDumper.set_dump_type_for_all"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.set_dump_type_for_all" title="Link to this definition"></a></dt>
+<dd><p>Set the dump type for all tensors and gradients.</p>
+<p>This method is e.g. useful to quickly change the dump type to <code class="docutils literal notranslate"><span class="pre">Type.JSON</span></code> to generate reference data
+for comparison (using <a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.compare_to_dumped_data" title="accvlab.optim_test_tools.TensorDumper.compare_to_dumped_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">compare_to_dumped_data()</span></code></a>) without the need to go through the code and change the dump type
+for each tensor manually.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This method can sets the dumping type for the data which is already added.
+The dump type of data which is added after this method is called will not be affected.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dump_type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.Type" title="accvlab.optim_test_tools.tensor_dumper.TensorDumper.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a></span>) – The type of dump to use</p></li>
+<li><p><strong>include_tensors</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">True</span></code>) – Whether to include tensors in the dump</p></li>
+<li><p><strong>include_grads</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">True</span></code>) – Whether to include gradients in the dump</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.dump">
+<span class="sig-name descname"><span class="pre">dump</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/tensor_dumper.html#TensorDumper.dump"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.dump" title="Link to this definition"></a></dt>
+<dd><p>Dump the data to the dump directory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.compare_to_dumped_data">
+<span class="sig-name descname"><span class="pre">compare_to_dumped_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eps_numerical_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_errors_per_tensor_to_show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_missing_data_in_current</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_warning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/tensor_dumper.html#TensorDumper.compare_to_dumped_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.compare_to_dumped_data" title="Link to this definition"></a></dt>
+<dd><p>Compare the data to previously dumped data.</p>
+<p>In case of a mismatch, a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> is raised with a detailed error message.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Only comparisons to data stored in the JSON format (Type.JSON) are supported.
+Therefore, the reference data must be stored with the <code class="docutils literal notranslate"><span class="pre">Type.JSON</span></code> both
+when generating the reference data and when comparing to it.</p>
+<p>An easy way to ensure that the reference data is stored in the JSON format without
+modifying multiple places in the code is to call <a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.set_dump_type_for_all" title="accvlab.optim_test_tools.TensorDumper.set_dump_type_for_all"><code class="xref py py-meth docutils literal notranslate"><span class="pre">set_dump_type_for_all()</span></code></a>
+when generating the reference data.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The comparison can be set to allow missing data in the current data by setting <code class="docutils literal notranslate"><span class="pre">allow_missing_data_in_current</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code>.
+This is e.g. useful if the current data is based on an implementation in progress, so that some of the data is not yet available.
+In this case, the comparison will not raise an error if the current data is missing some data which is present in the reference data.
+Instead, a warning will be printed.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>eps_numerical_data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">1e-06</span></code>) – The numerical tolerance for the comparison of numerical data.</p></li>
+<li><p><strong>num_errors_per_tensor_to_show</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">1</span></code>) – The number of most significant errors to show per tensor.</p></li>
+<li><p><strong>allow_missing_data_in_current</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">False</span></code>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the comparison will not raise an error if the current data is missing
+some data which is present in the reference data.</p></li>
+<li><p><strong>as_warning</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">False</span></code>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, no error is raised in case of a mismatch and instead, a warning is printed.
+If <code class="docutils literal notranslate"><span class="pre">False</span></code>, an error is raised.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.set_gradients">
+<span class="sig-name descname"><span class="pre">set_gradients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/tensor_dumper.html#TensorDumper.set_gradients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.set_gradients" title="Link to this definition"></a></dt>
+<dd><p>Set gradients for the tensors in the dump.</p>
+<p>The gradients are computed using <a class="reference external" href="https://docs.pytorch.org/docs/stable/generated/torch.autograd.grad.html#torch.autograd.grad" title="(in PyTorch v2.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">torch.autograd.grad()</span></code></a>, and do not influence the gradients
+computed elsewhere (e.g. in the training loop).</p>
+<p>This method must be called before dumping if <a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.add_grad_data" title="accvlab.optim_test_tools.TensorDumper.add_grad_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_grad_data()</span></code></a> was called since the last dump.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>function_values</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code></a>[<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a>]]</span>) – The value(s) of the function(s) to compute the gradients for.
+This can be a single tensor or a list of tensors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.reset_dump_count">
+<span class="sig-name descname"><span class="pre">reset_dump_count</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/tensor_dumper.html#TensorDumper.reset_dump_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.reset_dump_count" title="Link to this definition"></a></dt>
+<dd><p>Reset the dump count.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Resetting the dump count means that:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>In case of dumping: the next dump will overwrite a previous dump (starting from the first dump).</p></li>
+<li><p>In case of comparing to previously dumped data: the next comparison will start from the first dump.</p></li>
+</ul>
+</div></blockquote>
+</div>
+<p>This method is useful for debugging e.g. to rerun the same code multiple times to check for
+determinism, while always comparing to the same dumped data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.perform_after_dump_count">
+<span class="sig-name descname"><span class="pre">perform_after_dump_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/tensor_dumper.html#TensorDumper.perform_after_dump_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.perform_after_dump_count" title="Link to this definition"></a></dt>
+<dd><p>Register an action to be performed after a given number of dumps.</p>
+<p>The action will be performed after the dump is completed.</p>
+<p>This can e.g. be used to automatically exit the program after a given number of iterations have
+been dumped (by passing the <code class="xref py py-func docutils literal notranslate"><span class="pre">exit()</span></code>-function as the action).</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>If <a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.reset_dump_count" title="accvlab.optim_test_tools.TensorDumper.reset_dump_count"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reset_dump_count()</span></code></a> is called, the dump count is reset to 0,
+and the action will be performed after the <code class="docutils literal notranslate"><span class="pre">count</span></code>-th dump after the reset.</p>
+<p>Note that this also means that the action can be performed multiple times if
+the dump count is reset after the action has been performed.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This method can be called multiple times with the same count.
+In this case, the action will be overwritten.</p>
+</div>
+<p>Note that as in case of other methods, this method has no effect if the TensorDumper is not enabled.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The number of dumps after which the action should be performed.</p></li>
+<li><p><strong>action</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – The action to perform.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.register_custom_converter">
+<span class="sig-name descname"><span class="pre">register_custom_converter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">converter_func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/tensor_dumper.html#TensorDumper.register_custom_converter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.register_custom_converter" title="Link to this definition"></a></dt>
+<dd><p>Register a custom converter for a given data type.</p>
+<p>This method can be used to register a custom converter function for a given data type.
+The converter function must take a single argument of type <code class="docutils literal notranslate"><span class="pre">data_type</span></code> and return one of the following,
+or a nested list/dict structure containing elements of the following types:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>either a JSON-serializable object,</p></li>
+<li><p>or a tensor,</p></li>
+<li><p>or a numpy array</p></li>
+<li><p>or an object for which a custom converter is registered</p></li>
+</ul>
+</div></blockquote>
+<p>The conversion is performed iteratively, so that chains of conversions can be followed through.</p>
+<p>The conversion is performed before any other processing steps. This means that if the converter returns
+tensors, these are handled in the same way as tensors which are directly added to the dumper.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is useful when the data to dump in not JSON-serializable by default. This may e.g. be the case
+for custom data types which are used in the training.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></a></span>) – The type of the data to convert.</p></li>
+<li><p><strong>converter_func</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a></span>) – The function to use for converting the data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.enable_ragged_batch_dumping">
+<span class="sig-name descname"><span class="pre">enable_ragged_batch_dumping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">as_per_sample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/tensor_dumper.html#TensorDumper.enable_ragged_batch_dumping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.enable_ragged_batch_dumping" title="Link to this definition"></a></dt>
+<dd><p>Enable dumping of <code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code> data.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is possible to dump some <code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code> data as per sample, and some as a <code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code>
+structure.
+This can be achieved by calling this method multiple times with different values for <code class="docutils literal notranslate"><span class="pre">as_per_sample</span></code>,
+before adding the data which should be dumped with the desired format.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>as_per_sample</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">False</span></code>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the <code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code> data is dumped as per sample. Otherwise, it is dumped
+as a <code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code> structure.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.optim_test_tools.TensorDumper.run_if_enabled">
+<span class="sig-name descname"><span class="pre">run_if_enabled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/optim_test_tools/tensor_dumper.html#TensorDumper.run_if_enabled"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.optim_test_tools.TensorDumper.run_if_enabled" title="Link to this definition"></a></dt>
+<dd><p>Run a function if the TensorDumper is enabled.</p>
+<p>This method can be used to run a function only if the TensorDumper is enabled.
+This is useful to avoid running code which is only relevant for debugging.</p>
+<p>The typical use-case for this method is the dumping of data which needs
+to be pre-processed first (e.g. drawing of bounding boxes into an image).
+This is done as follows:</p>
+<blockquote>
+<div><ul>
+<li><p>Encapsulate the pre-processing logic in a function (inside the function
+which uses the dumper). Note that this means that <code class="docutils literal notranslate"><span class="pre">func</span></code> will enclose
+the data accessible in that function and therefore does not need to have
+any arguments. The function <code class="docutils literal notranslate"><span class="pre">func</span></code> should</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Perform any debugging-related pre-processing needed</p></li>
+<li><p>Add the pre-processed data to the dump (e.g. using <a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.add_tensor_data" title="accvlab.optim_test_tools.TensorDumper.add_tensor_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_tensor_data()</span></code></a>)</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Call <a class="reference internal" href="#accvlab.optim_test_tools.TensorDumper.run_if_enabled" title="accvlab.optim_test_tools.TensorDumper.run_if_enabled"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run_if_enabled()</span></code></a> with the function <code class="docutils literal notranslate"><span class="pre">func</span></code> as its argument. This will ensure
+that the pre-processing is only performed if the dumper is enabled. Otherwise, the
+pre-processing is omitted, and there is no overhead (apart from calling an empty function).</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]</span>) – The function to run. The function must take no arguments.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="intro.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

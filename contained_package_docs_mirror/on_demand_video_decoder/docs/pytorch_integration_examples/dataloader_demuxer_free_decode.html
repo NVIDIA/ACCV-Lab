@@ -1,0 +1,876 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DataLoader Demuxer-Free Example &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Evaluation" href="../evaluation.html" />
+    <link rel="prev" title="DataLoader Separation Decode Example" href="dataloader_separation_decode.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">On Demand Video Decoder</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dataset_preparation.html">Dataset Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sample.html">Sample Code Documentation</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">PyTorch Integration Examples</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="dataloader_random_decode.html">DataLoader Random Decode Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataloader_stream_decode.html">DataLoader Stream Decode Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataloader_separation_decode.html">DataLoader Separation Decode Example</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">DataLoader Demuxer-Free Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#key-features">Key Features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#index-data-format">Index Data Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gop-storage-layout">GOP Storage Layout</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data-loading-structure">Data Loading Structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#usage">Usage</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#step-1-precompute-and-store-gop-packets">Step 1: Precompute and Store GOP Packets</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#step-2-training-with-demuxer-free-pipeline">Step 2: Training with Demuxer-Free Pipeline</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#command-line-arguments">Command Line Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#architecture">Architecture</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#gopstoragemanager">GOPStorageManager</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#videoclipdatasetdecodeonly">VideoClipDatasetDecodeOnly</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#videoclipsampler">VideoClipSampler</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#example-training-loop">Example Training Loop</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#performance">Performance</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#test-environment">Test Environment</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#performance-metrics-frames-sec">Performance Metrics (frames/sec)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#optimization-tips">Optimization Tips</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#performance-profiling">Performance Profiling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">On Demand Video Decoder</a></li>
+          <li class="breadcrumb-item"><a href="index.html">PyTorch Integration Examples</a></li>
+      <li class="breadcrumb-item active">DataLoader Demuxer-Free Example</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/contained_package_docs_mirror/on_demand_video_decoder/docs/pytorch_integration_examples/dataloader_demuxer_free_decode.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dataloader-demuxer-free-example">
+<h1>DataLoader Demuxer-Free Example<a class="headerlink" href="#dataloader-demuxer-free-example" title="Link to this heading"></a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>This example demonstrates how to use NVIDIA’s accvlab.on_demand_video_decoder library with PyTorch DataLoader for efficient demuxer-free video processing, ideal for training scenarios where datasets are reused frequently and demuxing overhead should be eliminated.</p>
+<p>The specific code implementation can be found in <code class="docutils literal notranslate"><span class="pre">packages/on_demand_video_decoder/examples/demuxer_free_decode</span></code> and <code class="docutils literal notranslate"><span class="pre">packages/on_demand_video_decoder/examples/demuxer_free_decode_cache</span></code>.</p>
+<img alt="Demuxer-Free Decode Optimazation Overview" src="../../../../_images/demuxer_free_access.png" />
+<p>The “demuxer-free” approach refers to pre-extracting and storing GOP (Group of Pictures) packets offline, enabling:</p>
+<ul class="simple">
+<li><p><strong>Zero Demuxing Overhead</strong>: All demuxing work is performed once during preprocessing; runtime only loads and decodes GOP packets</p></li>
+<li><p><strong>Maximum Throughput</strong>: Eliminates CPU demuxing bottleneck for higher decode performance</p></li>
+<li><p><strong>Reusable Dataset</strong>: GOP packets are stored persistently and can be reused across multiple training runs</p></li>
+<li><p><strong>Fast Random Access</strong>: Pre-computed GOP indices enable instant frame-to-GOP lookup</p></li>
+</ul>
+<p>The workflow consists of two phases:</p>
+<ol class="arabic simple">
+<li><p><strong>Preprocessing Phase (Offline)</strong>: Extract and store GOP packets from all videos</p></li>
+<li><p><strong>Training Phase (online)</strong>: Load pre-stored GOP packets and decode them directly on GPU</p></li>
+</ol>
+</section>
+<section id="key-features">
+<h2>Key Features<a class="headerlink" href="#key-features" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Demuxer-Free Pipeline</strong>: Eliminates runtime demuxing by pre-storing GOP packets in binary format</p></li>
+<li><p><strong>Persistent GOP Index</strong>: Uses <code class="docutils literal notranslate"><span class="pre">.gop_index.json</span></code> files for instant frame-to-GOP mapping without directory scans</p></li>
+<li><p><strong>Fixed GOP Optimization</strong>: Optional <code class="docutils literal notranslate"><span class="pre">--fix_gop_size</span></code> enables fast-path computation for constant GOP size datasets</p></li>
+<li><p><strong>Custom PyTorch Dataset</strong>: Implements lazy initialization of GOP storage manager for memory-efficient loading</p></li>
+<li><p><strong>Custom Sampler</strong>: Organizes video clips into batches for efficient processing with distributed training support</p></li>
+<li><p><strong>Multi-camera Support</strong>: Handles synchronized frames from multiple cameras with pre-cached GOP packets</p></li>
+<li><p><strong>Distributed Training</strong>: Compatible with PyTorch’s distributed training framework</p></li>
+<li><p><strong>Performance Profiling</strong>: Includes NVTX markers for performance analysis</p></li>
+<li><p><strong>Storage Flexibility</strong>: Supports both local and network storage for GOP packet files</p></li>
+</ul>
+</section>
+<section id="index-data-format">
+<h2>Index Data Format<a class="headerlink" href="#index-data-format" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The JSON file and the selection of frames to access are used here for demonstration purposes. In a
+real-world scenario, the file names and indices would be obtained from the dataset metadata.</p>
+</div>
+<p>The example expects a JSON file with the following structure:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{
+    &quot;video_dir1&quot;: {
+        &quot;clip0id&quot;: frame_count,
+        &quot;clip1id&quot;: frame_count,
+        ...
+    },
+    &quot;video_dir2&quot;: {
+        &quot;clip0id&quot;: frame_count,
+        &quot;clip1id&quot;: frame_count,
+        ...
+    }
+}
+</pre></div>
+</div>
+<p>Each video directory should contain subdirectories for each clip, and each clip directory should contain MP4 files for different cameras.</p>
+</section>
+<section id="gop-storage-layout">
+<h2>GOP Storage Layout<a class="headerlink" href="#gop-storage-layout" title="Link to this heading"></a></h2>
+<p>Assuming <code class="docutils literal notranslate"><span class="pre">video_base_path</span></code> contains the original videos and <code class="docutils literal notranslate"><span class="pre">gop_base_path</span></code> is where GOP binaries are stored:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>video_base_path/
+├── clip0/
+│   ├── cam0.mp4
+│   └── cam1.mp4
+└── clip1/
+    ├── cam0.mp4
+    └── cam1.mp4
+
+gop_base_path/
+├── clip0/
+│   ├── cam0.mp4/
+│   │   ├── .gop_index.json
+│   │   ├── gop.0.30.bin
+│   │   ├── gop.30.27.bin
+│   │   └── gop.57.30.bin
+│   └── cam1.mp4/
+│       ├── .gop_index.json
+│       ├── gop.0.30.bin
+│       ├── gop.30.27.bin
+│       └── gop.57.30.bin
+└── clip1/
+    ├── cam0.mp4/
+    │   ├── .gop_index.json
+    │   ├── gop.0.30.bin
+    │   ├── gop.30.30.bin
+    │   └── gop.60.18.bin
+    └── cam1.mp4/
+        ├── .gop_index.json
+        ├── gop.0.30.bin
+        ├── gop.30.30.bin
+        └── gop.60.18.bin
+</pre></div>
+</div>
+</section>
+<section id="data-loading-structure">
+<h2>Data Loading Structure<a class="headerlink" href="#data-loading-structure" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>For Random Access Pattern, ref to <code class="docutils literal notranslate"><span class="pre">packages/on_demand_video_decoder/docs/example/dataloader_random_decode.md</span></code>.</p></li>
+<li><p>For Stream Access Pattern, ref to <code class="docutils literal notranslate"><span class="pre">packages/on_demand_video_decoder/docs/example/dataloader_stream_decode.md</span></code>.</p></li>
+</ul>
+<p>Key differences from online demuxing:</p>
+<ul class="simple">
+<li><p><strong>Preprocessing</strong>: GOP packets are extracted once and stored as <code class="docutils literal notranslate"><span class="pre">.bin</span></code> files</p></li>
+<li><p><strong>Runtime</strong>: Only file I/O and GPU decoding, no demuxing overhead</p></li>
+<li><p><strong>Random Access (Optional)</strong>: Frame-to-GOP mapping is pre-computed in <code class="docutils literal notranslate"><span class="pre">.gop_index.json</span></code>.</p></li>
+</ul>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h2>
+<section id="step-1-precompute-and-store-gop-packets">
+<h3>Step 1: Precompute and Store GOP Packets<a class="headerlink" href="#step-1-precompute-and-store-gop-packets" title="Link to this heading"></a></h3>
+<p>Before training, you need to extract and store GOP packets from your video dataset.</p>
+<p>Edit the configuration paths in <code class="docutils literal notranslate"><span class="pre">examples/demuxer_free_decode/main_store_gops.py</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">VIDEO_BASE_PATH</span></code>: Directory containing your original video files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GOP_BASE_PATH</span></code>: Directory where GOP packets will be stored</p></li>
+</ul>
+<p>Then run the preprocessing script:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>examples/demuxer_free_decode/main_store_gops.py
+</pre></div>
+</div>
+<p><strong>Preprocessing Function Implementation:</strong></p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">examples/demuxer_free_decode/main_store_gops.py</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">223</span><span class="c1"># .. doc-marker-begin: preprocessing-main</span>
+<span class="linenos">224</span><span class="k">def</span><span class="w"> </span><span class="nf">demuxer_free_decoder_test_store</span><span class="p">(</span><span class="n">video_base_path</span><span class="p">,</span> <span class="n">gop_base_path</span><span class="p">):</span>
+<span class="linenos">225</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">226</span><span class="sd">    Test storing GOP data using the GOPStorageManager interface.</span>
+<span class="linenos">227</span>
+<span class="linenos">228</span><span class="sd">    Args:</span>
+<span class="linenos">229</span><span class="sd">        video_base_path: Base path for video files</span>
+<span class="linenos">230</span><span class="sd">        gop_base_path: Base path for GOP storage</span>
+<span class="linenos">231</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos">232</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cleaning existing GOP storage at: </span><span class="si">{</span><span class="n">gop_base_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">233</span>    <span class="n">cmd</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;rm -rf </span><span class="si">{</span><span class="n">gop_base_path</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="linenos">234</span>    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+<span class="linenos">235</span>
+<span class="linenos">236</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating GOP storage manager...&quot;</span><span class="p">)</span>
+<span class="linenos">237</span>    <span class="n">storage</span> <span class="o">=</span> <span class="n">GOPStorageManager</span><span class="p">(</span><span class="n">video_base_path</span><span class="p">,</span> <span class="n">gop_base_path</span><span class="p">,</span> <span class="n">clip_size</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">238</span>
+<span class="linenos">239</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting GOP extraction and storage...&quot;</span><span class="p">)</span>
+<span class="linenos">240</span>    <span class="n">storage</span><span class="o">.</span><span class="n">store_gops</span><span class="p">()</span>
+<span class="linenos">241</span>
+<span class="linenos">242</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GOP storage completed. Files saved to: </span><span class="si">{</span><span class="n">gop_base_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">243</span>
+<span class="linenos">244</span>
+</pre></div>
+</div>
+</div>
+<p>This preprocessing step will:</p>
+<ol class="arabic simple">
+<li><p>Recursively scan <code class="docutils literal notranslate"><span class="pre">VIDEO_BASE_PATH</span></code> for all <code class="docutils literal notranslate"><span class="pre">.mp4</span></code> files</p></li>
+<li><p>Extract GOP packets from each video</p></li>
+<li><p>Store packets as <code class="docutils literal notranslate"><span class="pre">gop.{start_frame}.{frame_count}.bin</span></code> files under <code class="docutils literal notranslate"><span class="pre">GOP_BASE_PATH</span></code></p></li>
+<li><p>Generate <code class="docutils literal notranslate"><span class="pre">.gop_index.json</span></code> for each video to enable fast frame-to-GOP lookup</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is a one-time operation per dataset. The stored GOP packets can be reused across multiple training
+runs.</p>
+</div>
+</section>
+<section id="step-2-training-with-demuxer-free-pipeline">
+<h3>Step 2: Training with Demuxer-Free Pipeline<a class="headerlink" href="#step-2-training-with-demuxer-free-pipeline" title="Link to this heading"></a></h3>
+<section id="basic-usage">
+<h4>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading"></a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>examples/demuxer_free_decode/main.py<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--index_file<span class="w"> </span>examples/index_frame.json<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--group_num<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--num_workers<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--video_base_path<span class="w"> </span>/data/nuscenes-mini/1600x900_gop30/<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--gop_base_path<span class="w"> </span>/data/nuscenes-mini/1600x900_gop30_packets/
+</pre></div>
+</div>
+</section>
+<section id="fixed-gop-size-optimization">
+<h4>Fixed GOP Size Optimization<a class="headerlink" href="#fixed-gop-size-optimization" title="Link to this heading"></a></h4>
+<p>If your dataset has a constant GOP size, enable the fast-path optimization:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>examples/demuxer_free_decode/main.py<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--index_file<span class="w"> </span>examples/index_frame.json<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--group_num<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--num_workers<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--video_base_path<span class="w"> </span>/data/nuscenes-mini/1600x900_gop30/<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--gop_base_path<span class="w"> </span>/data/nuscenes-mini/1600x900_gop30_packets/<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--fix_gop_size<span class="w"> </span><span class="m">30</span>
+</pre></div>
+</div>
+<p>This skips GOP index file scanning and computes filenames directly for maximum performance.</p>
+</section>
+<section id="distributed-training">
+<h4>Distributed Training<a class="headerlink" href="#distributed-training" title="Link to this heading"></a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.run<span class="w"> </span>--nproc_per_node<span class="o">=</span><span class="m">2</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>examples/demuxer_free_decode/main.py<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--index_file<span class="w"> </span>examples/index_frame.json<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--group_num<span class="w"> </span><span class="m">4</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--num_workers<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--video_base_path<span class="w"> </span>/data/nuscenes-mini/1600x900_gop30/<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--gop_base_path<span class="w"> </span>/data/nuscenes-mini/1600x900_gop30_packets/
+</pre></div>
+</div>
+</section>
+</section>
+<section id="command-line-arguments">
+<h3>Command Line Arguments<a class="headerlink" href="#command-line-arguments" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--index_file</span></code>: Path to the JSON file containing frame index information (default: <code class="docutils literal notranslate"><span class="pre">examples/index_frame.json</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--group_num</span></code>: Number of clips to process in each batch (default: 4)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--num_workers</span></code>: Number of worker processes for data loading (default: 2)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--video_base_path</span></code>: Base directory of the original videos (used to derive relative GOP storage paths)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--gop_base_path</span></code>: Base directory containing stored GOP packet files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--use_persistent_index</span></code>: Use <code class="docutils literal notranslate"><span class="pre">.gop_index.json</span></code> files for faster lookup (default: True)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--fix_gop_size</span></code>: Fixed GOP size for fast-path optimization (e.g., 30). If &gt; 0, computes filenames directly without scanning</p></li>
+</ul>
+</section>
+</section>
+<section id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h2>
+<section id="gopstoragemanager">
+<h3>GOPStorageManager<a class="headerlink" href="#gopstoragemanager" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">GOPStorageManager</span></code> class handles all GOP packet storage and retrieval operations.</p>
+<p><strong>Initialization:</strong></p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">examples/demuxer_free_decode/gop_storage.py</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 96</span>    <span class="c1"># .. doc-marker-begin: gop-storage-init</span>
+<span class="linenos"> 97</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="linenos"> 98</span>        <span class="bp">self</span><span class="p">,</span> <span class="n">video_base_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">gop_base_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">clip_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">use_persistent_index</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos"> 99</span>    <span class="p">):</span>
+<span class="linenos">100</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">101</span><span class="sd">        Initialize the GOP Storage Manager.</span>
+<span class="linenos">102</span>
+<span class="linenos">103</span><span class="sd">        Args:</span>
+<span class="linenos">104</span><span class="sd">            video_base_path (str): Base directory containing video files</span>
+<span class="linenos">105</span><span class="sd">            gop_base_path (str): Base directory for storing GOP data</span>
+<span class="linenos">106</span><span class="sd">            use_persistent_index (bool): Whether to use persistent index files</span>
+<span class="linenos">107</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos">108</span>        <span class="bp">self</span><span class="o">.</span><span class="n">video_base_path</span> <span class="o">=</span> <span class="n">video_base_path</span>
+<span class="linenos">109</span>        <span class="bp">self</span><span class="o">.</span><span class="n">gop_base_path</span> <span class="o">=</span> <span class="n">gop_base_path</span>
+<span class="linenos">110</span>        <span class="bp">self</span><span class="o">.</span><span class="n">use_persistent_index</span> <span class="o">=</span> <span class="n">use_persistent_index</span>
+<span class="linenos">111</span>        <span class="bp">self</span><span class="o">.</span><span class="n">nv_gop_demuxer</span> <span class="o">=</span> <span class="n">nvc</span><span class="o">.</span><span class="n">CreateGopDecoder</span><span class="p">(</span>
+<span class="linenos">112</span>            <span class="n">maxfiles</span><span class="o">=</span><span class="n">clip_size</span><span class="p">,</span>  <span class="c1"># Maximum number of files to use</span>
+<span class="linenos">113</span>            <span class="n">iGpu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># GPU ID</span>
+<span class="linenos">114</span>        <span class="p">)</span>
+<span class="linenos">115</span>        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gop_base_path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">116</span>
+</pre></div>
+</div>
+</div>
+<p><strong>store_gops() - Preprocessing Method:</strong></p>
+<p>Extracts GOP packets from all <code class="docutils literal notranslate"><span class="pre">.mp4</span></code> files under <code class="docutils literal notranslate"><span class="pre">video_base_path</span></code>, saves each GOP as <code class="docutils literal notranslate"><span class="pre">gop.{start_frame}.{frame_count}.bin</span></code>, and generates <code class="docutils literal notranslate"><span class="pre">.gop_index.json</span></code> for fast frame-to-GOP mapping.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">examples/demuxer_free_decode/gop_storage.py</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">263</span>    <span class="c1"># .. doc-marker-begin: gop-storage-store</span>
+<span class="linenos">264</span>    <span class="k">def</span><span class="w"> </span><span class="nf">store_gops</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos">265</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">266</span><span class="sd">        Extract and store GOP data for all video files in the video_base_path.</span>
+<span class="linenos">267</span>
+<span class="linenos">268</span><span class="sd">        This method recursively processes all .mp4 files in the video base directory,</span>
+<span class="linenos">269</span><span class="sd">        extracts GOP data, and stores them as binary files in the GOP base directory.</span>
+<span class="linenos">270</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos">271</span>        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">video_base_path</span><span class="p">):</span>
+<span class="linenos">272</span>            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+<span class="linenos">273</span>                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.mp4&#39;</span><span class="p">):</span>
+<span class="linenos">274</span>                    <span class="n">video_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+<span class="linenos">275</span>                    <span class="n">video_relpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">video_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">video_base_path</span><span class="p">)</span>
+<span class="linenos">276</span>                    <span class="n">clip_relpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">video_relpath</span><span class="p">)</span>
+<span class="linenos">277</span>
+<span class="linenos">278</span>                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing video: </span><span class="si">{</span><span class="n">video_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">279</span>
+<span class="linenos">280</span>                    <span class="n">frame_idx</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="linenos">281</span>                    <span class="n">pre_first_frame_id</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+<span class="linenos">282</span>                    <span class="n">gop_infos</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">283</span>
+<span class="linenos">284</span>                    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+<span class="linenos">285</span>                        <span class="k">try</span><span class="p">:</span>
+<span class="linenos">286</span>                            <span class="n">packets_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nv_gop_demuxer</span><span class="o">.</span><span class="n">GetGOP</span><span class="p">([</span><span class="n">video_path</span><span class="p">],</span> <span class="p">[</span><span class="n">frame_idx</span><span class="p">])</span>
+<span class="linenos">287</span>                            <span class="n">numpy_data</span><span class="p">,</span> <span class="n">first_frame_ids</span><span class="p">,</span> <span class="n">gop_lens</span> <span class="o">=</span> <span class="n">packets_tuple</span>
+<span class="linenos">288</span>
+<span class="linenos">289</span>                            <span class="c1"># Check if we&#39;ve processed this GOP already</span>
+<span class="linenos">290</span>                            <span class="k">if</span> <span class="n">pre_first_frame_id</span> <span class="o">==</span> <span class="n">first_frame_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+<span class="linenos">291</span>                                <span class="k">break</span>
+<span class="linenos">292</span>                            <span class="n">pre_first_frame_id</span> <span class="o">=</span> <span class="n">first_frame_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos">293</span>
+<span class="linenos">294</span>                            <span class="c1"># Store the GOP</span>
+<span class="linenos">295</span>                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_single_gop</span><span class="p">(</span><span class="n">clip_relpath</span><span class="p">,</span> <span class="n">video_path</span><span class="p">,</span> <span class="n">packets_tuple</span><span class="p">):</span>
+<span class="linenos">296</span>                                <span class="c1"># Add to index info</span>
+<span class="linenos">297</span>                                <span class="n">video_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">video_path</span><span class="p">)</span>
+<span class="linenos">298</span>                                <span class="n">clip_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gop_base_path</span><span class="p">,</span> <span class="n">clip_relpath</span><span class="p">,</span> <span class="n">video_name</span><span class="p">)</span>
+<span class="linenos">299</span>                                <span class="n">gop_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;gop.</span><span class="si">{</span><span class="n">first_frame_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">gop_lens</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">.bin&quot;</span>
+<span class="linenos">300</span>                                <span class="n">gop_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">clip_dir</span><span class="p">,</span> <span class="n">gop_name</span><span class="p">)</span>
+<span class="linenos">301</span>
+<span class="linenos">302</span>                                <span class="n">gop_infos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<span class="linenos">303</span>                                    <span class="n">GOPInfo</span><span class="p">(</span>
+<span class="linenos">304</span>                                        <span class="n">file_path</span><span class="o">=</span><span class="n">gop_path</span><span class="p">,</span>
+<span class="linenos">305</span>                                        <span class="n">first_frame_id</span><span class="o">=</span><span class="n">first_frame_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="linenos">306</span>                                        <span class="n">gop_len</span><span class="o">=</span><span class="n">gop_lens</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="linenos">307</span>                                    <span class="p">)</span>
+<span class="linenos">308</span>                                <span class="p">)</span>
+<span class="linenos">309</span>
+<span class="linenos">310</span>                            <span class="n">frame_idx</span> <span class="o">+=</span> <span class="n">gop_lens</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos">311</span>
+<span class="linenos">312</span>                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<span class="linenos">313</span>                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error processing frame </span><span class="si">{</span><span class="n">frame_idx</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">314</span>                            <span class="k">break</span>
+<span class="linenos">315</span>
+<span class="linenos">316</span>                    <span class="c1"># Create index file immediately after processing each video</span>
+<span class="linenos">317</span>                    <span class="k">if</span> <span class="n">gop_infos</span><span class="p">:</span>
+<span class="linenos">318</span>                        <span class="n">video_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">video_path</span><span class="p">)</span>
+<span class="linenos">319</span>                        <span class="n">clip_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gop_base_path</span><span class="p">,</span> <span class="n">clip_relpath</span><span class="p">,</span> <span class="n">video_name</span><span class="p">)</span>
+<span class="linenos">320</span>                        <span class="bp">self</span><span class="o">.</span><span class="n">_save_persistent_index</span><span class="p">(</span><span class="n">clip_dir</span><span class="p">,</span> <span class="n">gop_infos</span><span class="p">)</span>
+<span class="linenos">321</span>                        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Created index with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">gop_infos</span><span class="p">)</span><span class="si">}</span><span class="s2"> GOPs for </span><span class="si">{</span><span class="n">video_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">322</span>
+</pre></div>
+</div>
+</div>
+<p><strong>load_gops() - Runtime Method:</strong></p>
+<p>Loads required GOP packets by consulting the persistent index, returns merged GOP data via <code class="docutils literal notranslate"><span class="pre">LoadGops</span></code> for GPU decoding, and supports variable GOP sizes within a video.</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">examples/demuxer_free_decode/gop_storage.py</span><a class="headerlink" href="#id4" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">325</span>    <span class="c1"># .. doc-marker-begin: gop-storage-load</span>
+<span class="linenos">326</span>    <span class="k">def</span><span class="w"> </span><span class="nf">load_gops</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">video_paths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="linenos">327</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">328</span><span class="sd">        Load multiple GOPs for the specified frames and video paths using LoadGops.</span>
+<span class="linenos">329</span>
+<span class="linenos">330</span><span class="sd">        Args:</span>
+<span class="linenos">331</span><span class="sd">            frame_ids (List[int]): List of target frame indices</span>
+<span class="linenos">332</span><span class="sd">            video_paths (List[str]): List of video file paths</span>
+<span class="linenos">333</span>
+<span class="linenos">334</span><span class="sd">        Returns:</span>
+<span class="linenos">335</span><span class="sd">            Optional[np.ndarray]: Combined numpy array compatible with DecodeFromGOP,</span>
+<span class="linenos">336</span><span class="sd">                                 or None if any GOP is not found</span>
+<span class="linenos">337</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos">338</span>        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;load_gops_manager&quot;</span><span class="p">)</span>
+<span class="linenos">339</span>
+<span class="linenos">340</span>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame_ids</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">video_paths</span><span class="p">):</span>
+<span class="linenos">341</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: frame_ids length (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">frame_ids</span><span class="p">)</span><span class="si">}</span><span class="s2">) != video_paths length (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">video_paths</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="linenos">342</span>            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">343</span>            <span class="k">return</span> <span class="kc">None</span>
+<span class="linenos">344</span>
+<span class="linenos">345</span>        <span class="c1"># Find GOP files for each frame</span>
+<span class="linenos">346</span>        <span class="n">gop_file_paths</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">347</span>
+<span class="linenos">348</span>        <span class="k">for</span> <span class="n">frame_id</span><span class="p">,</span> <span class="n">video_path</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">frame_ids</span><span class="p">,</span> <span class="n">video_paths</span><span class="p">):</span>
+<span class="linenos">349</span>            <span class="c1"># Get GOP index for this video</span>
+<span class="linenos">350</span>            <span class="n">gop_infos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_persistent_index</span><span class="p">(</span><span class="n">video_path</span><span class="p">)</span>
+<span class="linenos">351</span>            <span class="k">if</span> <span class="ow">not</span> <span class="n">gop_infos</span><span class="p">:</span>
+<span class="linenos">352</span>                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: No GOP index found for video </span><span class="si">{</span><span class="n">video_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">353</span>                <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">354</span>                <span class="k">return</span> <span class="kc">None</span>
+<span class="linenos">355</span>
+<span class="linenos">356</span>            <span class="c1"># Find the GOP containing the target frame</span>
+<span class="linenos">357</span>            <span class="n">gop_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_gop_for_frame</span><span class="p">(</span><span class="n">gop_infos</span><span class="p">,</span> <span class="n">frame_id</span><span class="p">)</span>
+<span class="linenos">358</span>            <span class="k">if</span> <span class="n">gop_info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">359</span>                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: Could not find GOP for video </span><span class="si">{</span><span class="n">video_path</span><span class="si">}</span><span class="s2">, frame </span><span class="si">{</span><span class="n">frame_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">360</span>                <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">361</span>                <span class="k">return</span> <span class="kc">None</span>
+<span class="linenos">362</span>
+<span class="linenos">363</span>            <span class="n">gop_file_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gop_info</span><span class="o">.</span><span class="n">file_path</span><span class="p">)</span>
+<span class="linenos">364</span>
+<span class="linenos">365</span>        <span class="c1"># Use LoadGops to merge all GOP files</span>
+<span class="linenos">366</span>        <span class="k">try</span><span class="p">:</span>
+<span class="linenos">367</span>            <span class="n">merged_numpy_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nv_gop_demuxer</span><span class="o">.</span><span class="n">LoadGops</span><span class="p">(</span><span class="n">gop_file_paths</span><span class="p">)</span>
+<span class="linenos">368</span>            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">369</span>            <span class="k">return</span> <span class="n">merged_numpy_data</span>
+<span class="linenos">370</span>        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<span class="linenos">371</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error loading GOPs: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">372</span>            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">373</span>            <span class="k">return</span> <span class="kc">None</span>
+<span class="linenos">374</span>
+</pre></div>
+</div>
+</div>
+<p><strong>load_gops_fast() - Optimized Runtime Method:</strong></p>
+<p>Computes GOP filenames directly using <code class="docutils literal notranslate"><span class="pre">--fix_gop_size</span></code>, skips index file reading for maximum performance, and requires constant GOP size across the dataset.</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">examples/demuxer_free_decode/gop_storage.py</span><a class="headerlink" href="#id5" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">377</span>    <span class="c1"># .. doc-marker-begin: gop-storage-load-fast</span>
+<span class="linenos">378</span>    <span class="k">def</span><span class="w"> </span><span class="nf">load_gops_fast</span><span class="p">(</span>
+<span class="linenos">379</span>        <span class="bp">self</span><span class="p">,</span> <span class="n">frame_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">video_paths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">fix_gop_size</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos">380</span>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="linenos">381</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">382</span><span class="sd">        Fast path to load multiple GOPs assuming a fixed GOP size in filenames.</span>
+<span class="linenos">383</span>
+<span class="linenos">384</span><span class="sd">        This avoids scanning directories or loading indices by directly computing the</span>
+<span class="linenos">385</span><span class="sd">        GOP file path: gop.{first_frame_id}.{fix_gop_size}.bin where</span>
+<span class="linenos">386</span><span class="sd">        first_frame_id = (frame_id // fix_gop_size) * fix_gop_size.</span>
+<span class="linenos">387</span>
+<span class="linenos">388</span><span class="sd">        Args:</span>
+<span class="linenos">389</span><span class="sd">            frame_ids (List[int]): List of target frame indices.</span>
+<span class="linenos">390</span><span class="sd">            video_paths (List[str]): List of corresponding video file paths.</span>
+<span class="linenos">391</span><span class="sd">            fix_gop_size (int): Fixed GOP size used when storing, e.g., 30.</span>
+<span class="linenos">392</span>
+<span class="linenos">393</span><span class="sd">        Returns:</span>
+<span class="linenos">394</span><span class="sd">            Optional[np.ndarray]: Combined numpy array compatible with DecodeFromGOP,</span>
+<span class="linenos">395</span><span class="sd">                                  or None if any GOP file is not found.</span>
+<span class="linenos">396</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos">397</span>        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;load_gops_fast_manager&quot;</span><span class="p">)</span>
+<span class="linenos">398</span>
+<span class="linenos">399</span>        <span class="k">if</span> <span class="n">fix_gop_size</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">fix_gop_size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">400</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: invalid fix_gop_size </span><span class="si">{</span><span class="n">fix_gop_size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">401</span>            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">402</span>            <span class="k">return</span> <span class="kc">None</span>
+<span class="linenos">403</span>
+<span class="linenos">404</span>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame_ids</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">video_paths</span><span class="p">):</span>
+<span class="linenos">405</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: frame_ids length (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">frame_ids</span><span class="p">)</span><span class="si">}</span><span class="s2">) != video_paths length (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">video_paths</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+<span class="linenos">406</span>            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">407</span>            <span class="k">return</span> <span class="kc">None</span>
+<span class="linenos">408</span>
+<span class="linenos">409</span>        <span class="n">gop_file_paths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">410</span>
+<span class="linenos">411</span>        <span class="k">for</span> <span class="n">frame_id</span><span class="p">,</span> <span class="n">video_path</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">frame_ids</span><span class="p">,</span> <span class="n">video_paths</span><span class="p">):</span>
+<span class="linenos">412</span>            <span class="c1"># Compute GOP directory based on relative path</span>
+<span class="linenos">413</span>            <span class="n">video_relpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">video_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">video_base_path</span><span class="p">)</span>
+<span class="linenos">414</span>            <span class="n">gop_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gop_base_path</span><span class="p">,</span> <span class="n">video_relpath</span><span class="p">)</span>
+<span class="linenos">415</span>
+<span class="linenos">416</span>            <span class="c1"># Compute first_frame_id for this GOP</span>
+<span class="linenos">417</span>            <span class="k">if</span> <span class="n">frame_id</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">418</span>                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: negative frame_id </span><span class="si">{</span><span class="n">frame_id</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">video_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">419</span>                <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">420</span>                <span class="k">return</span> <span class="kc">None</span>
+<span class="linenos">421</span>
+<span class="linenos">422</span>            <span class="n">first_frame_id</span> <span class="o">=</span> <span class="p">(</span><span class="n">frame_id</span> <span class="o">//</span> <span class="n">fix_gop_size</span><span class="p">)</span> <span class="o">*</span> <span class="n">fix_gop_size</span>
+<span class="linenos">423</span>            <span class="n">expected_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;gop.</span><span class="si">{</span><span class="n">first_frame_id</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">fix_gop_size</span><span class="si">}</span><span class="s2">.bin&quot;</span>
+<span class="linenos">424</span>            <span class="n">expected_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">gop_dir</span><span class="p">,</span> <span class="n">expected_name</span><span class="p">)</span>
+<span class="linenos">425</span>
+<span class="linenos">426</span>            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">expected_path</span><span class="p">):</span>
+<span class="linenos">427</span>                <span class="n">gop_file_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expected_path</span><span class="p">)</span>
+<span class="linenos">428</span>                <span class="k">continue</span>
+<span class="linenos">429</span>
+<span class="linenos">430</span>            <span class="c1"># Fallback: try to find any file that matches the first_frame_id with any GOP len (e.g., tail GOP)</span>
+<span class="linenos">431</span>            <span class="n">fallback_found</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="linenos">432</span>            <span class="k">try</span><span class="p">:</span>
+<span class="linenos">433</span>                <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">gop_dir</span><span class="p">):</span>
+<span class="linenos">434</span>                    <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;gop.</span><span class="si">{</span><span class="n">first_frame_id</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.bin&#39;</span><span class="p">):</span>
+<span class="linenos">435</span>                        <span class="n">gop_file_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">gop_dir</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
+<span class="linenos">436</span>                        <span class="n">fallback_found</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos">437</span>                        <span class="k">break</span>
+<span class="linenos">438</span>            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<span class="linenos">439</span>                <span class="k">pass</span>
+<span class="linenos">440</span>
+<span class="linenos">441</span>            <span class="k">if</span> <span class="ow">not</span> <span class="n">fallback_found</span><span class="p">:</span>
+<span class="linenos">442</span>                <span class="nb">print</span><span class="p">(</span>
+<span class="linenos">443</span>                    <span class="sa">f</span><span class="s2">&quot;Error: GOP file not found for video </span><span class="si">{</span><span class="n">video_path</span><span class="si">}</span><span class="s2">, frame </span><span class="si">{</span><span class="n">frame_id</span><span class="si">}</span><span class="s2">. Expected </span><span class="si">{</span><span class="n">expected_path</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="linenos">444</span>                <span class="p">)</span>
+<span class="linenos">445</span>                <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">446</span>                <span class="k">return</span> <span class="kc">None</span>
+<span class="linenos">447</span>
+<span class="linenos">448</span>        <span class="c1"># Merge GOPs</span>
+<span class="linenos">449</span>        <span class="k">try</span><span class="p">:</span>
+<span class="linenos">450</span>            <span class="n">merged_numpy_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nv_gop_demuxer</span><span class="o">.</span><span class="n">LoadGops</span><span class="p">(</span><span class="n">gop_file_paths</span><span class="p">)</span>
+<span class="linenos">451</span>            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">452</span>            <span class="k">return</span> <span class="n">merged_numpy_data</span>
+<span class="linenos">453</span>        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<span class="linenos">454</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error loading GOPs (fast): </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">455</span>            <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">456</span>            <span class="k">return</span> <span class="kc">None</span>
+<span class="linenos">457</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="videoclipdatasetdecodeonly">
+<h3>VideoClipDatasetDecodeOnly<a class="headerlink" href="#videoclipdatasetdecodeonly" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">VideoClipDatasetDecodeOnly</span></code> class extends PyTorch’s <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> and provides:</p>
+<ul class="simple">
+<li><p>Lazy initialization of <code class="docutils literal notranslate"><span class="pre">GOPStorageManager</span></code> for memory efficiency</p></li>
+<li><p>Returns <code class="docutils literal notranslate"><span class="pre">PacketOndemandBuffers</span></code> containing pre-loaded GOP packets for each batch item</p></li>
+<li><p>Multi-camera frame synchronization with pre-cached GOP packets</p></li>
+<li><p>Error handling and validation</p></li>
+<li><p>Compatible with decoders from <code class="docutils literal notranslate"><span class="pre">video_transforms.py</span></code></p></li>
+</ul>
+<p><strong>Implementation:</strong></p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">examples/demuxer_free_decode/main.py</span><a class="headerlink" href="#id6" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 96</span><span class="c1"># .. doc-marker-begin: dataset-decode-only</span>
+<span class="linenos"> 97</span><span class="k">class</span><span class="w"> </span><span class="nc">VideoClipDatasetDecodeOnly</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+<span class="linenos"> 98</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos"> 99</span><span class="sd">    Dataset that loads pre-stored GOP packet data for the requested frames and clips</span>
+<span class="linenos">100</span><span class="sd">    using GOPStorageManager, returning buffers suitable for direct decoding.</span>
+<span class="linenos">101</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos">102</span>
+<span class="linenos">103</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="linenos">104</span>        <span class="bp">self</span><span class="p">,</span>
+<span class="linenos">105</span>        <span class="n">index_frame</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+<span class="linenos">106</span>        <span class="n">group_num</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="linenos">107</span>        <span class="n">video_base_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="linenos">108</span>        <span class="n">gop_base_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="linenos">109</span>        <span class="n">num_cameras</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">NUM_CAMERAS</span><span class="p">,</span>
+<span class="linenos">110</span>        <span class="n">use_persistent_index</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="linenos">111</span>        <span class="n">fix_gop_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<span class="linenos">112</span>    <span class="p">):</span>
+<span class="linenos">113</span>        <span class="bp">self</span><span class="o">.</span><span class="n">index_frame</span> <span class="o">=</span> <span class="n">index_frame</span>
+<span class="linenos">114</span>        <span class="bp">self</span><span class="o">.</span><span class="n">group_num</span> <span class="o">=</span> <span class="n">group_num</span>
+<span class="linenos">115</span>        <span class="bp">self</span><span class="o">.</span><span class="n">video_base_path</span> <span class="o">=</span> <span class="n">video_base_path</span>
+<span class="linenos">116</span>        <span class="bp">self</span><span class="o">.</span><span class="n">gop_base_path</span> <span class="o">=</span> <span class="n">gop_base_path</span>
+<span class="linenos">117</span>        <span class="bp">self</span><span class="o">.</span><span class="n">num_cameras</span> <span class="o">=</span> <span class="n">num_cameras</span>
+<span class="linenos">118</span>        <span class="bp">self</span><span class="o">.</span><span class="n">use_persistent_index</span> <span class="o">=</span> <span class="n">use_persistent_index</span>
+<span class="linenos">119</span>        <span class="bp">self</span><span class="o">.</span><span class="n">fix_gop_size</span> <span class="o">=</span> <span class="n">fix_gop_size</span>
+<span class="linenos">120</span>
+<span class="linenos">121</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_is_initialized</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="linenos">122</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_storage</span><span class="p">:</span> <span class="n">GOPStorageManager</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+<span class="linenos">123</span>
+<span class="linenos">124</span>        <span class="k">if</span> <span class="n">group_num</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">125</span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;group_num must be positive, got </span><span class="si">{</span><span class="n">group_num</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">126</span>        <span class="k">if</span> <span class="n">num_cameras</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">127</span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;num_cameras must be positive, got </span><span class="si">{</span><span class="n">num_cameras</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">128</span>
+<span class="linenos">129</span>        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Initialized demuxer-free dataset with </span><span class="si">{</span><span class="n">num_cameras</span><span class="si">}</span><span class="s2"> cameras, group_num=</span><span class="si">{</span><span class="n">group_num</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">130</span>
+<span class="linenos">131</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="linenos">132</span>        <span class="n">total_frames</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="linenos">133</span>        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">clip_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_frame</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="linenos">134</span>            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">frame_count</span> <span class="ow">in</span> <span class="n">clip_info</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="linenos">135</span>                <span class="n">total_frames</span> <span class="o">+=</span> <span class="n">frame_count</span>
+<span class="linenos">136</span>        <span class="k">return</span> <span class="n">total_frames</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_num</span>
+<span class="linenos">137</span>
+<span class="linenos">138</span>    <span class="k">def</span><span class="w"> </span><span class="nf">__lazy_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="linenos">139</span>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_initialized</span><span class="p">:</span>
+<span class="linenos">140</span>            <span class="k">return</span>
+<span class="linenos">141</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_storage</span> <span class="o">=</span> <span class="n">GOPStorageManager</span><span class="p">(</span>
+<span class="linenos">142</span>            <span class="n">video_base_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">video_base_path</span><span class="p">,</span>
+<span class="linenos">143</span>            <span class="n">gop_base_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gop_base_path</span><span class="p">,</span>
+<span class="linenos">144</span>            <span class="n">clip_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cameras</span><span class="p">,</span>
+<span class="linenos">145</span>            <span class="n">use_persistent_index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_persistent_index</span><span class="p">,</span>
+<span class="linenos">146</span>        <span class="p">)</span>
+<span class="linenos">147</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_is_initialized</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos">148</span>
+<span class="linenos">149</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<span class="linenos">150</span>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+<span class="linenos">151</span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected list of tuples, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">152</span>        <span class="bp">self</span><span class="o">.</span><span class="n">__lazy_init__</span><span class="p">()</span>
+<span class="linenos">153</span>
+<span class="linenos">154</span>        <span class="n">episode_buffers</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">155</span>
+<span class="linenos">156</span>        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">clip_path</span><span class="p">,</span> <span class="n">frame_idx</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
+<span class="linenos">157</span>            <span class="c1"># Find all MP4 files in the clip directory</span>
+<span class="linenos">158</span>            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">clip_path</span><span class="p">):</span>
+<span class="linenos">159</span>                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Clip path is not a directory: </span><span class="si">{</span><span class="n">clip_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">160</span>                <span class="k">continue</span>
+<span class="linenos">161</span>
+<span class="linenos">162</span>            <span class="n">video_paths</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+<span class="linenos">163</span>                <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">clip_path</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">clip_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.mp4&#39;</span><span class="p">)],</span>
+<span class="linenos">164</span>                <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+<span class="linenos">165</span>            <span class="p">)</span>
+<span class="linenos">166</span>
+<span class="linenos">167</span>            <span class="k">if</span> <span class="ow">not</span> <span class="n">video_paths</span><span class="p">:</span>
+<span class="linenos">168</span>                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No MP4 files found in </span><span class="si">{</span><span class="n">clip_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">169</span>                <span class="k">continue</span>
+<span class="linenos">170</span>
+<span class="linenos">171</span>            <span class="n">frame_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">frame_idx</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">video_paths</span><span class="p">)</span>
+<span class="linenos">172</span>
+<span class="linenos">173</span>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_gop_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">174</span>                <span class="n">merged_numpy_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_storage</span><span class="o">.</span><span class="n">load_gops_fast</span><span class="p">(</span>
+<span class="linenos">175</span>                    <span class="n">frame_indices</span><span class="p">,</span> <span class="n">video_paths</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix_gop_size</span>
+<span class="linenos">176</span>                <span class="p">)</span>
+<span class="linenos">177</span>            <span class="k">else</span><span class="p">:</span>
+<span class="linenos">178</span>                <span class="n">merged_numpy_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_storage</span><span class="o">.</span><span class="n">load_gops</span><span class="p">(</span><span class="n">frame_indices</span><span class="p">,</span> <span class="n">video_paths</span><span class="p">)</span>
+<span class="linenos">179</span>
+<span class="linenos">180</span>            <span class="k">if</span> <span class="n">merged_numpy_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">181</span>                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to load GOP packets for </span><span class="si">{</span><span class="n">clip_path</span><span class="si">}</span><span class="s2"> at frame </span><span class="si">{</span><span class="n">frame_idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">182</span>                <span class="k">continue</span>
+<span class="linenos">183</span>
+<span class="linenos">184</span>            <span class="n">episode_buffers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+<span class="linenos">185</span>                <span class="n">video_transforms</span><span class="o">.</span><span class="n">PacketOndemandBuffers</span><span class="p">(</span>
+<span class="linenos">186</span>                    <span class="n">gop_packets</span><span class="o">=</span><span class="n">merged_numpy_data</span><span class="p">,</span>
+<span class="linenos">187</span>                    <span class="n">target_frame_list</span><span class="o">=</span><span class="n">frame_indices</span><span class="p">,</span>
+<span class="linenos">188</span>                    <span class="n">target_file_list</span><span class="o">=</span><span class="n">video_paths</span><span class="p">,</span>
+<span class="linenos">189</span>                    <span class="n">use_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="linenos">190</span>                    <span class="n">sample_idx</span><span class="o">=</span><span class="n">i</span><span class="p">,</span>
+<span class="linenos">191</span>                <span class="p">)</span>
+<span class="linenos">192</span>            <span class="p">)</span>
+<span class="linenos">193</span>
+<span class="linenos">194</span>        <span class="k">return</span> <span class="n">episode_buffers</span>
+<span class="linenos">195</span>
+<span class="linenos">196</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="videoclipsampler">
+<h3>VideoClipSampler<a class="headerlink" href="#videoclipsampler" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">VideoClipSampler</span></code> class extends PyTorch’s <code class="docutils literal notranslate"><span class="pre">Sampler</span></code> and provides:</p>
+<ul class="simple">
+<li><p>Organizes <code class="docutils literal notranslate"><span class="pre">group_num</span></code> clips into each batch for efficient processing</p></li>
+<li><p>Distributed training support with proper rank/world_size sharding</p></li>
+<li><p>Optional shuffling support for each epoch</p></li>
+<li><p>Ensures balanced workload distribution across GPU ranks</p></li>
+</ul>
+</section>
+<section id="example-training-loop">
+<h3>Example Training Loop<a class="headerlink" href="#example-training-loop" title="Link to this heading"></a></h3>
+<p>The following code shows the complete setup for training with the demuxer-free pipeline:</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">examples/demuxer_free_decode/main.py</span><a class="headerlink" href="#id7" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">404</span>        <span class="c1"># .. doc-marker-begin: training-setup</span>
+<span class="linenos">405</span>        <span class="n">local_rank</span><span class="p">,</span> <span class="n">local_world_size</span> <span class="o">=</span> <span class="n">setup_distributed</span><span class="p">()</span>
+<span class="linenos">406</span>
+<span class="linenos">407</span>        <span class="n">index_frame</span> <span class="o">=</span> <span class="n">load_index_frame</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">index_file</span><span class="p">)</span>
+<span class="linenos">408</span>
+<span class="linenos">409</span>        <span class="n">dataset</span> <span class="o">=</span> <span class="n">VideoClipDatasetDecodeOnly</span><span class="p">(</span>
+<span class="linenos">410</span>            <span class="n">index_frame</span><span class="o">=</span><span class="n">index_frame</span><span class="p">,</span>
+<span class="linenos">411</span>            <span class="n">group_num</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">group_num</span><span class="p">,</span>
+<span class="linenos">412</span>            <span class="n">video_base_path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">video_base_path</span><span class="p">,</span>
+<span class="linenos">413</span>            <span class="n">gop_base_path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">gop_base_path</span><span class="p">,</span>
+<span class="linenos">414</span>            <span class="n">num_cameras</span><span class="o">=</span><span class="n">NUM_CAMERAS</span><span class="p">,</span>
+<span class="linenos">415</span>            <span class="n">use_persistent_index</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">use_persistent_index</span><span class="p">,</span>
+<span class="linenos">416</span>            <span class="n">fix_gop_size</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">fix_gop_size</span><span class="p">,</span>
+<span class="linenos">417</span>        <span class="p">)</span>
+<span class="linenos">418</span>
+<span class="linenos">419</span>        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">frame_read_type</span> <span class="o">==</span> <span class="s1">&#39;stream&#39;</span><span class="p">:</span>
+<span class="linenos">420</span>            <span class="n">sampler</span> <span class="o">=</span> <span class="n">video_clip_sampler</span><span class="o">.</span><span class="n">VideoClipSamplerStream</span><span class="p">(</span>
+<span class="linenos">421</span>                <span class="n">index_frame</span><span class="o">=</span><span class="n">index_frame</span><span class="p">,</span>
+<span class="linenos">422</span>                <span class="n">group_num</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">group_num</span><span class="p">,</span>
+<span class="linenos">423</span>                <span class="n">rank</span><span class="o">=</span><span class="n">local_rank</span><span class="p">,</span>
+<span class="linenos">424</span>                <span class="n">world_size</span><span class="o">=</span><span class="n">local_world_size</span><span class="p">,</span>
+<span class="linenos">425</span>            <span class="p">)</span>
+<span class="linenos">426</span>        <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">frame_read_type</span> <span class="o">==</span> <span class="s1">&#39;random&#39;</span><span class="p">:</span>
+<span class="linenos">427</span>            <span class="n">sampler</span> <span class="o">=</span> <span class="n">video_clip_sampler</span><span class="o">.</span><span class="n">VideoClipSamplerRandom</span><span class="p">(</span>
+<span class="linenos">428</span>                <span class="n">index_frame</span><span class="o">=</span><span class="n">index_frame</span><span class="p">,</span>
+<span class="linenos">429</span>                <span class="n">group_num</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">group_num</span><span class="p">,</span>
+<span class="linenos">430</span>                <span class="n">rank</span><span class="o">=</span><span class="n">local_rank</span><span class="p">,</span>
+<span class="linenos">431</span>                <span class="n">world_size</span><span class="o">=</span><span class="n">local_world_size</span><span class="p">,</span>
+<span class="linenos">432</span>            <span class="p">)</span>
+<span class="linenos">433</span>        <span class="k">else</span><span class="p">:</span>
+<span class="linenos">434</span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown frame_read_type: </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">frame_read_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">435</span>
+<span class="linenos">436</span>        <span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
+<span class="linenos">437</span>            <span class="n">dataset</span><span class="p">,</span>
+<span class="linenos">438</span>            <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="linenos">439</span>            <span class="n">sampler</span><span class="o">=</span><span class="n">sampler</span><span class="p">,</span>
+<span class="linenos">440</span>            <span class="n">num_workers</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span>
+<span class="linenos">441</span>            <span class="n">pin_memory</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="linenos">442</span>        <span class="p">)</span>
+<span class="linenos">443</span>
+<span class="linenos">444</span>        <span class="n">decoder</span> <span class="o">=</span> <span class="n">video_transforms</span><span class="o">.</span><span class="n">DecodeVideoOnDemand</span><span class="p">(</span><span class="n">device_id</span><span class="o">=</span><span class="n">local_rank</span><span class="p">,</span> <span class="n">num_cameras</span><span class="o">=</span><span class="n">NUM_CAMERAS</span><span class="p">)</span>
+<span class="linenos">445</span>
+<span class="linenos">446</span>        <span class="n">run_warmup</span><span class="p">(</span><span class="n">dataloader</span><span class="p">,</span> <span class="n">decoder</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">warmup_iterations</span><span class="p">)</span>
+<span class="linenos">447</span>
+<span class="linenos">448</span>        <span class="n">metrics</span> <span class="o">=</span> <span class="n">run_benchmark</span><span class="p">(</span><span class="n">dataloader</span><span class="p">,</span> <span class="n">decoder</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">group_num</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">log_interval</span><span class="p">)</span>
+<span class="linenos">449</span>
+<span class="linenos">450</span>        <span class="n">print_performance_summary</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">num_workers</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="performance">
+<h2>Performance<a class="headerlink" href="#performance" title="Link to this heading"></a></h2>
+<section id="test-environment">
+<h3>Test Environment<a class="headerlink" href="#test-environment" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>GPU</strong>: NVIDIA A100-SXM4-80GB</p></li>
+<li><p><strong>CPU</strong>: AMD EPYC 7J13 64-Core Processor</p></li>
+<li><p><strong>Storage</strong>: NFS</p></li>
+<li><p><strong>DataSet</strong>: NuScenes-mini, 10 clips, 6 cameras, H.265, 1600x900, GOP_SIZE=30, non-bframe</p></li>
+</ul>
+</section>
+<section id="performance-metrics-frames-sec">
+<h3>Performance Metrics (frames/sec)<a class="headerlink" href="#performance-metrics-frames-sec" title="Link to this heading"></a></h3>
+<p>Using the Demuxer-Free Access API, measure the throughput (frames per second) between stream frame access and random frame access:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>configuration</p></th>
+<th class="head"><p>stream access</p></th>
+<th class="head"><p>random access</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1 GPU</p></td>
+<td><p>803.09</p></td>
+<td><p>306.29</p></td>
+</tr>
+<tr class="row-odd"><td><p>2 GPU</p></td>
+<td><p>1584.18</p></td>
+<td><p>615.5</p></td>
+</tr>
+<tr class="row-even"><td><p>4 GPU</p></td>
+<td><p>2847.4</p></td>
+<td><p>1195.65</p></td>
+</tr>
+<tr class="row-odd"><td><p>8 GPU</p></td>
+<td><p>3859.31</p></td>
+<td><p>2326.49</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="optimization-tips">
+<h3>Optimization Tips<a class="headerlink" href="#optimization-tips" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>CPU Efficiency</strong>: Demuxing overhead is completely eliminated; workers only perform filesystem I/O and GOP packet loading</p></li>
+<li><p><strong>GPU Memory</strong>: Only the main process requires GPU resources for decoding; adjust <code class="docutils literal notranslate"><span class="pre">group_num</span></code> based on available GPU memory</p></li>
+<li><p><strong>Persistent Index</strong>: Keep <code class="docutils literal notranslate"><span class="pre">--use_persistent_index</span></code> enabled for large datasets to avoid directory scans at runtime</p></li>
+<li><p><strong>Fixed GOP Fast Path</strong>: Use <code class="docutils literal notranslate"><span class="pre">--fix_gop_size</span></code> when your dataset has constant GOP size for maximum throughput</p></li>
+<li><p><strong>Storage Location</strong>: Place <code class="docutils literal notranslate"><span class="pre">gop_base_path</span></code> on fast local/NVMe storage for optimal I/O performance</p></li>
+<li><p><strong>Worker Processes</strong>: Adjust <code class="docutils literal notranslate"><span class="pre">num_workers</span></code> based on storage bandwidth and CPU cores</p></li>
+<li><p><strong>GOP Size</strong>: Smaller GOP sizes improve random access performance but increase storage overhead</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While this example demonstrates the basic usage of the demuxer-free approach, this is not the maximum
+performance which can be achieved with this approach. We can still do more optimization such as introducing
+a GOP cache mechanism &amp; passing only newly accessed GOPs from the data loader processes to the main process
+to achieve better performance.</p>
+</div>
+</section>
+<section id="performance-profiling">
+<h3>Performance Profiling<a class="headerlink" href="#performance-profiling" title="Link to this heading"></a></h3>
+<p>Use NVIDIA Nsight Systems for detailed performance analysis:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nsys<span class="w"> </span>profile<span class="w"> </span>--trace-fork-before-exec<span class="w"> </span><span class="nb">true</span><span class="w"> </span>-w<span class="w"> </span><span class="nb">true</span><span class="w"> </span>-f<span class="w"> </span><span class="nb">true</span><span class="w"> </span>-t<span class="w"> </span>cuda,nvtx,osrt,cudnn,cublas,nvvideo<span class="w"> </span>--gpu-video-device<span class="w"> </span>all<span class="w"> </span>-x<span class="w"> </span><span class="nb">true</span><span class="w"> </span>-o<span class="w"> </span>dataloader_decode_only<span class="w"> </span>python<span class="w"> </span>examples/demuxer_free_decode/main.py<span class="w"> </span>--index_file<span class="w"> </span>examples/index_frame.json
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dataloader_separation_decode.html" class="btn btn-neutral float-left" title="DataLoader Separation Decode Example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../evaluation.html" class="btn btn-neutral float-right" title="Evaluation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

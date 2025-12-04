@@ -1,0 +1,205 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.dali_pipeline_framework.internal_helpers.debug_helpers &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.dali_pipeline_framework.internal_helpers.debug_helpers</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.dali_pipeline_framework.internal_helpers.debug_helpers</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">nvidia.dali</span><span class="w"> </span><span class="kn">import</span> <span class="n">fn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">nvidia.dali.pipeline</span>
+
+
+<div class="viewcode-block" id="print_tensor_op">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/internal_helpers.html#accvlab.dali_pipeline_framework.internal_helpers.print_tensor_op">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">print_tensor_op</span><span class="p">(</span><span class="n">tensor_list</span><span class="p">:</span> <span class="n">nvidia</span><span class="o">.</span><span class="n">dali</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">DataNode</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Python operator for printing a tensor list.</span>
+
+<span class="sd">    This operator is used to print a tensor list while running the pipeline.</span>
+<span class="sd">    Note that simply adding print statements to the pipeline will not work as</span>
+<span class="sd">    those will be executed during the DALI graph construction phase, not the actual</span>
+<span class="sd">    execution of the pipeline, and therefore, the printed objects will be</span>
+<span class="sd">    :class:`DataNode` (i.e. &quot;placeholder&quot; objects) instead of the actual data.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The input is of type :class:`~nvidia.dali.pipeline.DataNode`, not a tensor list</span>
+<span class="sd">        (:class:`~nvidia.dali.backend_impl.TensorListCPU` or</span>
+<span class="sd">        :class:`~nvidia.dali.backend_impl.TensorListGPU`). This is because this function is called in the</span>
+<span class="sd">        DALI pipeline definition, i.e. during the graph construction phase.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tensor_list: The tensor list to print.</span>
+<span class="sd">        name: The name of the tensor list (will be shown in the printed output).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_tensor_func</span><span class="p">(</span><span class="n">tensor_list_used</span><span class="p">,</span> <span class="n">name_used</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">tensor_list_used</span><span class="p">,</span> <span class="nb">list</span>
+        <span class="p">),</span> <span class="s2">&quot;Input has to be a tensor list. Use &#39;batch_processing=True&#39; when using this function.&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tensor_list_used</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;-----</span><span class="si">{</span><span class="n">name_used</span><span class="si">}</span><span class="s2">-----&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;size: </span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name_used</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]: &quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">tensor_list_used</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-----&quot;</span><span class="p">)</span>
+
+    <span class="n">used_func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">print_tensor_func</span><span class="p">,</span> <span class="n">name_used</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">fn</span><span class="o">.</span><span class="n">python_function</span><span class="p">(</span><span class="n">tensor_list</span><span class="p">,</span> <span class="n">function</span><span class="o">=</span><span class="n">used_func</span><span class="p">,</span> <span class="n">num_outputs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">batch_processing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">preserve</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="print_tensor_size_op">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/internal_helpers.html#accvlab.dali_pipeline_framework.internal_helpers.print_tensor_size_op">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">print_tensor_size_op</span><span class="p">(</span><span class="n">tensor_list</span><span class="p">:</span> <span class="n">nvidia</span><span class="o">.</span><span class="n">dali</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">DataNode</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Python operator for printing the size of a tensor list.</span>
+
+<span class="sd">    This operator is used to print the size of a tensor list while running the pipeline.</span>
+<span class="sd">    See :func:`print_tensor_op` for more details on why this operator is needed.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The input is of type :class:`~nvidia.dali.pipeline.DataNode`, not a tensor list</span>
+<span class="sd">        (:class:`~nvidia.dali.backend_impl.TensorListCPU` or</span>
+<span class="sd">        :class:`~nvidia.dali.backend_impl.TensorListGPU`). This is because this function is called in the</span>
+<span class="sd">        DALI pipeline definition, i.e. during the graph construction phase.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        tensor_list: The tensor list to print the size of.</span>
+<span class="sd">        name: The name of the tensor list (will be shown in the printed output).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">print_tensor_func</span><span class="p">(</span><span class="n">tensor_list_used</span><span class="p">,</span> <span class="n">name_used</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">tensor_list_used</span><span class="p">,</span> <span class="nb">list</span>
+        <span class="p">),</span> <span class="s2">&quot;Input has to be a tensor list. Use &#39;batch_processing=True&#39; when using this function.&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tensor_list_used</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;-----</span><span class="si">{</span><span class="n">name_used</span><span class="si">}</span><span class="s2">-----&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;size: </span><span class="si">{</span><span class="n">size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name_used</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">].shape: &quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">tensor_list_used</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-----&quot;</span><span class="p">)</span>
+
+    <span class="n">used_func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">print_tensor_func</span><span class="p">,</span> <span class="n">name_used</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">fn</span><span class="o">.</span><span class="n">python_function</span><span class="p">(</span><span class="n">tensor_list</span><span class="p">,</span> <span class="n">function</span><span class="o">=</span><span class="n">used_func</span><span class="p">,</span> <span class="n">num_outputs</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">batch_processing</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">preserve</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

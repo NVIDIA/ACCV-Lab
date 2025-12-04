@@ -1,0 +1,296 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.dali_pipeline_framework.internal_helpers.mini_parser.parser &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.dali_pipeline_framework.internal_helpers.mini_parser.parser</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.dali_pipeline_framework.internal_helpers.mini_parser.parser</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.lexer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Token</span><span class="p">,</span> <span class="n">TokenType</span><span class="p">,</span> <span class="n">Lexer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">ast</span>
+
+
+<div class="viewcode-block" id="Parser">
+<a class="viewcode-back" href="../../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/internal_helpers.html#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Parser">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Parser</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;The actual parser.</span>
+
+<span class="sd">    The input string must start with a variable name, followed by an assignment operator, followed by an</span>
+<span class="sd">    expression.</span>
+
+<span class="sd">    The expression is parsed recursively. The expression can contain variables, literals, and operators.</span>
+
+<span class="sd">    The operators are:</span>
+<span class="sd">        - Logical operators: ``or``, ``and``, ``not``</span>
+<span class="sd">        - Comparison operators: ``==``, ``!=``, ``&gt;``, ``&gt;=``, ``&lt;``, ``&lt;=``</span>
+<span class="sd">        - Parentheses: ``(`` and ``)``</span>
+<span class="sd">        - Unary minus: ``-``</span>
+<span class="sd">        - Assignment operator: ``=``</span>
+
+<span class="sd">    The syntax is similar to Python. However, note that</span>
+<span class="sd">        - Only the operators defined above are supported.</span>
+<span class="sd">        - Comparisons of more than two values are not supported (e.g. ``a &lt; b &lt; c`` is not supported).</span>
+<span class="sd">        - Only numeric literals are supported. ``True`` and ``False`` are not supported (not needed in the current</span>
+<span class="sd">          use case).</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">        Some valid statements:</span>
+<span class="sd">          - ``res_var = -_b1 &lt; 10.5``</span>
+<span class="sd">          - ``res_1_var = -_b1 &lt; 10.5 and -c &gt; -20``</span>
+<span class="sd">          - ``res_3_var = not -_b1 &lt; 10.5``</span>
+<span class="sd">          - ``res_4_var = (-_b1 &lt; 10.5 or a_bool_var) and another_nool_var``</span>
+<span class="sd">          - ``res_5_var = (-_b1 &lt; 10.5 or (-c &gt; -20 and d == 10)) and another_var &gt; 30``</span>
+<span class="sd">          - ``res_7_var = (-_b1 &lt; 10.5 or (-c &gt; -20 and d == 10)) and (another_var &gt; 30 and _e &lt; 40) and f &gt; 50``</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_str: Input string to parse.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">_priority_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">TokenType</span><span class="o">.</span><span class="n">LOGICAL_OR</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">TokenType</span><span class="o">.</span><span class="n">LOGICAL_AND</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">TokenType</span><span class="o">.</span><span class="n">COMPARISON</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">TokenType</span><span class="o">.</span><span class="n">LOGICAL_NOT</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">TokenType</span><span class="o">.</span><span class="n">MINUS</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">TokenType</span><span class="o">.</span><span class="n">PARENTHESIS_OPEN</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lexer</span> <span class="o">=</span> <span class="n">Lexer</span><span class="p">(</span><span class="n">input_str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tokens</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lexer</span><span class="o">.</span><span class="n">next_token</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">EOL</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_curr_token_idx</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="Parser.parse">
+<a class="viewcode-back" href="../../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/internal_helpers.html#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Parser.parse">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ast</span><span class="o">.</span><span class="n">AST</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Parses the input stream and returns an AST.</span>
+
+<span class="sd">        See the class docstring for the syntax.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The AST of the input stream.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_curr_token</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">VARIABLE</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The condition must start with `&lt;res_var_name&gt; = ...` (replace `&lt;res_var_name&gt;` with the name of the variable to store the result in)&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_move_to_next_token</span><span class="p">()</span>
+        <span class="n">assignment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_curr_token</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">assignment</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">ASSIGNMENT</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The condition must start with `&lt;res_var_name&gt; = ...` (replace `&lt;res_var_name&gt;` with the name of the variable to store the result in)&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_move_to_next_token</span><span class="p">()</span>
+        <span class="n">expression</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_expression</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">Assignment</span><span class="p">(</span><span class="n">ast</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">value</span><span class="p">),</span> <span class="n">expression</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_curr_token</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Token</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Returns the current token.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The current token.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tokens</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_curr_token_idx</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_curr_token_priority</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Returns the priority of the current token.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The priority of the current token.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_priority_map</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_curr_token</span><span class="p">()</span><span class="o">.</span><span class="n">type</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_move_to_next_token</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Move current token forward&#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_curr_token_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">priority</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ast</span><span class="o">.</span><span class="n">AST</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Parses the input stream and returns an AST.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            priority: The priority of the expression to parse.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_prefix</span><span class="p">()</span>
+        <span class="n">end_token_types</span> <span class="o">=</span> <span class="p">(</span><span class="n">TokenType</span><span class="o">.</span><span class="n">EOL</span><span class="p">,</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">PARENTHESIS_CLOSE</span><span class="p">)</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_curr_token</span><span class="p">()</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="n">end_token_types</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_curr_token_priority</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">priority</span><span class="p">:</span>
+            <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_infix</span><span class="p">(</span><span class="n">left</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_curr_token_priority</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">left</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_prefix</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ast</span><span class="o">.</span><span class="n">AST</span><span class="p">:</span>
+        <span class="n">curr_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_curr_token</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">curr_token</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">TokenType</span><span class="o">.</span><span class="n">LOGICAL_NOT</span><span class="p">,</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">MINUS</span><span class="p">):</span>
+            <span class="n">priority</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_curr_token_priority</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_move_to_next_token</span><span class="p">()</span>
+            <span class="n">inner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_expression</span><span class="p">(</span><span class="n">priority</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">curr_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">LOGICAL_NOT</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">Not</span><span class="p">(</span><span class="n">inner</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">curr_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">MINUS</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">UnaryMinus</span><span class="p">(</span><span class="n">inner</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">res</span>
+        <span class="k">elif</span> <span class="n">curr_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">PARENTHESIS_OPEN</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_move_to_next_token</span><span class="p">()</span>
+            <span class="c1"># Parse the inner expression.</span>
+            <span class="c1"># We reset the priority to 0 because we are parsing the inner expression</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_expression</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="c1"># The right parenthesis serves as the end token for the inner expression.</span>
+            <span class="c1"># We do not advance it inside the inner expression (as it may need to serve as the end token</span>
+            <span class="c1"># for multiple recursion levels). Instead, we advance it here.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_move_to_next_token</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">res</span>
+        <span class="k">elif</span> <span class="n">curr_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">LITERAL</span> <span class="ow">or</span> <span class="n">curr_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">VARIABLE</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">curr_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">LITERAL</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">Literal</span><span class="p">(</span><span class="n">curr_token</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">curr_token</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">VARIABLE</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">curr_token</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_move_to_next_token</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid token: </span><span class="si">{</span><span class="n">curr_token</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_infix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left_value</span><span class="p">:</span> <span class="n">ast</span><span class="o">.</span><span class="n">AST</span><span class="p">,</span> <span class="n">priority</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ast</span><span class="o">.</span><span class="n">AST</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Parses an infix expression from the input stream and returns an AST.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            left_value: The left value of the infix expression.</span>
+<span class="sd">            priority: The priority of the infix expression.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">combination</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_curr_token</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_move_to_next_token</span><span class="p">()</span>
+        <span class="n">right_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_expression</span><span class="p">(</span><span class="n">priority</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">combination</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">LOGICAL_OR</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">Or</span><span class="p">(</span><span class="n">left_value</span><span class="p">,</span> <span class="n">right_value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">combination</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">LOGICAL_AND</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">And</span><span class="p">(</span><span class="n">left_value</span><span class="p">,</span> <span class="n">right_value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">combination</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">TokenType</span><span class="o">.</span><span class="n">COMPARISON</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">Comparison</span><span class="p">(</span><span class="n">left_value</span><span class="p">,</span> <span class="n">combination</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">right_value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

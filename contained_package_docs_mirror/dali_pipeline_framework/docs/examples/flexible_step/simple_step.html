@@ -1,0 +1,261 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Image Decoding Step &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+    <link rel="next" title="Flexible Image Decoding Step" href="flexible_step.html" />
+    <link rel="prev" title="Flexible Step Implementation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">DALI Pipeline Framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../design.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/main_api.html">Main API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/additional_api.html">Additional API Reference</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html">Examples</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../examples.html#pipeline-setup-examples">Pipeline Setup Examples</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../2d_object_detection/index.html">2D Object Detection Pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stream_petr/index.html">StreamPETR Pipeline</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="index.html">Flexible Step Implementation</a><ul class="current">
+<li class="toctree-l5 current"><a class="current reference internal" href="#">Simple Image Decoding Step</a></li>
+<li class="toctree-l5"><a class="reference internal" href="flexible_step.html">Flexible Image Decoding Step</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../examples.html#data-loaders-for-nuscenes">Data Loaders for NuScenes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">DALI Pipeline Framework</a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Examples</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Flexible Step Implementation</a></li>
+      <li class="breadcrumb-item active">Simple Image Decoding Step</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../_sources/contained_package_docs_mirror/dali_pipeline_framework/docs/examples/flexible_step/simple_step.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="simple-image-decoding-step">
+<h1>Simple Image Decoding Step<a class="headerlink" href="#simple-image-decoding-step" title="Link to this heading"></a></h1>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The implementation of <code class="docutils literal notranslate"><span class="pre">SimpleExampleImageDecoder</span></code> can be found at
+<code class="docutils literal notranslate"><span class="pre">packages/dali_pipeline_framework/examples/simple_processing_step_example/simple_example_image_decoder.py</span></code>.</p>
+</div>
+<p>First, let’s implement a single image decoding step. Image decoding is typically the first step performed
+after obtaining the input data. For now, we assume that there is only one image to process and we know exactly
+where in the input data structure the image is located. These assumptions limit the usability of the
+processing step (e.g. using single-camera vs. multi-camera input, or using other images). We will lift this
+limitation in the next step using functionality of <a class="reference internal" href="../../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a>.
+But first, let’s have a look at <code class="docutils literal notranslate"><span class="pre">SimpleExampleImageDecoder</span></code>.</p>
+<div class="literal-block-wrapper docutils container" id="simple-example-image-decoder">
+<div class="code-block-caption"><span class="caption-text">packages/dali_pipeline_framework/examples/simple_processing_step_example/simple_example_image_decoder.py</span><a class="headerlink" href="#simple-example-image-decoder" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="linenos">  2</span><span class="c1">#</span>
+<span class="linenos">  3</span><span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="linenos">  4</span><span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="linenos">  5</span><span class="c1"># You may obtain a copy of the License at</span>
+<span class="linenos">  6</span><span class="c1">#</span>
+<span class="linenos">  7</span><span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="linenos">  8</span><span class="c1">#</span>
+<span class="linenos">  9</span><span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="linenos"> 10</span><span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="linenos"> 11</span><span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="linenos"> 12</span><span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="linenos"> 13</span><span class="c1"># limitations under the License.</span>
+<span class="linenos"> 14</span>
+<span class="linenos"> 15</span><span class="k">try</span><span class="p">:</span>
+<span class="linenos"> 16</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+<span class="linenos"> 17</span><span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+<span class="linenos"> 18</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+<span class="linenos"> 19</span>
+<span class="linenos"> 20</span><span class="kn">import</span><span class="w"> </span><span class="nn">nvidia.dali.types</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">types</span>
+<span class="linenos"> 21</span><span class="kn">import</span><span class="w"> </span><span class="nn">nvidia.dali.fn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fn</span>
+<span class="linenos"> 22</span>
+<span class="hll"><span class="linenos"> 23</span><span class="c1"># @NOTE: Import the needed functinoality from the DALI pipeline framework package.</span>
+</span><span class="linenos"> 24</span><span class="kn">from</span><span class="w"> </span><span class="nn">accvlab.dali_pipeline_framework.processing_steps</span><span class="w"> </span><span class="kn">import</span> <span class="n">PipelineStepBase</span>
+<span class="linenos"> 25</span><span class="kn">from</span><span class="w"> </span><span class="nn">accvlab.dali_pipeline_framework.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleDataGroup</span>
+<span class="linenos"> 26</span>
+<span class="linenos"> 27</span>
+<span class="hll"><span class="linenos"> 28</span><span class="c1"># @NOTE: We derive from the base class PipelineStepBase to implement a processing step.</span>
+</span><span class="linenos"> 29</span><span class="k">class</span><span class="w"> </span><span class="nc">SimpleExampleImageDecoder</span><span class="p">(</span><span class="n">PipelineStepBase</span><span class="p">):</span>
+<span class="linenos"> 30</span><span class="w">    </span><span class="sd">&#39;&#39;&#39;Minimal example: decode a single image.&#39;&#39;&#39;</span>
+<span class="linenos"> 31</span>
+<span class="linenos"> 32</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_device_mixed</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">hw_decoder_load</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.65</span><span class="p">):</span>
+<span class="linenos"> 33</span><span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="linenos"> 34</span>
+<span class="linenos"> 35</span><span class="sd">        Args:</span>
+<span class="linenos"> 36</span><span class="sd">            use_device_mixed: If ``True``, decoding is performed on GPU (mixed) and results reside in GPU</span>
+<span class="linenos"> 37</span><span class="sd">                memory; if ``False``, only CPU is used.</span>
+<span class="linenos"> 38</span><span class="sd">            hw_decoder_load: When ``use_device_mixed==True``, fraction of work handled by hardware decoder</span>
+<span class="linenos"> 39</span><span class="sd">                (rest is handled by CUDA kernels).</span>
+<span class="linenos"> 40</span>
+<span class="linenos"> 41</span><span class="sd">        &#39;&#39;&#39;</span>
+<span class="linenos"> 42</span>
+<span class="linenos"> 43</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_use_device_mixed</span> <span class="o">=</span> <span class="n">use_device_mixed</span>
+<span class="linenos"> 44</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_hw_decoder_load</span> <span class="o">=</span> <span class="n">hw_decoder_load</span>
+<span class="linenos"> 45</span>
+<span class="linenos"> 46</span>    <span class="nd">@override</span>
+<span class="linenos"> 47</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+<span class="hll"><span class="linenos"> 48</span>        <span class="c1"># @NOTE: This is the main processing step. This method needs to be implemented by the derived class.</span>
+</span><span class="linenos"> 49</span>
+<span class="hll"><span class="linenos"> 50</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 51</span>        <span class="c1"># Here, we assume that the image is stored in the data field &quot;image&quot; in the root of the input data.</span>
+</span><span class="hll"><span class="linenos"> 52</span>        <span class="c1"># This makes this processing step unflexible, as images anywhere else in the data cannot be processed</span>
+</span><span class="hll"><span class="linenos"> 53</span>        <span class="c1"># (and the processing is limited to a single image).</span>
+</span><span class="linenos"> 54</span>        <span class="n">image</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span>
+<span class="linenos"> 55</span>
+<span class="hll"><span class="linenos"> 56</span>        <span class="c1"># @NOTE: Perform the actual decoding using the DALI image decoder operator.</span>
+</span><span class="linenos"> 57</span>        <span class="n">image</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">decoders</span><span class="o">.</span><span class="n">image</span><span class="p">(</span>
+<span class="linenos"> 58</span>            <span class="n">image</span><span class="p">,</span>
+<span class="linenos"> 59</span>            <span class="n">device</span><span class="o">=</span><span class="s2">&quot;mixed&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_device_mixed</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+<span class="linenos"> 60</span>            <span class="n">hw_decoder_load</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_hw_decoder_load</span><span class="p">,</span>
+<span class="linenos"> 61</span>            <span class="n">output_type</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">RGB</span><span class="p">,</span>
+<span class="linenos"> 62</span>        <span class="p">)</span>
+<span class="linenos"> 63</span>
+<span class="hll"><span class="linenos"> 64</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 65</span>        <span class="c1"># Again, we assume a fixed image data field name and set the image data to the decoded version. Note</span>
+</span><span class="hll"><span class="linenos"> 66</span>        <span class="c1"># that this simple assignment works as the image is still of the same type (UINT8). If the type</span>
+</span><span class="hll"><span class="linenos"> 67</span>        <span class="c1"># changes, we would need to change the type `data` first, e.g. by calling:</span>
+</span><span class="hll"><span class="linenos"> 68</span>        <span class="c1">#  &gt;&gt; data.change_type_of_data_and_remove_data(&quot;image&quot;, new_type)</span>
+</span><span class="hll"><span class="linenos"> 69</span>        <span class="c1"># which would change the type and remove the reference to the old data (as the old data is by</span>
+</span><span class="hll"><span class="linenos"> 70</span>        <span class="c1"># definition incompatible with the new type). After this call, we could write `image` into the data</span>
+</span><span class="hll"><span class="linenos"> 71</span>        <span class="c1"># field.</span>
+</span><span class="hll"><span class="linenos"> 72</span>        <span class="c1">#</span>
+</span><span class="hll"><span class="linenos"> 73</span>        <span class="c1"># Similarly, if we wanted to add a new data fields, we would need to call:</span>
+</span><span class="hll"><span class="linenos"> 74</span>        <span class="c1">#  &gt;&gt; data.add_data_field(&quot;new_field&quot;, new_type)</span>
+</span><span class="hll"><span class="linenos"> 75</span>        <span class="c1"># to add the field to the data format before setting the actual data.</span>
+</span><span class="linenos"> 76</span>        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">image</span>
+<span class="linenos"> 77</span>
+<span class="hll"><span class="linenos"> 78</span>        <span class="c1"># @NOTE: Return the resulting data structure with the decoded image.</span>
+</span><span class="linenos"> 79</span>        <span class="k">return</span> <span class="n">data</span>
+<span class="linenos"> 80</span>
+<span class="linenos"> 81</span>    <span class="nd">@override</span>
+<span class="linenos"> 82</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_check_and_adjust_data_format_input_to_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_empty</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+<span class="hll"><span class="linenos"> 83</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 84</span>        <span class="c1"># Here, we need to override the base class method to adjust the data format to the output data</span>
+</span><span class="hll"><span class="linenos"> 85</span>        <span class="c1"># format &amp; check for compatibility.</span>
+</span><span class="linenos"> 86</span>
+<span class="hll"><span class="linenos"> 87</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 88</span>        <span class="c1"># In this simple example processing step, the input data format is hardcoded (see above), and we just</span>
+</span><span class="hll"><span class="linenos"> 89</span>        <span class="c1"># check that the input data format contains an image field and that it is of the correct type.</span>
+</span><span class="linenos"> 90</span>        <span class="k">if</span> <span class="ow">not</span> <span class="n">data_empty</span><span class="o">.</span><span class="n">has_child</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">):</span>
+<span class="linenos"> 91</span>            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Image data field not found&quot;</span><span class="p">)</span>
+<span class="linenos"> 92</span>        <span class="k">if</span> <span class="n">data_empty</span><span class="o">.</span><span class="n">get_type_of_field</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">UINT8</span><span class="p">:</span>
+<span class="linenos"> 93</span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Image data field is not of type UINT8&quot;</span><span class="p">)</span>
+<span class="linenos"> 94</span>
+<span class="hll"><span class="linenos"> 95</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 96</span>        <span class="c1"># We do not need to add or adjust any new data fields, so we can return the input data format as is.</span>
+</span><span class="hll"><span class="linenos"> 97</span>        <span class="c1"># If we e.g. wanted to change the type of the image field, we would need to call:</span>
+</span><span class="hll"><span class="linenos"> 98</span>        <span class="c1">#  &gt;&gt; data_empty.change_type_of_data_and_remove_data(&quot;image&quot;, new_type)</span>
+</span><span class="hll"><span class="linenos"> 99</span>        <span class="c1"># before returning the adjusted blueprint. Note hat the output data structure needs to match the</span>
+</span><span class="hll"><span class="linenos">100</span>        <span class="c1"># structure of the actual output, so any changes to the data structure done here need to be reflected</span>
+</span><span class="hll"><span class="linenos">101</span>        <span class="c1"># in the _process() method as well.</span>
+</span><span class="linenos">102</span>        <span class="k">return</span> <span class="n">data_empty</span>
+</pre></div>
+</div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Flexible Step Implementation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="flexible_step.html" class="btn btn-neutral float-right" title="Flexible Image Decoding Step" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,470 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.dali_pipeline_framework.processing_steps.bev_bboxes_transformer_3d &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.dali_pipeline_framework.processing_steps.bev_bboxes_transformer_3d</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.dali_pipeline_framework.processing_steps.bev_bboxes_transformer_3d</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">nvidia.dali.types</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">types</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">nvidia.dali.fn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fn</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..pipeline.sample_data_group</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleDataGroup</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.pipeline_step_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">PipelineStepBase</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..operators_impl</span><span class="w"> </span><span class="kn">import</span> <span class="n">numba_operators</span> <span class="k">as</span> <span class="n">numba_ops</span>
+
+
+<div class="viewcode-block" id="BEVBBoxesTransformer3D">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.BEVBBoxesTransformer3D">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BEVBBoxesTransformer3D</span><span class="p">(</span><span class="n">PipelineStepBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Augment BEV bounding boxes (and related geometry) with rotation, scaling, and translation.</span>
+
+<span class="sd">    The augmentation is applied in world coordinates. Related sensor geometry (e.g., extrinsics) is defined</span>
+<span class="sd">    in ego coordinates and is updated accordingly using provided ego&lt;-&gt;world transforms.</span>
+
+<span class="sd">    The individual augmentation steps are applied in the following order:</span>
+<span class="sd">      1. Rotation</span>
+<span class="sd">      2. Scaling</span>
+<span class="sd">      3. Translation</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_field_names_points</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]],</span>
+        <span class="n">data_field_names_velocities</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]],</span>
+        <span class="n">data_field_names_sizes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]],</span>
+        <span class="n">data_field_names_orientation</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]],</span>
+        <span class="n">data_field_names_proj_matrices_and_extrinsics</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]],</span>
+        <span class="n">data_field_names_ego_to_world</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]],</span>
+        <span class="n">data_field_names_world_to_ego</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]],</span>
+        <span class="n">rotation_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+        <span class="n">rotation_axis</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">scaling_range</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+        <span class="n">translation_max_abs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            data_field_names_points: Name or names of data fields in the input :class:`SampleDataGroup`</span>
+<span class="sd">                instance containing the points representing the bounding box center (in ``[x, y, z]`` format).</span>
+<span class="sd">                Optional; will be updated if provided.</span>
+<span class="sd">            data_field_names_velocities: Name or names of data fields in the input :class:`SampleDataGroup`</span>
+<span class="sd">                instance containing the velocities of the objects (bounding boxes) (in ``[vx, vy, vz]``</span>
+<span class="sd">                format).</span>
+<span class="sd">                Optional; will be updated if provided.</span>
+<span class="sd">            data_field_names_sizes: Name or names of data fields in the input :class:`SampleDataGroup`</span>
+<span class="sd">                instance containing the sizes of the bounding boxes (in ``[x, y, z]`` format).</span>
+<span class="sd">                Optional; will be updated if provided.</span>
+<span class="sd">            data_field_names_orientation: Name or names of data fields in the input :class:`SampleDataGroup`</span>
+<span class="sd">                instance containing the orientations of the bounding boxes (in radians).</span>
+<span class="sd">                Optional; will be updated if provided.</span>
+<span class="sd">            data_field_names_proj_matrices_and_extrinsics: Name or names of data fields in the input</span>
+<span class="sd">                :class:`SampleDataGroup` instance containing projection matrices and/or extrinsics. Note that</span>
+<span class="sd">                camera intrinsics don&#39;t need to be adjusted and must not be included in this list. Optional;</span>
+<span class="sd">                will be updated if provided.</span>
+<span class="sd">            data_field_names_ego_to_world: Name or names of data fields in the input :class:`SampleDataGroup`</span>
+<span class="sd">                instance containing matrices representing a transformation (e.g. for points) from ego to</span>
+<span class="sd">                world coordinates. Optional; will be updated if provided.</span>
+<span class="sd">            data_field_names_world_to_ego: Name or names of data fields in the input :class:`SampleDataGroup`</span>
+<span class="sd">                instance containing matrices representing a transformation (e.g. for points) from world to</span>
+<span class="sd">                ego coordinates. Optional; will be updated if provided.</span>
+<span class="sd">            rotation_range: Rotation range for the randomized rotation in the augmentation transformation.</span>
+<span class="sd">                Optional; if not provided, no rotation is applied.</span>
+<span class="sd">            rotation_axis: Axis of rotation (``0`` indicating ``x``, ``1`` indicating ``y``,</span>
+<span class="sd">                and ``2`` indicating ``z``). Must be provided if ``rotation_range`` is provided.</span>
+<span class="sd">            scaling_range: Scaling range for the augmentation transformation.</span>
+<span class="sd">                Optional; if not provided, no scaling is applied.</span>
+<span class="sd">            translation_max_abs: Maximum absolute translation range in all dimensions.</span>
+<span class="sd">                Optional; if not provided, no translation is applied.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">int_str_to_list</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">data</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_do_rotate</span> <span class="o">=</span> <span class="n">rotation_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_do_scale</span> <span class="o">=</span> <span class="n">scaling_range</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_do_translate</span> <span class="o">=</span> <span class="n">translation_max_abs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_rotate</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">rotation_axis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">),</span> <span class="s2">&quot;If `rotation_range` is set, `rotation_axis` needs to be set too&quot;</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">rotation_range</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+            <span class="p">),</span> <span class="s2">&quot;If `rotation_range` is set, it must have 2 elements (minimum and maximum rotation angle).&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rotation_range</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">rr</span><span class="p">)</span> <span class="k">for</span> <span class="n">rr</span> <span class="ow">in</span> <span class="n">rotation_range</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rotation_axis</span> <span class="o">=</span> <span class="n">rotation_axis</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rotation_axis_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rotation_axis_vec</span><span class="p">[</span><span class="n">rotation_axis</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_scale</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">scaling_range</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+            <span class="p">),</span> <span class="s2">&quot;If `scaling_range` is set, it must have 2 elements (minimum and maximum scaling factor).&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_scaling_range</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span> <span class="k">for</span> <span class="n">sr</span> <span class="ow">in</span> <span class="n">scaling_range</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_translate</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">translation_max_abs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span>
+            <span class="p">),</span> <span class="s2">&quot;If `translation_max_abs` is set, it must have 3 elements (one per dimension to translate in).&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_translation_max_abs</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="n">tma</span><span class="p">)</span> <span class="k">for</span> <span class="n">tma</span> <span class="ow">in</span> <span class="n">translation_max_abs</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">data_field_names_points</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="s2">&quot;data_field_names_points&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">int_str_to_list</span><span class="p">(</span><span class="n">data_field_names_points</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="s2">&quot;data_field_names_points&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">data_field_names_velocities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="s2">&quot;data_field_names_velocities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">int_str_to_list</span><span class="p">(</span><span class="n">data_field_names_velocities</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="s2">&quot;data_field_names_velocities&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">data_field_names_sizes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="s2">&quot;data_field_names_sizes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">int_str_to_list</span><span class="p">(</span><span class="n">data_field_names_sizes</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="s2">&quot;data_field_names_sizes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">data_field_names_orientation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="s2">&quot;data_field_names_orientation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">int_str_to_list</span><span class="p">(</span><span class="n">data_field_names_orientation</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="s2">&quot;data_field_names_orientation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">data_field_names_proj_matrices_and_extrinsics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="s2">&quot;data_field_names_proj_matrices_and_extrinsics&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">int_str_to_list</span><span class="p">(</span>
+                <span class="n">data_field_names_proj_matrices_and_extrinsics</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="s2">&quot;data_field_names_proj_matrices_and_extrinsics&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">data_field_names_ego_to_world</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="s2">&quot;data_field_names_ego_to_world&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">int_str_to_list</span><span class="p">(</span>
+                <span class="n">data_field_names_ego_to_world</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="s2">&quot;data_field_names_ego_to_world&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">data_field_names_world_to_ego</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="s2">&quot;data_field_names_world_to_ego&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">int_str_to_list</span><span class="p">(</span>
+                <span class="n">data_field_names_world_to_ego</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="s2">&quot;data_field_names_world_to_ego&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;At least one kind of data field name must be set.&quot;</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+        <span class="n">to_apply_rotation_to</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;data_field_names_points&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data_field_names_velocities&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data_field_names_ego_to_world&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data_field_names_world_to_ego&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data_field_names_proj_matrices_and_extrinsics&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">apply_rotation_from_right</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">]</span>
+        <span class="n">apply_rotation_inv</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">]</span>
+        <span class="n">apply_rotation_is_transposed</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
+        <span class="n">apply_rotation_make_homog</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
+        <span class="c1"># ego&#39; -&gt; ego -&gt; world; note that (ego&#39; -&gt; ego) is the same transformation as for the objects, but it needs to be multiplied from the right</span>
+        <span class="c1"># to_apply_rotation_to_from_right = [&quot;data_field_names_ego_to_world&quot;]</span>
+        <span class="c1"># to_apply_rotation_to_inv = [&quot;data_field_names_world_to_ego&quot;]</span>
+
+        <span class="n">orientation_to_apply_rotation_to</span> <span class="o">=</span> <span class="s2">&quot;data_field_names_orientation&quot;</span>
+
+        <span class="n">to_apply_scaling_to</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;data_field_names_points&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data_field_names_velocities&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data_field_names_sizes&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data_field_names_ego_to_world&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data_field_names_world_to_ego&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data_field_names_proj_matrices_and_extrinsics&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="c1"># Note that for scaling, for square inputs it does not matter if the scaling matrix is multiplied from the left or the right. However, for non-square inputs, it matters (and the number of dimensions may not match</span>
+        <span class="c1"># if done wrongly).</span>
+        <span class="n">apply_scaling_from_right</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">]</span>
+        <span class="n">apply_scaling_inv</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">]</span>
+        <span class="n">apply_scaling_transposed</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
+        <span class="n">apply_scaling_make_homog</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
+
+        <span class="n">to_apply_translation_to</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;data_field_names_points&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data_field_names_ego_to_world&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data_field_names_world_to_ego&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data_field_names_proj_matrices_and_extrinsics&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">apply_translation_from_right</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">]</span>
+        <span class="n">apply_translation_inv</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">]</span>
+        <span class="n">apply_translation_transposed</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
+        <span class="n">apply_translation_make_homog</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
+
+        <span class="c1"># rotation_angle_deg = self._get_random_in_range(*self._rotation_range)</span>
+        <span class="c1"># rotation_angle_rad = rotation_angle_deg / 180.0 * np.pi</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_rotate</span><span class="p">:</span>
+            <span class="n">rotation_angle_rad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_random_in_range</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_rotation_range</span><span class="p">)</span>
+            <span class="n">rotation_vector</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">fn</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">fdata</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rotation_axis_vec</span><span class="p">),</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">)</span>
+                <span class="o">*</span> <span class="n">rotation_angle_rad</span>
+            <span class="p">)</span>
+            <span class="c1"># print(f&quot;/////////////////////////////////////////////////////////////////// rotation_vector: {rotation_vector}&quot;)</span>
+            <span class="c1"># debug_help.print_tensor_op(rotation_vector, &quot;rotation_vector&quot;)</span>
+            <span class="n">rotation_matrix</span> <span class="o">=</span> <span class="n">numba_ops</span><span class="o">.</span><span class="n">get_rot_mat_from_rot_vector</span><span class="p">(</span><span class="n">rotation_vector</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_scale</span><span class="p">:</span>
+            <span class="n">scaling_factor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_random_in_range</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_scaling_range</span><span class="p">)</span>
+            <span class="n">scaling_matrix</span> <span class="o">=</span> <span class="n">numba_ops</span><span class="o">.</span><span class="n">get_scaling_mat_from_vector</span><span class="p">(</span>
+                <span class="n">fn</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">scaling_factor</span><span class="p">,</span> <span class="n">scaling_factor</span><span class="p">,</span> <span class="n">scaling_factor</span><span class="p">),</span> <span class="kc">True</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_translate</span><span class="p">:</span>
+            <span class="n">translation</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_get_random_in_range</span><span class="p">(</span><span class="o">-</span><span class="n">max_abs_trans</span><span class="p">,</span> <span class="n">max_abs_trans</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">max_abs_trans</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_translation_max_abs</span>
+            <span class="p">]</span>
+            <span class="n">translation</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="o">*</span><span class="n">translation</span><span class="p">)</span>
+
+            <span class="n">translation_matrix</span> <span class="o">=</span> <span class="n">numba_ops</span><span class="o">.</span><span class="n">get_translation_mat_from_vector</span><span class="p">(</span><span class="n">translation</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_rotate</span><span class="p">:</span>
+            <span class="c1"># Apply rotation transformation to all data fields (except the orientation)</span>
+            <span class="k">for</span> <span class="n">key_of_names</span><span class="p">,</span> <span class="n">from_right</span><span class="p">,</span> <span class="n">invert</span><span class="p">,</span> <span class="n">data_transposed</span><span class="p">,</span> <span class="n">make_homog</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="n">to_apply_rotation_to</span><span class="p">,</span>
+                <span class="n">apply_rotation_from_right</span><span class="p">,</span>
+                <span class="n">apply_rotation_inv</span><span class="p">,</span>
+                <span class="n">apply_rotation_is_transposed</span><span class="p">,</span>
+                <span class="n">apply_rotation_make_homog</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="n">key_of_names</span><span class="p">]:</span>
+                    <span class="n">paths</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">find_all_occurrences</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+                        <span class="n">parent</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_parent_of_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                        <span class="c1"># Note that instead of `matrix_is_inverted`, invert is passed to the function as `matrix_is_transposed`.</span>
+                        <span class="c1"># This is as for rotation matrices, the transpose is the inverse and computing the transpose is cheaper.</span>
+                        <span class="c1"># debug_help.print_tensor_op(parent[name], name + &quot;:pre_rotate&quot;)</span>
+                        <span class="n">res</span> <span class="o">=</span> <span class="n">numba_ops</span><span class="o">.</span><span class="n">apply_matrix</span><span class="p">(</span>
+                            <span class="n">parent</span><span class="p">[</span><span class="n">name</span><span class="p">],</span>
+                            <span class="n">rotation_matrix</span><span class="p">,</span>
+                            <span class="n">make_apply_to_homog</span><span class="o">=</span><span class="n">make_homog</span><span class="p">,</span>
+                            <span class="n">to_apply_to_is_transposed</span><span class="o">=</span><span class="n">data_transposed</span><span class="p">,</span>
+                            <span class="n">matrix_is_transposed</span><span class="o">=</span><span class="n">invert</span><span class="p">,</span>
+                            <span class="n">matrix_is_inverted</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="n">multiply_matrix_from_right</span><span class="o">=</span><span class="n">from_right</span><span class="p">,</span>
+                        <span class="p">)</span>
+                        <span class="n">parent</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span>
+                        <span class="c1"># debug_help.print_tensor_op(parent[name], name + &quot;:post_rotate&quot;)</span>
+
+            <span class="c1"># Adjust the orientation</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="n">orientation_to_apply_rotation_to</span><span class="p">]:</span>
+                <span class="n">paths</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">find_all_occurrences</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+                    <span class="n">parent</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_parent_of_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                    <span class="n">orientation</span> <span class="o">=</span> <span class="n">parent</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">+</span> <span class="n">rotation_angle_rad</span>
+                    <span class="n">orientation</span> <span class="o">=</span> <span class="n">numba_ops</span><span class="o">.</span><span class="n">ensure_range</span><span class="p">(</span>
+                        <span class="n">orientation</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">get_type_of_field</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">parent</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">orientation</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_scale</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key_of_names</span><span class="p">,</span> <span class="n">from_right</span><span class="p">,</span> <span class="n">invert</span><span class="p">,</span> <span class="n">data_transposed</span><span class="p">,</span> <span class="n">make_homog</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="n">to_apply_scaling_to</span><span class="p">,</span>
+                <span class="n">apply_scaling_from_right</span><span class="p">,</span>
+                <span class="n">apply_scaling_inv</span><span class="p">,</span>
+                <span class="n">apply_scaling_transposed</span><span class="p">,</span>
+                <span class="n">apply_scaling_make_homog</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="n">key_of_names</span><span class="p">]:</span>
+                    <span class="n">paths</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">find_all_occurrences</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+                        <span class="n">parent</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_parent_of_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                        <span class="n">res</span> <span class="o">=</span> <span class="n">numba_ops</span><span class="o">.</span><span class="n">apply_matrix</span><span class="p">(</span>
+                            <span class="n">parent</span><span class="p">[</span><span class="n">name</span><span class="p">],</span>
+                            <span class="n">scaling_matrix</span><span class="p">,</span>
+                            <span class="n">make_apply_to_homog</span><span class="o">=</span><span class="n">make_homog</span><span class="p">,</span>
+                            <span class="n">to_apply_to_is_transposed</span><span class="o">=</span><span class="n">data_transposed</span><span class="p">,</span>
+                            <span class="n">matrix_is_transposed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="n">matrix_is_inverted</span><span class="o">=</span><span class="n">invert</span><span class="p">,</span>
+                            <span class="n">multiply_matrix_from_right</span><span class="o">=</span><span class="n">from_right</span><span class="p">,</span>
+                        <span class="p">)</span>
+                        <span class="n">parent</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_translate</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key_of_names</span><span class="p">,</span> <span class="n">from_right</span><span class="p">,</span> <span class="n">invert</span><span class="p">,</span> <span class="n">data_transposed</span><span class="p">,</span> <span class="n">make_homog</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="n">to_apply_translation_to</span><span class="p">,</span>
+                <span class="n">apply_translation_from_right</span><span class="p">,</span>
+                <span class="n">apply_translation_inv</span><span class="p">,</span>
+                <span class="n">apply_translation_transposed</span><span class="p">,</span>
+                <span class="n">apply_translation_make_homog</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="n">key_of_names</span><span class="p">]:</span>
+                    <span class="n">paths</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">find_all_occurrences</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+                        <span class="n">parent</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_parent_of_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                        <span class="n">res</span> <span class="o">=</span> <span class="n">numba_ops</span><span class="o">.</span><span class="n">apply_matrix</span><span class="p">(</span>
+                            <span class="n">parent</span><span class="p">[</span><span class="n">name</span><span class="p">],</span>
+                            <span class="n">translation_matrix</span><span class="p">,</span>
+                            <span class="n">make_apply_to_homog</span><span class="o">=</span><span class="n">make_homog</span><span class="p">,</span>
+                            <span class="n">to_apply_to_is_transposed</span><span class="o">=</span><span class="n">data_transposed</span><span class="p">,</span>
+                            <span class="n">matrix_is_transposed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                            <span class="n">matrix_is_inverted</span><span class="o">=</span><span class="n">invert</span><span class="p">,</span>
+                            <span class="n">multiply_matrix_from_right</span><span class="o">=</span><span class="n">from_right</span><span class="p">,</span>
+                        <span class="p">)</span>
+                        <span class="n">parent</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span>
+
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_and_adjust_data_format_input_to_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_empty</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+
+        <span class="k">for</span> <span class="n">field_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_fields</span><span class="p">[</span><span class="n">field_type</span><span class="p">]:</span>
+                <span class="n">paths</span> <span class="o">=</span> <span class="n">data_empty</span><span class="o">.</span><span class="n">find_all_occurrences</span><span class="p">(</span><span class="n">field_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No fields found with name &#39;</span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+                    <span class="n">parent</span> <span class="o">=</span> <span class="n">data_empty</span><span class="o">.</span><span class="n">get_parent_of_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">parent</span><span class="o">.</span><span class="n">is_data_field</span><span class="p">(</span><span class="n">field_name</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;Field with name &#39;</span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2">&#39; in path `</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">` is not a data field.&quot;</span>
+                        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data_empty</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_random_in_range</span><span class="p">(</span><span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">min</span> <span class="o">==</span> <span class="nb">max</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="nb">min</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">min</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="nb">min</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">)</span>
+            <span class="nb">max</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="nb">max</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">)</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="n">fn</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,838 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Example &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Evaluation" href="evaluation.html" />
+    <link rel="prev" title="API Reference" href="api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Batching Helpers</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#matcher">Matcher</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#efficient-implementation-approach">Efficient Implementation Approach</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#non-batched-approach">Non-batched Approach</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#batched-approach">Batched Approach</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#implementation">Implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#loss-computation">Loss Computation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Efficient Implementation Approach</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#id2">Non-batched Approach</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#id3">Batched Approach</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">Implementation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Batching Helpers</a></li>
+      <li class="breadcrumb-item active">Example</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/contained_package_docs_mirror/batching_helpers/docs/example.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="example">
+<h1>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h1>
+<p>Here, we provide an example of how to use the <cite>batching-helpers</cite> package to implement object detection loss,
+including</p>
+<ul class="simple">
+<li><p>Handling of per-sample (i.e. non-batched) input data</p></li>
+<li><p>Matching between predictions and ground truth (GT) objects as a pre-requisite for the actual loss
+computation</p></li>
+<li><p>Loss computation of different types:</p>
+<ul>
+<li><p>Based on direct object-to-object comparisons (in this example: classification and bounding box regression
+losses)</p></li>
+<li><p>Computed for all predictions, but utilizing the matching results (in this example: existence loss)</p></li>
+</ul>
+</li>
+</ul>
+<p>The implementation of the loss computation is fully shown in the code snippets in this document.
+The complete implementation (including helpers providing example input data to actually run the code) can be
+found in the <cite>example</cite> folder of the <cite>batching-helpers</cite> package.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>You can run the example using the script <code class="docutils literal notranslate"><span class="pre">packages/batching_helpers/example/example.py</span></code>.</p>
+</div>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The loss computation implementation consists of three main steps:</p>
+<ol class="arabic simple">
+<li><p>Conversion of ground truth per-sample data into <a class="reference internal" href="api.html#accvlab.batching_helpers.RaggedBatch" title="accvlab.batching_helpers.RaggedBatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code></a> instances</p></li>
+<li><p>Matching predictions to ground truth objects</p></li>
+<li><p>Loss computation</p></li>
+</ol>
+<p>The following code snippet demonstrates this high-level approach. Step (1) is fully covered here, while
+steps (2) and (3) are detailed in subsequent sections.</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">packages/batching_helpers/example/example.py</span><a class="headerlink" href="#id5" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="linenos"> 2</span><span class="c1">#</span>
+<span class="linenos"> 3</span><span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="linenos"> 4</span><span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="linenos"> 5</span><span class="c1"># You may obtain a copy of the License at</span>
+<span class="linenos"> 6</span><span class="c1">#</span>
+<span class="linenos"> 7</span><span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="linenos"> 8</span><span class="c1">#</span>
+<span class="linenos"> 9</span><span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="linenos">10</span><span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="linenos">11</span><span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="linenos">12</span><span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="linenos">13</span><span class="c1"># limitations under the License.</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span><span class="c1"># Import the batching-helpers package</span>
+<span class="linenos">18</span><span class="kn">import</span><span class="w"> </span><span class="nn">accvlab.batching_helpers</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">batching_helpers</span>
+<span class="linenos">19</span>
+<span class="linenos">20</span><span class="c1"># Import the matcher and loss computation modules (parts of the example implementation)</span>
+<span class="linenos">21</span><span class="kn">from</span><span class="w"> </span><span class="nn">matcher</span><span class="w"> </span><span class="kn">import</span> <span class="n">Matcher</span>
+<span class="linenos">22</span><span class="kn">from</span><span class="w"> </span><span class="nn">loss_computation</span><span class="w"> </span><span class="kn">import</span> <span class="n">LossComputation</span>
+<span class="linenos">23</span>
+<span class="linenos">24</span><span class="c1"># Import the example input data (helper for running the example)</span>
+<span class="linenos">25</span><span class="kn">import</span><span class="w"> </span><span class="nn">input_data</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span>
+<span class="linenos">28</span><span class="k">def</span><span class="w"> </span><span class="nf">loss_computation_main</span><span class="p">(</span><span class="n">rects_gt</span><span class="p">,</span> <span class="n">classes_gt</span><span class="p">,</span> <span class="n">rects_pred</span><span class="p">,</span> <span class="n">classes_pred</span><span class="p">,</span> <span class="n">pred_existence</span><span class="p">,</span> <span class="n">weights_gt</span><span class="p">):</span>
+<span class="linenos">29</span>
+<span class="linenos">30</span>    <span class="c1"># ===== Step 1: Conversion of the GT per-sample data to RaggedBatch instances =====</span>
+<span class="linenos">31</span>
+<span class="hll"><span class="linenos">32</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">33</span>    <span class="c1"># Typically, the ground truth (GT) is provided as a list containing per-sample GT data as individual</span>
+</span><span class="hll"><span class="linenos">34</span>    <span class="c1"># tensors. Here, this format is converted into RaggedBatch objects containing the whole batch.</span>
+</span><span class="hll"><span class="linenos">35</span>    <span class="c1"># Note that except for the first call, a `other_with_same_sample_sizes` parameter is present. This</span>
+</span><span class="hll"><span class="linenos">36</span>    <span class="c1"># is optional, but saves memory by re-using the `mask` and `sample_sizes` (see `RaggedBatch`</span>
+</span><span class="hll"><span class="linenos">37</span>    <span class="c1"># documentation) of the first created instance. This is possible as all the GT data refers to the same</span>
+</span><span class="hll"><span class="linenos">38</span>    <span class="c1"># objects, so that for a given sample, the number of objects is the same for the different types of GT</span>
+</span><span class="hll"><span class="linenos">39</span>    <span class="c1"># data.</span>
+</span><span class="linenos">40</span>    <span class="n">rects_gt_compact</span> <span class="o">=</span> <span class="n">batching_helpers</span><span class="o">.</span><span class="n">combine_data</span><span class="p">(</span><span class="n">rects_gt</span><span class="p">)</span>
+<span class="linenos">41</span>    <span class="n">classes_gt_compact</span> <span class="o">=</span> <span class="n">batching_helpers</span><span class="o">.</span><span class="n">combine_data</span><span class="p">(</span>
+<span class="linenos">42</span>        <span class="n">classes_gt</span><span class="p">,</span> <span class="n">other_with_same_sample_sizes</span><span class="o">=</span><span class="n">rects_gt_compact</span>
+<span class="linenos">43</span>    <span class="p">)</span>
+<span class="linenos">44</span>    <span class="n">weights_gt_compact</span> <span class="o">=</span> <span class="n">batching_helpers</span><span class="o">.</span><span class="n">combine_data</span><span class="p">(</span>
+<span class="linenos">45</span>        <span class="n">weights_gt</span><span class="p">,</span> <span class="n">other_with_same_sample_sizes</span><span class="o">=</span><span class="n">rects_gt_compact</span>
+<span class="linenos">46</span>    <span class="p">)</span>
+<span class="linenos">47</span>
+<span class="linenos">48</span>    <span class="c1"># ===== Step 2: Matching of the predictions to the GT objects =====</span>
+<span class="linenos">49</span>
+<span class="hll"><span class="linenos">50</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">51</span>    <span class="c1"># Get the matches for the individual samples. `matched_gt_indices` and `matched_pred_indices` contain</span>
+</span><span class="hll"><span class="linenos">52</span>    <span class="c1"># indices for matches for the GT and predictions, respectively. As each sample contains a different number</span>
+</span><span class="hll"><span class="linenos">53</span>    <span class="c1"># of matches, `RaggedBatch` instances are used to store the indices for both the GT and the predictions.</span>
+</span><span class="linenos">54</span>    <span class="n">matcher</span> <span class="o">=</span> <span class="n">Matcher</span><span class="p">()</span>
+<span class="linenos">55</span>    <span class="n">matched_gt_indices</span><span class="p">,</span> <span class="n">matched_pred_indices</span> <span class="o">=</span> <span class="n">matcher</span><span class="p">(</span>
+<span class="linenos">56</span>        <span class="n">rects_gt_compact</span><span class="p">,</span> <span class="n">classes_gt_compact</span><span class="p">,</span> <span class="n">rects_pred</span><span class="p">,</span> <span class="n">classes_pred</span>
+<span class="linenos">57</span>    <span class="p">)</span>
+<span class="linenos">58</span>
+<span class="linenos">59</span>    <span class="c1"># ===== Step 3: The actual loss computation =====</span>
+<span class="linenos">60</span>
+<span class="hll"><span class="linenos">61</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">62</span>    <span class="c1"># Compute the actual loss given GT and prediction data, as well as the matches established by the matcher.</span>
+</span><span class="linenos">63</span>    <span class="n">loss_comp</span> <span class="o">=</span> <span class="n">LossComputation</span><span class="p">()</span>
+<span class="linenos">64</span>    <span class="n">per_sample_loss</span> <span class="o">=</span> <span class="n">loss_comp</span><span class="p">(</span>
+<span class="linenos">65</span>        <span class="n">rects_gt_compact</span><span class="p">,</span>
+<span class="linenos">66</span>        <span class="n">classes_gt_compact</span><span class="p">,</span>
+<span class="linenos">67</span>        <span class="n">rects_pred</span><span class="p">,</span>
+<span class="linenos">68</span>        <span class="n">classes_pred</span><span class="p">,</span>
+<span class="linenos">69</span>        <span class="n">pred_existence</span><span class="p">,</span>
+<span class="linenos">70</span>        <span class="n">weights_gt_compact</span><span class="p">,</span>
+<span class="linenos">71</span>        <span class="n">matched_gt_indices</span><span class="p">,</span>
+<span class="linenos">72</span>        <span class="n">matched_pred_indices</span><span class="p">,</span>
+<span class="linenos">73</span>    <span class="p">)</span>
+<span class="linenos">74</span>
+<span class="hll"><span class="linenos">75</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">76</span>    <span class="c1"># The loss computation returns per-sample losses, and they can be used as such after the computation</span>
+</span><span class="hll"><span class="linenos">77</span>    <span class="c1"># (e.g. logged, weighted, etc.). Here, we just sum the per-sample losses to obtain the final loss.</span>
+</span><span class="linenos">78</span>    <span class="n">final_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">per_sample_loss</span><span class="p">)</span>
+<span class="linenos">79</span>    <span class="k">return</span> <span class="n">final_loss</span>
+<span class="linenos">80</span>
+<span class="linenos">81</span>
+<span class="linenos">82</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">83</span>    <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_computation_main</span><span class="p">(</span>
+<span class="linenos">84</span>        <span class="n">input_data</span><span class="o">.</span><span class="n">rects_gt</span><span class="p">,</span>
+<span class="linenos">85</span>        <span class="n">input_data</span><span class="o">.</span><span class="n">classes_gt</span><span class="p">,</span>
+<span class="linenos">86</span>        <span class="n">input_data</span><span class="o">.</span><span class="n">rects_pred</span><span class="p">,</span>
+<span class="linenos">87</span>        <span class="n">input_data</span><span class="o">.</span><span class="n">classes_pred_onehot</span><span class="p">,</span>
+<span class="linenos">88</span>        <span class="n">input_data</span><span class="o">.</span><span class="n">pred_existence</span><span class="p">,</span>
+<span class="linenos">89</span>        <span class="n">input_data</span><span class="o">.</span><span class="n">weights_gt</span><span class="p">,</span>
+<span class="linenos">90</span>    <span class="p">)</span>
+<span class="linenos">91</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loss: </span><span class="si">{</span><span class="n">loss</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="matcher">
+<h2>Matcher<a class="headerlink" href="#matcher" title="Link to this heading"></a></h2>
+<section id="efficient-implementation-approach">
+<h3>Efficient Implementation Approach<a class="headerlink" href="#efficient-implementation-approach" title="Link to this heading"></a></h3>
+<p>The matcher implementation is designed to be efficient on the GPU. The matching consists of two steps, namely
+the cost matrix computation and the Hungarian matching based on the costs.
+As the matching itself is on the CPU (and remains non-batched), performance gains are mainly achieved through
+the batched cost matrix computation.</p>
+<p>The cost matrices are structured as follows: For each sample, the cost matrix denotes the cost of each
+possible match between a prediction and a GT object. For example, for a match of prediction <cite>i</cite> and a GT
+object <cite>j</cite>, the cost is <cite>cost_matrix[i, j]</cite>. This means that for each sample, the cost matrix is of size
+<code class="docutils literal notranslate"><span class="pre">(num_predictions,</span> <span class="pre">num_gt_objects)</span></code>, and each element is computed from one prediction and one GT object.</p>
+<section id="non-batched-approach">
+<h4>Non-batched Approach<a class="headerlink" href="#non-batched-approach" title="Link to this heading"></a></h4>
+<p>The following figure shows typical non-batched cost matrix computation:</p>
+<img alt="Unbatched cost matrix computation" class="align-center" src="../../../_images/UnbatchedCostMatrix.png" />
+<p>In the illustration, the different colors represent the individual samples, and each sample corresponds to one
+computation iteration. Note that:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The GT data is of variable size (and therefore stored as a list of per-sample tensors, not a single tensor)</p></li>
+<li><p>Due to the variable GT size, the sizes of the cost matrices are also variable in the dimension iterating
+over the GT objects (<cite>dim==1</cite>; horizontal axis in the figure)</p></li>
+</ul>
+</div></blockquote>
+<p>Due to this variable size, batched implementation is challenging and in practice, the cost matrix computation
+is often implemented in a non-batched manner.</p>
+</section>
+<section id="batched-approach">
+<h4>Batched Approach<a class="headerlink" href="#batched-approach" title="Link to this heading"></a></h4>
+<p>The following figure illustrates how the matching can be implemented in a batched manner using the
+<cite>batching-helpers</cite> package:</p>
+<img alt="Batched cost matrix computation" class="align-center" src="../../../_images/BatchedCostMatrix.png" />
+<p>Gray elements represent filler values that allow uniform batch processing while preserving variable ground
+truth sizes. The <a class="reference internal" href="api.html#accvlab.batching_helpers.RaggedBatch" title="accvlab.batching_helpers.RaggedBatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code></a> class as well as the available helper functions
+handle these values automatically. Please refer to the <a class="reference internal" href="api.html"><span class="doc">API documentation</span></a> for details.</p>
+<p>The key implementation principles to achieve batched processing are:</p>
+<ul class="simple">
+<li><p>Ground truth data for all samples is stored in a single <a class="reference internal" href="api.html#accvlab.batching_helpers.RaggedBatch" title="accvlab.batching_helpers.RaggedBatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code></a>
+instance for batched processing with variable sizes (as shown in the figure)</p></li>
+<li><p>Cost matrices also use <a class="reference internal" href="api.html#accvlab.batching_helpers.RaggedBatch" title="accvlab.batching_helpers.RaggedBatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code></a> format with the non-uniform dimension
+being the dimension iterating over the ground truth elements (as shown in the figure)</p></li>
+<li><p>Handling of the non-uniform size:</p>
+<ul>
+<li><p>During the cost matrix computation, uniform sample sizes are assumed (i.e. no differentiation between data
+and filler values), enabling the use of standard PyTorch operations or e.g. already implemented custom
+implementations of batched cost functions</p></li>
+<li><p>After the computation, the results are wrapped in a <a class="reference internal" href="api.html#accvlab.batching_helpers.RaggedBatch" title="accvlab.batching_helpers.RaggedBatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code></a>
+instance, which enables easy handling of the filler values. Here, the samples sizes of the input GT data
+can be re-used, so that they do not need to be set up manually.</p></li>
+</ul>
+</li>
+</ul>
+<p>Note that this approach means that computations are also performed for the filler values, which leads to some
+overhead. However, this overhead is typically much smaller than the gains of the batched implementation, which
+reduces the CPU (Python) overhead and improves the GPU utilization for the individual operations.</p>
+</section>
+</section>
+<section id="implementation">
+<h3>Implementation<a class="headerlink" href="#implementation" title="Link to this heading"></a></h3>
+<p>The matcher implementation is shown in the following snippet, with the core functionality residing in the
+<cite>__call__()</cite> method. The matcher employs various cost functions. These cost functions do not explicitly handle
+non-uniform batches, instead assuming a fixed size for the individual samples. As discussed above, this means
+that existing batched implementations of such cost functions can be readily re-used.</p>
+<p>The handling of non-uniform batches in the resulting cost matrices is achieved by wrapping the results as
+<a class="reference internal" href="api.html#accvlab.batching_helpers.RaggedBatch" title="accvlab.batching_helpers.RaggedBatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code></a> instances, where the number of valid GT objects is known from
+the input GT data (see the comments in <cite>__call__()</cite> for implementation specifics).</p>
+<p>Note: The core matching operation (<code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.linear_sum_assignment()</span></code>) is performed on the CPU and
+remains non-batched. The <cite>batching-helpers</cite> package facilitates integration of non-batched operations through
+<a class="reference internal" href="api.html#accvlab.batching_helpers.RaggedBatch.split" title="accvlab.batching_helpers.RaggedBatch.split"><code class="xref py py-meth docutils literal notranslate"><span class="pre">split()</span></code></a> and <a class="reference internal" href="api.html#accvlab.batching_helpers.combine_data" title="accvlab.batching_helpers.combine_data"><code class="xref py py-func docutils literal notranslate"><span class="pre">combine_data()</span></code></a>
+functions.</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">packages/batching_helpers/example/matcher.py</span><a class="headerlink" href="#id6" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="linenos">  2</span><span class="c1">#</span>
+<span class="linenos">  3</span><span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="linenos">  4</span><span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="linenos">  5</span><span class="c1"># You may obtain a copy of the License at</span>
+<span class="linenos">  6</span><span class="c1">#</span>
+<span class="linenos">  7</span><span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="linenos">  8</span><span class="c1">#</span>
+<span class="linenos">  9</span><span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="linenos"> 10</span><span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="linenos"> 11</span><span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="linenos"> 12</span><span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="linenos"> 13</span><span class="c1"># limitations under the License.</span>
+<span class="linenos"> 14</span>
+<span class="linenos"> 15</span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="linenos"> 16</span><span class="kn">import</span><span class="w"> </span><span class="nn">accvlab.batching_helpers</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">batching_helpers</span>
+<span class="linenos"> 17</span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">linear_sum_assignment</span>
+<span class="linenos"> 18</span>
+<span class="linenos"> 19</span>
+<span class="linenos"> 20</span><span class="k">class</span><span class="w"> </span><span class="nc">Matcher</span><span class="p">:</span>
+<span class="linenos"> 21</span>
+<span class="linenos"> 22</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rects_gt</span><span class="p">,</span> <span class="n">classes_gt</span><span class="p">,</span> <span class="n">rects_pred</span><span class="p">,</span> <span class="n">classes_pred</span><span class="p">):</span>
+<span class="hll"><span class="linenos"> 23</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 24</span>        <span class="c1"># Get the cost matrices denoting the cost for each GT to prediction combination. Note that as the</span>
+</span><span class="hll"><span class="linenos"> 25</span>        <span class="c1"># samples in the GT data are padded to uniform size (see documentation of `RaggedBatch.tensor`), the</span>
+</span><span class="hll"><span class="linenos"> 26</span>        <span class="c1"># same will be true for the matrices.</span>
+</span><span class="linenos"> 27</span>        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">rects_gt</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos"> 28</span>        <span class="n">iou_cost_matrices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iou_cost_func</span><span class="p">(</span><span class="n">rects_gt</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">rects_pred</span><span class="p">)</span>
+<span class="linenos"> 29</span>        <span class="n">class_cost_matrices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_class_l1_cost_func_gt_labels</span><span class="p">(</span><span class="n">classes_gt</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">classes_pred</span><span class="p">)</span>
+<span class="linenos"> 30</span>        <span class="n">total_cost_matrices</span> <span class="o">=</span> <span class="n">iou_cost_matrices</span> <span class="o">+</span> <span class="n">class_cost_matrices</span>
+<span class="linenos"> 31</span>
+<span class="hll"><span class="linenos"> 32</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 33</span>        <span class="c1"># During cost matrix computation, we assume uniform batch size (and use filler values). However, the</span>
+</span><span class="hll"><span class="linenos"> 34</span>        <span class="c1"># valid cost matrices are non-uniform in size. Along `dim==2` (iterating over the GT objects), the</span>
+</span><span class="hll"><span class="linenos"> 35</span>        <span class="c1"># sample sizes correspond to the sample sizes of the GT inputs (there, along `dim==1`). Create a</span>
+</span><span class="hll"><span class="linenos"> 36</span>        <span class="c1"># RaggedBatch containing the matrices. Note that this will correctly handle the filler regions in the</span>
+</span><span class="hll"><span class="linenos"> 37</span>        <span class="c1"># matrices, as they exactly correspond to the format used in `RaggedBatch.tensor`. This is as follows:</span>
+</span><span class="hll"><span class="linenos"> 38</span>        <span class="c1">#   - In the input data to the matrix computations originally from `RaggedBatch` instances, the filler</span>
+</span><span class="hll"><span class="linenos"> 39</span>        <span class="c1">#     values are in the correct format (i.e. always after the valid data)</span>
+</span><span class="hll"><span class="linenos"> 40</span>        <span class="c1">#   - The matrix computations do not perform any permutations of the data, so that the filler values</span>
+</span><span class="hll"><span class="linenos"> 41</span>        <span class="c1">#     remain in the same locations (but along a different dimension)</span>
+</span><span class="linenos"> 42</span>        <span class="n">total_cost_matrices</span> <span class="o">=</span> <span class="n">classes_gt</span><span class="o">.</span><span class="n">create_with_sample_sizes_like_self</span><span class="p">(</span>
+<span class="linenos"> 43</span>            <span class="n">total_cost_matrices</span><span class="p">,</span> <span class="n">non_uniform_dim</span><span class="o">=</span><span class="mi">2</span>
+<span class="linenos"> 44</span>        <span class="p">)</span>
+<span class="linenos"> 45</span>
+<span class="hll"><span class="linenos"> 46</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 47</span>        <span class="c1"># The Hungarian matching is done on the CPU one sample at a time. Therefore, move the data to the CPU</span>
+</span><span class="hll"><span class="linenos"> 48</span>        <span class="c1"># and split RaggedBatch instances containing the cost matrices into individual samples. Note that</span>
+</span><span class="hll"><span class="linenos"> 49</span>        <span class="c1"># `split()` removes the filler value padding, so that the valid matrices with correct sample sizes are</span>
+</span><span class="hll"><span class="linenos"> 50</span>        <span class="c1"># obtained.</span>
+</span><span class="linenos"> 51</span>        <span class="n">device_cpu</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+<span class="linenos"> 52</span>        <span class="n">total_cost_matrices_cpu</span> <span class="o">=</span> <span class="n">total_cost_matrices</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">device_cpu</span><span class="p">)</span>
+<span class="linenos"> 53</span>        <span class="n">total_cost_matrices_list</span> <span class="o">=</span> <span class="n">total_cost_matrices_cpu</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+<span class="linenos"> 54</span>
+<span class="hll"><span class="linenos"> 55</span>        <span class="c1"># @NOTE: Perform matching for each sample</span>
+</span><span class="linenos"> 56</span>        <span class="n">matched_gt_index_list</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">batch_size</span>
+<span class="linenos"> 57</span>        <span class="n">matched_pred_index_list</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">batch_size</span>
+<span class="linenos"> 58</span>        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cost_mat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">total_cost_matrices_list</span><span class="p">):</span>
+<span class="linenos"> 59</span>            <span class="n">m_pred</span><span class="p">,</span> <span class="n">m_gt</span> <span class="o">=</span> <span class="n">linear_sum_assignment</span><span class="p">(</span><span class="n">cost_mat</span><span class="p">)</span>
+<span class="linenos"> 60</span>            <span class="n">matched_gt_index_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">m_gt</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device_cpu</span><span class="p">)</span>
+<span class="linenos"> 61</span>            <span class="n">matched_pred_index_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">m_pred</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device_cpu</span><span class="p">)</span>
+<span class="linenos"> 62</span>
+<span class="hll"><span class="linenos"> 63</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 64</span>        <span class="c1"># Combine resulting indices for the individual samples into RaggedBatch instances representing the</span>
+</span><span class="hll"><span class="linenos"> 65</span>        <span class="c1"># whole batch.</span>
+</span><span class="linenos"> 66</span>        <span class="n">matched_gt_indices</span> <span class="o">=</span> <span class="n">batching_helpers</span><span class="o">.</span><span class="n">combine_data</span><span class="p">(</span><span class="n">matched_gt_index_list</span><span class="p">)</span>
+<span class="linenos"> 67</span>        <span class="n">matched_pred_indices</span> <span class="o">=</span> <span class="n">batching_helpers</span><span class="o">.</span><span class="n">combine_data</span><span class="p">(</span>
+<span class="linenos"> 68</span>            <span class="n">matched_pred_index_list</span><span class="p">,</span> <span class="n">other_with_same_sample_sizes</span><span class="o">=</span><span class="n">matched_gt_indices</span>
+<span class="linenos"> 69</span>        <span class="p">)</span>
+<span class="hll"><span class="linenos"> 70</span>        <span class="c1"># @NOTE: Move results to the GPU</span>
+</span><span class="linenos"> 71</span>        <span class="n">matched_gt_indices</span> <span class="o">=</span> <span class="n">matched_gt_indices</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">rects_gt</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+<span class="linenos"> 72</span>        <span class="n">matched_pred_indices</span> <span class="o">=</span> <span class="n">matched_pred_indices</span><span class="o">.</span><span class="n">to_device</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="n">rects_gt</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+<span class="linenos"> 73</span>
+<span class="linenos"> 74</span>        <span class="k">return</span> <span class="n">matched_gt_indices</span><span class="p">,</span> <span class="n">matched_pred_indices</span>
+<span class="linenos"> 75</span>
+<span class="linenos"> 76</span>    <span class="c1"># Example batched cost function for the matcher. It is used in the example, but the implementation</span>
+<span class="linenos"> 77</span>    <span class="c1"># of this function is not the focus of the example.</span>
+<span class="linenos"> 78</span>    <span class="nd">@staticmethod</span>
+<span class="linenos"> 79</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_iou_cost_func</span><span class="p">(</span><span class="n">rects_gt</span><span class="p">,</span> <span class="n">rects_pred</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
+<span class="linenos"> 80</span>
+<span class="linenos"> 81</span>        <span class="c1"># With broadcasting, using the `_ext` variants will lead to pair-wise results for all possible</span>
+<span class="linenos"> 82</span>        <span class="c1"># combinations</span>
+<span class="linenos"> 83</span>        <span class="n">rects_gt_ext</span> <span class="o">=</span> <span class="n">rects_gt</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos"> 84</span>        <span class="n">rects_pred_ext</span> <span class="o">=</span> <span class="n">rects_pred</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos"> 85</span>
+<span class="linenos"> 86</span>        <span class="n">areas_gt</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">rects_gt_ext</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">-</span> <span class="n">rects_gt_ext</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos"> 87</span>        <span class="n">areas_pred</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">rects_pred_ext</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">-</span> <span class="n">rects_pred_ext</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos"> 88</span>
+<span class="linenos"> 89</span>        <span class="n">rects_gt_ul</span> <span class="o">=</span> <span class="n">rects_gt_ext</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+<span class="linenos"> 90</span>        <span class="n">rects_gt_lr</span> <span class="o">=</span> <span class="n">rects_gt_ext</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+<span class="linenos"> 91</span>        <span class="n">rects_pred_ul</span> <span class="o">=</span> <span class="n">rects_pred_ext</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+<span class="linenos"> 92</span>        <span class="n">rects_pred_lr</span> <span class="o">=</span> <span class="n">rects_pred_ext</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+<span class="linenos"> 93</span>
+<span class="linenos"> 94</span>        <span class="n">intersections_ul</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">rects_gt_ul</span><span class="p">,</span> <span class="n">rects_pred_ul</span><span class="p">)</span>
+<span class="linenos"> 95</span>        <span class="n">intersections_lr</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">rects_gt_lr</span><span class="p">,</span> <span class="n">rects_pred_lr</span><span class="p">)</span>
+<span class="linenos"> 96</span>        <span class="n">sizes_intersections</span> <span class="o">=</span> <span class="n">intersections_lr</span> <span class="o">-</span> <span class="n">intersections_ul</span>
+<span class="linenos"> 97</span>        <span class="n">sizes_intersections</span><span class="p">[</span><span class="n">sizes_intersections</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="linenos"> 98</span>        <span class="n">areas_intersections</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">sizes_intersections</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos"> 99</span>
+<span class="linenos">100</span>        <span class="n">areas_union</span> <span class="o">=</span> <span class="n">areas_gt</span> <span class="o">+</span> <span class="n">areas_pred</span> <span class="o">-</span> <span class="n">areas_intersections</span>
+<span class="linenos">101</span>        <span class="n">areas_union</span><span class="p">[</span><span class="n">areas_union</span> <span class="o">&lt;</span> <span class="n">eps</span><span class="p">]</span> <span class="o">=</span> <span class="n">eps</span>
+<span class="linenos">102</span>
+<span class="linenos">103</span>        <span class="n">res</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">areas_intersections</span> <span class="o">/</span> <span class="n">areas_union</span>
+<span class="linenos">104</span>
+<span class="linenos">105</span>        <span class="k">return</span> <span class="n">res</span>
+<span class="linenos">106</span>
+<span class="linenos">107</span>    <span class="c1"># Example batched cost function for the matcher. It is used in the example, but the implementation</span>
+<span class="linenos">108</span>    <span class="c1"># of this function is not the focus of the example.</span>
+<span class="linenos">109</span>    <span class="nd">@staticmethod</span>
+<span class="linenos">110</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_class_l1_cost_func_gt_labels</span><span class="p">(</span><span class="n">classes_gt</span><span class="p">,</span> <span class="n">classes_pred_one_hot</span><span class="p">):</span>
+<span class="linenos">111</span>
+<span class="linenos">112</span>        <span class="c1"># Internal helper function</span>
+<span class="linenos">113</span>        <span class="k">def</span><span class="w"> </span><span class="nf">class_l1_cost_func_gt_one_hot</span><span class="p">(</span><span class="n">classes_gt_one_hot</span><span class="p">,</span> <span class="n">classes_pred_one_hot</span><span class="p">):</span>
+<span class="linenos">114</span>            <span class="n">prod</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;bik,bjk-&gt;bij&#39;</span><span class="p">,</span> <span class="n">classes_pred_one_hot</span><span class="p">,</span> <span class="n">classes_gt_one_hot</span><span class="p">)</span>
+<span class="linenos">115</span>            <span class="n">cost</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">prod</span>
+<span class="linenos">116</span>            <span class="k">return</span> <span class="n">cost</span>
+<span class="linenos">117</span>
+<span class="linenos">118</span>        <span class="c1"># Note: This part of the loss computation is not computed in a batched manner. However, this</span>
+<span class="linenos">119</span>        <span class="c1"># is not the focus of the example and in an actual application, the loss can be implemented</span>
+<span class="linenos">120</span>        <span class="c1"># differently (e.g. custom extension).</span>
+<span class="linenos">121</span>        <span class="n">num_classes</span> <span class="o">=</span> <span class="n">classes_pred_one_hot</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="linenos">122</span>        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">classes_gt</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos">123</span>        <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">batch_size</span>
+<span class="linenos">124</span>        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">gt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">classes_gt</span><span class="p">):</span>
+<span class="linenos">125</span>            <span class="n">res_s</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">gt</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">num_classes</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">gt</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+<span class="linenos">126</span>            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gt</span><span class="p">):</span>
+<span class="linenos">127</span>                <span class="n">res_s</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="bp">cls</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="linenos">128</span>            <span class="n">res</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">res_s</span>
+<span class="linenos">129</span>        <span class="n">classes_gt_one_hot</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos">130</span>        <span class="c1"># end of non_batched part</span>
+<span class="linenos">131</span>        <span class="n">cost</span> <span class="o">=</span> <span class="n">class_l1_cost_func_gt_one_hot</span><span class="p">(</span><span class="n">classes_gt_one_hot</span><span class="p">,</span> <span class="n">classes_pred_one_hot</span><span class="p">)</span>
+<span class="linenos">132</span>        <span class="k">return</span> <span class="n">cost</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="loss-computation">
+<h2>Loss Computation<a class="headerlink" href="#loss-computation" title="Link to this heading"></a></h2>
+<section id="id1">
+<h3>Efficient Implementation Approach<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>Similar to the matcher, the efficiency is improved by enabling batching where it was previously challenging to
+achieve.
+For most loss types, the loss is computed by an element-wise (i.e. object for object) comparison between the
+predictions and the GT objects.
+Here, the corresponding (according to the matching) GT and prediction objects need to be extracted first,
+followed by the actual loss computation.</p>
+<p>Note that the existence loss is computed differently, as it is not based on a direct object-to-object
+comparison.
+The existence loss is not discussed here, but it also benefits from batched implementation in a similar way.
+It is part of the example implementation, so please refer to the code snipped further below for details.</p>
+<section id="id2">
+<h4>Non-batched Approach<a class="headerlink" href="#id2" title="Link to this heading"></a></h4>
+<p>The loss computation is comprised of two steps. First, the corresponding objects for the predictions and the
+GT are extracted.</p>
+<p>Ground truth object extraction at matched indices:</p>
+<img alt="Unbatched loss computation" class="align-center" src="../../../_images/UnbatchedLossComputation_object_gt.png" />
+<p>Note that here, both the GT objects and the indices are lists of tensors. Similar to the matcher,
+different samples are indicated by different colors, and are typically processed sequentially, one sample at a
+time.</p>
+<p>Similarly, the predictions at the matched indices are extracted as follows:</p>
+<img alt="Unbatched loss computation" class="align-center" src="../../../_images/UnbatchedLossComputation_object_pred.png" />
+<p>This step is very similar to the GT object processing shown above. A notable difference is that the
+predictions are stored as a single tensor, as the predictions are outputs of the trained model and their
+number is typically fixed.
+However, as the number of matches varies between samples, the indices are stored as a list of tensors,
+preventing the use of a single tensor in the output.</p>
+<p>Finally, the loss is computed by comparing the predictions and the GT objects.</p>
+<img alt="Unbatched loss computation" class="align-center" src="../../../_images/UnbatchedLossComputation_per_object_loss.png" />
+</section>
+<section id="id3">
+<h4>Batched Approach<a class="headerlink" href="#id3" title="Link to this heading"></a></h4>
+<p>Similarly to the matcher, the loss computation is done in a batched manner by using the
+<a class="reference internal" href="api.html#accvlab.batching_helpers.RaggedBatch" title="accvlab.batching_helpers.RaggedBatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code></a> format.</p>
+<p>The extraction of the GT objects is done as follows:</p>
+<img alt="Batched loss computation" class="align-center" src="../../../_images/BatchedLossComputation_object_gt.png" />
+<p>Similarly, the predictions are extracted as follows:</p>
+<img alt="Batched loss computation" class="align-center" src="../../../_images/BatchedLossComputation_object_pred.png" />
+<p>Finally, the loss is computed by comparing the predictions and the GT objects.</p>
+<img alt="Batched loss computation" class="align-center" src="../../../_images/BatchedLossComputation_per_object_loss.png" />
+<p>Note that all operations are performed in a batched manner. For the indexing operation, the function
+<a class="reference internal" href="api.html#accvlab.batching_helpers.batched_indexing_access" title="accvlab.batching_helpers.batched_indexing_access"><code class="xref py py-func docutils literal notranslate"><span class="pre">batched_indexing_access()</span></code></a> is used.
+Similar to the matcher, we also process filler values in the loss function(s), which leads to some overhead.
+However, this is typically far outweighed by the performance gains of the batched implementation.</p>
+<p>Here, we discussed the loss implementation as is e.g. used in the classification and bounding box regression
+losses in the implementation above. Note that e.g. the existence loss follows a different approach.
+However, the same principles apply.</p>
+</section>
+</section>
+<section id="id4">
+<h3>Implementation<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<p>The loss function takes two key inputs:</p>
+<ol class="arabic simple">
+<li><p>Ground truth objects and predictions (same as matcher)</p></li>
+<li><p>Matching results mapping predictions to corresponding ground truth objects</p></li>
+</ol>
+<p>Loss functions operate on batched data assuming uniform sample sizes (similar to the cost functions employed
+by the matcher), allowing direct reuse of existing batched implementations. See the <cite>__call__()</cite> method
+comments for implementation details.</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">packages/batching_helpers/example/loss_computation.py</span><a class="headerlink" href="#id7" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="linenos">  2</span><span class="c1">#</span>
+<span class="linenos">  3</span><span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="linenos">  4</span><span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="linenos">  5</span><span class="c1"># You may obtain a copy of the License at</span>
+<span class="linenos">  6</span><span class="c1">#</span>
+<span class="linenos">  7</span><span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="linenos">  8</span><span class="c1">#</span>
+<span class="linenos">  9</span><span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="linenos"> 10</span><span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="linenos"> 11</span><span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="linenos"> 12</span><span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="linenos"> 13</span><span class="c1"># limitations under the License.</span>
+<span class="linenos"> 14</span>
+<span class="linenos"> 15</span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="linenos"> 16</span><span class="kn">import</span><span class="w"> </span><span class="nn">accvlab.batching_helpers</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">batching_helpers</span>
+<span class="linenos"> 17</span>
+<span class="linenos"> 18</span>
+<span class="linenos"> 19</span><span class="k">class</span><span class="w"> </span><span class="nc">LossComputation</span><span class="p">:</span>
+<span class="linenos"> 20</span>
+<span class="linenos"> 21</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+<span class="linenos"> 22</span>        <span class="bp">self</span><span class="p">,</span>
+<span class="linenos"> 23</span>        <span class="n">bboxes_gt</span><span class="p">,</span>
+<span class="linenos"> 24</span>        <span class="n">classes_gt</span><span class="p">,</span>
+<span class="linenos"> 25</span>        <span class="n">bboxes_pred</span><span class="p">,</span>
+<span class="linenos"> 26</span>        <span class="n">classes_pred</span><span class="p">,</span>
+<span class="linenos"> 27</span>        <span class="n">existence_pred</span><span class="p">,</span>
+<span class="linenos"> 28</span>        <span class="n">weights_gt</span><span class="p">,</span>
+<span class="linenos"> 29</span>        <span class="n">matches_gt</span><span class="p">,</span>
+<span class="linenos"> 30</span>        <span class="n">matches_pred</span><span class="p">,</span>
+<span class="linenos"> 31</span>    <span class="p">):</span>
+<span class="hll"><span class="linenos"> 32</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 33</span>        <span class="c1"># Extract matched ground truth and prediction data using the indices from matching.</span>
+</span><span class="hll"><span class="linenos"> 34</span>        <span class="c1"># This creates element-wise correspondences between GT and prediction objects,</span>
+</span><span class="hll"><span class="linenos"> 35</span>        <span class="c1"># enabling direct comparison in subsequent loss computations.</span>
+</span><span class="hll"><span class="linenos"> 36</span>        <span class="c1"># See `batching_helpers.batched_indexing_access()` documentation for details.</span>
+</span><span class="linenos"> 37</span>        <span class="n">cls_gt_matched</span> <span class="o">=</span> <span class="n">batching_helpers</span><span class="o">.</span><span class="n">batched_indexing_access</span><span class="p">(</span><span class="n">classes_gt</span><span class="p">,</span> <span class="n">matches_gt</span><span class="p">)</span><span class="o">.</span><span class="n">to_dtype</span><span class="p">(</span>
+<span class="linenos"> 38</span>            <span class="n">torch</span><span class="o">.</span><span class="n">int64</span>
+<span class="linenos"> 39</span>        <span class="p">)</span>
+<span class="linenos"> 40</span>        <span class="n">cls_pred_matched</span> <span class="o">=</span> <span class="n">batching_helpers</span><span class="o">.</span><span class="n">batched_indexing_access</span><span class="p">(</span><span class="n">classes_pred</span><span class="p">,</span> <span class="n">matches_pred</span><span class="p">)</span>
+<span class="linenos"> 41</span>        <span class="n">bbxs_gt_matched</span> <span class="o">=</span> <span class="n">batching_helpers</span><span class="o">.</span><span class="n">batched_indexing_access</span><span class="p">(</span><span class="n">bboxes_gt</span><span class="p">,</span> <span class="n">matches_gt</span><span class="p">)</span>
+<span class="linenos"> 42</span>        <span class="n">bbxs_pred_matched</span> <span class="o">=</span> <span class="n">batching_helpers</span><span class="o">.</span><span class="n">batched_indexing_access</span><span class="p">(</span><span class="n">bboxes_pred</span><span class="p">,</span> <span class="n">matches_pred</span><span class="p">)</span>
+<span class="linenos"> 43</span>        <span class="n">weights_matched</span> <span class="o">=</span> <span class="n">batching_helpers</span><span class="o">.</span><span class="n">batched_indexing_access</span><span class="p">(</span><span class="n">weights_gt</span><span class="p">,</span> <span class="n">matches_gt</span><span class="p">)</span>
+<span class="linenos"> 44</span>
+<span class="hll"><span class="linenos"> 45</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 46</span>        <span class="c1"># Compute (per-object) losses. Note that this is a batched operation and furthermore, that the</span>
+</span><span class="hll"><span class="linenos"> 47</span>        <span class="c1"># loss functions themselves are not specifically implemented for non-uniform batches and do not</span>
+</span><span class="hll"><span class="linenos"> 48</span>        <span class="c1"># distinguish between actual objects and filler entries in the data. This means that</span>
+</span><span class="hll"><span class="linenos"> 49</span>        <span class="c1"># in a real use-case, already available batched loss functions can be readily re-used.</span>
+</span><span class="hll"><span class="linenos"> 50</span>        <span class="c1">#</span>
+</span><span class="hll"><span class="linenos"> 51</span>        <span class="c1"># Also, please note that the loss functions do not reduce over the individual objects/targets.</span>
+</span><span class="hll"><span class="linenos"> 52</span>        <span class="c1"># This enables us to wrap the per-object losses as `RaggedBatch` instances and use the</span>
+</span><span class="hll"><span class="linenos"> 53</span>        <span class="c1"># `RaggedBatch` and `batching-helpers` functionality to handle the non-uniform sample sizes (e.g.</span>
+</span><span class="hll"><span class="linenos"> 54</span>        <span class="c1"># when summing/averaging over the valid entries only).</span>
+</span><span class="hll"><span class="linenos"> 55</span>        <span class="c1">#</span>
+</span><span class="hll"><span class="linenos"> 56</span>        <span class="c1"># Note that other ways of handling the padded entries are also possible if the loss functions do</span>
+</span><span class="hll"><span class="linenos"> 57</span>        <span class="c1"># reduce over the objects. One possible way is to provide appropriate (0.0) weights for the padded</span>
+</span><span class="hll"><span class="linenos"> 58</span>        <span class="c1"># entries (however, be cautious of potential NaN values when using this approach).</span>
+</span><span class="linenos"> 59</span>        <span class="n">class_per_object_loss_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_per_object_class_l1_loss_labels_gt</span><span class="p">(</span>
+<span class="linenos"> 60</span>            <span class="n">cls_gt_matched</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">cls_pred_matched</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">weights_matched</span><span class="o">.</span><span class="n">tensor</span>
+<span class="linenos"> 61</span>        <span class="p">)</span>
+<span class="linenos"> 62</span>        <span class="n">bbox_per_object_loss_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_per_object_bbox_overlap_loss</span><span class="p">(</span>
+<span class="linenos"> 63</span>            <span class="n">bbxs_gt_matched</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">bbxs_pred_matched</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">weights_matched</span><span class="o">.</span><span class="n">tensor</span>
+<span class="linenos"> 64</span>        <span class="p">)</span>
+<span class="linenos"> 65</span>
+<span class="hll"><span class="linenos"> 66</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 67</span>        <span class="c1"># Wrap the per-object losses as `RaggedBatch` instances. Similarly to the cost matrices in the</span>
+</span><span class="hll"><span class="linenos"> 68</span>        <span class="c1"># matcher, this can be done as the filler elements in the loss tensors are located where the</span>
+</span><span class="hll"><span class="linenos"> 69</span>        <span class="c1"># `RaggedBatch` implementation expects them (as the filler locations in the loss computation inputs</span>
+</span><span class="hll"><span class="linenos"> 70</span>        <span class="c1"># were defined by the `RaggedBatch` instances containing the input data, and no permutations of</span>
+</span><span class="hll"><span class="linenos"> 71</span>        <span class="c1"># objects are performed in the loss computation).</span>
+</span><span class="linenos"> 72</span>        <span class="n">class_per_object_loss</span> <span class="o">=</span> <span class="n">cls_gt_matched</span><span class="o">.</span><span class="n">create_with_sample_sizes_like_self</span><span class="p">(</span>
+<span class="linenos"> 73</span>            <span class="n">class_per_object_loss_data</span><span class="p">,</span> <span class="n">non_uniform_dim</span><span class="o">=</span><span class="mi">1</span>
+<span class="linenos"> 74</span>        <span class="p">)</span>
+<span class="linenos"> 75</span>        <span class="n">bbox_per_object_loss</span> <span class="o">=</span> <span class="n">bbxs_gt_matched</span><span class="o">.</span><span class="n">create_with_sample_sizes_like_self</span><span class="p">(</span>
+<span class="linenos"> 76</span>            <span class="n">bbox_per_object_loss_data</span><span class="p">,</span> <span class="n">non_uniform_dim</span><span class="o">=</span><span class="mi">1</span>
+<span class="linenos"> 77</span>        <span class="p">)</span>
+<span class="linenos"> 78</span>
+<span class="hll"><span class="linenos"> 79</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 80</span>        <span class="c1"># Sum up loss for the individual objects. As the loss functions do not explicitly handle the padded</span>
+</span><span class="hll"><span class="linenos"> 81</span>        <span class="c1"># entries, the loss computation is also performed for those. This means that the filler entries may</span>
+</span><span class="hll"><span class="linenos"> 82</span>        <span class="c1"># contain non-zero values (including `NaN`). Therefore, the filler values would potentially influence</span>
+</span><span class="hll"><span class="linenos"> 83</span>        <span class="c1"># the sum if taken into consideration. This means we cannot use `torch.sum()` directly. Instead, we</span>
+</span><span class="hll"><span class="linenos"> 84</span>        <span class="c1"># use the `sum_over_targets()` function provided by the `batching-helpers` package.</span>
+</span><span class="linenos"> 85</span>        <span class="n">class_loss</span> <span class="o">=</span> <span class="n">batching_helpers</span><span class="o">.</span><span class="n">sum_over_targets</span><span class="p">(</span><span class="n">class_per_object_loss</span><span class="p">)</span>
+<span class="linenos"> 86</span>        <span class="n">bbox_loss</span> <span class="o">=</span> <span class="n">batching_helpers</span><span class="o">.</span><span class="n">sum_over_targets</span><span class="p">(</span><span class="n">bbox_per_object_loss</span><span class="p">)</span>
+<span class="linenos"> 87</span>
+<span class="hll"><span class="linenos"> 88</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 89</span>        <span class="c1"># Compute existence loss next. This loss is different from the other losses in that the computation is</span>
+</span><span class="hll"><span class="linenos"> 90</span>        <span class="c1"># done for all predictions, not only the matched ones.</span>
+</span><span class="linenos"> 91</span>
+<span class="hll"><span class="linenos"> 92</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 93</span>        <span class="c1"># First, create a mask which is `True` for existing (matched) targets and `False` for non-existent</span>
+</span><span class="hll"><span class="linenos"> 94</span>        <span class="c1"># ones. The mask is created from the indices of the matched predictions (also see the</span>
+</span><span class="hll"><span class="linenos"> 95</span>        <span class="c1"># `batching_helpers.get_mask_from_indices()` documentation).</span>
+</span><span class="linenos"> 96</span>        <span class="n">existence_mask</span> <span class="o">=</span> <span class="n">batching_helpers</span><span class="o">.</span><span class="n">get_mask_from_indices</span><span class="p">(</span><span class="n">existence_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">matches_pred</span><span class="p">)</span>
+<span class="linenos"> 97</span>
+<span class="hll"><span class="linenos"> 98</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 99</span>        <span class="c1"># Additionally, compute the overlap (`1.0 - bbox_per_target_loss`) and use it as a weight in the</span>
+</span><span class="hll"><span class="linenos">100</span>        <span class="c1"># existence loss (in combination with the weights from `weights_gt`) as follows:</span>
+</span><span class="hll"><span class="linenos">101</span>        <span class="c1">#   - Use the so computed weights directly for the matched objects</span>
+</span><span class="hll"><span class="linenos">102</span>        <span class="c1">#   - Compute average value and use it for the non-matched objects</span>
+</span><span class="hll"><span class="linenos">103</span>        <span class="c1"># In addition, apply a compensation factor between existing and non-existing objects to the</span>
+</span><span class="hll"><span class="linenos">104</span>        <span class="c1"># non-matched objects in order to account for the imbalance.</span>
+</span><span class="hll"><span class="linenos">105</span>        <span class="c1">#</span>
+</span><span class="hll"><span class="linenos">106</span>        <span class="c1"># To obtain the overall weights used for all predictions, the following steps are performed:</span>
+</span><span class="hll"><span class="linenos">107</span>        <span class="c1"># 1. Compute the overlap weights for the matched objects (from `bbox_per_object_loss`)</span>
+</span><span class="hll"><span class="linenos">108</span>        <span class="c1"># 2. Combine the overlap weights with `weights_matched` (which contains the values from `weights_gt`</span>
+</span><span class="hll"><span class="linenos">109</span>        <span class="c1">#    for the matched objects) to obtain `existence_weights_matched`.</span>
+</span><span class="hll"><span class="linenos">110</span>        <span class="c1"># 3. Map the resulting `existence_weights_matched` back to all predictions &amp; also set the weights for</span>
+</span><span class="hll"><span class="linenos">111</span>        <span class="c1">#    non-existent (i.e. non-matched) predictions in the process. This is done as follows:</span>
+</span><span class="hll"><span class="linenos">112</span>        <span class="c1">#   a) First compute the per-sample mean values of `existence_weights_matched` (averaging over the</span>
+</span><span class="hll"><span class="linenos">113</span>        <span class="c1">#      existing objects) to obtain `weights_means`.</span>
+</span><span class="hll"><span class="linenos">114</span>        <span class="c1">#   b) Then, compute per-sample `imbalance_factors` compensating for the imbalance between existing</span>
+</span><span class="hll"><span class="linenos">115</span>        <span class="c1">#      and non-existing objects.</span>
+</span><span class="hll"><span class="linenos">116</span>        <span class="c1">#   c) Multiply the `weights_means` with `imbalance_factors` to obtain `weights_mean_adjusted`.</span>
+</span><span class="hll"><span class="linenos">117</span>        <span class="c1">#   d) Initialize `existence_weights_preds` (which contains the weights for all predictions and is of</span>
+</span><span class="hll"><span class="linenos">118</span>        <span class="c1">#      corresponding shape) with the values from `weights_mean_adjusted`. These initial values are the</span>
+</span><span class="hll"><span class="linenos">119</span>        <span class="c1">#      weights for the non-matched predictions.</span>
+</span><span class="hll"><span class="linenos">120</span>        <span class="c1">#   e) Write the values from `existence_weights_matched` into</span>
+</span><span class="hll"><span class="linenos">121</span>        <span class="c1">#      `batching_helpers.batched_indexing_write()` for the matched predictions (i.e. use the weights</span>
+</span><span class="hll"><span class="linenos">122</span>        <span class="c1">#      in `existence_weights_matched` for those), while leaving the other values (i.e. non-matched)</span>
+</span><span class="hll"><span class="linenos">123</span>        <span class="c1">#      unchanged.</span>
+</span><span class="hll"><span class="linenos">124</span>        <span class="c1">#</span>
+</span><span class="hll"><span class="linenos">125</span>        <span class="c1"># The points above are implemented as follows:</span>
+</span><span class="linenos">126</span>
+<span class="hll"><span class="linenos">127</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">128</span>        <span class="c1"># 1. Compute the overlap weights for the matched bboxes (from `bbox_per_object_loss`).</span>
+</span><span class="hll"><span class="linenos">129</span>        <span class="c1">#</span>
+</span><span class="hll"><span class="linenos">130</span>        <span class="c1"># Note the use of the `apply()` convenience method to apply a function to the data tensor (i.e.</span>
+</span><span class="hll"><span class="linenos">131</span>        <span class="c1"># `tensor`) of the `RaggedBatch` instance. The line:</span>
+</span><span class="hll"><span class="linenos">132</span>        <span class="c1">#   &gt;&gt;&gt; overlap_weights_matched = bbox_per_object_loss.apply(lambda tensor: 1.0 - tensor)</span>
+</span><span class="hll"><span class="linenos">133</span>        <span class="c1"># is equivalent to:</span>
+</span><span class="hll"><span class="linenos">134</span>        <span class="c1">#   &gt;&gt;&gt; tensor = bbox_per_object_loss.tensor</span>
+</span><span class="hll"><span class="linenos">135</span>        <span class="c1">#   &gt;&gt;&gt; tensor = 1.0 - tensor</span>
+</span><span class="hll"><span class="linenos">136</span>        <span class="c1">#   &gt;&gt;&gt; overlap_weights_matched = bbox_per_object_loss.create_with_sample_sizes_like_self(tensor)</span>
+</span><span class="hll"><span class="linenos">137</span>        <span class="c1"># Note that the `apply()` method returns a new `RaggedBatch` instance. Also, the passed function</span>
+</span><span class="hll"><span class="linenos">138</span>        <span class="c1"># may accept more than one argument, in which case `sample_sizes` and `mask` are also passed to</span>
+</span><span class="hll"><span class="linenos">139</span>        <span class="c1"># the function (but should not be modified). Please refer to the documentation of</span>
+</span><span class="hll"><span class="linenos">140</span>        <span class="c1"># `RaggedBatch.apply()` for more details.</span>
+</span><span class="linenos">141</span>        <span class="n">overlap_weights_matched</span> <span class="o">=</span> <span class="n">bbox_per_object_loss</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">tensor</span><span class="p">:</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">tensor</span><span class="p">)</span>
+<span class="linenos">142</span>
+<span class="hll"><span class="linenos">143</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">144</span>        <span class="c1"># 2. Combine the overlap weights with `weights_matched` (which contains the values from `weights_gt`</span>
+</span><span class="hll"><span class="linenos">145</span>        <span class="c1">#    for the matched objects).</span>
+</span><span class="hll"><span class="linenos">146</span>        <span class="c1">#</span>
+</span><span class="hll"><span class="linenos">147</span>        <span class="c1"># Note that here, data tensors of two `RaggedBatch` instances are processed in the lambda function.</span>
+</span><span class="hll"><span class="linenos">148</span>        <span class="c1"># As both `RaggedBatch` instances represent the same sample sizes and non-uniform dimension, it does</span>
+</span><span class="hll"><span class="linenos">149</span>        <span class="c1"># not matter which one calls the `apply()` method and for which one the data tensor is accessed as</span>
+</span><span class="hll"><span class="linenos">150</span>        <span class="c1"># `.tensor`.</span>
+</span><span class="linenos">151</span>        <span class="n">existence_weights_matched</span> <span class="o">=</span> <span class="n">weights_matched</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+<span class="linenos">152</span>            <span class="k">lambda</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">tensor</span> <span class="o">*</span> <span class="n">overlap_weights_matched</span><span class="o">.</span><span class="n">tensor</span>
+<span class="linenos">153</span>        <span class="p">)</span>
+<span class="linenos">154</span>
+<span class="hll"><span class="linenos">155</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">156</span>        <span class="c1"># 3a). First compute the per-sample mean values of `existence_weights_matched` (averaging over the</span>
+</span><span class="hll"><span class="linenos">157</span>        <span class="c1">#      existing objects) to obtain `weights_means`.</span>
+</span><span class="hll"><span class="linenos">158</span>        <span class="c1">#</span>
+</span><span class="hll"><span class="linenos">159</span>        <span class="c1"># As the target dimension is padded, `torch.mean()` cannot be used both</span>
+</span><span class="hll"><span class="linenos">160</span>        <span class="c1">#   - for the reasons discussed above for summation over objects (i.e. the number of actual objects</span>
+</span><span class="hll"><span class="linenos">161</span>        <span class="c1">#     does not necessarily correspond to the tensor size)</span>
+</span><span class="hll"><span class="linenos">162</span>        <span class="c1">#   - because `torch.mean()` would divide the sum by a wrong number of elements for samples containing</span>
+</span><span class="hll"><span class="linenos">163</span>        <span class="c1">#     filler elements</span>
+</span><span class="hll"><span class="linenos">164</span>        <span class="c1"># Instead, we use the method provided by the `batching-helpers` package:</span>
+</span><span class="linenos">165</span>        <span class="n">weights_means</span> <span class="o">=</span> <span class="n">batching_helpers</span><span class="o">.</span><span class="n">average_over_targets</span><span class="p">(</span><span class="n">existence_weights_matched</span><span class="p">)</span>
+<span class="linenos">166</span>
+<span class="hll"><span class="linenos">167</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">168</span>        <span class="c1"># 3b). Then, compute per-sample `imbalance_factors` compensating for the imbalance between existing</span>
+</span><span class="hll"><span class="linenos">169</span>        <span class="c1">#      and non-existing objects.</span>
+</span><span class="hll"><span class="linenos">170</span>        <span class="c1">#</span>
+</span><span class="hll"><span class="linenos">171</span>        <span class="c1"># First, obtain the number of predictions.</span>
+</span><span class="linenos">172</span>        <span class="n">num_preds</span> <span class="o">=</span> <span class="n">bboxes_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="hll"><span class="linenos">173</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">174</span>        <span class="c1"># Then, compute the imbalance correction factor as follows:</span>
+</span><span class="hll"><span class="linenos">175</span>        <span class="c1">#   - Divide by the number of non-existent targets</span>
+</span><span class="hll"><span class="linenos">176</span>        <span class="c1">#     (i.e. `num_preds - overlap_weights_matched.sample_sizes`)</span>
+</span><span class="hll"><span class="linenos">177</span>        <span class="c1">#   - Multiply by the number of existing targets (i.e. `overlap_weights_matched.sample_sizes`)</span>
+</span><span class="hll"><span class="linenos">178</span>        <span class="c1"># Note that the `nan_to_num()` function is used to handle the case where the number of non-existent</span>
+</span><span class="hll"><span class="linenos">179</span>        <span class="c1"># targets is zero.</span>
+</span><span class="linenos">180</span>        <span class="n">imbalance_factors</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span>
+<span class="linenos">181</span>            <span class="n">overlap_weights_matched</span><span class="o">.</span><span class="n">sample_sizes</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_preds</span> <span class="o">-</span> <span class="n">overlap_weights_matched</span><span class="o">.</span><span class="n">sample_sizes</span><span class="p">),</span> <span class="mf">0.0</span>
+<span class="linenos">182</span>        <span class="p">)</span>
+<span class="linenos">183</span>
+<span class="hll"><span class="linenos">184</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">185</span>        <span class="c1"># 3c). Multiply the `weights_means` with `imbalance_factors` to obtain `weights_mean_adjusted`.</span>
+</span><span class="linenos">186</span>        <span class="n">weights_mean_adjusted</span> <span class="o">=</span> <span class="n">weights_means</span> <span class="o">*</span> <span class="n">imbalance_factors</span>
+<span class="linenos">187</span>
+<span class="hll"><span class="linenos">188</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">189</span>        <span class="c1"># 3d). Initialize `existence_weights_preds` (which contains the weights for all predictions and is of</span>
+</span><span class="hll"><span class="linenos">190</span>        <span class="c1">#      corresponding shape) with the values from `weights_mean_adjusted`. These initial values are the</span>
+</span><span class="hll"><span class="linenos">191</span>        <span class="c1">#      weights for the non-matched predictions.</span>
+</span><span class="linenos">192</span>        <span class="n">existence_weights_preds</span> <span class="o">=</span> <span class="n">weights_mean_adjusted</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">classes_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="linenos">193</span>
+<span class="hll"><span class="linenos">194</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">195</span>        <span class="c1"># 3e). Write the values from `existence_weights_matched` into `existence_weights_preds` for the</span>
+</span><span class="hll"><span class="linenos">196</span>        <span class="c1">#      matched predictions (i.e. use the weights in `existence_weights_matched` for those), while</span>
+</span><span class="hll"><span class="linenos">197</span>        <span class="c1">#      leaving the other values unchanged.</span>
+</span><span class="hll"><span class="linenos">198</span>        <span class="c1">#</span>
+</span><span class="hll"><span class="linenos">199</span>        <span class="c1"># Note that the `batched_indexing_write()` function is equivalent to `__setitem__()` for the unbatched</span>
+</span><span class="hll"><span class="linenos">200</span>        <span class="c1"># (single-sample) case using the build-in tensor indexing operator.</span>
+</span><span class="linenos">201</span>        <span class="n">existence_weights_preds</span> <span class="o">=</span> <span class="n">batching_helpers</span><span class="o">.</span><span class="n">batched_indexing_write</span><span class="p">(</span>
+<span class="linenos">202</span>            <span class="n">existence_weights_matched</span><span class="p">,</span> <span class="n">matches_pred</span><span class="p">,</span> <span class="n">existence_weights_preds</span>
+<span class="linenos">203</span>        <span class="p">)</span>
+<span class="linenos">204</span>
+<span class="hll"><span class="linenos">205</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">206</span>        <span class="c1"># Compute existence loss (considering all predictions, not only the matched ones).</span>
+</span><span class="hll"><span class="linenos">207</span>        <span class="c1"># Note that the loss has uniform size, and therefore we can directly use `torch.sum()`</span>
+</span><span class="hll"><span class="linenos">208</span>        <span class="c1"># to sum over the objects.</span>
+</span><span class="linenos">209</span>        <span class="n">existence_per_object_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_per_object_existence_loss</span><span class="p">(</span>
+<span class="linenos">210</span>            <span class="n">existence_pred</span><span class="p">,</span> <span class="n">existence_mask</span><span class="p">,</span> <span class="n">existence_weights_preds</span>
+<span class="linenos">211</span>        <span class="p">)</span>
+<span class="linenos">212</span>        <span class="n">existence_loss</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">existence_per_object_loss</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="linenos">213</span>
+<span class="hll"><span class="linenos">214</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">215</span>        <span class="c1"># Sum up all losses &amp; return result.</span>
+</span><span class="linenos">216</span>        <span class="n">loss</span> <span class="o">=</span> <span class="n">class_loss</span> <span class="o">+</span> <span class="n">bbox_loss</span> <span class="o">+</span> <span class="n">existence_loss</span>
+<span class="linenos">217</span>        <span class="k">return</span> <span class="n">loss</span>
+<span class="linenos">218</span>
+<span class="linenos">219</span>    <span class="c1"># Example loss function for the loss computation. This is not the focus of the example.</span>
+<span class="linenos">220</span>    <span class="nd">@staticmethod</span>
+<span class="linenos">221</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_per_object_class_l1_loss_labels_gt</span><span class="p">(</span><span class="n">classes_gt</span><span class="p">,</span> <span class="n">classes_pred</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+<span class="linenos">222</span>
+<span class="linenos">223</span>        <span class="k">def</span><span class="w"> </span><span class="nf">per_object_class_l1_loss_one_hot_gt</span><span class="p">(</span><span class="n">classes_gt</span><span class="p">,</span> <span class="n">classes_pred</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+<span class="linenos">224</span>
+<span class="linenos">225</span>            <span class="n">diff</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">classes_gt</span> <span class="o">-</span> <span class="n">classes_pred</span><span class="p">)</span>
+<span class="linenos">226</span>            <span class="n">weighted_diff</span> <span class="o">=</span> <span class="n">weights</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">diff</span>
+<span class="linenos">227</span>
+<span class="linenos">228</span>            <span class="c1"># Compute the sum over the classes</span>
+<span class="linenos">229</span>            <span class="n">res</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weighted_diff</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos">230</span>
+<span class="linenos">231</span>            <span class="k">return</span> <span class="n">res</span>
+<span class="linenos">232</span>
+<span class="linenos">233</span>        <span class="c1"># Note: This part of the loss computation is not batched. However, we do not focus on loss</span>
+<span class="linenos">234</span>        <span class="c1"># function implementation here and in a practical application, the loss can be implemented</span>
+<span class="linenos">235</span>        <span class="c1"># differently (e.g. custom PyTorch extension).</span>
+<span class="linenos">236</span>        <span class="n">num_classes</span> <span class="o">=</span> <span class="n">classes_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="linenos">237</span>        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">classes_gt</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos">238</span>        <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">batch_size</span>
+<span class="linenos">239</span>        <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">gt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">classes_gt</span><span class="p">):</span>
+<span class="linenos">240</span>            <span class="n">res_s</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">gt</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">num_classes</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">gt</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+<span class="linenos">241</span>            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gt</span><span class="p">):</span>
+<span class="linenos">242</span>                <span class="n">res_s</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="linenos">243</span>            <span class="n">res</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">res_s</span>
+<span class="linenos">244</span>        <span class="n">classes_gt_one_hot</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos">245</span>        <span class="c1"># end of non_batched part</span>
+<span class="linenos">246</span>        <span class="n">res</span> <span class="o">=</span> <span class="n">per_object_class_l1_loss_one_hot_gt</span><span class="p">(</span><span class="n">classes_gt_one_hot</span><span class="p">,</span> <span class="n">classes_pred</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+<span class="linenos">247</span>        <span class="k">return</span> <span class="n">res</span>
+<span class="linenos">248</span>
+<span class="linenos">249</span>    <span class="c1"># Example batched loss function. It is used in the example, but the implementation</span>
+<span class="linenos">250</span>    <span class="c1"># of this function is not the focus of the example.</span>
+<span class="linenos">251</span>    <span class="nd">@staticmethod</span>
+<span class="linenos">252</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_per_object_bbox_overlap_loss</span><span class="p">(</span><span class="n">bboxes_gt</span><span class="p">,</span> <span class="n">bboxes_pred</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">):</span>
+<span class="linenos">253</span>        <span class="n">areas_gt</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">bboxes_gt</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">-</span> <span class="n">bboxes_gt</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">254</span>        <span class="n">areas_pred</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">bboxes_pred</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span> <span class="o">-</span> <span class="n">bboxes_pred</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">255</span>
+<span class="linenos">256</span>        <span class="n">rects_gt_ul</span> <span class="o">=</span> <span class="n">bboxes_gt</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+<span class="linenos">257</span>        <span class="n">rects_gt_lr</span> <span class="o">=</span> <span class="n">bboxes_gt</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+<span class="linenos">258</span>        <span class="n">rects_pred_ul</span> <span class="o">=</span> <span class="n">bboxes_pred</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+<span class="linenos">259</span>        <span class="n">rects_pred_lr</span> <span class="o">=</span> <span class="n">bboxes_pred</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+<span class="linenos">260</span>
+<span class="linenos">261</span>        <span class="n">intersections_ul</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">rects_gt_ul</span><span class="p">,</span> <span class="n">rects_pred_ul</span><span class="p">)</span>
+<span class="linenos">262</span>        <span class="n">intersections_lr</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">rects_gt_lr</span><span class="p">,</span> <span class="n">rects_pred_lr</span><span class="p">)</span>
+<span class="linenos">263</span>        <span class="n">sizes_intersections</span> <span class="o">=</span> <span class="n">intersections_lr</span> <span class="o">-</span> <span class="n">intersections_ul</span>
+<span class="linenos">264</span>        <span class="n">sizes_intersections</span><span class="p">[</span><span class="n">sizes_intersections</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="linenos">265</span>        <span class="n">areas_intersections</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">sizes_intersections</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">266</span>
+<span class="linenos">267</span>        <span class="n">areas_union</span> <span class="o">=</span> <span class="n">areas_gt</span> <span class="o">+</span> <span class="n">areas_pred</span> <span class="o">-</span> <span class="n">areas_intersections</span>
+<span class="linenos">268</span>        <span class="n">areas_union</span><span class="p">[</span><span class="n">areas_union</span> <span class="o">&lt;</span> <span class="n">eps</span><span class="p">]</span> <span class="o">=</span> <span class="n">eps</span>
+<span class="linenos">269</span>
+<span class="linenos">270</span>        <span class="n">target_loss</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">areas_intersections</span> <span class="o">/</span> <span class="n">areas_union</span>
+<span class="linenos">271</span>
+<span class="linenos">272</span>        <span class="n">target_loss</span> <span class="o">=</span> <span class="n">target_loss</span> <span class="o">*</span> <span class="n">weights</span>
+<span class="linenos">273</span>
+<span class="linenos">274</span>        <span class="k">return</span> <span class="n">target_loss</span>
+<span class="linenos">275</span>
+<span class="linenos">276</span>    <span class="c1"># Example batched loss function. It is used in the example, but the implementation</span>
+<span class="linenos">277</span>    <span class="c1"># of this function is not the focus of the example.</span>
+<span class="linenos">278</span>    <span class="nd">@staticmethod</span>
+<span class="linenos">279</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_per_object_existence_loss</span><span class="p">(</span><span class="n">existence_pred</span><span class="p">,</span> <span class="n">existence_mask</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+<span class="linenos">280</span>        <span class="n">existence_gt</span> <span class="o">=</span> <span class="n">existence_mask</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="linenos">281</span>        <span class="n">diff</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">existence_pred</span> <span class="o">-</span> <span class="n">existence_gt</span><span class="p">)</span>
+<span class="linenos">282</span>        <span class="n">loss</span> <span class="o">=</span> <span class="n">weights</span> <span class="o">*</span> <span class="n">diff</span>
+<span class="linenos">283</span>        <span class="k">return</span> <span class="n">loss</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api.html" class="btn btn-neutral float-left" title="API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="evaluation.html" class="btn btn-neutral float-right" title="Evaluation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

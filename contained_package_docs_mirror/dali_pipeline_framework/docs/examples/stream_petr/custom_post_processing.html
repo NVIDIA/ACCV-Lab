@@ -1,0 +1,325 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Custom Post-Processing &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+    <link rel="next" title="Flexible Step Implementation" href="../flexible_step/index.html" />
+    <link rel="prev" title="Custom Processing Step: StreamPETRDataCombiner" href="custom_processing_step.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">DALI Pipeline Framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../design.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/main_api.html">Main API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/additional_api.html">Additional API Reference</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html">Examples</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../examples.html#pipeline-setup-examples">Pipeline Setup Examples</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../2d_object_detection/index.html">2D Object Detection Pipeline</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="index.html">StreamPETR Pipeline</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="pipeline_setup.html">StreamPETR Pipeline Setup</a></li>
+<li class="toctree-l5"><a class="reference internal" href="custom_processing_step.html">Custom Processing Step: <code class="docutils literal notranslate"><span class="pre">StreamPETRDataCombiner</span></code></a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">Custom Post-Processing</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../flexible_step/index.html">Flexible Step Implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../examples.html#data-loaders-for-nuscenes">Data Loaders for NuScenes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">DALI Pipeline Framework</a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Examples</a></li>
+          <li class="breadcrumb-item"><a href="index.html">StreamPETR Pipeline</a></li>
+      <li class="breadcrumb-item active">Custom Post-Processing</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../_sources/contained_package_docs_mirror/dali_pipeline_framework/docs/examples/stream_petr/custom_post_processing.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="custom-post-processing">
+<h1>Custom Post-Processing<a class="headerlink" href="#custom-post-processing" title="Link to this heading"></a></h1>
+<p>This page documents the post-processing function used by the StreamPETR pipeline to align DALI outputs
+with the training format expected by StreamPETR (including wrapping into <code class="docutils literal notranslate"><span class="pre">DataContainer</span></code> and
+<code class="docutils literal notranslate"><span class="pre">LiDARInstance3DBoxes</span></code> objects where needed).</p>
+<section id="overview-and-goals">
+<h2>Overview and Goals<a class="headerlink" href="#overview-and-goals" title="Link to this heading"></a></h2>
+<p>Here, we demonstrate how to align the DALI outputs with the training format expected by StreamPETR by
+means of a custom post-processing function. This function can be used to implement any custom post-processing
+that cannot be implemented inside the DALI pipeline (e.g. due to data types not supported by DALI or
+batching conventions which differ from the DALI batching conventions).</p>
+</section>
+<section id="details">
+<h2>Details<a class="headerlink" href="#details" title="Link to this heading"></a></h2>
+<p>Here, we discuss the details of the post-processing function used by the StreamPETR pipeline.</p>
+<section id="helper-and-input-shape">
+<h3>Helper and Input Shape<a class="headerlink" href="#helper-and-input-shape" title="Link to this heading"></a></h3>
+<p>Derive batch/image shape information and define a helper for converting 3D boxes to
+<code class="docutils literal notranslate"><span class="pre">LiDARInstance3DBoxes</span></code>.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">packages/dali_pipeline_framework/examples/pipeline_setup/stream_petr_pipeline.py</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">120</span>    <span class="c1"># ===== Helper and input shape =====</span>
+<span class="linenos">121</span>
+<span class="hll"><span class="linenos">122</span>    <span class="c1"># @NOTE Helper to convert tensors to LiDARInstance3DBoxes (used for 3D GT in the training implementation);</span>
+</span><span class="linenos">123</span>    <span class="k">def</span><span class="w"> </span><span class="nf">tensor_to_lidar_inst</span><span class="p">(</span><span class="n">tensor</span><span class="p">):</span>
+<span class="linenos">124</span>        <span class="k">return</span> <span class="n">LiDARInstance3DBoxes</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">box_dim</span><span class="o">=</span><span class="n">tensor</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+<span class="linenos">125</span>
+<span class="linenos">126</span>    <span class="c1"># Get the shape of the (concatenated) images as well as the batch size (corresponds to the first dimension</span>
+<span class="linenos">127</span>    <span class="c1"># of the images)</span>
+<span class="linenos">128</span>    <span class="n">img_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;img&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="linenos">129</span>    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">img_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos">130</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="wrap-core-tensors-as-datacontainer-objects">
+<h3>Wrap Core Tensors as <code class="docutils literal notranslate"><span class="pre">DataContainer</span></code> objects<a class="headerlink" href="#wrap-core-tensors-as-datacontainer-objects" title="Link to this heading"></a></h3>
+<p>Add a sequence dimension and wrap the actual tensors as <code class="docutils literal notranslate"><span class="pre">DataContainer</span></code> objects for training code
+compatibility.
+Note that we also add a sequence dimension to the tensors (length 1, as we use the streaming video training
+mode), as this is the format that the training implementation expects.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">packages/dali_pipeline_framework/examples/pipeline_setup/stream_petr_pipeline.py</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">131</span>    <span class="c1"># ===== Wrap core tensors as DataContainer objects =====</span>
+<span class="hll"><span class="linenos">132</span>    <span class="c1"># @NOTE Add a sequence dimension (length 1, as we use the streaming video training mode) and wrap tensors</span>
+</span><span class="hll"><span class="linenos">133</span>    <span class="c1"># in DataContainer objects as expected by StreamPETR training code.</span>
+</span><span class="hll"><span class="linenos">134</span>    <span class="c1">#</span>
+</span><span class="hll"><span class="linenos">135</span>    <span class="c1"># Convert data fields by unsqueezing (the new dimension represents time steps, but only single time steps</span>
+</span><span class="hll"><span class="linenos">136</span>    <span class="c1"># are used in the relevant setups) and wrapping as DataContainer, as this is what</span>
+</span><span class="hll"><span class="linenos">137</span>    <span class="c1"># the training expects.</span>
+</span><span class="linenos">138</span>    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span>
+<span class="linenos">139</span>        <span class="s1">&#39;lidar2img&#39;</span><span class="p">,</span>
+<span class="linenos">140</span>        <span class="s1">&#39;intrinsics&#39;</span><span class="p">,</span>
+<span class="linenos">141</span>        <span class="s1">&#39;extrinsics&#39;</span><span class="p">,</span>
+<span class="linenos">142</span>        <span class="s1">&#39;timestamp&#39;</span><span class="p">,</span>
+<span class="linenos">143</span>        <span class="s1">&#39;img_timestamp&#39;</span><span class="p">,</span>
+<span class="linenos">144</span>        <span class="s1">&#39;ego_pose&#39;</span><span class="p">,</span>
+<span class="linenos">145</span>        <span class="s1">&#39;ego_pose_inv&#39;</span><span class="p">,</span>
+<span class="linenos">146</span>        <span class="s1">&#39;img&#39;</span><span class="p">,</span>
+<span class="linenos">147</span>        <span class="s1">&#39;prev_exists&#39;</span><span class="p">,</span>
+<span class="linenos">148</span>    <span class="p">]:</span>
+<span class="hll"><span class="linenos">149</span>        <span class="c1"># @NOTE Get as one tensor and add a dimension for the sequence length (always 1)</span>
+</span><span class="linenos">150</span>        <span class="n">tensor_to_store</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+<span class="linenos">151</span>        <span class="n">tensor_with_seq_dim</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="n">tensor_to_store</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">152</span>        <span class="n">batch</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">DataContainer</span><span class="p">([</span><span class="n">tensor_with_seq_dim</span><span class="p">],</span> <span class="n">cpu_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">stack</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">pad_dims</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="linenos">153</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="process-ground-truth-training-only">
+<h3>Process Ground Truth (Training Only)<a class="headerlink" href="#process-ground-truth-training-only" title="Link to this heading"></a></h3>
+<p>Trim padded regions, structure nesting for sequences/batches, convert 3D boxes to
+<code class="docutils literal notranslate"><span class="pre">LiDARInstance3DBoxes</span></code>, and wrap results as <code class="docutils literal notranslate"><span class="pre">DataContainer</span></code> objects.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">packages/dali_pipeline_framework/examples/pipeline_setup/stream_petr_pipeline.py</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">154</span>    <span class="c1"># ===== Process ground truth (training only) =====</span>
+<span class="hll"><span class="linenos">155</span>    <span class="c1"># @NOTE For training: trim padded regions, wrap GT in DataContainer, and add sequence/batch nesting to match</span>
+</span><span class="hll"><span class="linenos">156</span>    <span class="c1"># consumer expectations.</span>
+</span><span class="hll"><span class="linenos">157</span>    <span class="c1"># If the data is for training ...</span>
+</span><span class="linenos">158</span>    <span class="k">if</span> <span class="n">for_training</span><span class="p">:</span>
+<span class="linenos">159</span>        <span class="c1"># ----- Process 2D ground truth -----</span>
+<span class="linenos">160</span>        <span class="n">num_gt_obj</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;num_gt_objects&quot;</span><span class="p">]</span>
+<span class="linenos">161</span>        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;gt_bboxes&#39;</span><span class="p">,</span> <span class="s1">&#39;gt_labels&#39;</span><span class="p">,</span> <span class="s1">&#39;centers2d&#39;</span><span class="p">,</span> <span class="s1">&#39;depths&#39;</span><span class="p">]:</span>
+<span class="linenos">162</span>            <span class="n">num_cams</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="linenos">163</span>            <span class="c1"># Note that the following line performs the following functions</span>
+<span class="linenos">164</span>            <span class="c1"># - In the innermost dimension (iterating over individual objects), only as many elements are</span>
+<span class="linenos">165</span>            <span class="c1">#   retained as there are objects (indexed as `[0:num_gt_obj[s][c]]`). This is needed because the</span>
+<span class="linenos">166</span>            <span class="c1">#   individual samples were padded to the largest number of objects encountered for any camera in</span>
+<span class="linenos">167</span>            <span class="c1">#   the batch (to be filled into a single tensor). The padded regions are removed here and</span>
+<span class="linenos">168</span>            <span class="c1">#   `num_gt_obj` (from data field `batch[&quot;num_gt_objects&quot;]`) stores the actual number of objects</span>
+<span class="linenos">169</span>            <span class="c1">#   for each sample and camera.</span>
+<span class="linenos">170</span>            <span class="c1"># - The data is wrapped in a DataContainer, as this is what the training</span>
+<span class="linenos">171</span>            <span class="c1">#   expects.</span>
+<span class="linenos">172</span>            <span class="c1"># - Dimensions are added: Note that the list comprehensions are enclosed by another pair of `[]`.</span>
+<span class="linenos">173</span>            <span class="c1">#   For the inner list comprehension, the added dimension corresponds to the sequence of time</span>
+<span class="linenos">174</span>            <span class="c1">#   steps (always length 1).</span>
+<span class="linenos">175</span>            <span class="n">batch</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">DataContainer</span><span class="p">(</span>
+<span class="linenos">176</span>                <span class="p">[</span>
+<span class="linenos">177</span>                    <span class="p">[</span>
+<span class="linenos">178</span>                        <span class="p">[[</span><span class="n">batch</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">s</span><span class="p">][</span><span class="n">c</span><span class="p">][</span><span class="mi">0</span> <span class="p">:</span> <span class="n">num_gt_obj</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">c</span><span class="p">]]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_cams</span><span class="p">)]]</span>
+<span class="linenos">179</span>                        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
+<span class="linenos">180</span>                    <span class="p">]</span>
+<span class="linenos">181</span>                <span class="p">],</span>
+<span class="linenos">182</span>                <span class="n">cpu_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="linenos">183</span>            <span class="p">)</span>
+<span class="linenos">184</span>
+<span class="linenos">185</span>        <span class="c1"># ----- Process 3D ground truth -----</span>
+<span class="linenos">186</span>        <span class="c1"># The following lines perform the following functions</span>
+<span class="linenos">187</span>        <span class="c1"># - Make sure that only as many elements are retained as there are objects (stored in</span>
+<span class="linenos">188</span>        <span class="c1">#   `batch[&quot;num_gt_objects_3d&quot;]`). Similar to the 2D GT data, the data was padded to the maximum</span>
+<span class="linenos">189</span>        <span class="c1">#   number of objects in the batch, and this needs to be reversed here.</span>
+<span class="linenos">190</span>        <span class="c1"># - The data is wrapped in a DataContainer, as this is what the training</span>
+<span class="linenos">191</span>        <span class="c1">#   expects</span>
+<span class="linenos">192</span>        <span class="c1"># - For the ground truth bounding boxes, the format is converted from PyTorch tensors to</span>
+<span class="linenos">193</span>        <span class="c1">#   `LiDARInstance3DBoxes` (as this format is expected in the training)</span>
+<span class="linenos">194</span>        <span class="c1"># - Dimensions are added (similar to the other tensors, described above)</span>
+<span class="linenos">195</span>        <span class="n">num_gt_obj_3d</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;num_gt_objects_3d&quot;</span><span class="p">]</span>
+<span class="linenos">196</span>        <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;gt_labels_3d&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DataContainer</span><span class="p">(</span>
+<span class="linenos">197</span>            <span class="p">[[[</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;gt_labels_3d&quot;</span><span class="p">][</span><span class="n">s</span><span class="p">][</span><span class="mi">0</span> <span class="p">:</span> <span class="n">num_gt_obj_3d</span><span class="p">[</span><span class="n">s</span><span class="p">]]]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)]],</span> <span class="n">cpu_only</span><span class="o">=</span><span class="kc">False</span>
+<span class="linenos">198</span>        <span class="p">)</span>
+<span class="linenos">199</span>        <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;gt_bboxes_3d&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DataContainer</span><span class="p">(</span>
+<span class="linenos">200</span>            <span class="p">[</span>
+<span class="linenos">201</span>                <span class="p">[</span>
+<span class="linenos">202</span>                    <span class="p">[</span><span class="n">tensor_to_lidar_inst</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;gt_bboxes_3d&quot;</span><span class="p">][</span><span class="n">s</span><span class="p">][</span><span class="mi">0</span> <span class="p">:</span> <span class="n">num_gt_obj_3d</span><span class="p">[</span><span class="n">s</span><span class="p">]])]</span>
+<span class="linenos">203</span>                    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">)</span>
+<span class="linenos">204</span>                <span class="p">]</span>
+<span class="linenos">205</span>            <span class="p">],</span>
+<span class="linenos">206</span>            <span class="n">cpu_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="linenos">207</span>        <span class="p">)</span>
+<span class="linenos">208</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="set-image-metadata">
+<h3>Set Image Metadata<a class="headerlink" href="#set-image-metadata" title="Link to this heading"></a></h3>
+<p>Populate <code class="docutils literal notranslate"><span class="pre">img_metas</span></code> to mirror the format of the data used in the original implementation.</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">packages/dali_pipeline_framework/examples/pipeline_setup/stream_petr_pipeline.py</span><a class="headerlink" href="#id4" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">209</span>    <span class="c1"># ===== Set image metas =====</span>
+<span class="hll"><span class="linenos">210</span>    <span class="c1"># @NOTE Populate img_metas to align with training expectations; much of this information exists elsewhere,</span>
+</span><span class="hll"><span class="linenos">211</span>    <span class="c1"># but this is done to replaicate the training data format from the original implementation.</span>
+</span><span class="linenos">212</span>    <span class="n">img_shape_to_set</span> <span class="o">=</span> <span class="p">[(</span><span class="n">img_shape</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">img_shape</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">img_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span> <span class="o">*</span> <span class="n">img_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="linenos">213</span>    <span class="n">img_metas</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">batch_size</span>
+<span class="linenos">214</span>    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">batch_size</span><span class="p">):</span>
+<span class="linenos">215</span>        <span class="n">image_metas_sample</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="linenos">216</span>        <span class="n">image_metas_sample</span><span class="p">[</span><span class="s2">&quot;img_shape&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">img_shape_to_set</span>
+<span class="linenos">217</span>        <span class="n">image_metas_sample</span><span class="p">[</span><span class="s2">&quot;pad_shape&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">img_shape_to_set</span>
+<span class="linenos">218</span>        <span class="k">if</span> <span class="n">for_training</span><span class="p">:</span>
+<span class="linenos">219</span>            <span class="c1"># Here, `batch[&quot;gt_bboxes_3d&quot;]` and `batch[&quot;gt_labels_3d&quot;]` are already wrapped in a DataContainer.</span>
+<span class="linenos">220</span>            <span class="c1"># Access accordingly (with `.data[0]`)</span>
+<span class="linenos">221</span>            <span class="n">image_metas_sample</span><span class="p">[</span><span class="s2">&quot;gt_bboxes_3d&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DataContainer</span><span class="p">(</span>
+<span class="linenos">222</span>                <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;gt_bboxes_3d&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">s</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">cpu_only</span><span class="o">=</span><span class="kc">False</span>
+<span class="linenos">223</span>            <span class="p">)</span>
+<span class="linenos">224</span>            <span class="n">image_metas_sample</span><span class="p">[</span><span class="s2">&quot;gt_labels_3d&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DataContainer</span><span class="p">(</span>
+<span class="linenos">225</span>                <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;gt_labels_3d&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">s</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">cpu_only</span><span class="o">=</span><span class="kc">False</span>
+<span class="linenos">226</span>            <span class="p">)</span>
+<span class="linenos">227</span>        <span class="n">img_metas</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">image_metas_sample</span><span class="p">]</span>
+<span class="linenos">228</span>
+<span class="linenos">229</span>    <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;img_metas&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DataContainer</span><span class="p">([</span><span class="n">img_metas</span><span class="p">],</span> <span class="n">cpu_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">230</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="cleanup">
+<h3>Cleanup<a class="headerlink" href="#cleanup" title="Link to this heading"></a></h3>
+<p>Remove internal fields that are no longer needed once padding has been reversed.</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">packages/dali_pipeline_framework/examples/pipeline_setup/stream_petr_pipeline.py</span><a class="headerlink" href="#id5" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">231</span>    <span class="c1"># ===== Cleanup =====</span>
+<span class="hll"><span class="linenos">232</span>    <span class="c1"># @NOTE Remove fields used only internally to reverse padding; they are used in this function to reverse</span>
+</span><span class="hll"><span class="linenos">233</span>    <span class="c1"># the padding, and are not needed downstream.</span>
+</span><span class="linenos">234</span>    <span class="k">del</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;num_gt_objects&quot;</span><span class="p">]</span>
+<span class="linenos">235</span>    <span class="k">del</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;num_gt_objects_3d&quot;</span><span class="p">]</span>
+<span class="linenos">236</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="custom_processing_step.html" class="btn btn-neutral float-left" title="Custom Processing Step: StreamPETRDataCombiner" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../flexible_step/index.html" class="btn btn-neutral float-right" title="Flexible Step Implementation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

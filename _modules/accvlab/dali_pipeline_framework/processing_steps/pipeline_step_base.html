@@ -1,0 +1,332 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.dali_pipeline_framework.processing_steps.pipeline_step_base &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.dali_pipeline_framework.processing_steps.pipeline_step_base</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.dali_pipeline_framework.processing_steps.pipeline_step_base</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..pipeline.sample_data_group</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleDataGroup</span>
+
+
+<div class="viewcode-block" id="PipelineStepBase">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PipelineStepBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Base class for pipeline processing steps.</span>
+
+<span class="sd">    Pipeline processing steps are the building blocks of the pipeline and represent individual</span>
+<span class="sd">    operations applied to input data in sequence to produce outputs.</span>
+
+<span class="sd">    Provides the common interface and common functionality shared by all processing steps:</span>
+
+<span class="sd">      - Checking the input data format for compatibility and setting the output data format (blueprint)</span>
+<span class="sd">        (see :meth:`check_input_data_format_and_set_output_data_format`).</span>
+<span class="sd">      - Applying the step via :meth:`__call__`. This</span>
+
+<span class="sd">        - Invokes :meth:`_process` to perform the actual processing.</span>
+<span class="sd">        - Validates the resulting data format against a reference blueprint from</span>
+<span class="sd">          :meth:`check_input_data_format_and_set_output_data_format` to ensure that the resulting format is</span>
+<span class="sd">          &quot;as advertised&quot;, i.e. as obtained by independent calls to</span>
+<span class="sd">          :meth:`check_input_data_format_and_set_output_data_format`. Note that this check is performed at</span>
+<span class="sd">          DALI graph construction time and therefore does not affect runtime during training.</span>
+
+<span class="sd">      - Support for operating on sub-trees of input data (through specialized wrapper steps, see</span>
+<span class="sd">        :class:`GroupToApplyToSelectedStepBase`).</span>
+
+<span class="sd">    .. _pipeline_step_base_access_modifier_wrapper_discussion:</span>
+
+<span class="sd">    .. admonition:: Consistent &amp; Independent Data Processing</span>
+<span class="sd">        :class: important</span>
+
+<span class="sd">        Many of the included processing steps can be configured to operate on more than one field in the input</span>
+<span class="sd">        :class:`~accvlab.dali_pipeline_framework.pipeline.SampleDataGroup` object. For some</span>
+<span class="sd">        steps (e.g. those which apply random transformations), the question arises whether these steps should</span>
+<span class="sd">        apply consistent processing across all fields they process (e.g. same augmentation transformation for</span>
+<span class="sd">        all images), or if the processing should happen independently for different fields (e.g. different</span>
+<span class="sd">        transformations for different images). The answer to this question depends on the use-case.</span>
+
+<span class="sd">        By default, the processing steps are designed to apply consistent processing. For example,</span>
+<span class="sd">        :class:`AffineTransformer` applies the same spatial transform to all processed images, as well as</span>
+<span class="sd">        corresponding fields such as point sets defined on the image or projection matrices. This ensures</span>
+<span class="sd">        that:</span>
+
+<span class="sd">          - Consistent randomization is possible if needed (e.g., between an image, a corresponding</span>
+<span class="sd">            segmentation mask, projection matrix, and points defined on the image).</span>
+<span class="sd">          - No correspondences between multiple fields need to be explicitly maintained. For example, if</span>
+<span class="sd">            multiple images and projection matrices are present, there is no need to know which projection</span>
+<span class="sd">            matrix corresponds to which image, as the same transformation is applied to all of them. This is</span>
+<span class="sd">            useful when processing multiple fields which are related to one another.</span>
+
+<span class="sd">        To ensure that independent processing (e.g. different randomizations) can be applied to different</span>
+<span class="sd">        parts of the data (e.g., different randomizations for data from different cameras), sub-classes of</span>
+<span class="sd">        :class:`GroupToApplyToSelectedStepBase` can be used to select one or more parts (sub-trees) of the</span>
+<span class="sd">        input data to process independently of each other. The selection of the sub-trees also allows to</span>
+<span class="sd">        establish field correspondences (e.g., process the image and projection matrix from one camera</span>
+<span class="sd">        consistently) in a natural way, i.e. by grouping all related fields in one sub-tree (e.g. one sub-tree</span>
+<span class="sd">        per camera).</span>
+
+<span class="sd">        The available wrappers include :class:`DataGroupInPathAppliedStep`,</span>
+<span class="sd">        :class:`DataGroupsWithNameAppliedStep`, :class:`DataGroupArrayInPathElementsAppliedStep`, and</span>
+<span class="sd">        :class:`DataGroupArrayWithNameElementsAppliedStep`. Please see the documentation of these classes for</span>
+<span class="sd">        more details. If necessary, new wrappers can be added by subclassing</span>
+<span class="sd">        :class:`GroupToApplyToSelectedStepBase`.</span>
+
+<span class="sd">        Having both options (e.g. consistent or different randomizations for different parts of the data)</span>
+<span class="sd">        available, as well as the ability to group related data (e.g. all images and projection matrices for</span>
+<span class="sd">        one camera) allows for flexible pipeline design which can be tailored to the specific use-case by</span>
+<span class="sd">        configuration.</span>
+
+<span class="sd">    .. automethod:: PipelineStepBase._check_and_adjust_data_format_input_to_output</span>
+
+
+<span class="sd">    .. automethod:: PipelineStepBase._process</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="PipelineStepBase.__call__">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase.__call__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Apply the processing step and validate its output format.</span>
+
+<span class="sd">        Important:</span>
+<span class="sd">            To define the actual functionality of a processing step, override :meth:`_process`, not</span>
+<span class="sd">            this method.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Input data to process.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Processed output data.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Note that this needs to be done before calling `_process()`, as `_process()` may change `data`.</span>
+        <span class="n">data_plueprint_in</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_empty_like_self</span><span class="p">()</span>
+
+        <span class="n">processed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c1"># The check is performed at DALI graph construction time and therefore does not affect runtime during training.</span>
+        <span class="n">reference_blueprint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_input_data_format_and_set_output_data_format</span><span class="p">(</span><span class="n">data_plueprint_in</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">processed</span><span class="o">.</span><span class="n">type_matches</span><span class="p">(</span><span class="n">reference_blueprint</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;SampleDataGroup data format returned by the _process function does not match the reference (returned by `check_input_data_format_and_set_output_data_format()`).</span><span class="se">\n</span><span class="s2"> ##### From `_process()`:</span><span class="se">\n</span><span class="s2"> </span><span class="si">{</span><span class="n">processed</span><span class="si">}</span><span class="se">\n</span><span class="s2"> ##### Reference:</span><span class="se">\n</span><span class="s2"> </span><span class="si">{</span><span class="n">reference_blueprint</span><span class="si">}</span><span class="se">\n</span><span class="s2"> ##########&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">processed</span></div>
+
+
+<div class="viewcode-block" id="PipelineStepBase._process">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase._process">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Apply the processing step to the input, or to a selected sub-tree when wrapped accordingly.</span>
+
+<span class="sd">        Individual processing steps need to override this method and implement the actual functionality.</span>
+
+<span class="sd">        The method may mutate the input data; callers must not rely on the input remaining unchanged or</span>
+<span class="sd">        corresponding to the output after the call.</span>
+
+<span class="sd">        Note:</span>
+
+<span class="sd">            - Override this method in each (non-abstract) derived class to define the actual functionality.</span>
+<span class="sd">            - This method is called by :meth:`__call__` and should not be called directly.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: Data to be processed by the step.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Resulting processed data.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="PipelineStepBase.check_input_data_format_and_set_output_data_format">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase.check_input_data_format_and_set_output_data_format">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_input_data_format_and_set_output_data_format</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data_empty</span><span class="p">:</span> <span class="n">SampleDataGroup</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Check the input data format for compatibility and return the output data format (blueprint).</span>
+
+<span class="sd">        Compatibility typically means that expected data fields are present and types are compatible, and</span>
+<span class="sd">        that the output data fields can be added (are not already present). Typical changes to the data</span>
+<span class="sd">        format include additions/removals of fields or changes to data types (e.g., an image may change</span>
+<span class="sd">        from ``types.DALIDataType.UINT8`` to ``types.DALIDataType.FLOAT`` in a normalization step).</span>
+
+<span class="sd">        This method does not modify ``data_empty`` in place; it returns a new :class:`~accvlab.dali_pipeline_framework.pipeline.SampleDataGroup`</span>
+<span class="sd">        describing the modified format.</span>
+
+<span class="sd">        If the input data format is incompatible, an exception is raised.</span>
+
+<span class="sd">        Important:</span>
+<span class="sd">            To define the actual functionality of the check, override</span>
+<span class="sd">            :meth:`_check_and_adjust_data_format_input_to_output`, not this method.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_empty: Input data format (blueprint),</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Resulting data format (blueprint).</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Do not modify the original SampleDataGroup object. `get_empty_like_self()` returns a copy without</span>
+        <span class="c1"># data for use as a &#39;blueprint&#39; describing the data format. Using this method instead of `get_copy()`</span>
+        <span class="c1"># makes this intent explicit.</span>
+        <span class="n">data_empty</span> <span class="o">=</span> <span class="n">data_empty</span><span class="o">.</span><span class="n">get_empty_like_self</span><span class="p">()</span>
+
+        <span class="n">data_empty_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_and_adjust_data_format_input_to_output</span><span class="p">(</span><span class="n">data_empty</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data_empty_res</span></div>
+
+
+<div class="viewcode-block" id="PipelineStepBase._check_and_adjust_data_format_input_to_output">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase._check_and_adjust_data_format_input_to_output">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_and_adjust_data_format_input_to_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_empty</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Check the input data format for compatibility and return the output data format (blueprint).</span>
+
+<span class="sd">        If the input data format is incompatible, raise an exception describing the problem.</span>
+
+<span class="sd">        Please see :meth:`check_input_data_format_and_set_output_data_format` for a description of typical</span>
+<span class="sd">        checks and format changes that need to be performed here.</span>
+
+<span class="sd">        This method may or may not modify ``data_empty`` directly, but in any case has to return an object</span>
+<span class="sd">        representing the modified format (i.e., either the modified ``data_empty`` or a new object).</span>
+
+<span class="sd">        Note:</span>
+
+<span class="sd">            - Override this method in each (non-abstract) derived class to define the actual functionality.</span>
+<span class="sd">            - This method is called by :meth:`check_input_data_format_and_set_output_data_format` and should</span>
+<span class="sd">              not be called directly.</span>
+
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_empty: Input data format (blueprint)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Resulting data format (blueprint)</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

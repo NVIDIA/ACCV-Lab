@@ -1,0 +1,356 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Examples &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Optimization Testing Tools" href="../../optim_test_tools/docs/index.html" />
+    <link rel="prev" title="API Reference" href="api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Draw Heatmap</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#draw-heatmap">draw_heatmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#draw-heatmap-batched">draw_heatmap_batched</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#one-for-all-classes">one-for-all classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#one-for-each-class">one-for-each class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Draw Heatmap</a></li>
+      <li class="breadcrumb-item active">Examples</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/contained_package_docs_mirror/draw_heatmap/docs/examples.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="examples">
+<h1>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h1>
+<p>Currently, this package provides two implementations for drawing the heatmaps in general which differs in the input format corresponding two <strong>functions</strong> to work efficiently.</p>
+<section id="draw-heatmap">
+<h2>draw_heatmap<a class="headerlink" href="#draw-heatmap" title="Link to this heading"></a></h2>
+<p>This implementation is designed for the <strong>concatenated</strong> input format. For the details about the inputs, please refer to the <cite>packages/draw_heatmap/examples/input_data.py</cite> file.</p>
+<div class="literal-block-wrapper docutils container" id="draw-heatmap-example">
+<div class="code-block-caption"><span class="caption-text">Concatenated input example</span><a class="headerlink" href="#draw-heatmap-example" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">accvlab.draw_heatmap</span><span class="w"> </span><span class="kn">import</span> <span class="n">draw_heatmap</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">input_data</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">device</span><span class="p">,</span>
+    <span class="n">centers_list</span><span class="p">,</span>
+    <span class="n">radii_list</span><span class="p">,</span>
+    <span class="n">HEATMAP_SIZE</span><span class="p">,</span>
+    <span class="n">diameter_to_sigma_factor</span><span class="p">,</span>
+    <span class="n">k_scale</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">draw_heatmap_example</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This example shows how to draw heatmaps for concatenated inputs.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        centers_list: List[torch.Tensor]</span>
+<span class="sd">        radii_list: List[torch.Tensor]</span>
+<span class="sd">        HEATMAP_SIZE: [H, W]</span>
+<span class="sd">        diameter_to_sigma_factor: float</span>
+<span class="sd">        k_scale: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">num_of_heatmaps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">centers_list</span><span class="p">)</span>
+
+    <span class="n">centers</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">centers_list</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">radii</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">radii_list</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">heatmaps</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">num_of_heatmaps</span><span class="p">,</span> <span class="n">HEATMAP_SIZE</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">HEATMAP_SIZE</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span>
+    <span class="p">)</span>
+
+    <span class="c1"># because we concat all samples, we need to record the index of the heatmap for each bounding box</span>
+    <span class="n">heatmap_idxes</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">centers_list</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">],</span>
+        <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">draw_heatmap</span><span class="p">(</span><span class="n">heatmaps</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">radii</span><span class="p">,</span> <span class="n">heatmap_idxes</span><span class="p">,</span> <span class="n">diameter_to_sigma_factor</span><span class="p">,</span> <span class="n">k_scale</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">heatmaps</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">heatmaps</span> <span class="o">=</span> <span class="n">draw_heatmap_example</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">heatmaps</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="draw-heatmap-batched">
+<h2>draw_heatmap_batched<a class="headerlink" href="#draw-heatmap-batched" title="Link to this heading"></a></h2>
+<p>This implementation is designed for the <strong>batched</strong> input format. For the details about the inputs, please refer to the <cite>packages/draw_heatmap/examples/input_data.py</cite> file.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It’s general to draw all classes in one heatmap. However, another option in to have one heatmap for each class. Both are supported by this function distinguishing by feeding <cite>labels</cite> parameter of each bounding box or not.</p>
+</div>
+<section id="one-for-all-classes">
+<h3>one-for-all classes<a class="headerlink" href="#one-for-all-classes" title="Link to this heading"></a></h3>
+<div class="literal-block-wrapper docutils container" id="draw-heatmap-batched-example">
+<div class="code-block-caption"><span class="caption-text">Batched input, one heatmap for all classes example</span><a class="headerlink" href="#draw-heatmap-batched-example" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">accvlab.draw_heatmap</span><span class="w"> </span><span class="kn">import</span> <span class="n">draw_heatmap_batched</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">input_data</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">device</span><span class="p">,</span>
+    <span class="n">centers_list</span><span class="p">,</span>
+    <span class="n">radii_list</span><span class="p">,</span>
+    <span class="n">HEATMAP_SIZE</span><span class="p">,</span>
+    <span class="n">diameter_to_sigma_factor</span><span class="p">,</span>
+    <span class="n">k_scale</span><span class="p">,</span>
+    <span class="n">MAX_NUM_TARGET</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">accvlab.batching_helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">RaggedBatch</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">draw_heatmap_example_batch</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This example shows how to draw heatmaps for batched inputs.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        centers_list: List[torch.Tensor]</span>
+<span class="sd">        radii_list: List[torch.Tensor]</span>
+<span class="sd">        HEATMAP_SIZE: [H, W]</span>
+<span class="sd">        diameter_to_sigma_factor: float</span>
+<span class="sd">        k_scale: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">centers_list</span><span class="p">)</span>
+
+    <span class="c1"># In order to support the batched input, we need to convert the input to the format of ragged batch</span>
+    <span class="n">centers</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">MAX_NUM_TARGET</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">radii</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">MAX_NUM_TARGET</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">gt_nums_targets</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">batch_size</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="c1"># Copy over the valid boxes</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">centers_list</span><span class="p">):</span>
+        <span class="n">centers</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">sublist</span><span class="p">)]</span> <span class="o">=</span> <span class="n">centers_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">radii</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">sublist</span><span class="p">)]</span> <span class="o">=</span> <span class="n">radii_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">gt_nums_targets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sublist</span><span class="p">)</span>
+
+    <span class="n">centers_rb</span> <span class="o">=</span> <span class="n">RaggedBatch</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">sample_sizes</span><span class="o">=</span><span class="n">gt_nums_targets</span><span class="p">)</span>
+    <span class="n">radii_rb</span> <span class="o">=</span> <span class="n">RaggedBatch</span><span class="p">(</span><span class="n">radii</span><span class="p">,</span> <span class="n">sample_sizes</span><span class="o">=</span><span class="n">gt_nums_targets</span><span class="p">)</span>
+    <span class="n">heatmaps</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">HEATMAP_SIZE</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">HEATMAP_SIZE</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">draw_heatmap_batched</span><span class="p">(</span><span class="n">heatmaps</span><span class="p">,</span> <span class="n">centers_rb</span><span class="p">,</span> <span class="n">radii_rb</span><span class="p">,</span> <span class="n">diameter_to_sigma_factor</span><span class="p">,</span> <span class="n">k_scale</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">heatmaps</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">heatmaps</span> <span class="o">=</span> <span class="n">draw_heatmap_example_batch</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">heatmaps</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="one-for-each-class">
+<h3>one-for-each class<a class="headerlink" href="#one-for-each-class" title="Link to this heading"></a></h3>
+<div class="literal-block-wrapper docutils container" id="draw-heatmap-batched-example-each-class">
+<div class="code-block-caption"><span class="caption-text">Batched input, one heatmap for each class example</span><a class="headerlink" href="#draw-heatmap-batched-example-each-class" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">accvlab.draw_heatmap</span><span class="w"> </span><span class="kn">import</span> <span class="n">draw_heatmap_batched</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">input_data</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">device</span><span class="p">,</span>
+    <span class="n">centers_list</span><span class="p">,</span>
+    <span class="n">radii_list</span><span class="p">,</span>
+    <span class="n">labels_list</span><span class="p">,</span>
+    <span class="n">HEATMAP_SIZE</span><span class="p">,</span>
+    <span class="n">diameter_to_sigma_factor</span><span class="p">,</span>
+    <span class="n">k_scale</span><span class="p">,</span>
+    <span class="n">MAX_NUM_TARGET</span><span class="p">,</span>
+    <span class="n">MAX_NUM_CLASSES</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">accvlab.batching_helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">RaggedBatch</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">draw_heatmap_classwise_example_batch</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This example shows how to draw class-wise heatmaps for batched inputs.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        centers_list: List[torch.Tensor]</span>
+<span class="sd">        radii_list: List[torch.Tensor]</span>
+<span class="sd">        labels_list: List[torch.Tensor]</span>
+<span class="sd">        HEATMAP_SIZE: [H, W]</span>
+<span class="sd">        diameter_to_sigma_factor: float</span>
+<span class="sd">        k_scale: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">centers_list</span><span class="p">)</span>
+
+    <span class="c1"># In order to support the batched input, we need to convert the input to the format of ragged batch</span>
+    <span class="n">centers</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">MAX_NUM_TARGET</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">radii</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">MAX_NUM_TARGET</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">MAX_NUM_TARGET</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">gt_nums_targets</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">batch_size</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span>
+    <span class="c1"># Copy over the valid boxes</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">centers_list</span><span class="p">):</span>
+        <span class="n">centers</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">sublist</span><span class="p">)]</span> <span class="o">=</span> <span class="n">centers_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">radii</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">sublist</span><span class="p">)]</span> <span class="o">=</span> <span class="n">radii_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">labels</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">sublist</span><span class="p">)]</span> <span class="o">=</span> <span class="n">labels_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">gt_nums_targets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sublist</span><span class="p">)</span>
+
+    <span class="n">centers_rb</span> <span class="o">=</span> <span class="n">RaggedBatch</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">sample_sizes</span><span class="o">=</span><span class="n">gt_nums_targets</span><span class="p">)</span>
+    <span class="n">radii_rb</span> <span class="o">=</span> <span class="n">RaggedBatch</span><span class="p">(</span><span class="n">radii</span><span class="p">,</span> <span class="n">sample_sizes</span><span class="o">=</span><span class="n">gt_nums_targets</span><span class="p">)</span>
+    <span class="n">labels_rb</span> <span class="o">=</span> <span class="n">RaggedBatch</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">sample_sizes</span><span class="o">=</span><span class="n">gt_nums_targets</span><span class="p">)</span>
+    <span class="n">heatmaps</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">MAX_NUM_CLASSES</span><span class="p">,</span> <span class="n">HEATMAP_SIZE</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">HEATMAP_SIZE</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span>
+    <span class="p">)</span>
+    <span class="n">draw_heatmap_batched</span><span class="p">(</span><span class="n">heatmaps</span><span class="p">,</span> <span class="n">centers_rb</span><span class="p">,</span> <span class="n">radii_rb</span><span class="p">,</span> <span class="n">diameter_to_sigma_factor</span><span class="p">,</span> <span class="n">k_scale</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">labels_rb</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">heatmaps</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">heatmaps</span> <span class="o">=</span> <span class="n">draw_heatmap_classwise_example_batch</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">heatmaps</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api.html" class="btn btn-neutral float-left" title="API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../optim_test_tools/docs/index.html" class="btn btn-neutral float-right" title="Optimization Testing Tools" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

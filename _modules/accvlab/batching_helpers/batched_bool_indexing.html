@@ -1,0 +1,486 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.batching_helpers.batched_bool_indexing &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.batching_helpers.batched_bool_indexing</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.batching_helpers.batched_bool_indexing</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.data_format</span><span class="w"> </span><span class="kn">import</span> <span class="n">RaggedBatch</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_compare_indexed_data_and_mask</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">RaggedBatch</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
+    <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">RaggedBatch</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Compare the data and mask to ensure that they are compatible.</span>
+
+<span class="sd">    Note that if both the data and mask are RaggedBatch instances, it is assumed that the sample sizes match.</span>
+<span class="sd">    Only the maximum sample size is checked, not the individual sample sizes.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        AssertionError: If the data and mask are not compatible.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">is_data_ragged</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">)</span>
+    <span class="n">is_mask_ragged</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_data_ragged</span> <span class="ow">and</span> <span class="n">is_mask_ragged</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">num_batch_dims</span> <span class="o">==</span> <span class="n">mask</span><span class="o">.</span><span class="n">num_batch_dims</span>
+        <span class="p">),</span> <span class="s2">&quot;Data and mask must have the same number of batch dimensions&quot;</span>
+        <span class="k">assert</span> <span class="n">data</span><span class="o">.</span><span class="n">batch_shape</span> <span class="o">==</span> <span class="n">mask</span><span class="o">.</span><span class="n">batch_shape</span><span class="p">,</span> <span class="s2">&quot;Data and mask must have the same batch shape&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">max_sample_size</span> <span class="o">==</span> <span class="n">mask</span><span class="o">.</span><span class="n">max_sample_size</span>
+        <span class="p">),</span> <span class="s2">&quot;Data and mask must have the same maximum sample size&quot;</span>
+    <span class="k">elif</span> <span class="n">is_data_ragged</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">data</span><span class="o">.</span><span class="n">num_batch_dims</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Data must have exactly one batch dimension if mask is a tensor&quot;</span>
+        <span class="k">assert</span> <span class="n">data</span><span class="o">.</span><span class="n">batch_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;Data and mask must have the same number of samples&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">max_sample_size</span> <span class="o">==</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">),</span> <span class="s2">&quot;Maximum sample size of data must correspond to `input_mask.shape[1]` if the mask is a tensor&quot;</span>
+    <span class="k">elif</span> <span class="n">is_mask_ragged</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">mask</span><span class="o">.</span><span class="n">num_batch_dims</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="p">),</span> <span class="s2">&quot;Mask must have exactly one batch dimension if input data is a tensor&quot;</span>
+        <span class="k">assert</span> <span class="n">mask</span><span class="o">.</span><span class="n">batch_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;Mask and data must have the same number of samples&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">mask</span><span class="o">.</span><span class="n">max_sample_size</span> <span class="o">==</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">),</span> <span class="s2">&quot;Maximum sample size of mask must correspond to `input_data.shape[1]` if the input data is a tensor&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;Data and mask must have the same number of samples&quot;</span>
+        <span class="k">assert</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;Data and mask must have the same maximum sample size&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_mask_the_mask</span><span class="p">(</span>
+    <span class="n">mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">RaggedBatch</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">RaggedBatch</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">RaggedBatch</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Mask the mask to ensure that filler elements are set to False.</span>
+
+<span class="sd">    If the mask is a RaggedBatch, we ensure that filler elements are set to False.</span>
+
+<span class="sd">    If the mask is a tensor and the data is a RaggedBatch, we assume that the mask has the same sample sizes</span>
+<span class="sd">    as the data. Therefore, we perform a masking of the mask with ``data.mask``.</span>
+
+<span class="sd">    If both the mask and the data are tensors, the mask is not modified.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mask: The mask to apply masking to.</span>
+<span class="sd">        data: The data which is indexed using the mask.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The masked mask.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">with_padded_set_to</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span> <span class="o">*</span> <span class="n">data</span><span class="o">.</span><span class="n">mask</span>
+    <span class="k">return</span> <span class="n">mask</span>
+
+
+<div class="viewcode-block" id="batched_bool_indexing">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/batching_helpers/docs/api.html#accvlab.batching_helpers.batched_bool_indexing">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">batched_bool_indexing</span><span class="p">(</span>
+    <span class="n">input_data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">RaggedBatch</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
+    <span class="n">input_mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">RaggedBatch</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RaggedBatch</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Batched boolean indexing.</span>
+
+<span class="sd">    This function performs batched boolean indexing on the input data using the input mask.</span>
+<span class="sd">    Both the input data and the input mask can be either :class:`RaggedBatch` or :class:`torch.Tensor`</span>
+<span class="sd">    instances.</span>
+
+<span class="sd">    The indexing is performed along the non-uniform dimension of the input data. For tensors,</span>
+<span class="sd">    the non-uniform dimension is assumed to be ``dim==1``.</span>
+
+<span class="sd">    In case that one ``input_data`` or ``input_mask`` is a :class:`torch.Tensor` and the other is</span>
+<span class="sd">    a :class:`RaggedBatch`:</span>
+
+<span class="sd">      - A single batch dimension must be used</span>
+<span class="sd">      - The sample sizes of the :class:`RaggedBatch` are assumed to also apply to the tensor</span>
+<span class="sd">      - The non-uniform dimension of the tensor is assumed to be ``dim==1``</span>
+
+<span class="sd">    If both the input data and the input mask are tensors:</span>
+
+<span class="sd">      - All entries along ``dim==1`` (the non-uniform dimension) are assumed to be valid (i.e. sample size for</span>
+<span class="sd">        each sample corresponds to the size of this dimension)</span>
+<span class="sd">      - The output will also be a :class:`RaggedBatch` in this case (as in general, the number of ``True``</span>
+<span class="sd">        values in the mask is not the same for all samples)</span>
+
+<span class="sd">        - A single batch dimension will be used (consistent to the assumption about the input data)</span>
+<span class="sd">        - The non-uniform dimension will be at ``dim==1`` (consistent to the assumption about the input data)</span>
+
+<span class="sd">    If both the input data and the input mask are :class:`RaggedBatch` instances, multiple batch dimensions</span>
+<span class="sd">    are supported.</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">        If both the input data and mask are :class:`RaggedBatch` instances, it is assumed that the sample</span>
+<span class="sd">        sizes match. Only the maximum sample size is checked and if the individual sample sizes are not the</span>
+<span class="sd">        same, the behavior is undefined.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_data: The data to index into.</span>
+<span class="sd">            Shape (in case of the non-uniform dimension being ``dim==1``):</span>
+<span class="sd">            ``(*batch_shape, max_sample_size, *data_shape)``,</span>
+<span class="sd">            where ``max_sample_size`` is the maximum sample size of the input data.</span>
+<span class="sd">            Note that the data_shape may contain 0 or more entries.</span>
+<span class="sd">            If the non-uniform dimension is not ``dim==1``, the ``max_sample_size`` is also not the size of the</span>
+<span class="sd">            second dimension (``dim==1``), but of the corresponding dimension.</span>
+<span class="sd">        input_mask: The mask to use for indexing.</span>
+<span class="sd">            Shape: ``(*batch_shape, max_sample_size)``,</span>
+<span class="sd">            where ``max_sample_size`` is the maximum sample size of the input data.</span>
+<span class="sd">            Note that ``data_shape`` is not present, as each data entry is treated as a single element</span>
+<span class="sd">            in the indexing operation.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :class:`RaggedBatch` instance containing the indexed data for each sample.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">        In the illustration below:</span>
+<span class="sd">          - Letters indicate data entries that are indexed in the input (and therefore appear in the output)</span>
+<span class="sd">          - &#39;-&#39; indicates entries where the actual values are not relevant (in the input).</span>
+<span class="sd">          - &#39;*&#39; indicates filler values in :class:`RaggedBatch` instances.</span>
+
+<span class="sd">        .. image:: images/BatchedBoolIndexAccess_ragged.png</span>
+<span class="sd">            :alt: Illustration of the batched boolean indexing operation</span>
+<span class="sd">            :align: center</span>
+
+<span class="sd">        Each depicted entry in ``input_data`` may represent a single value (in case of</span>
+<span class="sd">        2D tensors), or itself be a non-scalar entry (in case that ``input_data`` has more than 2 dimensions).</span>
+<span class="sd">        The entries in ``input_mask`` are always scalar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_compare_indexed_data_and_mask</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">input_mask</span><span class="p">)</span>
+
+    <span class="n">is_input_data_ragged</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">)</span>
+    <span class="n">is_mask_ragged</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_mask</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">)</span>
+
+    <span class="c1"># Get the mask to use for the result (with filler elements set to False, either using the mask itself</span>
+    <span class="c1"># (if it is a RaggedBatch) or using the mask of the to_write (if it is a RaggedBatch and the mask is a</span>
+    <span class="c1"># tensor))</span>
+    <span class="n">input_mask</span> <span class="o">=</span> <span class="n">_mask_the_mask</span><span class="p">(</span><span class="n">input_mask</span><span class="p">,</span> <span class="n">input_data</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_input_data_ragged</span><span class="p">:</span>
+        <span class="n">batch_shape</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="n">input_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+        <span class="n">is_multi_batch_dim</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">num_batch_dims</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">batch_shape</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">batch_shape</span>
+        <span class="n">is_multi_batch_dim</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">num_batch_dims</span> <span class="o">&gt;</span> <span class="mi">1</span>
+        <span class="n">num_batch_dims</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">num_batch_dims</span>
+
+    <span class="c1"># Convert the data to the correct format</span>
+    <span class="k">if</span> <span class="n">is_input_data_ragged</span><span class="p">:</span>
+        <span class="n">orig_input_data_non_uniform_dim</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">non_uniform_dim</span>
+        <span class="k">if</span> <span class="n">num_batch_dims</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">input_data</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">flatten_batch_dims</span><span class="p">()</span>
+        <span class="n">input_data</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">get_non_uniform_dimension_transposed_to</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_mask_ragged</span><span class="p">:</span>
+        <span class="c1"># Note that for the mask, we do not need to transpose the non-uniform dimension, as it is already</span>
+        <span class="c1"># in the correct position (as it has no data dimensions).</span>
+        <span class="k">if</span> <span class="n">num_batch_dims</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">input_mask</span> <span class="o">=</span> <span class="n">input_mask</span><span class="o">.</span><span class="n">flatten_batch_dims</span><span class="p">()</span>
+        <span class="n">input_mask</span> <span class="o">=</span> <span class="n">input_mask</span><span class="o">.</span><span class="n">tensor</span>
+
+    <span class="c1"># Get the sample sizes of the input data</span>
+    <span class="n">sample_sizes</span> <span class="o">=</span> <span class="n">input_mask</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Create the output RaggedBatch</span>
+    <span class="n">max_sample_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sample_sizes</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">output_data</span> <span class="o">=</span> <span class="n">RaggedBatch</span><span class="p">(</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">max_sample_size</span><span class="p">,</span> <span class="o">*</span><span class="n">input_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">:]),</span>
+            <span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">input_data</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+            <span class="n">device</span><span class="o">=</span><span class="n">input_data</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">sample_sizes</span><span class="o">=</span><span class="n">sample_sizes</span><span class="p">,</span>
+        <span class="n">non_uniform_dim</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Now, we have a mask for both the input and output data (the latter will be generated from the</span>
+    <span class="c1"># sample_sizes used to construct the output RaggedBatch)</span>
+    <span class="c1"># We can use both masks to fill the output data with the input data. Note that while the masks are</span>
+    <span class="c1"># different, the element correspondence is preserved as for each sample, the number of selected</span>
+    <span class="c1"># element in the input is the same as the sample size of the outputs (by construction).</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fill_output_data</span><span class="p">(</span><span class="n">tensor</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+        <span class="n">input_data_tensor</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">tensor</span> <span class="k">if</span> <span class="n">is_input_data_ragged</span> <span class="k">else</span> <span class="n">input_data</span>
+        <span class="n">tensor</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">input_data_tensor</span><span class="p">[</span><span class="n">input_mask</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">tensor</span>
+
+    <span class="n">output_data</span> <span class="o">=</span> <span class="n">output_data</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">fill_output_data</span><span class="p">)</span>
+
+    <span class="c1"># If the input was a tensor, we do not need to change the non-uniform dimension or batch shape, as in</span>
+    <span class="c1"># this case, the input data is expected to corresponf to the format that the output RaggedBatch already</span>
+    <span class="c1"># has. Otherwise, we need to transpose the non-uniform dimension back to its original position and reshape</span>
+    <span class="c1"># the batch dimensions back to the original shape.</span>
+    <span class="k">if</span> <span class="n">is_input_data_ragged</span><span class="p">:</span>
+        <span class="c1"># Reshape the batch dimensions back to the original shape</span>
+        <span class="k">if</span> <span class="n">is_multi_batch_dim</span><span class="p">:</span>
+            <span class="n">output_data</span> <span class="o">=</span> <span class="n">output_data</span><span class="o">.</span><span class="n">reshape_batch_dims</span><span class="p">(</span><span class="n">batch_shape</span><span class="p">)</span>
+        <span class="c1"># Transpose the non-uniform dimension back to its original position</span>
+        <span class="n">output_data</span> <span class="o">=</span> <span class="n">output_data</span><span class="o">.</span><span class="n">get_non_uniform_dimension_transposed_to</span><span class="p">(</span><span class="n">orig_input_data_non_uniform_dim</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">output_data</span></div>
+
+
+
+<div class="viewcode-block" id="batched_bool_indexing_write">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/batching_helpers/docs/api.html#accvlab.batching_helpers.batched_bool_indexing_write">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">batched_bool_indexing_write</span><span class="p">(</span>
+    <span class="n">to_write</span><span class="p">:</span> <span class="n">RaggedBatch</span><span class="p">,</span>
+    <span class="n">output_mask</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">RaggedBatch</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
+    <span class="n">to_write_into</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">RaggedBatch</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">RaggedBatch</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Batched boolean indexing write (inverse operation of batched_bool_indexing).</span>
+
+<span class="sd">    This function performs the inverse operation of :func:`batched_bool_indexing`. It writes data from a</span>
+<span class="sd">    :class:`RaggedBatch` into a target tensor or :class:`RaggedBatch` using a boolean mask to specify</span>
+<span class="sd">    where to write the data.</span>
+
+<span class="sd">    The writing is performed along the non-uniform dimension of `to_write_into`. For tensors,</span>
+<span class="sd">    the non-uniform dimension is assumed to be `dim==1`.</span>
+
+<span class="sd">    In case that one `output_mask` or `to_write_into` is a :class:`torch.Tensor` and the other is a</span>
+<span class="sd">    :class:`RaggedBatch`:</span>
+
+<span class="sd">      - A single batch dimension must be used</span>
+<span class="sd">      - The sample sizes of the :class:`RaggedBatch` are assumed to also apply to the tensor (regardless of</span>
+<span class="sd">        which of the two is which)</span>
+<span class="sd">      - The non-uniform dimension of the tensor is assumed to be `dim==1`</span>
+
+<span class="sd">    If both `output_mask` and `to_write_into` are tensors, all entries along `dim==1` (the non-uniform</span>
+<span class="sd">    dimension) are assumed to be valid (i.e. sample size for each sample corresponds to the size of this</span>
+<span class="sd">    dimension).</span>
+
+<span class="sd">    Multiple batch dimensions are only supported if both `output_mask` and `to_write_into` are</span>
+<span class="sd">    :class:`RaggedBatch` instances.</span>
+
+<span class="sd">    Warning:</span>
+<span class="sd">        If both `output_mask` and `to_write_into` are :class:`RaggedBatch` instances, it is assumed that</span>
+<span class="sd">        the sample sizes match. Only the maximum sample size is checked and if the individual sample sizes are</span>
+<span class="sd">        not the same, the behavior is undefined.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        to_write: The :class:`RaggedBatch` containing the data to write.</span>
+<span class="sd">            Shape (in case of the non-uniform dimension being `dim==1`):</span>
+<span class="sd">            `(*batch_shape, max_sample_size, *data_shape)`,</span>
+<span class="sd">            where `max_sample_size` is the maximum sample size of the data to write.</span>
+<span class="sd">            Note that the data_shape may contain 0 or more entries.</span>
+<span class="sd">            If the non-uniform dimension is not `dim==1`, the `max_sample_size` is also not the size of the</span>
+<span class="sd">            second dimension (`dim==1`), but of the corresponding dimension.</span>
+<span class="sd">        output_mask: The mask specifying where to write the data.</span>
+<span class="sd">            Shape: `(*batch_shape, max_sample_size)`,</span>
+<span class="sd">            Note that `data_shape` is not present, as each data entry is treated as a single element</span>
+<span class="sd">            in the writing operation.</span>
+<span class="sd">        to_write_into: The target tensor or :class:`RaggedBatch` to write into.</span>
+<span class="sd">            Shape: `(*batch_shape, max_sample_size, *data_shape)`,</span>
+<span class="sd">            The data_shape must match the data_shape of `to_write`.</span>
+<span class="sd">            If the non-uniform dimension is not `dim==1`, the `max_sample_size` is also not the size of the</span>
+<span class="sd">            second dimension (`dim==1`), but of the corresponding dimension.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :class:`RaggedBatch` or :class:`torch.Tensor` instance containing the target data with the</span>
+<span class="sd">        selected elements from `to_write` written into the positions specified by `output_mask`.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">        In the illustration below:</span>
+<span class="sd">          - Letters indicate data entries that are indexed in the input (and therefore appear in the output)</span>
+<span class="sd">          - &#39;*&#39; indicates filler values in :class:`RaggedBatch` instances.</span>
+<span class="sd">          - &#39;..&#39; indicates data which remains unchanged, i.e. is the same as in the `to_write_into` parameter</span>
+<span class="sd">            and the output.</span>
+
+<span class="sd">        .. image:: images/BatchedBoolIndexWrite_ragged.png</span>
+<span class="sd">            :alt: Illustration of the batched boolean indexing write operation</span>
+<span class="sd">            :align: center</span>
+
+<span class="sd">        Each depicted entry in `to_write` and `to_write_into` may represent a single value (in case of</span>
+<span class="sd">        2D tensors), or itself be a non-scalar entry (in case that the data has more than 2 dimensions).</span>
+<span class="sd">        The entries in `output_mask` are always scalar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check the input</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">to_write</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">),</span> <span class="s2">&quot;to_write must be a RaggedBatch&quot;</span>
+    <span class="n">_compare_indexed_data_and_mask</span><span class="p">(</span><span class="n">to_write_into</span><span class="p">,</span> <span class="n">output_mask</span><span class="p">)</span>
+
+    <span class="c1"># Check that the mask is a boolean mask</span>
+    <span class="n">is_mask_ragged</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output_mask</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">)</span>
+    <span class="n">is_to_write_into_ragged</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">to_write_into</span><span class="p">,</span> <span class="n">RaggedBatch</span><span class="p">)</span>
+
+    <span class="c1"># Get the mask to use for the result (with filler elements set to False, either using the mask itself</span>
+    <span class="c1"># (if it is a RaggedBatch) or using the mask of the to_write (if it is a RaggedBatch and the mask is a</span>
+    <span class="c1"># tensor))</span>
+    <span class="n">output_mask</span> <span class="o">=</span> <span class="n">_mask_the_mask</span><span class="p">(</span><span class="n">output_mask</span><span class="p">,</span> <span class="n">to_write_into</span><span class="p">)</span>
+
+    <span class="c1"># Get batch info</span>
+    <span class="n">batch_shape</span> <span class="o">=</span> <span class="n">to_write</span><span class="o">.</span><span class="n">batch_shape</span>
+    <span class="n">is_multi_batch_dim</span> <span class="o">=</span> <span class="n">to_write</span><span class="o">.</span><span class="n">num_batch_dims</span> <span class="o">&gt;</span> <span class="mi">1</span>
+    <span class="n">num_batch_dims</span> <span class="o">=</span> <span class="n">to_write</span><span class="o">.</span><span class="n">num_batch_dims</span>
+
+    <span class="k">assert</span> <span class="n">to_write</span><span class="o">.</span><span class="n">batch_shape</span> <span class="o">==</span> <span class="n">batch_shape</span><span class="p">,</span> <span class="s2">&quot;to_write must have the same batch shape as the other inputs&quot;</span>
+    <span class="k">assert</span> <span class="p">(</span>
+        <span class="n">to_write</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span> <span class="o">==</span> <span class="n">to_write_into</span><span class="o">.</span><span class="n">dim</span><span class="p">()</span>
+    <span class="p">),</span> <span class="s2">&quot;to_write and to_write_into must have the same number of dimensions&quot;</span>
+
+    <span class="c1"># Convert the data to the correct format</span>
+    <span class="k">if</span> <span class="n">num_batch_dims</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">to_write</span> <span class="o">=</span> <span class="n">to_write</span><span class="o">.</span><span class="n">flatten_batch_dims</span><span class="p">()</span>
+    <span class="n">to_write</span> <span class="o">=</span> <span class="n">to_write</span><span class="o">.</span><span class="n">get_non_uniform_dimension_transposed_to</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_to_write_into_ragged</span><span class="p">:</span>
+        <span class="n">orig_to_write_into_non_uniform_dim</span> <span class="o">=</span> <span class="n">to_write_into</span><span class="o">.</span><span class="n">non_uniform_dim</span>
+        <span class="k">if</span> <span class="n">num_batch_dims</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">to_write_into</span> <span class="o">=</span> <span class="n">to_write_into</span><span class="o">.</span><span class="n">flatten_batch_dims</span><span class="p">()</span>
+        <span class="n">to_write_into</span> <span class="o">=</span> <span class="n">to_write_into</span><span class="o">.</span><span class="n">get_non_uniform_dimension_transposed_to</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">is_mask_ragged</span><span class="p">:</span>
+        <span class="c1"># Note that for the mask, we do not need to transpose the non-uniform dimension, as it is already</span>
+        <span class="c1"># in the correct position (as it has no data dimensions).</span>
+        <span class="k">if</span> <span class="n">num_batch_dims</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">output_mask</span> <span class="o">=</span> <span class="n">output_mask</span><span class="o">.</span><span class="n">flatten_batch_dims</span><span class="p">()</span>
+        <span class="n">output_mask</span> <span class="o">=</span> <span class="n">output_mask</span><span class="o">.</span><span class="n">tensor</span>
+
+    <span class="c1"># Get the result</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_write</span><span class="p">(</span><span class="n">tensor</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">tensor</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="n">res</span><span class="p">[</span><span class="n">output_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_write</span><span class="o">.</span><span class="n">tensor</span><span class="p">[</span><span class="n">to_write</span><span class="o">.</span><span class="n">mask</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="k">if</span> <span class="n">is_to_write_into_ragged</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">to_write_into</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">apply_write</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">to_write_into</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+        <span class="n">res</span><span class="p">[</span><span class="n">output_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_write</span><span class="o">.</span><span class="n">tensor</span><span class="p">[</span><span class="n">to_write</span><span class="o">.</span><span class="n">mask</span><span class="p">]</span>
+
+    <span class="c1"># If to_write_into is a RaggedBatch, we need to adjust the format (i.e. the batch shape and the</span>
+    <span class="c1"># non-uniform dimension) back to the original format</span>
+    <span class="k">if</span> <span class="n">is_to_write_into_ragged</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_multi_batch_dim</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">reshape_batch_dims</span><span class="p">(</span><span class="n">batch_shape</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">get_non_uniform_dimension_transposed_to</span><span class="p">(</span><span class="n">orig_to_write_into_non_uniform_dim</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">res</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

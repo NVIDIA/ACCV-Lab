@@ -1,0 +1,342 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.dali_pipeline_framework.pipeline.dali_structured_output_iterator &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.dali_pipeline_framework.pipeline.dali_structured_output_iterator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.dali_pipeline_framework.pipeline.dali_structured_output_iterator</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span> <span class="k">as</span> <span class="n">ABCIterator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">nvidia.dali.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">nvidia.dali.plugin.pytorch</span><span class="w"> </span><span class="kn">import</span> <span class="n">DALIGenericIterator</span> <span class="k">as</span> <span class="n">PyTorchDALIGenericIterator</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataLoader</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.sample_data_group</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleDataGroup</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+
+
+<div class="viewcode-block" id="DALIStructuredOutputIterator">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DALIStructuredOutputIterator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Structured access to DALI pipeline output (as a nested dict or :class:`SampleDataGroup`).</span>
+
+<span class="sd">    Designed as a drop-in replacement for a :class:`torch.utils.data.DataLoader`. Optionally applies a user-defined</span>
+<span class="sd">    lightweight post-processing function (e.g., conversions to types not supported by DALI).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="DALIStructuredOutputIterator.SimpleIterator">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator.SimpleIterator">[docs]</a>
+    <span class="k">class</span><span class="w"> </span><span class="nc">SimpleIterator</span><span class="p">(</span><span class="n">ABCIterator</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Iterator, which can e.g. be used as a drop-in replacement for a PyTorch DataLoader iterator.</span>
+
+<span class="sd">        Note that a single iterator should be used at any point in time.</span>
+<span class="sd">        if multiple iterators are used, they share the state, i.e. getting a new iterator will reset all other iterators and calling next for one iterator</span>
+<span class="sd">        will advance all iterators by one element.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">DALIStructuredOutputIterator</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">obj</span>
+            <span class="c1"># Make sure the iteration starts anew</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+<div class="viewcode-block" id="DALIStructuredOutputIterator.SimpleIterator.__next__">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator.SimpleIterator.__next__">[docs]</a>
+        <span class="nd">@override</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&#39;&#39;&#39;Get the next element.&#39;&#39;&#39;</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">_next</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="DALIStructuredOutputIterator.SimpleIterator.__iter__">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator.SimpleIterator.__iter__">[docs]</a>
+        <span class="nd">@override</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&#39;&#39;&#39;Get the iterator (i.e. return ``self`` without re-starting the iteration).&#39;&#39;&#39;</span>
+            <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="DALIStructuredOutputIterator.SimpleIterator.reset">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator.SimpleIterator.reset">[docs]</a>
+        <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&#39;&#39;&#39;Reset the iterator.</span>
+
+<span class="sd">            Will call :meth:`DALIStructuredOutputIterator.reset` for the parent object.</span>
+<span class="sd">            &#39;&#39;&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="DALIStructuredOutputIterator.SimpleIterator.__len__">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator.SimpleIterator.__len__">[docs]</a>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&#39;&#39;&#39;Get the number of elements (from parent object).&#39;&#39;&#39;</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">)</span></div>
+</div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">num_batches_in_epoch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">pipeline</span><span class="p">:</span> <span class="n">Pipeline</span><span class="p">,</span>
+        <span class="n">sample_data_structure_blueprint</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">,</span>
+        <span class="n">contained_dataset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dali_generic_iterator_class</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
+            <span class="n">Type</span><span class="p">[</span><span class="n">PyTorchDALIGenericIterator</span><span class="p">],</span> <span class="n">Any</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">PyTorchDALIGenericIterator</span><span class="p">,</span>
+        <span class="n">convert_sample_data_group_to_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">post_process_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span>
+            <span class="n">Callable</span><span class="p">[[</span><span class="n">Union</span><span class="p">[</span><span class="n">SampleDataGroup</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]],</span> <span class="n">Union</span><span class="p">[</span><span class="n">SampleDataGroup</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]]</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            num_batches_in_epoch: Number of batches in an epoch. Note that this value is only used</span>
+<span class="sd">                to output if ``len(obj)`` is called. It is not used internally and is added here to</span>
+<span class="sd">                ensure drop-in compatibility with :class:`torch.utils.data.DataLoader`.</span>
+<span class="sd">            pipeline: DALI pipeline object.</span>
+<span class="sd">            sample_data_structure_blueprint: Blueprint for the output data structure.</span>
+<span class="sd">            contained_dataset: Dataset object which will be exposed via :attr:`dataset`</span>
+<span class="sd">                (mirrors PyTorch ``DataLoader`` behavior). Can be a PyTorch ``Dataset`` or any other</span>
+<span class="sd">                compatible object. Note that this object is not used internally. Also see :attr:`dataset`.</span>
+<span class="sd">            dali_generic_iterator_class: Class for the internal DALI generic iterator. Follows the</span>
+<span class="sd">                :class:`PyTorchDALIGenericIterator` interface but may emit tensors for other frameworks.</span>
+<span class="sd">                Defaults to :class:`PyTorchDALIGenericIterator`.</span>
+<span class="sd">            convert_sample_data_group_to_dict: If ``True``, convert output :class:`SampleDataGroup` to a</span>
+<span class="sd">                nested :class:`dict`. Ensures drop-in compatibility with ``DataLoader`` when no</span>
+<span class="sd">                post-processing function is provided.</span>
+<span class="sd">            post_process_func: Optional post-processing function for the output. This can be e.g. used to</span>
+<span class="sd">                convert data to types not supported by DALI.</span>
+<span class="sd">                or perform other light-weight steps. The input is a :class:`SampleDataGroup` object if</span>
+<span class="sd">                ``convert_sample_data_group_to_dict == False`` and a :class:`dict` otherwise.</span>
+<span class="sd">                Note that this function is executed when the data is accessed in the thread accessing the</span>
+<span class="sd">                data (typically the thread performing the training). Therefore, this function should be kept</span>
+<span class="sd">                lightweight to avoid performance penalties.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">flattened_names</span> <span class="o">=</span> <span class="n">sample_data_structure_blueprint</span><span class="o">.</span><span class="n">field_names_flat</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_batches_in_epoch</span> <span class="o">=</span> <span class="n">num_batches_in_epoch</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_iterator</span> <span class="o">=</span> <span class="n">dali_generic_iterator_class</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">flattened_names</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_blueprint</span> <span class="o">=</span> <span class="n">sample_data_structure_blueprint</span><span class="o">.</span><span class="n">get_empty_like_self</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_contained_dataset</span> <span class="o">=</span> <span class="n">contained_dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_convert_sample_data_group_to_dict</span> <span class="o">=</span> <span class="n">convert_sample_data_group_to_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_post_process_func</span> <span class="o">=</span> <span class="n">post_process_func</span>
+
+<div class="viewcode-block" id="DALIStructuredOutputIterator.__iter__">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator.__iter__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DALIStructuredOutputIterator</span><span class="o">.</span><span class="n">SimpleIterator</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Get an iterator.</span>
+
+<span class="sd">        Note that a single iterator should be used at any point in time.</span>
+<span class="sd">        if multiple iterators are used, they share the state, i.e. getting a new iterator will reset all other iterators and calling next for one iterator</span>
+<span class="sd">        will advance all iterators by one element.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SimpleIterator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_next</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">SampleDataGroup</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterator</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>
+        <span class="n">data_structured</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blueprint</span><span class="o">.</span><span class="n">get_empty_like_self</span><span class="p">()</span>
+        <span class="n">data_structured</span><span class="o">.</span><span class="n">set_data_from_dali_generic_iterator_output</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_sample_data_group_to_dict</span><span class="p">:</span>
+            <span class="n">data_structured</span> <span class="o">=</span> <span class="n">data_structured</span><span class="o">.</span><span class="n">to_dictionary</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_post_process_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_structured</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_post_process_func</span><span class="p">(</span><span class="n">data_structured</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data_structured</span>
+
+<div class="viewcode-block" id="DALIStructuredOutputIterator.reset">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator.reset">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Reset the current iteration progress (start over from the beginning).</span>
+
+<span class="sd">        Note that this will reset iterators of the object as well.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_iterator</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sample_data_structure_blueprint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Get the output data structure blueprint.</span>
+
+<span class="sd">        The blueprint is a :class:`SampleDataGroup` representing the same nested data format as the output,</span>
+<span class="sd">        without the actual data. See :class:`SampleDataGroup` for details.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blueprint</span><span class="o">.</span><span class="n">get_empty_like_self</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">internal_iterator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">PyTorchDALIGenericIterator</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Get the actual DALI iterator used to access the output data internally.</span>
+
+<span class="sd">        Note that by default, this is a :class:`nvidia.dali.plugin.pytorch.DALIGenericIterator`. However, this</span>
+<span class="sd">        can be changed in the constructor and in this case, the returned object will be of the type specified</span>
+<span class="sd">        in the constructor.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterator</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Get the dataset object.</span>
+
+<span class="sd">        This is the dataset object set in the constructor (if any). If not set, this will return the object</span>
+<span class="sd">        for which it is called. This property is used for compatibility with</span>
+<span class="sd">        :class:`torch.utils.data.DataLoader`.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_contained_dataset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_contained_dataset</span>
+
+<div class="viewcode-block" id="DALIStructuredOutputIterator.__len__">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator.__len__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Number of available batches.</span>
+
+<span class="sd">        Important:</span>
+<span class="sd">            This value is set manually in the constructor, and only used to output it here.</span>
+<span class="sd">            This is done as it is a part of the :class:`torch.utils.data.DataLoader` interface.</span>
+<span class="sd">            The value my be not the actual number of batches in the epoch, e.g. for non-epoch based</span>
+<span class="sd">            pipelines.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_batches_in_epoch</span></div>
+
+
+<div class="viewcode-block" id="DALIStructuredOutputIterator.CreateAsDataLoaderObject">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator.CreateAsDataLoaderObject">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">CreateAsDataLoaderObject</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.dali_structured_output_iterator_data_loader_wrapper</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_masked_as_type</span>
+
+        <span class="n">used_type</span> <span class="o">=</span> <span class="n">get_masked_as_type</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">DataLoader</span><span class="p">)</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">used_type</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

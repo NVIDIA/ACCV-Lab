@@ -1,0 +1,380 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tensor Dumper – Comparison Example &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Tensor Dumper – Extended Dumping Example" href="tensor_dumper_dumping.html" />
+    <link rel="prev" title="NVTX Range Wrapper Example" href="nvtx_range_wrapper.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Optimization Testing Tools</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../examples.html">Examples</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="stopwatch.html">Stopwatch Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nvtx_range_wrapper.html">NVTX Range Wrapper Example</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Tensor Dumper – Comparison Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example">Example</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#example-code">Example Code</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#output">Output</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#related-examples">Related examples</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tensor_dumper_dumping.html">Tensor Dumper – Extended Dumping Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Optimization Testing Tools</a></li>
+          <li class="breadcrumb-item"><a href="../examples.html">Examples</a></li>
+      <li class="breadcrumb-item active">Tensor Dumper – Comparison Example</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/contained_package_docs_mirror/optim_test_tools/docs/examples/tensor_dumper_comparison.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tensor-dumper-comparison-example">
+<h1>Tensor Dumper – Comparison Example<a class="headerlink" href="#tensor-dumper-comparison-example" title="Link to this heading"></a></h1>
+<p>Start here for the tensor dumper. This example shows how to enable the dumper, dump tensors,
+and compare a subsequent run against a stored reference. The <a class="reference internal" href="tensor_dumper_dumping.html"><span class="doc">Tensor Dumper – Extended Dumping Example</span></a> example shows
+more features (custom converters, per‑tensor overrides, RaggedBatch support, custom pre‑dump processing,
+early exit).</p>
+<p>Note that the dumper is a singleton similar to the other tools (see <a class="reference internal" href="stopwatch.html"><span class="doc">Stopwatch Example</span></a> and
+<a class="reference internal" href="nvtx_range_wrapper.html"><span class="doc">NVTX Range Wrapper Example</span></a>). Therefore, it can be enabled once and used across multiple code parts.
+However, this is not the focus of this example.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The code of this example can be found in the repository under
+<code class="docutils literal notranslate"><span class="pre">packages/optim_test_tools/examples/tensor_dumper_comparison_example.py</span></code>.</p>
+</div>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Enable the dumper and choose dump location.</p></li>
+<li><p>Dump data in one run; compare in a later run (or next loop iteration here for demonstration).</p></li>
+<li><p>Override dump formats to JSON for comparison (comparison supports only JSON).</p></li>
+<li><p>Gradients are auto-computed when you call <code class="docutils literal notranslate"><span class="pre">set_gradients([...])</span></code> with scalar losses.</p></li>
+</ul>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h2>
+<section id="example-code">
+<h3>Example Code<a class="headerlink" href="#example-code" title="Link to this heading"></a></h3>
+<p>Please see the notes in the code for more details.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">packages/optim_test_tools/examples/tensor_dumper_comparison_example.py</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="linenos">  2</span><span class="c1">#</span>
+<span class="linenos">  3</span><span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="linenos">  4</span><span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="linenos">  5</span><span class="c1"># You may obtain a copy of the License at</span>
+<span class="linenos">  6</span><span class="c1">#</span>
+<span class="linenos">  7</span><span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="linenos">  8</span><span class="c1">#</span>
+<span class="linenos">  9</span><span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="linenos"> 10</span><span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="linenos"> 11</span><span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="linenos"> 12</span><span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="linenos"> 13</span><span class="c1"># limitations under the License.</span>
+<span class="linenos"> 14</span>
+<span class="linenos"> 15</span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="linenos"> 16</span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="linenos"> 17</span><span class="kn">from</span><span class="w"> </span><span class="nn">accvlab.optim_test_tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">TensorDumper</span>
+<span class="linenos"> 18</span>
+<span class="hll"><span class="linenos"> 19</span><span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 20</span><span class="c1"># In this example, we do not divide the code into different parts which correspond to e.g. different source</span>
+</span><span class="hll"><span class="linenos"> 21</span><span class="c1"># files in the actual use case, to make the example more concise. However, as the `TensorDumper` is a</span>
+</span><span class="hll"><span class="linenos"> 22</span><span class="c1"># singleton, this can be easily done in practice. Please see the stopwatch example (&quot;stopwatch_example.py&quot;)</span>
+</span><span class="hll"><span class="linenos"> 23</span><span class="c1"># or the nvtx range wrapper example (&quot;nvtx_range_wrapper_example.py&quot;) for examples of how to do this. The</span>
+</span><span class="hll"><span class="linenos"> 24</span><span class="c1"># same approach can be used with the tensor dumper.</span>
+</span><span class="linenos"> 25</span>
+<span class="hll"><span class="linenos"> 26</span><span class="c1"># @NOTE: Get instance and enable the dumper.</span>
+</span><span class="linenos"> 27</span><span class="n">_current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+<span class="linenos"> 28</span><span class="n">dumper</span> <span class="o">=</span> <span class="n">TensorDumper</span><span class="p">()</span>
+<span class="linenos"> 29</span><span class="n">dumper</span><span class="o">.</span><span class="n">enable</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_current_dir</span><span class="p">,</span> <span class="s2">&quot;test_dump&quot;</span><span class="p">))</span>
+<span class="linenos"> 30</span>
+<span class="hll"><span class="linenos"> 31</span><span class="c1"># @NOTE: Test configuration. You can play around with this configuration and see how it affects the comparison.</span>
+</span><span class="linenos"> 32</span>
+<span class="linenos"> 33</span><span class="c1"># Set to `True` to make the tensor data for `i==1` inconsistent with the reference data (`i==0`)</span>
+<span class="linenos"> 34</span><span class="n">make_tensor_data_inconsistent</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos"> 35</span><span class="c1"># Set to `True` to make the stored structure inconsistent with the reference data</span>
+<span class="linenos"> 36</span><span class="n">make_structure_inconsistent</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos"> 37</span><span class="c1"># Set to `True` to allow missing data in the current data (one of the two inconsistencies introduced if</span>
+<span class="linenos"> 38</span><span class="c1"># `make_structure_inconsistent` is `True`)</span>
+<span class="linenos"> 39</span><span class="n">allow_missing_data_in_current</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="linenos"> 40</span>
+<span class="hll"><span class="linenos"> 41</span><span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 42</span><span class="c1"># Here, we dump tensor in iteration 0 and compare to the dumped data in iteration 1.</span>
+</span><span class="hll"><span class="linenos"> 43</span><span class="c1"># In a typical use-case, one would dump the data in one run, store it, and then compare in future runs,</span>
+</span><span class="hll"><span class="linenos"> 44</span><span class="c1"># while e.g. working on optimizations, to ensure that the optimizations do not introduce errors in the data.</span>
+</span><span class="linenos"> 45</span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+<span class="hll"><span class="linenos"> 46</span>    <span class="c1"># @NOTE: Generate data to dump/compare to</span>
+</span><span class="linenos"> 47</span>    <span class="k">if</span> <span class="ow">not</span> <span class="n">make_tensor_data_inconsistent</span><span class="p">:</span>
+<span class="linenos"> 48</span>        <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="linenos"> 49</span>    <span class="n">tensor1</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="linenos"> 50</span>    <span class="n">tensor2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="linenos"> 51</span>    <span class="n">tensor3</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="linenos"> 52</span>
+<span class="hll"><span class="linenos"> 53</span>    <span class="c1"># @NOTE: Add a single tensor to be dumped/compared</span>
+</span><span class="linenos"> 54</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">add_tensor_data</span><span class="p">(</span><span class="s2">&quot;tensor1&quot;</span><span class="p">,</span> <span class="n">tensor1</span><span class="p">,</span> <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">JSON</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="linenos"> 55</span>    <span class="c1"># To introduce mismatches, set `make_structure_inconsistent` to `True`</span>
+<span class="linenos"> 56</span>    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">make_structure_inconsistent</span><span class="p">:</span>
+<span class="hll"><span class="linenos"> 57</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 58</span>        <span class="c1"># Add a dictionary of tensors to be dumped/compared. Note that the BINARY format is used here.</span>
+</span><span class="hll"><span class="linenos"> 59</span>        <span class="c1"># See the API documentation of the `TensorDumper.Type` enum for more details.</span>
+</span><span class="linenos"> 60</span>        <span class="n">dumper</span><span class="o">.</span><span class="n">add_tensor_data</span><span class="p">(</span>
+<span class="linenos"> 61</span>            <span class="s2">&quot;other_tensors&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;tensor2&quot;</span><span class="p">:</span> <span class="n">tensor2</span><span class="p">,</span> <span class="s2">&quot;tensor4&quot;</span><span class="p">:</span> <span class="n">tensor3</span><span class="p">},</span> <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">BINARY</span><span class="p">,</span> <span class="kc">None</span>
+<span class="linenos"> 62</span>        <span class="p">)</span>
+<span class="linenos"> 63</span>    <span class="k">else</span><span class="p">:</span>
+<span class="hll"><span class="linenos"> 64</span>        <span class="c1"># @NOTE: Add a dictionary of tensors to be dumped/compared</span>
+</span><span class="linenos"> 65</span>        <span class="n">dumper</span><span class="o">.</span><span class="n">add_tensor_data</span><span class="p">(</span>
+<span class="linenos"> 66</span>            <span class="s2">&quot;other_tensors&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;tensor2&quot;</span><span class="p">:</span> <span class="n">tensor2</span><span class="p">,</span> <span class="s2">&quot;tensor3&quot;</span><span class="p">:</span> <span class="n">tensor3</span><span class="p">},</span> <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">BINARY</span><span class="p">,</span> <span class="kc">None</span>
+<span class="linenos"> 67</span>        <span class="p">)</span>
+<span class="linenos"> 68</span>
+<span class="hll"><span class="linenos"> 69</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 70</span>    <span class="c1"># Add gradients of tensor to be dumped/compared. Note that we need to ensure that the gradients are</span>
+</span><span class="hll"><span class="linenos"> 71</span>    <span class="c1"># actually required by the tensor. If this is not the case, no gradients will be computed and the dump</span>
+</span><span class="hll"><span class="linenos"> 72</span>    <span class="c1"># will contain the note that no gradients are needed (instead of the actual gradients).</span>
+</span><span class="linenos"> 73</span>    <span class="n">tensor1</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos"> 74</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">add_grad_data</span><span class="p">(</span><span class="s2">&quot;tensor1&quot;</span><span class="p">,</span> <span class="n">tensor1</span><span class="p">,</span> <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">JSON</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="linenos"> 75</span>    <span class="n">sin_tensor1</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">tensor1</span><span class="p">)</span>
+<span class="linenos"> 76</span>    <span class="n">sum_sin_tensor1</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sin_tensor1</span><span class="p">)</span>
+<span class="linenos"> 77</span>
+<span class="hll"><span class="linenos"> 78</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 79</span>    <span class="c1"># Overwrite the dump type for all tensors and gradients to JSON to ensure that the reference data is</span>
+</span><span class="hll"><span class="linenos"> 80</span>    <span class="c1"># stored in the JSON format (which is the only format supported for comparison).</span>
+</span><span class="hll"><span class="linenos"> 81</span>    <span class="c1"># This is not needed if the dump type for all tensors and gradients is set to JSON when generating the</span>
+</span><span class="hll"><span class="linenos"> 82</span>    <span class="c1"># reference data. However, as we set some of the data to be in BINARY format, we need to override this to</span>
+</span><span class="hll"><span class="linenos"> 83</span>    <span class="c1"># use the comparison functionality.</span>
+</span><span class="hll"><span class="linenos"> 84</span>    <span class="c1">#</span>
+</span><span class="hll"><span class="linenos"> 85</span>    <span class="c1"># In practice, this may be useful to switch between dumping the data for manual inspection (original</span>
+</span><span class="hll"><span class="linenos"> 86</span>    <span class="c1"># formats) or comparison (all JSON).</span>
+</span><span class="linenos"> 87</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">set_dump_type_for_all</span><span class="p">(</span><span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">JSON</span><span class="p">)</span>
+<span class="linenos"> 88</span>
+<span class="hll"><span class="linenos"> 89</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 90</span>    <span class="c1"># To set the gradients (for the tensors for which gradients are dumped), we need to call the</span>
+</span><span class="hll"><span class="linenos"> 91</span>    <span class="c1"># `set_gradients()` method and provide a sequence of scalars (typically loss values) from which to compute</span>
+</span><span class="hll"><span class="linenos"> 92</span>    <span class="c1"># the gradients.</span>
+</span><span class="linenos"> 93</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">set_gradients</span><span class="p">([</span><span class="n">sum_sin_tensor1</span><span class="p">])</span>
+<span class="linenos"> 94</span>
+<span class="hll"><span class="linenos"> 95</span>    <span class="c1"># @NOTE: Dump or compare the data (depending on the iteration).</span>
+</span><span class="linenos"> 96</span>    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos"> 97</span>        <span class="n">dumper</span><span class="o">.</span><span class="n">dump</span><span class="p">()</span>
+<span class="linenos"> 98</span>    <span class="k">else</span><span class="p">:</span>
+<span class="hll"><span class="linenos"> 99</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">100</span>        <span class="c1"># There are some parameters which can be used to configure the comparison. Please see the API</span>
+</span><span class="hll"><span class="linenos">101</span>        <span class="c1"># documentation for more details.</span>
+</span><span class="linenos">102</span>        <span class="n">dumper</span><span class="o">.</span><span class="n">compare_to_dumped_data</span><span class="p">(</span>
+<span class="linenos">103</span>            <span class="n">num_errors_per_tensor_to_show</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+<span class="linenos">104</span>            <span class="n">as_warning</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="linenos">105</span>            <span class="n">allow_missing_data_in_current</span><span class="o">=</span><span class="n">allow_missing_data_in_current</span><span class="p">,</span>
+<span class="linenos">106</span>        <span class="p">)</span>
+<span class="linenos">107</span>
+<span class="hll"><span class="linenos">108</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">109</span>    <span class="c1"># Note that the dumper allows for dumping/comparison of dumped data from multiple iterations. This can be</span>
+</span><span class="hll"><span class="linenos">110</span>    <span class="c1"># useful e.g. when the dumping/comparison spans multiple training iterations. Each time `dump()` is</span>
+</span><span class="hll"><span class="linenos">111</span>    <span class="c1"># called, the iteration count is incremented, and data is stored in separate sub-directories.</span>
+</span><span class="hll"><span class="linenos">112</span>    <span class="c1">#</span>
+</span><span class="hll"><span class="linenos">113</span>    <span class="c1"># However, here we have a special case: we want to pretend that the two iterations of the loop are two</span>
+</span><span class="hll"><span class="linenos">114</span>    <span class="c1"># different runs (the original run storing the data, and a following run where data is compared).</span>
+</span><span class="hll"><span class="linenos">115</span>    <span class="c1"># Therefore, reset the dump count to start from the first dump again (i.e. the next iteration `i==1` will</span>
+</span><span class="hll"><span class="linenos">116</span>    <span class="c1"># be compared to the first dump `i==0`).</span>
+</span><span class="hll"><span class="linenos">117</span>    <span class="c1">#</span>
+</span><span class="hll"><span class="linenos">118</span>    <span class="c1"># Note that in the typical use case (comparison of two runs), this resetting is not needed.</span>
+</span><span class="hll"><span class="linenos">119</span>    <span class="c1"># However, it may be useful for debugging e.g. to rerun the same code multiple times to check for</span>
+</span><span class="hll"><span class="linenos">120</span>    <span class="c1"># determinism, while always comparing to the same dumped data.</span>
+</span><span class="linenos">121</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">reset_dump_count</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="output">
+<h3>Output<a class="headerlink" href="#output" title="Link to this heading"></a></h3>
+<p>Here, we show example output (for the test configuration as set in the example code).</p>
+<p>There are two warnings, one for the tensors and one for the gradients.</p>
+<section id="tensor-comparison">
+<h4>Tensor Comparison<a class="headerlink" href="#tensor-comparison" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>Note that</dt><dd><ul class="simple">
+<li><p>The number of numerical errors is limited per tensor. This is controlled by the
+<code class="docutils literal notranslate"><span class="pre">num_errors_per_tensor_to_show</span></code> parameter and used to prevent the output from being too verbose (e.g.
+when comparing large tensors such as images)</p></li>
+<li><p>Apart from the numerical errors, there are also mismatch errors for missing/extra keys. Missing keys may
+be allowed (configurable). This option may be useful when the current data is based on an implementation
+in progress, so that some of the data is not yet available.</p></li>
+<li><p>Instead of displaying warnings, an error can be raised instead by setting the <code class="docutils literal notranslate"><span class="pre">as_warning</span></code> parameter to
+<code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Comparison of data with previously dumped data failed for [tensors] data for dump 0.
+NOTE: The following errors were found for the dumped [tensors] data for dump 0.
+      Up to 3 most significant errors are shown per tensor.
+  Numerical mismatch at path: tensor1[0,9]
+    Dumped data: 0.7697955965995789
+    Struct to compare: -2.429549217224121
+    Difference (current - dumped): -3.1993448138237
+  Numerical mismatch at path: tensor1[9,2]
+    Dumped data: 2.10503888130188
+    Struct to compare: -0.7213656306266785
+    Difference (current - dumped): -2.8264045119285583
+  Numerical mismatch at path: tensor1[5,8]
+    Dumped data: -1.2030445337295532
+    Struct to compare: 1.4832252264022827
+    Difference (current - dumped): 2.686269760131836
+  Numerical mismatch at path: other_tensors.tensor2[1,7]
+    Dumped data: 1.8169379234313965
+    Struct to compare: -2.4539949893951416
+    Difference (current - dumped): -4.270932912826538
+  Numerical mismatch at path: other_tensors.tensor2[1,2]
+    Dumped data: -2.2293128967285156
+    Struct to compare: 0.7702249884605408
+    Difference (current - dumped): 2.9995378851890564
+  Numerical mismatch at path: other_tensors.tensor2[4,7]
+    Dumped data: -1.3049689531326294
+    Struct to compare: 1.670259952545166
+    Difference (current - dumped): 2.9752289056777954
+  Missing key &#39;tensor3&#39; at path: &#39;other_tensors&#39; in dumped reference
+  Extra key &#39;tensor4&#39; at path: &#39;other_tensors&#39; in dumped reference
+  warnings.warn(error_message)
+</pre></div>
+</div>
+</section>
+<section id="gradients">
+<h4>Gradients<a class="headerlink" href="#gradients" title="Link to this heading"></a></h4>
+<p>The comparison of gradients is analogous to the comparison of tensors. In this example, only numerical errors
+are present.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>UserWarning: Comparison of data with previously dumped data failed for [grads] data for dump 0.
+NOTE: The following errors were found for the dumped [grads] data for dump 0.
+      Up to 3 most significant errors are shown per tensor.
+  Numerical mismatch at path: tensor1[0,0]
+    Dumped data: -0.5149053931236267
+    Struct to compare: 0.9704018831253052
+    Difference (current - dumped): 1.4853072762489319
+  Numerical mismatch at path: tensor1[0,9]
+    Dumped data: 0.7180529236793518
+    Struct to compare: -0.7570282816886902
+    Difference (current - dumped): -1.475081205368042
+  Numerical mismatch at path: tensor1[1,8]
+    Dumped data: -0.33085548877716064
+    Struct to compare: 0.9765480756759644
+    Difference (current - dumped): 1.307403564453125
+  warnings.warn(error_message)
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="related-examples">
+<h2>Related examples<a class="headerlink" href="#related-examples" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>The extended dumping example (<a class="reference internal" href="tensor_dumper_dumping.html"><span class="doc">Tensor Dumper – Extended Dumping Example</span></a>) demonstrates more features (converters, per‑tensor
+overrides, RaggedBatch support, custom pre‑dump processing, early exit).</p></li>
+<li><p>See <a class="reference internal" href="stopwatch.html"><span class="doc">Stopwatch Example</span></a> and <a class="reference internal" href="nvtx_range_wrapper.html"><span class="doc">NVTX Range Wrapper Example</span></a> for the multi‑file singleton usage pattern.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="nvtx_range_wrapper.html" class="btn btn-neutral float-left" title="NVTX Range Wrapper Example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tensor_dumper_dumping.html" class="btn btn-neutral float-right" title="Tensor Dumper – Extended Dumping Example" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

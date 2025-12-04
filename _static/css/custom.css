@@ -1,0 +1,159 @@
+/* ===== Set the max width of the main content ===== */
+.wy-nav-content {
+    max-width: 1200px;
+    /* Adjust this value to your desired width */
+    margin: 0 auto;
+    /* Center the content horizontally */
+}
+
+/* ===== Device notes ===== */
+.device-note {
+    background: hsl(52, 100%, 83%);
+    border-left: 4px solid hsl(52, 100%, 57%);
+    padding: 0.0em 0.5em;
+    margin: 1em 0;
+}
+
+/* ===== Indent nested lists in the in-page TOC (.. contents::) for Read the Docs theme ===== */
+nav.contents ul ul {
+    margin-left: 0.5em !important;
+}
+
+nav.contents ul ul ul {
+    margin-left: 1.0em !important;
+}
+
+nav.contents ul ul ul ul {
+    margin-left: 1.5em !important;
+}
+
+/* ===== Widen the left RTD sidebar (and keep content aligned) ===== */
+/* Define a CSS custom property for the sidebar width */
+:root {
+    --rtd-sidebar-width: 380px;
+}
+
+/* Set the width of the sidebar */
+.wy-nav-side,
+.wy-side-scroll {
+    width: var(--rtd-sidebar-width) !important;
+}
+
+/* Keep the content aligned with the sidebar */
+.wy-nav-content-wrap {
+    margin-left: var(--rtd-sidebar-width) !important;
+}
+
+/* Ensure inner elements expand with the sidebar */
+.wy-side-nav-search,
+.wy-menu-vertical {
+    width: 100% !important;
+}
+
+.wy-side-nav-search input[type="text"] {
+    width: 100% !important;
+}
+
+/* ===== Tables: allow wrapping and avoid horizontal scroll for specific tables ===== */
+.wy-table-responsive table.no-scroll td,
+.wy-table-responsive table.no-scroll th {
+    white-space: normal !important;
+    word-break: break-word;
+}
+
+.wy-table-responsive table.no-scroll {
+    table-layout: fixed;
+    width: 100% !important;
+}
+
+/* ===== Print layout: remove left sidebar gap (introduced above) and use full width ===== */
+@media print {
+
+    .wy-nav-side,
+    .wy-side-scroll {
+        display: none !important;
+    }
+
+    .wy-nav-content-wrap {
+        margin-left: 0 !important;
+    }
+
+    .wy-nav-content {
+        max-width: none !important;
+        margin: 0 !important;
+    }
+}
+
+/* ===== Autosummary tables: wrap content and fit page width ===== */
+.wy-table-responsive table.autosummary td,
+.wy-table-responsive table.autosummary th {
+    white-space: normal !important;
+    word-break: break-word;
+}
+
+.wy-table-responsive table.autosummary {
+    table-layout: auto;
+    /* allow intrinsic sizing so first column can grow up to its cap */
+    width: 100% !important;
+}
+
+/* Bias first column: grow as needed up to 50%, then wrap */
+.wy-table-responsive table.autosummary td:first-child,
+.wy-table-responsive table.autosummary th:first-child {
+    max-width: 50%;
+    width: 1%;
+    /* encourage minimal width while allowing growth */
+    word-break: normal;
+    /* avoid aggressive breaks before hitting the cap */
+    overflow-wrap: normal;
+}
+
+/* ===== Link colors ===== */
+/* Links in the main content area */
+.wy-nav-content a,
+.rst-content a {
+    color: #619a00;
+}
+
+.wy-nav-content a:hover,
+.wy-nav-content a:focus,
+.rst-content a:hover,
+.rst-content a:focus {
+    color: #76B900;
+}
+
+/* ===== Sidebar section headings (e.g., "CONTAINED PACKAGES") ===== */
+.wy-menu-vertical .caption,
+.wy-menu-vertical .caption span.caption-text {
+    color: #76B900;
+    font-weight: 600;
+}
+
+/* ===== Top sidebar header (home logo + project name) ===== */
+.wy-side-nav-search {
+    background-color: #76B900;
+}
+
+/* Sidebar link color only while the mouse button is pressed */
+.wy-menu-vertical a:active {
+    background-color: #76B900;
+}
+
+/* Function signature line: background + text color */
+.rst-content dl.py.function > dt,
+.rst-content dl.py.class > dt,
+.rst-content dl.py.data > dt {
+    background-color: #e8ffc9 !important;
+    border-top: 3px solid #76B900 !important;
+    color: #365500 !important;
+}
+
+/* Code/links inside the signature */
+.rst-content dl.py.function > dt code,
+.rst-content dl.py.class > dt code,
+.rst-content dl.py.data > dt code,
+.rst-content dl.py.function > dt a,
+.rst-content dl.py.class > dt a,
+.rst-content dl.py.data > dt a {
+    color: #26350f !important;
+}

@@ -1,0 +1,459 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation Guide &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Docker Guide" href="DOCKER_GUIDE.html" />
+    <link rel="prev" title="Guides" href="../guides_index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../guides_index.html">Guides</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Installation Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#prerequisites">Prerequisites</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#environment-setup">Environment Setup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#installation-methods">Installation Methods</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#installation-using-the-package-manager-script">1. Installation Using the Package Manager Script</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#overview">Overview</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#installation-using-the-convenience-wrapper-script">2. Installation Using the Convenience Wrapper Script</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#building-and-installing-wheels">3. Building and Installing Wheels</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#installing-from-built-wheels">Installing from Built Wheels</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#installing-individual-packages-with-pip">4. Installing Individual Packages with <code class="docutils literal notranslate"><span class="pre">pip</span></code></a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#installing-with-optional-dependencies">Installing with Optional Dependencies</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#verifying-installation">Verifying Installation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#basic-verification">Basic Verification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#check-available-namespace-packages">Check Available Namespace Packages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#running-all-unit-tests">Running all Unit Tests</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#build-configuration">Build Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#available-build-variables">Available Build Variables</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#additional-information">Additional Information</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="DOCKER_GUIDE.html">Docker Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DEVELOPMENT_GUIDE.html">Development Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FORMATTING_GUIDE.html">Code Formatting Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html">Sphinx Documentation Setup Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CONTRIBUTION_GUIDE.html">Contribution Guide</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../guides_index.html">Guides</a></li>
+      <li class="breadcrumb-item active">Installation Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/guides/INSTALLATION_GUIDE.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="installation-guide">
+<h1>Installation Guide<a class="headerlink" href="#installation-guide" title="Link to this heading"></a></h1>
+<p>This guide covers how to install and use ACCV-Lab, a CUDA-accelerated library with multiple namespace packages.</p>
+<section id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
+<section id="environment-setup">
+<h3>Environment Setup<a class="headerlink" href="#environment-setup" title="Link to this heading"></a></h3>
+<p>Before installing ACCV-Lab, please ensure that the environment is set up correctly. The recommended way is to
+use the Docker image as described in the <a class="reference internal" href="DOCKER_GUIDE.html"><span class="std std-doc">Docker Guide</span></a>.</p>
+<p>You can also have a look at the <a class="reference download internal" download="" href="../_downloads/9c6d2dd30e172995ff9466799d6f77ed/Dockerfile"><span class="xref download myst">Dockerfile</span></a> for more details on the base
+environment.</p>
+</section>
+<section id="submodules">
+<h3>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h3>
+<p>ACCV-Lab uses submodules in some of the packages (currently only the <code class="docutils literal notranslate"><span class="pre">on_demand_video_decoder</span></code> package).
+To clone the repository with the submodules, you can use the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>--recurse-submodules<span class="w"> </span>https://github.com/NVIDIA/ACCV-Lab.git
+</pre></div>
+</div>
+<p>If you have already cloned the repository without the submodules, you can add them later with the following
+command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>submodule<span class="w"> </span>update<span class="w"> </span>--init<span class="w"> </span>--recursive
+</pre></div>
+</div>
+</section>
+</section>
+<section id="installation-methods">
+<h2>Installation Methods<a class="headerlink" href="#installation-methods" title="Link to this heading"></a></h2>
+<section id="installation-using-the-package-manager-script">
+<h3>1. Installation Using the Package Manager Script<a class="headerlink" href="#installation-using-the-package-manager-script" title="Link to this heading"></a></h3>
+<section id="overview">
+<h4>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h4>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>The editable installation (<code class="docutils literal notranslate"><span class="pre">-e</span></code>) is not supported for scikit-build based packages
+(e.g. <code class="docutils literal notranslate"><span class="pre">on_demand_video_decoder</span></code> or <code class="docutils literal notranslate"><span class="pre">dali_pipeline_framework</span></code>). This can lead to missing binaries
+and import errors.</p>
+</div>
+<p>The standard way to install ACCV-Lab is using the unified installer script that handles all namespace packages
+automatically. By default it installs packages with their <strong>basic</strong> dependencies only; to also install optional
+dependencies (needed for some tests and examples), pass the <code class="docutils literal notranslate"><span class="pre">--optional</span></code> flag explicitly:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install all namespace packages</span>
+./scripts/package_manager.sh<span class="w"> </span>install
+
+<span class="c1"># Install in development mode (editable installation)</span>
+./scripts/package_manager.sh<span class="w"> </span>install<span class="w"> </span>-e
+
+<span class="c1"># Install with optional dependencies</span>
+./scripts/package_manager.sh<span class="w"> </span>install<span class="w"> </span>--optional
+
+<span class="c1"># Install in development mode with optional dependencies</span>
+./scripts/package_manager.sh<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>--optional
+</pre></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>Installing with optional dependencies is required if you plan to run the contained
+tests, as they rely on optional dependencies such as <code class="docutils literal notranslate"><span class="pre">pytest</span></code> (and possibly other dependencies). It may be
+also required for the contained examples, as they may use additional packages which are otherwise
+not used in the core library.</p>
+</div>
+<p>The package manager script:</p>
+<ul class="simple">
+<li><p>Automatically installs the required <code class="docutils literal notranslate"><span class="pre">accvlab_build_config</span></code> helper package (see the <code class="docutils literal notranslate"><span class="pre">build_config</span></code> directory
+in the repository root)</p></li>
+<li><p>Installs all configured namespace packages from <code class="docutils literal notranslate"><span class="pre">namespace_packages_config.py</span></code> (see the
+<a class="reference internal" href="DEVELOPMENT_GUIDE.html"><span class="std std-doc">development guide</span></a> for more details).</p></li>
+<li><p>Installs the individual namespace packages with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> and the <code class="docutils literal notranslate"><span class="pre">--no-build-isolation</span></code> flag by
+default. You can pass <code class="docutils literal notranslate"><span class="pre">--with-build-isolation</span></code> to the script if you want pip to use build isolation.</p></li>
+<li><p>Tests imports after installation</p></li>
+<li><p>Provides detailed progress feedback</p></li>
+</ul>
+</section>
+</section>
+<section id="installation-using-the-convenience-wrapper-script">
+<h3>2. Installation Using the Convenience Wrapper Script<a class="headerlink" href="#installation-using-the-convenience-wrapper-script" title="Link to this heading"></a></h3>
+<p><strong>Alternative</strong>: You can also use the convenience wrapper <code class="docutils literal notranslate"><span class="pre">install_local.sh</span></code> which calls the package manager
+automatically and <strong>performs a single default install with optional dependencies enabled</strong>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install all packages with optional dependencies (default local setup)</span>
+./scripts/install_local.sh
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong><code class="docutils literal notranslate"><span class="pre">install_local.sh</span></code> does not accept any parameters. If you need fine-grained control (e.g.,
+installing <strong>without</strong> optional dependencies, using editable installs, or building wheels), use
+<code class="docutils literal notranslate"><span class="pre">scripts/package_manager.sh</span></code> directly instead of <code class="docutils literal notranslate"><span class="pre">install_local.sh</span></code>.</p>
+</div>
+</section>
+<section id="building-and-installing-wheels">
+<h3>3. Building and Installing Wheels<a class="headerlink" href="#building-and-installing-wheels" title="Link to this heading"></a></h3>
+<p>You can also build the wheels:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build wheels for all namespace packages</span>
+./scripts/package_manager.sh<span class="w"> </span>wheel
+
+<span class="c1"># Build wheels with optional dependencies</span>
+./scripts/package_manager.sh<span class="w"> </span>wheel<span class="w"> </span>--optional
+
+<span class="c1"># Build wheels in a specific directory</span>
+./scripts/package_manager.sh<span class="w"> </span>wheel<span class="w"> </span>-o<span class="w"> </span>/path/to/wheels
+</pre></div>
+</div>
+<p>The wheel building script:</p>
+<ul class="simple">
+<li><p>Creates wheels for all namespace packages</p></li>
+<li><p>Saves wheels to <code class="docutils literal notranslate"><span class="pre">./wheels/</span></code> directory by default</p></li>
+<li><p>Includes the <code class="docutils literal notranslate"><span class="pre">build_config</span></code> helper package wheel</p></li>
+<li><p>Supports various build configurations for different deployment scenarios</p></li>
+<li><p>Uses <code class="docutils literal notranslate"><span class="pre">--no-build-isolation</span></code> by default. This means that the resulting wheel will be built in the current
+environment. You can pass <code class="docutils literal notranslate"><span class="pre">--with-build-isolation</span></code> to the script if you want pip to use build isolation.</p></li>
+<li><p>Uses <code class="docutils literal notranslate"><span class="pre">--no-deps</span></code> by default. This means that only a wheel for the package itself will be built, and no
+wheels for dependencies will be prepared. You can pass <code class="docutils literal notranslate"><span class="pre">--with-deps</span></code> to the script if you want to use the
+default <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">wheel</span></code> behavior instead (i.e. prepare wheels for all dependencies as well).</p></li>
+</ul>
+<section id="installing-from-built-wheels">
+<h4>Installing from Built Wheels<a class="headerlink" href="#installing-from-built-wheels" title="Link to this heading"></a></h4>
+<p>After building wheels, you can install them:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install all wheels from the wheels directory</span>
+pip<span class="w"> </span>install<span class="w"> </span>wheels/*.whl
+
+<span class="c1"># Install specific wheels</span>
+pip<span class="w"> </span>install<span class="w"> </span>wheels/accvlab_optim_test_tools-*.whl
+pip<span class="w"> </span>install<span class="w"> </span>wheels/accvlab_batching_helpers-*.whl
+pip<span class="w"> </span>install<span class="w"> </span>wheels/accvlab_dali_pipeline_framework-*.whl
+pip<span class="w"> </span>install<span class="w"> </span>wheels/accvlab_on_demand_video_decoder-*.whl
+</pre></div>
+</div>
+</section>
+</section>
+<section id="installing-individual-packages-with-pip">
+<h3>4. Installing Individual Packages with <code class="docutils literal notranslate"><span class="pre">pip</span></code><a class="headerlink" href="#installing-individual-packages-with-pip" title="Link to this heading"></a></h3>
+<p>For development or when you only need specific packages, you can install them individually directly with
+<code class="docutils literal notranslate"><span class="pre">pip</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong><code class="docutils literal notranslate"><span class="pre">{-e}</span></code> means that the <code class="docutils literal notranslate"><span class="pre">-e</span></code> (editable) option is optional.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>The <code class="docutils literal notranslate"><span class="pre">-e</span></code> option is not supported for scikit-build based packages (e.g.
+<code class="docutils literal notranslate"><span class="pre">dali_pipeline_framework</span></code>, <code class="docutils literal notranslate"><span class="pre">on_demand_video_decoder</span></code>).</p>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install individual packages</span>
+<span class="nb">cd</span><span class="w"> </span>packages/optim_test_tools<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="o">{</span>-e<span class="o">}</span><span class="w"> </span>.<span class="w"> </span>--no-build-isolation
+<span class="nb">cd</span><span class="w"> </span>packages/batching_helpers<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="o">{</span>-e<span class="o">}</span><span class="w"> </span>.<span class="w"> </span>--no-build-isolation
+<span class="nb">cd</span><span class="w"> </span>packages/dali_pipeline_framework<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.<span class="w"> </span>--no-build-isolation
+<span class="nb">cd</span><span class="w"> </span>packages/on_demand_video_decoder<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.<span class="w"> </span>--no-build-isolation
+</pre></div>
+</div>
+<section id="installing-with-optional-dependencies">
+<h4>Installing with Optional Dependencies<a class="headerlink" href="#installing-with-optional-dependencies" title="Link to this heading"></a></h4>
+<p>For individual package installation with optional dependencies:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install individual packages with optional dependencies</span>
+<span class="nb">cd</span><span class="w"> </span>packages/optim_test_tools<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="o">{</span>-e<span class="o">}</span><span class="w"> </span>.<span class="o">[</span>optional<span class="o">]</span><span class="w"> </span>--no-build-isolation
+<span class="nb">cd</span><span class="w"> </span>packages/batching_helpers<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="o">{</span>-e<span class="o">}</span><span class="w"> </span>.<span class="o">[</span>optional<span class="o">]</span><span class="w"> </span>--no-build-isolation
+<span class="nb">cd</span><span class="w"> </span>packages/dali_pipeline_framework<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.<span class="o">[</span>optional<span class="o">]</span><span class="w"> </span>--no-build-isolation
+<span class="nb">cd</span><span class="w"> </span>packages/on_demand_video_decoder<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.<span class="o">[</span>optional<span class="o">]</span><span class="w"> </span>--no-build-isolation
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="verifying-installation">
+<h2>Verifying Installation<a class="headerlink" href="#verifying-installation" title="Link to this heading"></a></h2>
+<section id="basic-verification">
+<h3>Basic Verification<a class="headerlink" href="#basic-verification" title="Link to this heading"></a></h3>
+<p>Test that the packages installed correctly:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Test basic import</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import accvlab; print(&#39;ACCV-Lab loaded successfully&#39;)&quot;</span>
+
+<span class="c1"># Test specific namespace packages</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import accvlab.optim_test_tools; print(&#39;Optim test tools loaded successfully&#39;)&quot;</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import accvlab.batching_helpers; print(&#39;Batching helpers loaded successfully&#39;)&quot;</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import accvlab.dali_pipeline_framework; print(&#39;DALI pipeline framework loaded successfully&#39;)&quot;</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import accvlab.on_demand_video_decoder; print(&#39;On-demand video decoder loaded successfully&#39;)&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="check-available-namespace-packages">
+<h3>Check Available Namespace Packages<a class="headerlink" href="#check-available-namespace-packages" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># List all configured namespace packages</span>
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from namespace_packages_config import get_namespace_packages; print(&#39;\n&#39;.join(get_namespace_packages()))&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="running-all-unit-tests">
+<h3>Running all Unit Tests<a class="headerlink" href="#running-all-unit-tests" title="Link to this heading"></a></h3>
+<p>The repository provides a convenience script to run pytest for all configured namespace packages:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./scripts/run_tests.sh
+</pre></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>If you want to run the tests, please make sure to install the packages with optional
+dependencies, as they may be required for the tests.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>If you want to run the tests inside a docker container, you need to
+install and use the Nvidia container runtime to ensure that the <code class="docutils literal notranslate"><span class="pre">on_demand_video_decoder</span></code> package can be
+used.
+Please see the <a class="reference internal" href="DOCKER_GUIDE.html"><span class="std std-doc">Docker Guide</span></a> for more details on how to set up and run with the Nvidia
+container runtime.</p>
+<p>Alternatively, you can also remove the <code class="docutils literal notranslate"><span class="pre">on_demand_video_decoder</span></code> package from the installation (by removing
+it from the list of namespace packages in the <code class="docutils literal notranslate"><span class="pre">namespace_packages_config.py</span></code> file, also see the
+<a class="reference internal" href="DEVELOPMENT_GUIDE.html"><span class="std std-doc">Development Guide</span></a>).</p>
+</div>
+</section>
+</section>
+<section id="build-configuration">
+<h2>Build Configuration<a class="headerlink" href="#build-configuration" title="Link to this heading"></a></h2>
+<p>You can customize the build process using environment variables. Note that this works for any of the
+installation methods described above.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Debug build with verbose output</span>
+<span class="nv">DEBUG_BUILD</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">VERBOSE_BUILD</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>./scripts/package_manager.sh<span class="w"> </span>install
+
+<span class="c1"># Optimized build for production</span>
+<span class="nv">OPTIMIZE_LEVEL</span><span class="o">=</span><span class="m">3</span><span class="w"> </span><span class="nv">USE_FAST_MATH</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>./scripts/package_manager.sh<span class="w"> </span>install
+
+<span class="c1"># Custom CUDA architectures (if you know your GPU architecture)</span>
+<span class="nv">CUSTOM_CUDA_ARCHS</span><span class="o">=</span><span class="s2">&quot;70,75,80&quot;</span><span class="w"> </span>./scripts/package_manager.sh<span class="w"> </span>install
+
+<span class="c1"># Enable profiling support</span>
+<span class="nv">ENABLE_PROFILING</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>./scripts/package_manager.sh<span class="w"> </span>install
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>These build variables are honored across all build types in ACCV-Lab: setuptools (PyTorch
+extensions), external CMake builds (via the provided helper script), and scikit-build packages.</p>
+</div>
+<section id="available-build-variables">
+<h3>Available Build Variables<a class="headerlink" href="#available-build-variables" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable</p></th>
+<th class="head"><p>Type/Values</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">DEBUG_BUILD</span></code></p></td>
+<td><p>bool: <code class="docutils literal notranslate"><span class="pre">0</span></code>/<code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">true</span></code>/<code class="docutils literal notranslate"><span class="pre">false</span></code>, <code class="docutils literal notranslate"><span class="pre">yes</span></code>/<code class="docutils literal notranslate"><span class="pre">no</span></code>, <code class="docutils literal notranslate"><span class="pre">on</span></code>/<code class="docutils literal notranslate"><span class="pre">off</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Enable debug symbols and assertions</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">OPTIMIZE_LEVEL</span></code></p></td>
+<td><p>int: <code class="docutils literal notranslate"><span class="pre">0</span></code>–<code class="docutils literal notranslate"><span class="pre">3</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3</span></code></p></td>
+<td><p>Compiler optimization level</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CPP_STANDARD</span></code></p></td>
+<td><p>string: <code class="docutils literal notranslate"><span class="pre">c++17</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">c++17</span></code></p></td>
+<td><p>C++ standard to use</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">VERBOSE_BUILD</span></code></p></td>
+<td><p>bool: <code class="docutils literal notranslate"><span class="pre">0</span></code>/<code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">true</span></code>/<code class="docutils literal notranslate"><span class="pre">false</span></code>, <code class="docutils literal notranslate"><span class="pre">yes</span></code>/<code class="docutils literal notranslate"><span class="pre">no</span></code>, <code class="docutils literal notranslate"><span class="pre">on</span></code>/<code class="docutils literal notranslate"><span class="pre">off</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Show detailed build output</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CUSTOM_CUDA_ARCHS</span></code></p></td>
+<td><p>list: e.g. <code class="docutils literal notranslate"><span class="pre">&quot;70,75,80&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;75;80;86&quot;</span></code></p></td>
+<td><p>Auto-detect</p></td>
+<td><p>Target CUDA architectures (overrides auto-detect)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">USE_FAST_MATH</span></code></p></td>
+<td><p>bool: <code class="docutils literal notranslate"><span class="pre">0</span></code>/<code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">true</span></code>/<code class="docutils literal notranslate"><span class="pre">false</span></code>, <code class="docutils literal notranslate"><span class="pre">yes</span></code>/<code class="docutils literal notranslate"><span class="pre">no</span></code>, <code class="docutils literal notranslate"><span class="pre">on</span></code>/<code class="docutils literal notranslate"><span class="pre">off</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p>Enable fast math optimizations</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ENABLE_PROFILING</span></code></p></td>
+<td><p>bool: <code class="docutils literal notranslate"><span class="pre">0</span></code>/<code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">true</span></code>/<code class="docutils literal notranslate"><span class="pre">false</span></code>, <code class="docutils literal notranslate"><span class="pre">yes</span></code>/<code class="docutils literal notranslate"><span class="pre">no</span></code>, <code class="docutils literal notranslate"><span class="pre">on</span></code>/<code class="docutils literal notranslate"><span class="pre">off</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Enable profiling support</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>Currently only C++17 is supported across all packages and toolchains. Set
+<code class="docutils literal notranslate"><span class="pre">CPP_STANDARD=c++17</span></code>. Using newer standards (e.g., C++20) may not be supported for CUDA builds for some
+of the packages.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>If <code class="docutils literal notranslate"><span class="pre">CUSTOM_CUDA_ARCHS</span></code> is not set, auto-detection via PyTorch is attempted. If this fails,
+the build will use CMake’s native detection (<code class="docutils literal notranslate"><span class="pre">CMAKE_CUDA_ARCHITECTURES=native</span></code>) to select the appropriate
+GPU architectures on the current system.</p>
+</div>
+</section>
+</section>
+<section id="additional-information">
+<h2>Additional Information<a class="headerlink" href="#additional-information" title="Link to this heading"></a></h2>
+<p>For information about extending ACCV-Lab or adding new namespace packages, see the
+<a class="reference internal" href="DEVELOPMENT_GUIDE.html"><span class="std std-doc">development guide</span></a>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../guides_index.html" class="btn btn-neutral float-left" title="Guides" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="DOCKER_GUIDE.html" class="btn btn-neutral float-right" title="Docker Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

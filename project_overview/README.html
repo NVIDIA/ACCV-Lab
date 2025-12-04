@@ -1,0 +1,368 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ACCV-Lab Overview &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Guides" href="../guides_index.html" />
+    <link rel="prev" title="ACCV-Lab Documentation" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ACCV-Lab Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#resources">Resources</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contained-packages">Contained Packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#quick-start">Quick Start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#project-structure">Project Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#available-guides">Available Guides</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#installation-guide">🚀 <span class="xref myst">Installation Guide</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#docker-guide">🐳 <span class="xref myst">Docker Guide</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#development-guide">📚 <span class="xref myst">Development Guide</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#formatting-guide">🎨 <span class="xref myst">Formatting Guide</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#documentation-setup-guide">📖 <span class="xref myst">Documentation Setup Guide</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#contribution-guide">🤝 <span class="xref myst">Contribution Guide</span></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#namespace-packages">Namespace Packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#development">Development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contributing">Contributing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#useful-links">Useful Links</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#license">License</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">ACCV-Lab Overview</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/project_overview/README.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="accv-lab-overview">
+<h1>ACCV-Lab Overview<a class="headerlink" href="#accv-lab-overview" title="Link to this heading"></a></h1>
+<p>Accelerated Computer Vision Lab (ACCV-Lab) is a systematic collection of packages with the common goal to
+facilitate end-to-end efficient training in the ADAS domain, each package offering tools &amp; best practices for
+a specific aspect/task in this domain.</p>
+<section id="resources">
+<h2>Resources<a class="headerlink" href="#resources" title="Link to this heading"></a></h2>
+<p>The following resources provide an overview of the project and its capabilities:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Type</p></th>
+<th class="head"><p>Title</p></th>
+<th class="head"><p>Date</p></th>
+<th class="head"><p>Link</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>📝 Blog</p></td>
+<td><p>Accelerate Assisted Driving Training with NVIDIA ACCV-Lab Open-Source Toolkit 【CN】</p></td>
+<td><p>2025-12-24</p></td>
+<td><p><a class="reference external" href="https://developer.nvidia.cn/blog/accelerate-assisted-driving-training-with-nvidia-accv-lab-open-source-toolkit/">NVIDIA Tech Blog</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>🎬 Video</p></td>
+<td><p>ADAS &amp; Robotics - Overview of ACCV-Lab for Data Loading and Model Training Acceleration 【EN】</p></td>
+<td><p>2025-11-19</p></td>
+<td><p><a class="reference external" href="https://www.bilibili.com/video/BV14yyEB3E5B/">Bilibili</a></p></td>
+</tr>
+<tr class="row-even"><td><p>🎬 Video</p></td>
+<td><p>Video Training for ADAS 【CN】 and DALI-Based Image Preprocessing Pipeline 【EN】</p></td>
+<td><p>2025-06-12</p></td>
+<td><p><a class="reference external" href="https://www.bilibili.com/video/BV1LMMwzNEnF/">Bilibili</a></p></td>
+</tr>
+<tr class="row-odd"><td><p>🎬 Video</p></td>
+<td><p>Batching Helpers: Optimizing Loss Computation 【EN】</p></td>
+<td><p>2025-06-12</p></td>
+<td><p><a class="reference external" href="https://www.bilibili.com/video/BV1dKMwzvEQ5/">Bilibili</a></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="contained-packages">
+<h2>Contained Packages<a class="headerlink" href="#contained-packages" title="Link to this heading"></a></h2>
+<p>This section provides a brief overview of the contained packages &amp; evaluations performed on them. Please also
+see the <code class="docutils literal notranslate"><span class="pre">CONTAINED</span> <span class="pre">PACKAGES</span></code> section in the documentation for a more detailed description of the packages,
+their functionality and usage, as well as the API reference for each package and examples demonstrating the
+usage of the packages. Evaluation results are also provided for some of the packages (On-Demand Video Decoder,
+Batching Helpers, DALI Pipeline Framework).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>We are planning to add demos for packages contained in ACCV-Lab in the future. Apart from
+acting as tutorials show-casing real-world examples, they will include the implementation of the experiments
+which were used to obtain the evaluation results as shown in the documentation of the contained packages.</p>
+</div>
+<p>The contained packages are:</p>
+<ul class="simple">
+<li><p><strong>On-Demand Video Decoder</strong>: Designed for efficiently obtaining video frames from video files. Focused on
+the ADAS training domain, implementing access patterns typical for training workloads to ensure high
+throughput and low latency. Enables training directly from videos with performance similar to image-based
+training.</p></li>
+<li><p><strong>Batching Helpers</strong>: Facilitates easy-to-implement batching for non‑uniform sample sizes, a common issue in
+loss computation in the ADAS domain.</p></li>
+<li><p><strong>DALI Pipeline Framework</strong>: Framework on top of
+<a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/">NVIDIA DALI</a> that simplifies creation of
+pipelines for typical ADAS use‑cases and enables integration into existing training implementations with
+minimal changes.</p></li>
+<li><p><strong>Draw Heatmap</strong>: Utility for drawing Gaussian heatmaps (e.g. for object detection training) on the GPU.
+Optionally, this package can process data in the batched format defined in the Batching Helpers package.</p></li>
+<li><p><strong>Optim Test Tools</strong>: Utilities for testing and profiling the optimizations. This functionality can be used
+during development and evaluation of optimizations.</p></li>
+</ul>
+<p>For more details on the packages (including performance evaluation results), please see the documentation for
+each package in the <code class="docutils literal notranslate"><span class="pre">CONTAINED</span> <span class="pre">PACKAGES</span></code> section of the documentation.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>If you are reading this in the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> file (and not in the HTML documentation),
+please note that there is a full documentation available, containing this page, the guides, and additional
+content (e.g. API reference, examples with detailed explanations, …). You can view the documentation
+online at <a class="reference external" href="https://NVIDIA.github.io/ACCV-Lab">NVIDIA.github.io/ACCV-Lab</a>, or build a local copy as outlined
+in the <code class="docutils literal notranslate"><span class="pre">Quick</span> <span class="pre">Start</span></code> section below.</p>
+</div>
+</section>
+<section id="quick-start">
+<span id="project-overview-quick-start"></span><h2>Quick Start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h2>
+<p>A docker file setting up the environment to install and use the ACCV-Lab package is available in the
+<code class="docutils literal notranslate"><span class="pre">docker/</span></code> directory. It allows building an image and using it as root (build without any parameters),
+but also allows to configure a specific user (see the Dockerfile for the parameters).</p>
+<p>The image can be built as follows (run from inside the <code class="docutils literal notranslate"><span class="pre">docker/</span></code> directory):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build container to be used as root</span>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>image_name:tag<span class="w"> </span>.
+
+<span class="c1"># Build container for the current user</span>
+docker<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">USER_ID</span><span class="o">=</span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">USER_NAME</span><span class="o">=</span><span class="k">$(</span>id<span class="w"> </span>-un<span class="k">)</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">GROUP_ID</span><span class="o">=</span><span class="k">$(</span>id<span class="w"> </span>-g<span class="k">)</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">GROUP_NAME</span><span class="o">=</span><span class="k">$(</span>id<span class="w"> </span>-gn<span class="k">)</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-t<span class="w"> </span>image_name:tag<span class="w"> </span>.
+</pre></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>If you want to run the On-Demand Video Decoder package inside the docker container, you
+need to install and use the Nvidia container runtime.
+Please see the <a class="reference internal" href="../guides/DOCKER_GUIDE.html"><span class="std std-doc">Docker Guide</span></a> for more details.</p>
+</div>
+<p>Before installing the packages, you need to make sure that git submodules are initialized. This can e.g. be
+done by running the following command in your cloned version of the repository:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>submodule<span class="w"> </span>update<span class="w"> </span>--init<span class="w"> </span>--recursive
+</pre></div>
+</div>
+<p>There are scripts available for the common tasks such as installing the contained packages or building the
+documentation. The basic commands are:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Install all namespace packages</span>
+./scripts/install_local.sh
+
+<span class="c1"># Install in development mode (see &quot;Important&quot; note below)</span>
+./scripts/install_local.sh<span class="w"> </span>-e
+
+<span class="c1"># Build documentation. This needs to be done after installing the packages, as the generation of the API </span>
+<span class="c1"># documentation relies on the installed packages.</span>
+./scripts/build_docs.sh
+</pre></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>Note that for some of the contained namespace packages, an editable build (i.e.
+development mode) may not be possible. This is the case if the package uses <code class="docutils literal notranslate"><span class="pre">scikit-build</span></code>. In this case,
+the package will be installed, but the binaries will be missing, leading to import errors when using the
+package. It is recommended to only use the editable installation while working on specific packages.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>Before generating the documentation, the package needs to be installed, as the generation
+of the API documentation relies on the package being available (i.e. it should be possible to import it
+during the generation). Note that installing the package also ensures that binaries of the used C++
+extensions are available, so that any docstrings defined there can also be extracted.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>Pre-built documentation is available online at
+<a class="reference external" href="https://NVIDIA.github.io/ACCV-Lab">NVIDIA.github.io/ACCV-Lab</a>.</p>
+</div>
+</section>
+<section id="project-structure">
+<h2>Project Structure<a class="headerlink" href="#project-structure" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">packages/</span></code> - Individual namespace packages (each with their own <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">build_config/</span></code> - Shared build utilities and configuration</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docs/</span></code> - Documentation generation implementation &amp; common (i.e. not package-specific) part of documentation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scripts/</span></code> - Development and build scripts</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docs/guides/</span></code> - Guides on how to work with this repository (also included in the documentation)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docker/</span></code> - Dockerfile for setting up a container able to run <code class="docutils literal notranslate"><span class="pre">ACCV-Lab</span></code></p></li>
+</ul>
+</section>
+<section id="available-guides">
+<h2>Available Guides<a class="headerlink" href="#available-guides" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>The following guides are also available in the documentation (in the <code class="docutils literal notranslate"><span class="pre">Guides</span></code> section).
+If you are reading this in the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> file, we recommend building the documentation first (see the
+<code class="docutils literal notranslate"><span class="pre">Quick</span> <span class="pre">Start</span></code> section above) for better formatting and navigation, as well as to have access to the full
+documentation.</p>
+</div>
+<p>The following guides provide comprehensive information for different aspects of the project:</p>
+<section id="installation-guide">
+<h3>🚀 <a class="reference internal" href="../guides/INSTALLATION_GUIDE.html"><span class="std std-doc">Installation Guide</span></a><a class="headerlink" href="#installation-guide" title="Link to this heading"></a></h3>
+<p>Step-by-step installation instructions for users and developers.</p>
+</section>
+<section id="docker-guide">
+<h3>🐳 <a class="reference internal" href="../guides/DOCKER_GUIDE.html"><span class="std std-doc">Docker Guide</span></a><a class="headerlink" href="#docker-guide" title="Link to this heading"></a></h3>
+<p>Guide for setting up a container able to run <code class="docutils literal notranslate"><span class="pre">accvlab</span></code> from the provided Dockerfile and how to use it.</p>
+</section>
+<section id="development-guide">
+<h3>📚 <a class="reference internal" href="../guides/DEVELOPMENT_GUIDE.html"><span class="std std-doc">Development Guide</span></a><a class="headerlink" href="#development-guide" title="Link to this heading"></a></h3>
+<p>Complete guide for developers on project structure, adding new namespace packages, and working with the build
+system.</p>
+</section>
+<section id="formatting-guide">
+<h3>🎨 <a class="reference internal" href="../guides/FORMATTING_GUIDE.html"><span class="std std-doc">Formatting Guide</span></a><a class="headerlink" href="#formatting-guide" title="Link to this heading"></a></h3>
+<p>Guide to code formatting standards and tools. Explains how to use the unified formatting script and maintain
+consistent code style across all namespace packages.</p>
+</section>
+<section id="documentation-setup-guide">
+<h3>📖 <a class="reference internal" href="../guides/DOCUMENTATION_SETUP_GUIDE.html"><span class="std std-doc">Documentation Setup Guide</span></a><a class="headerlink" href="#documentation-setup-guide" title="Link to this heading"></a></h3>
+<p>Comprehensive guide for setting up and maintaining project documentation. Covers Sphinx configuration,
+automatic documentation generation, and best practices for documenting namespace packages.</p>
+</section>
+<section id="contribution-guide">
+<h3>🤝 <a class="reference internal" href="../guides/CONTRIBUTION_GUIDE.html"><span class="std std-doc">Contribution Guide</span></a><a class="headerlink" href="#contribution-guide" title="Link to this heading"></a></h3>
+<p>Guide for contributors on how to contribute to the project.</p>
+</section>
+</section>
+<section id="namespace-packages">
+<h2>Namespace Packages<a class="headerlink" href="#namespace-packages" title="Link to this heading"></a></h2>
+<p>The project includes several namespace packages, each providing specific functionality.
+Please see the <code class="docutils literal notranslate"><span class="pre">CONTAINED</span> <span class="pre">PACKAGES</span></code> section in the documentation for details on the packages.</p>
+<p>Each namespace package contains its own documentation, C++ extensions, etc. and can be installed independently
+(see the <a class="reference internal" href="../guides/INSTALLATION_GUIDE.html"><span class="std std-doc">Installation Guide</span></a> for details).</p>
+</section>
+<section id="development">
+<h2>Development<a class="headerlink" href="#development" title="Link to this heading"></a></h2>
+<p>For development information, see the <a class="reference internal" href="../guides/DEVELOPMENT_GUIDE.html"><span class="std std-doc">Development Guide</span></a> which covers:</p>
+<ul class="simple">
+<li><p>Project architecture and namespace package structure</p></li>
+<li><p>Adding new namespace packages</p></li>
+<li><p>Build system configuration</p></li>
+<li><p>Testing and documentation workflows</p></li>
+</ul>
+</section>
+<section id="contributing">
+<h2>Contributing<a class="headerlink" href="#contributing" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Follow the <a class="reference internal" href="../guides/DEVELOPMENT_GUIDE.html"><span class="std std-doc">Development Guide</span></a> for development environment setup</p></li>
+<li><p>Use the <a class="reference internal" href="../guides/FORMATTING_GUIDE.html"><span class="std std-doc">Formatting Guide</span></a> to maintain code style</p></li>
+<li><p>Ensure documentation is updated following the
+<a class="reference internal" href="../guides/DOCUMENTATION_SETUP_GUIDE.html"><span class="std std-doc">Documentation Setup Guide</span></a></p></li>
+</ol>
+<p>Please also see the <a class="reference internal" href="../guides/CONTRIBUTION_GUIDE.html"><span class="std std-doc">Contribution Guide</span></a> for more a more detailed description</p>
+</section>
+<section id="useful-links">
+<h2>Useful Links<a class="headerlink" href="#useful-links" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://NVIDIA.github.io/ACCV-Lab">Online Documentation</a></p></li>
+<li><p><a class="reference external" href="https://github.com/NVIDIA/ACCV-Lab/issues/2">WeChat Discussion Group</a>: A real-time channel for ACCV-Lab Q&amp;A and news.</p></li>
+</ul>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading"></a></h2>
+<p>This project is licensed under the Apache License, Version 2.0. See the <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code> file for details.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="ACCV-Lab Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../guides_index.html" class="btn btn-neutral float-right" title="Guides" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,265 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pipeline &amp; Processing Steps &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Input – Passing Data to the Pipeline" href="input.html" />
+    <link rel="prev" title="Data Format: Sample Data Group" href="sample_data_group.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">DALI Pipeline Framework</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../design.html">Introduction</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../design.html#why-dali">Why DALI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#why-the-adas-dali-pipeline-framework">Why the ADAS DALI Pipeline Framework</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../design.html#overview">Overview</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="sample_data_group.html">Data Format: Sample Data Group</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Pipeline &amp; Processing Steps</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#processing-steps">Processing Steps</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pipeline">Pipeline</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="input.html">Input – Passing Data to the Pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="output.html">Output – DALI Structured Output Iterator</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api/main_api.html">Main API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/additional_api.html">Additional API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">DALI Pipeline Framework</a></li>
+          <li class="breadcrumb-item"><a href="../design.html">Introduction</a></li>
+      <li class="breadcrumb-item active">Pipeline &amp; Processing Steps</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/contained_package_docs_mirror/dali_pipeline_framework/docs/design/pipeline_processing_steps.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pipeline-processing-steps">
+<h1>Pipeline &amp; Processing Steps<a class="headerlink" href="#pipeline-processing-steps" title="Link to this heading"></a></h1>
+<section id="processing-steps">
+<h2>Processing Steps<a class="headerlink" href="#processing-steps" title="Link to this heading"></a></h2>
+<p>Data processing occurs through a sequence of instances of classed derived from
+<a class="reference internal" href="../api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase" title="accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineStepBase</span></code></a>. The instances are defined and configured
+before the pipeline is constructed. Once part of the pipeline, the steps are applied sequentially
+to training samples returned by input callable/iterable instances (see <a class="reference internal" href="input.html"><span class="doc">Input – Passing Data to the Pipeline</span></a>), or by previous
+processing steps. The results of the last processing step are output from the pipeline.</p>
+<section id="processing-step-design">
+<h3>Processing Step Design<a class="headerlink" href="#processing-step-design" title="Link to this heading"></a></h3>
+<section id="data-access-and-processing">
+<h4>Data Access and Processing<a class="headerlink" href="#data-access-and-processing" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p>By default, processing steps can access and modify any part of the input data</p></li>
+<li><p>Available steps are designed for broad compatibility across input data formats by not assuming a fixed
+data format (except where necessary). Instead, they use the
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> class and its utilities to</p>
+<ul>
+<li><p>Represent the data in a unified way (i.e. the input is always a single
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> instance)</p></li>
+<li><p>Automatically discover and process all relevant fields in the data where this makes sense. For example,
+the <a class="reference internal" href="../api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.ImageDecoder" title="accvlab.dali_pipeline_framework.processing_steps.ImageDecoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageDecoder</span></code></a> step automatically
+discovers and processes all relevant images, regardless of quantity or location in the data
+structure (finding all images by name, where the name is part of the configuration).</p></li>
+<li><p>Resolve paths to individual data fields when needed (e.g. see
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.get_item_in_path" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.get_item_in_path"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_item_in_path()</span></code></a>), which can be used
+both for accessing manually specified paths as well as paths of auto-discovered data fields.</p></li>
+</ul>
+</li>
+<li><p>For selective processing, wrapper classes (see
+<a class="reference internal" href="../api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.GroupToApplyToSelectedStepBase" title="accvlab.dali_pipeline_framework.processing_steps.GroupToApplyToSelectedStepBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">GroupToApplyToSelectedStepBase</span></code></a>) can limit which data a step
+processes, separating data selection logic from processing implementation. This facilitates re-use of both
+processing and data selection implementations across different use-cases.</p></li>
+</ul>
+</section>
+<section id="consistent-independent-data-processing">
+<h4>Consistent &amp; Independent Data Processing<a class="headerlink" href="#consistent-independent-data-processing" title="Link to this heading"></a></h4>
+<p>For some processing steps, the question arises whether all the processed data should be processed consistently
+(e.g. all contained images should be augmented consistently with the same transformation) or independently
+(e.g. different augmentations for different images), with the answer depending on the use-case.</p>
+<p>By default, the processing steps are designed to process all data consistently. In combination with the
+<a class="reference internal" href="../api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.GroupToApplyToSelectedStepBase" title="accvlab.dali_pipeline_framework.processing_steps.GroupToApplyToSelectedStepBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">GroupToApplyToSelectedStepBase</span></code></a>-derived wrapper classes, this
+allows for fine-grained control over which data is processed consistently (e.g. consistent randomization of
+camera image, segmentation map &amp; projection matrix), and which data is processed independently (e.g.
+different augmentations for different cameras). Please see the
+<a class="reference internal" href="../api/processing_steps.html#pipeline-step-base-access-modifier-wrapper-discussion"><span class="std std-ref">corresponding note</span></a> in the documentation
+of <a class="reference internal" href="../api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase" title="accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineStepBase</span></code></a> for a more detailed discussion of this
+approach and how it is used to group parts of the input data for consistent processing.</p>
+</section>
+<section id="format-validation-and-inference">
+<h4>Format Validation and Inference<a class="headerlink" href="#format-validation-and-inference" title="Link to this heading"></a></h4>
+<p>Each processing step must derive from
+<a class="reference internal" href="../api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase" title="accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineStepBase</span></code></a> and override the following methods:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase.check_input_data_format_and_set_output_data_format" title="accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase.check_input_data_format_and_set_output_data_format"><code class="xref py py-meth docutils literal notranslate"><span class="pre">check_input_data_format_and_set_output_data_format()</span></code></a>
+to implement:</p>
+<ul>
+<li><p><strong>Validation of Input Format</strong>: Check that required data exists and no conflicts occur (e.g., no existing
+fields at the same location/name that the step would overwrite).</p></li>
+<li><p><strong>Inference of Output Format</strong>: Generate a blueprint of the expected output data structure based on the
+input blueprint.</p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="../api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase._process" title="accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase._process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_process()</span></code></a> to implement the actual
+processing.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The consistency between the output format as declared by
+<a class="reference internal" href="../api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase.check_input_data_format_and_set_output_data_format" title="accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase.check_input_data_format_and_set_output_data_format"><code class="xref py py-meth docutils literal notranslate"><span class="pre">check_input_data_format_and_set_output_data_format()</span></code></a>
+and the actual processing output
+<a class="reference internal" href="../api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase._process" title="accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase._process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_process()</span></code></a>
+is verified automatically by the base class implementation.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The validation of the format as well as the check for consistency of the output with the declared output
+format occurs during pipeline construction (DALI graph construction), ensuring that there is no runtime
+performance impact when using the pipeline.</p>
+</div>
+</section>
+</section>
+</section>
+<section id="pipeline">
+<h2>Pipeline<a class="headerlink" href="#pipeline" title="Link to this heading"></a></h2>
+<p>The input callable/iterable (see <a class="reference internal" href="input.html"><span class="doc">Input – Passing Data to the Pipeline</span></a>) and the processing steps can be combined into a pipeline. This
+is done by constructing an instance of the
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.PipelineDefinition" title="accvlab.dali_pipeline_framework.pipeline.PipelineDefinition"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineDefinition</span></code></a> class (see documentation of the class),
+followed by calling the
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.PipelineDefinition.get_dali_pipeline" title="accvlab.dali_pipeline_framework.pipeline.PipelineDefinition.get_dali_pipeline"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_dali_pipeline()</span></code></a> to obtain the
+DALI pipeline object. Please see the documentation of the class for more details.</p>
+<p>Note that the creation of the DALI pipeline is a 2-step process:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p><strong>Creating the pipeline definition</strong>:</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>This is done by constructing an instance of the
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.PipelineDefinition" title="accvlab.dali_pipeline_framework.pipeline.PipelineDefinition"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineDefinition</span></code></a> class</p></li>
+<li><p>The pipeline structure (i.e. input callable/iterable, processing steps) is defined</p></li>
+<li><p>The underlying DALI pipeline is not created yet</p></li>
+<li><p>However, some functionality is available, e.g. the input data format can be obtained by as the
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.PipelineDefinition.input_data_structure" title="accvlab.dali_pipeline_framework.pipeline.PipelineDefinition.input_data_structure"><code class="xref py py-attr docutils literal notranslate"><span class="pre">input_data_structure</span></code></a> attribute and
+the output data format can be obtained by calling the
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.PipelineDefinition.check_and_get_output_data_structure" title="accvlab.dali_pipeline_framework.pipeline.PipelineDefinition.check_and_get_output_data_structure"><code class="xref py py-meth docutils literal notranslate"><span class="pre">check_and_get_output_data_structure()</span></code></a>
+method.</p></li>
+</ul>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p><strong>Creating the actual DALI pipeline</strong>:</p></li>
+</ol>
+<blockquote>
+<div><ul class="simple">
+<li><p>This is done by calling the
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.PipelineDefinition.get_dali_pipeline" title="accvlab.dali_pipeline_framework.pipeline.PipelineDefinition.get_dali_pipeline"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_dali_pipeline()</span></code></a> method</p></li>
+<li><p>Configuration of the underlying DALI pipeline is done at this point (see method documentation)</p></li>
+</ul>
+</div></blockquote>
+</div></blockquote>
+<p>The <a class="reference internal" href="../examples.html"><span class="doc">Examples</span></a> section contains code examples on how to set up a pipeline.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="sample_data_group.html" class="btn btn-neutral float-left" title="Data Format: Sample Data Group" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="input.html" class="btn btn-neutral float-right" title="Input – Passing Data to the Pipeline" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

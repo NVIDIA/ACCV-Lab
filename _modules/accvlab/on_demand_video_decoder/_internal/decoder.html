@@ -1,0 +1,512 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.on_demand_video_decoder._internal.decoder &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.on_demand_video_decoder._internal.decoder</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.on_demand_video_decoder._internal.decoder</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">GOP decoder with caching support.</span>
+
+<span class="sd">This module provides the CachedGopDecoder class and CreateGopDecoder factory function</span>
+<span class="sd">for video GOP extraction with transparent caching functionality.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_CreateGopDecoderCpp</span><span class="p">,</span> <span class="n">PyNvGopDecoder</span>
+
+<span class="c1"># Private key to prevent direct instantiation of CachedGopDecoder</span>
+<span class="n">_CREATION_KEY</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="CachedGopDecoder">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/api.html#accvlab.on_demand_video_decoder.CachedGopDecoder">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CachedGopDecoder</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    GOP decoder with caching support.</span>
+
+<span class="sd">    Use :func:`CreateGopDecoder` to create instances of this class.</span>
+
+<span class="sd">    This class extends :class:`PyNvGopDecoder` with transparent GOP caching.</span>
+<span class="sd">    All methods available in :class:`PyNvGopDecoder` (such as :meth:`~PyNvGopDecoder.DecodeFromGOPRGB`,</span>
+<span class="sd">    :meth:`~PyNvGopDecoder.DecodeFromGOPListRGB`, etc.) are also available in this class.</span>
+
+<span class="sd">    The following methods are enhanced with caching support:</span>
+
+<span class="sd">    - :meth:`GetGOP` - with optional ``useGOPCache`` parameter</span>
+<span class="sd">    - :meth:`GetGOPList` - with optional ``useGOPCache`` parameter</span>
+
+<span class="sd">    The caching can significantly reduce redundant demuxing operations when the same</span>
+<span class="sd">    GOP data is requested multiple times.</span>
+
+<span class="sd">    Caching behavior (controlled by ``useGOPCache`` parameter):</span>
+
+<span class="sd">    - When useGOPCache=False (default): Demuxes the video files and returns the GOP data.</span>
+<span class="sd">    - When useGOPCache=True: Caches GOP data and returns cached results when the requested</span>
+<span class="sd">      frame_id falls within a previously cached GOP range</span>
+
+<span class="sd">    Cache hit condition for each file: ``first_frame_id &lt;= frame_id &lt; first_frame_id + gop_len``</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :class:`PyNvGopDecoder`: The underlying decoder class with full method documentation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decoder</span><span class="p">:</span> <span class="n">PyNvGopDecoder</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">_key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the cached GOP decoder.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Do not instantiate this class directly.</span>
+<span class="sd">            Use :func:`CreateGopDecoder` instead.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            decoder: The internal decoder instance</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: If called directly instead of using CreateGopDecoder()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_CREATION_KEY</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;CachedGopDecoder cannot be instantiated directly. &quot;</span> <span class="s2">&quot;Use CreateGopDecoder() instead.&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span> <span class="o">=</span> <span class="n">decoder</span>
+        <span class="c1"># Cache structure: {filepath: (packets_numpy, first_frame_id, gop_len)}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gop_cache</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Track cache hit status for each file in the last GetGOP call</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_cache_hits</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_is_cache_hit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">frame_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if the requested frame_id is within the cached GOP range for the given filepath.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepath: The video file path to check</span>
+<span class="sd">            frame_id: The target frame index</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            True if cache hit (frame_id is within cached GOP range), False otherwise</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">filepath</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gop_cache</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">first_frame_id</span><span class="p">,</span> <span class="n">gop_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gop_cache</span><span class="p">[</span><span class="n">filepath</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">first_frame_id</span> <span class="o">&lt;=</span> <span class="n">frame_id</span> <span class="o">&lt;</span> <span class="n">first_frame_id</span> <span class="o">+</span> <span class="n">gop_len</span>
+
+<div class="viewcode-block" id="CachedGopDecoder.GetGOP">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/api.html#accvlab.on_demand_video_decoder.CachedGopDecoder.GetGOP">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">GetGOP</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">filepaths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">frame_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">fastStreamInfos</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
+        <span class="n">useGOPCache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract GOP data from video files with optional caching support.</span>
+
+<span class="sd">        When useGOPCache=True, this method checks if all requested files have cache hits</span>
+<span class="sd">        (i.e., the requested frame_ids fall within previously cached GOP ranges).</span>
+<span class="sd">        If all hit, cached data is returned directly without re-demuxing.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepaths: List of video file paths to extract GOP data from</span>
+<span class="sd">            frame_ids: List of frame IDs to extract GOP data for (one per file)</span>
+<span class="sd">            fastStreamInfos: Optional list of FastStreamInfo objects for fast initialization</span>
+<span class="sd">            useGOPCache: If True, enables GOP caching. Default is False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple containing</span>
+
+<span class="sd">            - numpy array with serialized GOP data (merged if multiple files)</span>
+<span class="sd">            - list of first frame IDs for each GOP</span>
+<span class="sd">            - list of GOP lengths for each GOP</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; decoder = CreateGopDecoder(maxfiles=6, iGpu=0)</span>
+<span class="sd">            &gt;&gt;&gt; # First call - fetches from video files</span>
+<span class="sd">            &gt;&gt;&gt; packets, first_ids, gop_lens = decoder.GetGOP(files, [77, 77], useGOPCache=True)</span>
+<span class="sd">            &gt;&gt;&gt; # Second call with frame_id in same GOP range - returns from cache</span>
+<span class="sd">            &gt;&gt;&gt; packets, first_ids, gop_lens = decoder.GetGOP(files, [80, 80], useGOPCache=True)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">useGOPCache</span><span class="p">:</span>
+            <span class="c1"># No caching, directly call C++ implementation</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_cache_hits</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">filepaths</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="o">.</span><span class="n">GetGOP</span><span class="p">(</span><span class="n">filepaths</span><span class="p">,</span> <span class="n">frame_ids</span><span class="p">,</span> <span class="n">fastStreamInfos</span><span class="p">)</span>
+
+        <span class="c1"># Check cache hits for each file</span>
+        <span class="n">cache_hits</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_cache_hit</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">fid</span><span class="p">)</span> <span class="k">for</span> <span class="n">fp</span><span class="p">,</span> <span class="n">fid</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">filepaths</span><span class="p">,</span> <span class="n">frame_ids</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_cache_hits</span> <span class="o">=</span> <span class="n">cache_hits</span>
+
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">cache_hits</span><span class="p">):</span>
+            <span class="c1"># All cache hits - return merged cached data</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_from_cache</span><span class="p">(</span><span class="n">filepaths</span><span class="p">)</span>
+
+        <span class="c1"># At least one cache miss - need to fetch from C++</span>
+        <span class="c1"># Use GetGOPList to get per-file data for individual caching</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="o">.</span><span class="n">GetGOPList</span><span class="p">(</span><span class="n">filepaths</span><span class="p">,</span> <span class="n">frame_ids</span><span class="p">,</span> <span class="n">fastStreamInfos</span><span class="p">)</span>
+
+        <span class="c1"># Update cache with new data</span>
+        <span class="k">for</span> <span class="n">filepath</span><span class="p">,</span> <span class="p">(</span><span class="n">packets</span><span class="p">,</span> <span class="n">first_frame_ids</span><span class="p">,</span> <span class="n">gop_lens</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">filepaths</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+            <span class="c1"># Each result contains data for a single file</span>
+            <span class="c1"># first_frame_ids and gop_lens are lists with single element</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gop_cache</span><span class="p">[</span><span class="n">filepath</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">packets</span><span class="p">,</span> <span class="n">first_frame_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">gop_lens</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># Merge and return in GetGOP format</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_cached_data</span><span class="p">(</span><span class="n">filepaths</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_from_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepaths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve and merge cached GOP data for the given filepaths.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepaths: List of video file paths to retrieve from cache</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple of (merged_packets, first_frame_ids, gop_lens)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_cached_data</span><span class="p">(</span><span class="n">filepaths</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_merge_cached_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepaths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Merge cached GOP data from multiple files into a single result.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepaths: List of video file paths to merge data from</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple of (merged_packets, first_frame_ids, gop_lens)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">packets_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">first_frame_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">gop_lens</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">filepath</span> <span class="ow">in</span> <span class="n">filepaths</span><span class="p">:</span>
+            <span class="n">packets</span><span class="p">,</span> <span class="n">first_fid</span><span class="p">,</span> <span class="n">gop_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gop_cache</span><span class="p">[</span><span class="n">filepath</span><span class="p">]</span>
+            <span class="n">packets_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packets</span><span class="p">)</span>
+            <span class="n">first_frame_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">first_fid</span><span class="p">)</span>
+            <span class="n">gop_lens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gop_len</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">packets_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Single file, no merge needed</span>
+            <span class="k">return</span> <span class="n">packets_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">first_frame_ids</span><span class="p">,</span> <span class="n">gop_lens</span>
+
+        <span class="c1"># Merge multiple packet arrays using C++ implementation</span>
+        <span class="n">merged_packets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="o">.</span><span class="n">MergePacketDataToOne</span><span class="p">(</span><span class="n">packets_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">merged_packets</span><span class="p">,</span> <span class="n">first_frame_ids</span><span class="p">,</span> <span class="n">gop_lens</span>
+
+<div class="viewcode-block" id="CachedGopDecoder.clear_cache">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/api.html#accvlab.on_demand_video_decoder.CachedGopDecoder.clear_cache">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Clear all cached GOP data.</span>
+
+<span class="sd">        Call this method to free memory when cached data is no longer needed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gop_cache</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="CachedGopDecoder.get_cache_info">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/api.html#accvlab.on_demand_video_decoder.CachedGopDecoder.get_cache_info">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_cache_info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get information about the current cache state.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dictionary with cache statistics and per-file information</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;cached_files_count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gop_cache</span><span class="p">),</span> <span class="s2">&quot;cached_files&quot;</span><span class="p">:</span> <span class="p">{}}</span>
+        <span class="k">for</span> <span class="n">filepath</span><span class="p">,</span> <span class="p">(</span><span class="n">packets</span><span class="p">,</span> <span class="n">first_fid</span><span class="p">,</span> <span class="n">gop_len</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gop_cache</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">info</span><span class="p">[</span><span class="s2">&quot;cached_files&quot;</span><span class="p">][</span><span class="n">filepath</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;first_frame_id&quot;</span><span class="p">:</span> <span class="n">first_fid</span><span class="p">,</span>
+                <span class="s2">&quot;gop_len&quot;</span><span class="p">:</span> <span class="n">gop_len</span><span class="p">,</span>
+                <span class="s2">&quot;frame_range&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">first_fid</span><span class="p">,</span> <span class="n">first_fid</span> <span class="o">+</span> <span class="n">gop_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span>
+                <span class="s2">&quot;packets_size_bytes&quot;</span><span class="p">:</span> <span class="n">packets</span><span class="o">.</span><span class="n">nbytes</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">packets</span><span class="p">,</span> <span class="s1">&#39;nbytes&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">packets</span><span class="p">),</span>
+            <span class="p">}</span>
+        <span class="k">return</span> <span class="n">info</span></div>
+
+
+<div class="viewcode-block" id="CachedGopDecoder.isCacheHit">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/api.html#accvlab.on_demand_video_decoder.CachedGopDecoder.isCacheHit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">isCacheHit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get cache hit status for each file in the last method :meth:`GetGOP` or :meth:`GetGOPList` call.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List of booleans, one per file in the last :meth:`GetGOP` or :meth:`GetGOPList` call.</span>
+<span class="sd">            True indicates cache hit, False indicates cache miss.</span>
+<span class="sd">            Returns empty list if :meth:`GetGOP` or :meth:`GetGOPList` has not been called yet.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; decoder = CreateGopDecoder(maxfiles=6, iGpu=0)</span>
+<span class="sd">            &gt;&gt;&gt; files = [&#39;video1.mp4&#39;, &#39;video2.mp4&#39;, &#39;video3.mp4&#39;]</span>
+<span class="sd">            &gt;&gt;&gt; packets, first_ids, gop_lens = decoder.GetGOP(files, [77, 77, 77], useGOPCache=True)</span>
+<span class="sd">            &gt;&gt;&gt; cache_hits = decoder.isCacheHit()</span>
+<span class="sd">            &gt;&gt;&gt; # cache_hits = [False, False, False]  # First call, all miss</span>
+<span class="sd">            &gt;&gt;&gt;</span>
+<span class="sd">            &gt;&gt;&gt; packets, first_ids, gop_lens = decoder.GetGOP(files, [80, 80, 80], useGOPCache=True)</span>
+<span class="sd">            &gt;&gt;&gt; cache_hits = decoder.isCacheHit()</span>
+<span class="sd">            &gt;&gt;&gt; # cache_hits = [True, True, True]  # Second call in same GOP range, all hit</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_cache_hits</span></div>
+
+
+<div class="viewcode-block" id="CachedGopDecoder.GetGOPList">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/api.html#accvlab.on_demand_video_decoder.CachedGopDecoder.GetGOPList">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">GetGOPList</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">filepaths</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">frame_ids</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">fastStreamInfos</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
+        <span class="n">useGOPCache</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract per-video GOP data with optional caching support.</span>
+
+<span class="sd">        Unlike meth:`GetGOP` which returns merged data, this method returns separate</span>
+<span class="sd">        GOP data for each video, enabling more granular control and caching.</span>
+
+<span class="sd">        When useGOPCache=True, this method:</span>
+<span class="sd">        1. Checks cache hits for each file individually</span>
+<span class="sd">        2. Only demuxes for cache misses</span>
+<span class="sd">        3. Updates cache with new data</span>
+<span class="sd">        4. Returns results from cache (preserving original order)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepaths: List of video file paths to extract GOP data from</span>
+<span class="sd">            frame_ids: List of frame IDs to extract GOP data for (one per file)</span>
+<span class="sd">            fastStreamInfos: Optional list of FastStreamInfo objects for fast initialization</span>
+<span class="sd">            useGOPCache: If True, enables GOP caching. Default is False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List of tuples, one per video file, each containing</span>
+
+<span class="sd">            - numpy array with serialized GOP data for that video</span>
+<span class="sd">            - list of first frame IDs for each GOP in that video</span>
+<span class="sd">            - list of GOP lengths for each GOP in that video</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; decoder = CreateGopDecoder(maxfiles=6, iGpu=0)</span>
+<span class="sd">            &gt;&gt;&gt; files = [&#39;video1.mp4&#39;, &#39;video2.mp4&#39;]</span>
+<span class="sd">            &gt;&gt;&gt; # First call - fetches from video files</span>
+<span class="sd">            &gt;&gt;&gt; gop_list = decoder.GetGOPList(files, [77, 77], useGOPCache=True)</span>
+<span class="sd">            &gt;&gt;&gt; print(decoder.isCacheHit())  # [False, False]</span>
+<span class="sd">            &gt;&gt;&gt;</span>
+<span class="sd">            &gt;&gt;&gt; # Second call with frame_id in same GOP range - returns from cache</span>
+<span class="sd">            &gt;&gt;&gt; gop_list = decoder.GetGOPList(files, [80, 80], useGOPCache=True)</span>
+<span class="sd">            &gt;&gt;&gt; print(decoder.isCacheHit())  # [True, True]</span>
+<span class="sd">            &gt;&gt;&gt;</span>
+<span class="sd">            &gt;&gt;&gt; # Use with DecodeFromGOPListRGB</span>
+<span class="sd">            &gt;&gt;&gt; gop_data_list = [data for data, _, _ in gop_list]</span>
+<span class="sd">            &gt;&gt;&gt; frames = decoder.DecodeFromGOPListRGB(gop_data_list, files, [80, 80], True)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">useGOPCache</span><span class="p">:</span>
+            <span class="c1"># No caching, directly call C++ implementation</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_cache_hits</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">filepaths</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="o">.</span><span class="n">GetGOPList</span><span class="p">(</span><span class="n">filepaths</span><span class="p">,</span> <span class="n">frame_ids</span><span class="p">,</span> <span class="n">fastStreamInfos</span><span class="p">)</span>
+
+        <span class="c1"># Check cache hits for each file</span>
+        <span class="n">cache_hits</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_cache_hit</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">fid</span><span class="p">)</span> <span class="k">for</span> <span class="n">fp</span><span class="p">,</span> <span class="n">fid</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">filepaths</span><span class="p">,</span> <span class="n">frame_ids</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_cache_hits</span> <span class="o">=</span> <span class="n">cache_hits</span>
+
+        <span class="c1"># Find indices of cache misses</span>
+        <span class="n">miss_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">hit</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cache_hits</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">hit</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">miss_indices</span><span class="p">:</span>
+            <span class="c1"># Fetch data for cache misses only</span>
+            <span class="n">miss_filepaths</span> <span class="o">=</span> <span class="p">[</span><span class="n">filepaths</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">miss_indices</span><span class="p">]</span>
+            <span class="n">miss_frame_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">frame_ids</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">miss_indices</span><span class="p">]</span>
+            <span class="n">miss_fast_infos</span> <span class="o">=</span> <span class="p">[</span><span class="n">fastStreamInfos</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">miss_indices</span><span class="p">]</span> <span class="k">if</span> <span class="n">fastStreamInfos</span> <span class="k">else</span> <span class="p">[]</span>
+
+            <span class="n">miss_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="o">.</span><span class="n">GetGOPList</span><span class="p">(</span><span class="n">miss_filepaths</span><span class="p">,</span> <span class="n">miss_frame_ids</span><span class="p">,</span> <span class="n">miss_fast_infos</span><span class="p">)</span>
+
+            <span class="c1"># Update cache with new data</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">packets</span><span class="p">,</span> <span class="n">first_frame_ids_list</span><span class="p">,</span> <span class="n">gop_lens_list</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">miss_indices</span><span class="p">,</span> <span class="n">miss_results</span><span class="p">):</span>
+                <span class="n">filepath</span> <span class="o">=</span> <span class="n">filepaths</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                <span class="c1"># Each result contains data for a single file</span>
+                <span class="c1"># first_frame_ids_list and gop_lens_list are lists with single element</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_gop_cache</span><span class="p">[</span><span class="n">filepath</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">packets</span><span class="p">,</span> <span class="n">first_frame_ids_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">gop_lens_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># Build results from cache in original order</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">filepath</span> <span class="ow">in</span> <span class="n">filepaths</span><span class="p">:</span>
+            <span class="n">packets</span><span class="p">,</span> <span class="n">first_fid</span><span class="p">,</span> <span class="n">gop_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gop_cache</span><span class="p">[</span><span class="n">filepath</span><span class="p">]</span>
+            <span class="c1"># Return in GetGOPList format: (packets, [first_frame_id], [gop_len])</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">packets</span><span class="p">,</span> <span class="p">[</span><span class="n">first_fid</span><span class="p">],</span> <span class="p">[</span><span class="n">gop_len</span><span class="p">]))</span>
+
+        <span class="k">return</span> <span class="n">results</span></div>
+
+
+<div class="viewcode-block" id="CachedGopDecoder.__getattr__">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/api.html#accvlab.on_demand_video_decoder.CachedGopDecoder.__getattr__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Proxy all other attribute accesses to the internal decoder.</span>
+
+<span class="sd">        This ensures that all methods not explicitly overridden (like :meth:`~PyNvGopDecoder.DecodeFromGOPRGB`,</span>
+<span class="sd">        :meth:`~PyNvGopDecoder.DecodeFromGOPListRGB`, etc.) are transparently forwarded.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: The attribute name to access</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The attribute from the internal decoder</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_decoder</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="CreateGopDecoder">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/api.html#accvlab.on_demand_video_decoder.CreateGopDecoder">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">CreateGopDecoder</span><span class="p">(</span>
+    <span class="n">maxfiles</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">iGpu</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">suppressNoColorRangeWarning</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CachedGopDecoder</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize GOP decoder with set of particular parameters.</span>
+
+<span class="sd">    This factory function creates a :class:`CachedGopDecoder` instance with</span>
+<span class="sd">    transparent GOP caching support.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        maxfiles: Maximum number of unique files that can be processed concurrently</span>
+<span class="sd">        iGpu: GPU device ID to use for decoding (0 for primary GPU)</span>
+<span class="sd">        suppressNoColorRangeWarning: Suppress warning when no color range can be</span>
+<span class="sd">                                     extracted from video files (limited/MPEG range is assumed)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :class:`CachedGopDecoder` instance configured with the specified parameters</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RuntimeError: If GPU initialization fails or parameters are invalid</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; decoder = CreateGopDecoder(maxfiles=3, iGpu=0)</span>
+<span class="sd">        &gt;&gt;&gt; # Use with caching enabled</span>
+<span class="sd">        &gt;&gt;&gt; packets, fids, glens = decoder.GetGOP([&#39;v0.mp4&#39;], [10], useGOPCache=True)</span>
+<span class="sd">        &gt;&gt;&gt; # Subsequent calls with frame_id in same GOP return cached data</span>
+<span class="sd">        &gt;&gt;&gt; packets, fids, glens = decoder.GetGOP([&#39;v0.mp4&#39;], [15], useGOPCache=True)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cpp_decoder</span> <span class="o">=</span> <span class="n">_CreateGopDecoderCpp</span><span class="p">(</span><span class="n">maxfiles</span><span class="p">,</span> <span class="n">iGpu</span><span class="p">,</span> <span class="n">suppressNoColorRangeWarning</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">CachedGopDecoder</span><span class="p">(</span><span class="n">cpp_decoder</span><span class="p">,</span> <span class="n">_key</span><span class="o">=</span><span class="n">_CREATION_KEY</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

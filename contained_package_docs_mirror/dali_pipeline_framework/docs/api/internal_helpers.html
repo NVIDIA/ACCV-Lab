@@ -1,0 +1,598 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Internal Helpers Submodule &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Operators Impl Submodule" href="operators_impl.html" />
+    <link rel="prev" title="Additional API Reference" href="additional_api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">DALI Pipeline Framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../design.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main_api.html">Main API Reference</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="additional_api.html">Additional API Reference</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Internal Helpers Submodule</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.check_type"><code class="docutils literal notranslate"><span class="pre">check_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.print_tensor_op"><code class="docutils literal notranslate"><span class="pre">print_tensor_op()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.print_tensor_size_op"><code class="docutils literal notranslate"><span class="pre">print_tensor_size_op()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.get_mapped"><code class="docutils literal notranslate"><span class="pre">get_mapped()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.get_as_data_node"><code class="docutils literal notranslate"><span class="pre">get_as_data_node()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-accvlab.dali_pipeline_framework.internal_helpers.mini_parser">Mini-Parser</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Parser"><code class="docutils literal notranslate"><span class="pre">Parser</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.AST"><code class="docutils literal notranslate"><span class="pre">AST</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Assignment"><code class="docutils literal notranslate"><span class="pre">Assignment</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Literal"><code class="docutils literal notranslate"><span class="pre">Literal</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Variable"><code class="docutils literal notranslate"><span class="pre">Variable</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Comparison"><code class="docutils literal notranslate"><span class="pre">Comparison</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Or"><code class="docutils literal notranslate"><span class="pre">Or</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.And"><code class="docutils literal notranslate"><span class="pre">And</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Not"><code class="docutils literal notranslate"><span class="pre">Not</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.UnaryMinus"><code class="docutils literal notranslate"><span class="pre">UnaryMinus</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Lexer"><code class="docutils literal notranslate"><span class="pre">Lexer</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType"><code class="docutils literal notranslate"><span class="pre">TokenType</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Token"><code class="docutils literal notranslate"><span class="pre">Token</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="operators_impl.html">Operators Impl Submodule</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">DALI Pipeline Framework</a></li>
+          <li class="breadcrumb-item"><a href="additional_api.html">Additional API Reference</a></li>
+      <li class="breadcrumb-item active">Internal Helpers Submodule</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/contained_package_docs_mirror/dali_pipeline_framework/docs/api/internal_helpers.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-accvlab.dali_pipeline_framework.internal_helpers">
+<span id="internal-helpers-submodule"></span><h1>Internal Helpers Submodule<a class="headerlink" href="#module-accvlab.dali_pipeline_framework.internal_helpers" title="Link to this heading"></a></h1>
+<p>This module contains helper functions and classes which are used internally in the package
+or can be useful when debugging or implementing custom functionality.</p>
+<p>For debugging, <a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.print_tensor_op" title="accvlab.dali_pipeline_framework.internal_helpers.print_tensor_op"><code class="xref py py-func docutils literal notranslate"><span class="pre">print_tensor_op()</span></code></a> and <a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.print_tensor_size_op" title="accvlab.dali_pipeline_framework.internal_helpers.print_tensor_size_op"><code class="xref py py-func docutils literal notranslate"><span class="pre">print_tensor_size_op()</span></code></a> can be used to print tensors
+from within the DALI pipeline.</p>
+<p>The other functionality is used internally, and may be useful when implementing custom processing steps.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.check_type">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.internal_helpers.</span></span><span class="sig-name descname"><span class="pre">check_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_type_np</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/check_type.html#check_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.check_type" title="Link to this definition"></a></dt>
+<dd><p>Python operator for checking the type of the input.</p>
+<p>If the type of the input does not match the expected type, a ValueError is raised.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The check is performed at runtime, i.e. not the graph construction time.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Use the output of this function to tie the dependency on the check op, preventing it from being
+pruned or remain unused. Note that even though <code class="docutils literal notranslate"><span class="pre">preserve=True</span></code> is set in the operator performing the
+check, the operator may be not executed if the output is not used, meaning that no check will be
+performed.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – The input to check the type of.</p></li>
+<li><p><strong>expected_type_np</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dtype</span></code></a></span>) – The expected type of the input.</p></li>
+<li><p><strong>identifier</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The identifier of the input.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The same input. Use this output to tie the dependency on the check op, preventing it from being
+not called due to the unused output.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If the type of the input does not match the expected type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.print_tensor_op">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.internal_helpers.</span></span><span class="sig-name descname"><span class="pre">print_tensor_op</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/debug_helpers.html#print_tensor_op"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.print_tensor_op" title="Link to this definition"></a></dt>
+<dd><p>Python operator for printing a tensor list.</p>
+<p>This operator is used to print a tensor list while running the pipeline.
+Note that simply adding print statements to the pipeline will not work as
+those will be executed during the DALI graph construction phase, not the actual
+execution of the pipeline, and therefore, the printed objects will be
+<code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code> (i.e. “placeholder” objects) instead of the actual data.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The input is of type <a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a>, not a tensor list
+(<code class="xref py py-class docutils literal notranslate"><span class="pre">TensorListCPU</span></code> or
+<code class="xref py py-class docutils literal notranslate"><span class="pre">TensorListGPU</span></code>). This is because this function is called in the
+DALI pipeline definition, i.e. during the graph construction phase.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tensor_list</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – The tensor list to print.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The name of the tensor list (will be shown in the printed output).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.print_tensor_size_op">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.internal_helpers.</span></span><span class="sig-name descname"><span class="pre">print_tensor_size_op</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tensor_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/debug_helpers.html#print_tensor_size_op"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.print_tensor_size_op" title="Link to this definition"></a></dt>
+<dd><p>Python operator for printing the size of a tensor list.</p>
+<p>This operator is used to print the size of a tensor list while running the pipeline.
+See <a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.print_tensor_op" title="accvlab.dali_pipeline_framework.internal_helpers.print_tensor_op"><code class="xref py py-func docutils literal notranslate"><span class="pre">print_tensor_op()</span></code></a> for more details on why this operator is needed.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The input is of type <a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a>, not a tensor list
+(<code class="xref py py-class docutils literal notranslate"><span class="pre">TensorListCPU</span></code> or
+<code class="xref py py-class docutils literal notranslate"><span class="pre">TensorListGPU</span></code>). This is because this function is called in the
+DALI pipeline definition, i.e. during the graph construction phase.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tensor_list</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – The tensor list to print the size of.</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The name of the tensor list (will be shown in the printed output).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.get_mapped">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.internal_helpers.</span></span><span class="sig-name descname"><span class="pre">get_mapped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encapsulate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/helper_functions.html#get_mapped"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.get_mapped" title="Link to this definition"></a></dt>
+<dd><p>Mapping of original values to numerical values.</p>
+<p>Handles nested lists/tuples recursively.</p>
+<p>The mapping is a dictionary with the original values (i.e. inputs to be mapped) as keys and the mapped
+values (i.e. the corresponding output values) as values. The dictionary may have a key <code class="docutils literal notranslate"><span class="pre">None</span></code>, which
+is used as a default value if the input value is not in the mapping. If no <code class="docutils literal notranslate"><span class="pre">None</span></code> key is present,
+all the values must have a corresponding key in the mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – The value(s) to map.</p></li>
+<li><p><strong>mapping</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></span>) – The mapping to use.</p></li>
+<li><p><strong>encapsulate</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">False</span></code>) – Whether to encapsulate the result in a list.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a></span> – The mapped value(s).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.get_as_data_node">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.internal_helpers.</span></span><span class="sig-name descname"><span class="pre">get_as_data_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/helper_functions.html#get_as_data_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.get_as_data_node" title="Link to this definition"></a></dt>
+<dd><p>Convert a value to a DALI DataNode constant.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The result is always either an 32-bit integer or a 32-bit float
+(depending on the type of the input value).</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> – The value to convert to a DALI DataNode.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span> – The value as a DALI DataNode.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<section id="module-accvlab.dali_pipeline_framework.internal_helpers.mini_parser">
+<span id="mini-parser"></span><h2>Mini-Parser<a class="headerlink" href="#module-accvlab.dali_pipeline_framework.internal_helpers.mini_parser" title="Link to this heading"></a></h2>
+<p>This module contains the mini-parser for the DALI pipeline. See <a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Parser" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Parser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parser</span></code></a> for more details on the parser
+and <a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.AST" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.AST"><code class="xref py py-class docutils literal notranslate"><span class="pre">AST</span></code></a> and its subclasses for more details on the abstract syntax tree which is used as the
+output of the parser.</p>
+<p>The parser is used internally in the <code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotationConditionEval</span></code>
+processing step.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Parser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.internal_helpers.mini_parser.</span></span><span class="sig-name descname"><span class="pre">Parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/mini_parser/parser.html#Parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Parser" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>The actual parser.</p>
+<p>The input string must start with a variable name, followed by an assignment operator, followed by an
+expression.</p>
+<p>The expression is parsed recursively. The expression can contain variables, literals, and operators.</p>
+<dl class="simple">
+<dt>The operators are:</dt><dd><ul class="simple">
+<li><p>Logical operators: <code class="docutils literal notranslate"><span class="pre">or</span></code>, <code class="docutils literal notranslate"><span class="pre">and</span></code>, <code class="docutils literal notranslate"><span class="pre">not</span></code></p></li>
+<li><p>Comparison operators: <code class="docutils literal notranslate"><span class="pre">==</span></code>, <code class="docutils literal notranslate"><span class="pre">!=</span></code>, <code class="docutils literal notranslate"><span class="pre">&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">&gt;=</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;=</span></code></p></li>
+<li><p>Parentheses: <code class="docutils literal notranslate"><span class="pre">(</span></code> and <code class="docutils literal notranslate"><span class="pre">)</span></code></p></li>
+<li><p>Unary minus: <code class="docutils literal notranslate"><span class="pre">-</span></code></p></li>
+<li><p>Assignment operator: <code class="docutils literal notranslate"><span class="pre">=</span></code></p></li>
+</ul>
+</dd>
+<dt>The syntax is similar to Python. However, note that</dt><dd><ul class="simple">
+<li><p>Only the operators defined above are supported.</p></li>
+<li><p>Comparisons of more than two values are not supported (e.g. <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">&lt;</span> <span class="pre">b</span> <span class="pre">&lt;</span> <span class="pre">c</span></code> is not supported).</p></li>
+<li><p>Only numeric literals are supported. <code class="docutils literal notranslate"><span class="pre">True</span></code> and <code class="docutils literal notranslate"><span class="pre">False</span></code> are not supported (not needed in the current
+use case).</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<dl class="simple">
+<dt>Some valid statements:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">res_var</span> <span class="pre">=</span> <span class="pre">-_b1</span> <span class="pre">&lt;</span> <span class="pre">10.5</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">res_1_var</span> <span class="pre">=</span> <span class="pre">-_b1</span> <span class="pre">&lt;</span> <span class="pre">10.5</span> <span class="pre">and</span> <span class="pre">-c</span> <span class="pre">&gt;</span> <span class="pre">-20</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">res_3_var</span> <span class="pre">=</span> <span class="pre">not</span> <span class="pre">-_b1</span> <span class="pre">&lt;</span> <span class="pre">10.5</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">res_4_var</span> <span class="pre">=</span> <span class="pre">(-_b1</span> <span class="pre">&lt;</span> <span class="pre">10.5</span> <span class="pre">or</span> <span class="pre">a_bool_var)</span> <span class="pre">and</span> <span class="pre">another_nool_var</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">res_5_var</span> <span class="pre">=</span> <span class="pre">(-_b1</span> <span class="pre">&lt;</span> <span class="pre">10.5</span> <span class="pre">or</span> <span class="pre">(-c</span> <span class="pre">&gt;</span> <span class="pre">-20</span> <span class="pre">and</span> <span class="pre">d</span> <span class="pre">==</span> <span class="pre">10))</span> <span class="pre">and</span> <span class="pre">another_var</span> <span class="pre">&gt;</span> <span class="pre">30</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">res_7_var</span> <span class="pre">=</span> <span class="pre">(-_b1</span> <span class="pre">&lt;</span> <span class="pre">10.5</span> <span class="pre">or</span> <span class="pre">(-c</span> <span class="pre">&gt;</span> <span class="pre">-20</span> <span class="pre">and</span> <span class="pre">d</span> <span class="pre">==</span> <span class="pre">10))</span> <span class="pre">and</span> <span class="pre">(another_var</span> <span class="pre">&gt;</span> <span class="pre">30</span> <span class="pre">and</span> <span class="pre">_e</span> <span class="pre">&lt;</span> <span class="pre">40)</span> <span class="pre">and</span> <span class="pre">f</span> <span class="pre">&gt;</span> <span class="pre">50</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input_str</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Input string to parse.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Parser.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/mini_parser/parser.html#Parser.parse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Parser.parse" title="Link to this definition"></a></dt>
+<dd><p>Parses the input stream and returns an AST.</p>
+<p>See the class docstring for the syntax.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.AST" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.ast.AST"><code class="xref py py-class docutils literal notranslate"><span class="pre">AST</span></code></a></span> – The AST of the input stream.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.AST">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.internal_helpers.mini_parser.</span></span><span class="sig-name descname"><span class="pre">AST</span></span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/mini_parser/ast.html#AST"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.AST" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Base class for the AST nodes.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Assignment">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.internal_helpers.mini_parser.</span></span><span class="sig-name descname"><span class="pre">Assignment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expression</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/mini_parser/ast.html#Assignment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Assignment" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.AST" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.ast.AST"><code class="xref py py-class docutils literal notranslate"><span class="pre">AST</span></code></a></p>
+<p>Represents an assignment of a value to a variable.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The constructor parameters are also the attributes of the class.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>variable</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Variable" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.ast.Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></span>) – Variable to assign the value to.</p></li>
+<li><p><strong>expression</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.AST" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.ast.AST"><code class="xref py py-class docutils literal notranslate"><span class="pre">AST</span></code></a></span>) – Expression to evaluate and assign the result to the variable.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Literal">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.internal_helpers.mini_parser.</span></span><span class="sig-name descname"><span class="pre">Literal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/mini_parser/ast.html#Literal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Literal" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.AST" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.ast.AST"><code class="xref py py-class docutils literal notranslate"><span class="pre">AST</span></code></a></p>
+<p>Represents a literal value.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The constructor parameters are also the attributes of the class.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Value to represent.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Variable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.internal_helpers.mini_parser.</span></span><span class="sig-name descname"><span class="pre">Variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/mini_parser/ast.html#Variable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Variable" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.AST" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.ast.AST"><code class="xref py py-class docutils literal notranslate"><span class="pre">AST</span></code></a></p>
+<p>Represents a variable (by name).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The constructor parameters are also the attributes of the class.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Name of the variable.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Comparison">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.internal_helpers.mini_parser.</span></span><span class="sig-name descname"><span class="pre">Comparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparison_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/mini_parser/ast.html#Comparison"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Comparison" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.AST" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.ast.AST"><code class="xref py py-class docutils literal notranslate"><span class="pre">AST</span></code></a></p>
+<p>Represents a comparison.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The constructor parameters are also the attributes of the class.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val1</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Variable" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.ast.Variable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Variable</span></code></a></span>) – First value to compare.</p></li>
+<li><p><strong>comparison_type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Type of comparison to perform. Supported comparisons
+are <code class="docutils literal notranslate"><span class="pre">==</span></code>, <code class="docutils literal notranslate"><span class="pre">!=</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;</span></code>, <code class="docutils literal notranslate"><span class="pre">&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">&gt;=</span></code>, <code class="docutils literal notranslate"><span class="pre">&lt;=</span></code>.</p></li>
+<li><p><strong>val2</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Literal" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.ast.Literal"><code class="xref py py-class docutils literal notranslate"><span class="pre">Literal</span></code></a></span>) – Second value to compare.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Or">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.internal_helpers.mini_parser.</span></span><span class="sig-name descname"><span class="pre">Or</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">conditions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/mini_parser/ast.html#Or"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Or" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.AST" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.ast.AST"><code class="xref py py-class docutils literal notranslate"><span class="pre">AST</span></code></a></p>
+<p>Represents a logical <code class="docutils literal notranslate"><span class="pre">or</span></code> on a set of operands.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The constructor parameters are also the attributes of the class.
+The individual conditions are stored as a tuple.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>conditions</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.AST" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.ast.AST"><code class="xref py py-class docutils literal notranslate"><span class="pre">AST</span></code></a></span>) – Conditions to be combined with <code class="docutils literal notranslate"><span class="pre">or</span></code>. Note that the number of conditions is variable,
+i.e. more than two conditions can be combined.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.And">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.internal_helpers.mini_parser.</span></span><span class="sig-name descname"><span class="pre">And</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">conditions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/mini_parser/ast.html#And"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.And" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.AST" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.ast.AST"><code class="xref py py-class docutils literal notranslate"><span class="pre">AST</span></code></a></p>
+<p>Represents a logical <code class="docutils literal notranslate"><span class="pre">and</span></code> on a set of operands.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The constructor parameters are also the attributes of the class.
+The individual conditions are stored as a tuple.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>conditions</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.AST" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.ast.AST"><code class="xref py py-class docutils literal notranslate"><span class="pre">AST</span></code></a></span>) – Conditions to be combined with <code class="docutils literal notranslate"><span class="pre">and</span></code>. Note that the number of conditions is variable,
+i.e. more than two conditions can be combined.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Not">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.internal_helpers.mini_parser.</span></span><span class="sig-name descname"><span class="pre">Not</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">condition</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/mini_parser/ast.html#Not"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Not" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.AST" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.ast.AST"><code class="xref py py-class docutils literal notranslate"><span class="pre">AST</span></code></a></p>
+<p>Represents a logical <code class="docutils literal notranslate"><span class="pre">not</span></code> (i.e. negation) for an operand.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The constructor parameters are also the attributes of the class.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>condition</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.AST" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.ast.AST"><code class="xref py py-class docutils literal notranslate"><span class="pre">AST</span></code></a></span>) – Condition to be negated.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.UnaryMinus">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.internal_helpers.mini_parser.</span></span><span class="sig-name descname"><span class="pre">UnaryMinus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/mini_parser/ast.html#UnaryMinus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.UnaryMinus" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.AST" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.ast.AST"><code class="xref py py-class docutils literal notranslate"><span class="pre">AST</span></code></a></p>
+<p>Represents a unary minus.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The constructor parameters are also the attributes of the class.</p>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Lexer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.internal_helpers.mini_parser.</span></span><span class="sig-name descname"><span class="pre">Lexer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/mini_parser/lexer.html#Lexer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Lexer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Lexer for the simple parser.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>input</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Input string to generate tokens from.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Lexer.next_token">
+<span class="sig-name descname"><span class="pre">next_token</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/mini_parser/lexer.html#Lexer.next_token"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Lexer.next_token" title="Link to this definition"></a></dt>
+<dd><p>Returns the next token in the input stream</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Token" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.lexer.Token"><code class="xref py py-class docutils literal notranslate"><span class="pre">Token</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.internal_helpers.mini_parser.</span></span><span class="sig-name descname"><span class="pre">TokenType</span></span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/mini_parser/lexer.html#TokenType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Represents the type of a token</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.LITERAL">
+<span class="sig-name descname"><span class="pre">LITERAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'literal'</span></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.LITERAL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.VARIABLE">
+<span class="sig-name descname"><span class="pre">VARIABLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'variable'</span></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.VARIABLE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.ASSIGNMENT">
+<span class="sig-name descname"><span class="pre">ASSIGNMENT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'assignment'</span></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.ASSIGNMENT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.COMPARISON">
+<span class="sig-name descname"><span class="pre">COMPARISON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'comparison'</span></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.COMPARISON" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.LOGICAL_OR">
+<span class="sig-name descname"><span class="pre">LOGICAL_OR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'logical_or'</span></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.LOGICAL_OR" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.LOGICAL_AND">
+<span class="sig-name descname"><span class="pre">LOGICAL_AND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'logical_and'</span></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.LOGICAL_AND" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.LOGICAL_NOT">
+<span class="sig-name descname"><span class="pre">LOGICAL_NOT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'logical_not'</span></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.LOGICAL_NOT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.MINUS">
+<span class="sig-name descname"><span class="pre">MINUS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'minus'</span></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.MINUS" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.PARENTHESIS_OPEN">
+<span class="sig-name descname"><span class="pre">PARENTHESIS_OPEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'parenthesis_open'</span></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.PARENTHESIS_OPEN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.PARENTHESIS_CLOSE">
+<span class="sig-name descname"><span class="pre">PARENTHESIS_CLOSE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'parenthesis_close'</span></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.PARENTHESIS_CLOSE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.EOL">
+<span class="sig-name descname"><span class="pre">EOL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'end_of_line'</span></em><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType.EOL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Token">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.internal_helpers.mini_parser.</span></span><span class="sig-name descname"><span class="pre">Token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/internal_helpers/mini_parser/lexer.html#Token"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.Token" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Represents a token in the input stream.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The constructor parameters become attributes of the class.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.dali_pipeline_framework.internal_helpers.mini_parser.TokenType" title="accvlab.dali_pipeline_framework.internal_helpers.mini_parser.lexer.TokenType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TokenType</span></code></a></span>) – Type of the token.</p></li>
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Value of the token.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="additional_api.html" class="btn btn-neutral float-left" title="Additional API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="operators_impl.html" class="btn btn-neutral float-right" title="Operators Impl Submodule" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

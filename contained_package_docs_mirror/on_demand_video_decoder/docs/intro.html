@@ -1,0 +1,257 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Introduction &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="On Demand Video Decoder" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">On Demand Video Decoder</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#target-use-cases">Target Use Cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#key-benefits">Key Benefits</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#massive-storage-savings">1. Massive Storage Savings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reduced-cpu-overhead">2. Reduced CPU Overhead</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#flexible-decoding-methods">3. Flexible Decoding Methods</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#seamless-integration-with-pytorch">4. Seamless Integration with PyTorch</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#features">Features</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#functional-features">Functional Features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#high-performance-features">High-Performance Features</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#getting-started">Getting Started</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dataset_preparation.html">Dataset Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sample.html">Sample Code Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pytorch_integration_examples/index.html">PyTorch Integration Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">On Demand Video Decoder</a></li>
+      <li class="breadcrumb-item active">Introduction</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/contained_package_docs_mirror/on_demand_video_decoder/docs/intro.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">accvlab.on_demand_video_decoder</span></code> package provides hardware-accelerated GPU on-demand decoding
+capabilities for NVIDIA GPUs.</p>
+<p>The package internally leverages the Video Codec SDK’s core C/C++ video decode APIs and provides user-friendly
+Python interfaces. The package offers efficient and convenient methods for video frame extraction.</p>
+<p><img alt="accvlab.on_demand_video_decoder Overview" src="../../../_images/overview.png" /></p>
+<section id="target-use-cases">
+<h2>Target Use Cases<a class="headerlink" href="#target-use-cases" title="Link to this heading"></a></h2>
+<p>This package is specifically designed for scenarios that demand high video decoding throughput, including:</p>
+<ul class="simple">
+<li><p><strong>Autonomous Driving</strong>: Process large volumes of video data for training perception models</p></li>
+<li><p><strong>Multimodal Large Language Models (MLLMs)</strong>: Efficiently extract video frames for vision-language training</p></li>
+<li><p><strong>Video Understanding</strong>: Enable high-throughput video analysis for inference and training workloads</p></li>
+<li><p><strong>Additional Scenarios Sensitive to Video-Decode Throughput</strong></p></li>
+</ul>
+</section>
+<section id="key-benefits">
+<h2>Key Benefits<a class="headerlink" href="#key-benefits" title="Link to this heading"></a></h2>
+<section id="massive-storage-savings">
+<h3>1. Massive Storage Savings<a class="headerlink" href="#massive-storage-savings" title="Link to this heading"></a></h3>
+<p>Traditional workflows require extracting video frames and storing them as individual images on disk before
+training. This package eliminates this step by decoding frames <strong>on-demand</strong> directly from video files, saving
+approximately <strong>90% of disk storage</strong> with negligible performance overhead.</p>
+</section>
+<section id="reduced-cpu-overhead">
+<h3>2. Reduced CPU Overhead<a class="headerlink" href="#reduced-cpu-overhead" title="Link to this heading"></a></h3>
+<p>By offloading video decoding tasks to NVIDIA’s dedicated <strong>NVDEC hardware decoder</strong>, this package frees up CPU
+resources <strong>(~20%)</strong> for other critical training pipeline operations, improving overall system performance.</p>
+</section>
+<section id="flexible-decoding-methods">
+<h3>3. Flexible Decoding Methods<a class="headerlink" href="#flexible-decoding-methods" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">accvlab.on_demand_video_decoder</span></code> provides multiple decoding modes optimized for different workload
+patterns:</p>
+<ul class="simple">
+<li><p><strong>Random Decode</strong>: Optimized for large-batch scenarios with random video selection and random frame sampling</p></li>
+<li><p><strong>Stream Decode</strong>: Optimized for large-batch sequential frame decoding from videos</p></li>
+<li><p><strong>Separate Decode</strong>: Decouples demuxer and decoder components, enabling flexible configuration of the video
+decoding pipeline</p></li>
+<li><p><strong>Demuxer-Free Decode</strong>: Optimized for direct GOP (Group of Pictures) reading scenarios, balancing latency
+and storage efficiency</p></li>
+</ul>
+</section>
+<section id="seamless-integration-with-pytorch">
+<h3>4. Seamless Integration with PyTorch<a class="headerlink" href="#seamless-integration-with-pytorch" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">accvlab.on_demand_video_decoder</span></code> integrates efficiently with PyTorch, and detailed examples are provided to
+help users quickly integrate the package and boost workload performance.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="sample.html"><span class="std std-doc">Basic <code class="docutils literal notranslate"><span class="pre">accvlab.on_demand_video_decoder</span></code> Usage Sample Code</span></a></p></li>
+<li><p><a class="reference internal" href="pytorch_integration_examples/index.html"><span class="doc std std-doc">PyTorch Integration Examples</span></a></p></li>
+</ul>
+</div>
+</section>
+</section>
+<section id="features">
+<h2>Features<a class="headerlink" href="#features" title="Link to this heading"></a></h2>
+<section id="functional-features">
+<h3>Functional Features<a class="headerlink" href="#functional-features" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Codecs</strong>: H.264, HEVC, AV1.</p></li>
+<li><p><strong>Surface formats</strong>: NV12 (8 bit), YUV 4:2:0 (10 bit), YUV 4:4:4 (8 and 10 bit).</p></li>
+<li><p><strong><a class="reference external" href="https://ffmpeg.org/ffmpeg-formats.html#Demuxers">Video container formats</a></strong>: MP4, MOV, FLV, etc.</p></li>
+<li><p>DLPack support to facilitate data exchange with popular DL frameworks like PyTorch and TensorRT.</p></li>
+<li><p>Contains Python sample applications demonstrating API usage.</p></li>
+<li><p>Flexible decode method (random, stream, demuxer-decoder separation, decoder-only)</p></li>
+</ul>
+</section>
+<section id="high-performance-features">
+<h3>High-Performance Features<a class="headerlink" href="#high-performance-features" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Caching</strong>: Re-use of Demuxers, Decoders, Packets &amp; internally used data</p></li>
+<li><p><strong>Map-free</strong>: Avoid memory mapping for unneeded frames</p></li>
+<li><p><strong>Use GPU Memory Pool</strong>: Avoid frequent memory re-allocation (re-allocate only if total needed memory
+increases)</p></li>
+<li><p><strong>Producer-Customer Model</strong>:  Demuxer as producer, decoder as consumer, GOP as products.</p></li>
+<li><p><strong>NVDEC Pipeline</strong>: Pipeline utilizes all NVDEC units while ensuring load balancing with non-uniform GOP
+length</p></li>
+</ul>
+</section>
+</section>
+<section id="getting-started">
+<h2>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h2>
+<p>Please refer to the following sections to get started:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="installation.html"><span class="doc std std-doc"><strong>Installation</strong></span></a></p></li>
+<li><p><a class="reference internal" href="sample.html"><span class="doc std std-doc"><strong>Sample Code Documentation</strong></span></a></p></li>
+<li><p><strong>PyTorch Integration Examples</strong></p>
+<ul>
+<li><p><a class="reference internal" href="pytorch_integration_examples/dataloader_random_decode.html"><span class="doc std std-doc"><strong>Random decode with PyTorch</strong></span></a></p></li>
+<li><p><a class="reference internal" href="pytorch_integration_examples/dataloader_stream_decode.html"><span class="doc std std-doc"><strong>Stream decode with PyTorch</strong></span></a></p></li>
+<li><p><a class="reference internal" href="pytorch_integration_examples/dataloader_separation_decode.html"><span class="doc std std-doc"><strong>Separation decode with PyTorch</strong></span></a></p></li>
+<li><p><a class="reference internal" href="pytorch_integration_examples/dataloader_demuxer_free_decode.html"><span class="doc std std-doc"><strong>Demuxer-free decode with PyTorch</strong></span></a></p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">accvlab.on_demand_video_decoder</span></code> package builds upon and integrates with several key technologies:</p>
+<ul class="simple">
+<li><p><strong><a class="reference external" href="https://www.ffmpeg.org/">FFmpeg</a></strong>: A complete, cross-platform solution for video and audio processing
+that provides essential multimedia framework capabilities</p></li>
+<li><p><strong><a class="reference external" href="https://developer.nvidia.com/pynvvideocodec">PyNvVideoCodec</a></strong>: NVIDIA’s Python bindings for video codec
+operations</p></li>
+<li><p><strong><a class="reference external" href="https://developer.nvidia.com/video-codec-sdk">NVIDIA Video Codec SDK</a></strong>: The underlying SDK that provides
+hardware-accelerated video encode and decode capabilities on NVIDIA GPUs</p></li>
+</ul>
+<p>We are grateful to these projects and the open-source community for making high-performance video processing
+accessible.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="On Demand Video Decoder" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

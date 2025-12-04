@@ -1,0 +1,388 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.dali_pipeline_framework.processing_steps.photo_metric_distorter &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.dali_pipeline_framework.processing_steps.photo_metric_distorter</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.dali_pipeline_framework.processing_steps.photo_metric_distorter</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">nvidia.dali.fn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">nvidia.dali.math</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dali_math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">nvidia.dali.types</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">types</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">nvidia.dali.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataNode</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..pipeline.sample_data_group</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleDataGroup</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.pipeline_step_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">PipelineStepBase</span>
+
+
+<div class="viewcode-block" id="PhotoMetricDistorter">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.PhotoMetricDistorter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PhotoMetricDistorter</span><span class="p">(</span><span class="n">PipelineStepBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Apply photometric augmentations to images (brightness, contrast, saturation, hue, channel swap).</span>
+
+<span class="sd">    The same random decision &amp; parametrization for each augmentation is shared across all matched images to</span>
+<span class="sd">    keep consistency (e.g., across multi-view inputs).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">image_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+        <span class="n">min_max_brightness</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+        <span class="n">min_max_hue</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+        <span class="n">min_max_contrast</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+        <span class="n">min_max_saturation</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+        <span class="n">prob_brightness_aug</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">prob_hue_aug</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">prob_contrast_aug</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">prob_saturation_aug</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">prob_swap_channels</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">is_bgr</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">enforce_process_on_gpu</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            image_name: Name of the image data fields to augment.</span>
+<span class="sd">            min_max_brightness: Minimum and maximum biases to apply to the brightness. Note that as the</span>
+<span class="sd">                image may be in different ranges ([0; 1] for float images, [0; 255] for uint8 images), the</span>
+<span class="sd">                values provided here are expected to be in the corresponding range.</span>
+<span class="sd">            min_max_hue: Minimum and maximum change in hue (degrees).</span>
+<span class="sd">            min_max_contrast: Minimum and maximum contrast factor (multiplicative).</span>
+<span class="sd">            min_max_saturation: Minimum and maximum saturation factor (multiplicative in HSV space).</span>
+<span class="sd">            prob_brightness_aug: Probability to apply brightness augmentation. Default value is 0.5.</span>
+<span class="sd">            prob_hue_aug: Probability to apply hue change augmentation. Default value is 0.5.</span>
+<span class="sd">            prob_contrast_aug: Probability to apply contrast augmentation. Default value is 0.5.</span>
+<span class="sd">            prob_saturation_aug: Probability to apply saturation augmentation. Default value is 0.5.</span>
+<span class="sd">            prob_swap_channels: Probability to randomly permute color channels.</span>
+<span class="sd">            is_bgr: Whether the image is in BGR format (RGB otherwise).</span>
+<span class="sd">            enforce_process_on_gpu: Whether to enforce the augmentation to happen on the GPU, even if the input image is stored on the CPU.</span>
+<span class="sd">                Default value is ``True``.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_image_name</span> <span class="o">=</span> <span class="n">image_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_min_max_brightness</span> <span class="o">=</span> <span class="n">min_max_brightness</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_min_max_hue</span> <span class="o">=</span> <span class="n">min_max_hue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_min_max_contrast</span> <span class="o">=</span> <span class="n">min_max_contrast</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_min_max_saturation</span> <span class="o">=</span> <span class="n">min_max_saturation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prob_brightness_aug</span> <span class="o">=</span> <span class="n">prob_brightness_aug</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prob_hue_aug</span> <span class="o">=</span> <span class="n">prob_hue_aug</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prob_contrast_aug</span> <span class="o">=</span> <span class="n">prob_contrast_aug</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prob_saturation_aug</span> <span class="o">=</span> <span class="n">prob_saturation_aug</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prob_swap_channels</span> <span class="o">=</span> <span class="n">prob_swap_channels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_enforce_process_on_gpu</span> <span class="o">=</span> <span class="n">enforce_process_on_gpu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_image_format</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">DALIImageType</span><span class="o">.</span><span class="n">BGR</span> <span class="k">if</span> <span class="n">is_bgr</span> <span class="k">else</span> <span class="n">types</span><span class="o">.</span><span class="n">DALIImageType</span><span class="o">.</span><span class="n">RGB</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+        <span class="c1"># Note that only the actual image normalization becomes part of the DALI graph, the search for images as well as resolvong the paths obtained in order to access the image,</span>
+        <span class="c1"># and the change of the data type, happen at graph construction time and do not influence the run time.</span>
+
+        <span class="c1"># Find all images</span>
+        <span class="n">image_paths</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">find_all_occurrences</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_name</span><span class="p">)</span>
+
+        <span class="c1"># Get the images, while remembering original dtypes. We will process in float</span>
+        <span class="c1"># but return tensors with the original dtype.</span>
+        <span class="n">images</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_paths</span><span class="p">)</span>
+        <span class="n">image_types</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_paths</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ip</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">image_paths</span><span class="p">):</span>
+            <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_item_in_path</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span>
+            <span class="n">image_types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_type_of_item_in_path</span><span class="p">(</span><span class="n">ip</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">image_types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">,</span>
+                <span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">UINT8</span><span class="p">,</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Image type </span><span class="si">{</span><span class="n">image_types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2"> not supported&quot;</span>
+
+        <span class="c1"># Process the images</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_process_images</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">image_types</span><span class="p">)</span>
+
+        <span class="c1"># Set the updated images</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ip</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">image_paths</span><span class="p">):</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">set_item_in_path</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_and_adjust_data_format_input_to_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_empty</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+
+        <span class="n">image_paths</span> <span class="o">=</span> <span class="n">data_empty</span><span class="o">.</span><span class="n">find_all_occurrences</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_name</span><span class="p">)</span>
+
+        <span class="c1"># Make sure at least 1 image is available</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">image_paths</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No occurrences of images found. Fields containing images are expected to have the name &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_name</span><span class="si">}</span><span class="s2">&#39;, as specified in the constructor.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data_empty</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_process_images</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">images</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DataNode</span><span class="p">],</span> <span class="n">image_types</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Process the images.&#39;&#39;&#39;</span>
+
+        <span class="n">augmentation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_augmentation_setup</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">)):</span>
+
+            <span class="n">image_type</span> <span class="o">=</span> <span class="n">image_types</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">is_image_uint8</span> <span class="o">=</span> <span class="n">image_type</span> <span class="o">==</span> <span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">UINT8</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enforce_process_on_gpu</span><span class="p">:</span>
+                <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">gpu</span><span class="p">()</span>
+
+            <span class="c1"># Work in float domain in [0, 1] for all photometric ops</span>
+            <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">is_image_uint8</span><span class="p">:</span>
+                <span class="n">intensity_factor</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">255.0</span>
+                <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">intensity_factor</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">intensity_factor</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+            <span class="k">if</span> <span class="n">augmentation</span><span class="p">[</span><span class="s2">&quot;aug_brightness&quot;</span><span class="p">]:</span>
+                <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">augmentation</span><span class="p">[</span><span class="s2">&quot;delta&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">intensity_factor</span>
+                <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dali_math</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">augmentation</span><span class="p">[</span><span class="s2">&quot;contrast_mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">augmentation</span><span class="p">[</span><span class="s2">&quot;aug_contrast&quot;</span><span class="p">]:</span>
+                <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">augmentation</span><span class="p">[</span><span class="s2">&quot;alpha&quot;</span><span class="p">]</span>
+                <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dali_math</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">augmentation</span><span class="p">[</span><span class="s2">&quot;aug_saturation&quot;</span><span class="p">]:</span>
+                <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">saturation</span><span class="p">(</span>
+                    <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                    <span class="n">saturation</span><span class="o">=</span><span class="n">augmentation</span><span class="p">[</span><span class="s2">&quot;saturation&quot;</span><span class="p">],</span>
+                    <span class="n">image_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_format</span><span class="p">,</span>
+                    <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">augmentation</span><span class="p">[</span><span class="s2">&quot;aug_hue&quot;</span><span class="p">]:</span>
+                <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">hue</span><span class="p">(</span>
+                    <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                    <span class="n">hue</span><span class="o">=</span><span class="n">augmentation</span><span class="p">[</span><span class="s2">&quot;hue&quot;</span><span class="p">],</span>
+                    <span class="n">image_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_format</span><span class="p">,</span>
+                    <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">augmentation</span><span class="p">[</span><span class="s2">&quot;contrast_mode&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">augmentation</span><span class="p">[</span><span class="s2">&quot;aug_contrast&quot;</span><span class="p">]:</span>
+                <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">augmentation</span><span class="p">[</span><span class="s2">&quot;alpha&quot;</span><span class="p">]</span>
+                <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dali_math</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">augmentation</span><span class="p">[</span><span class="s2">&quot;aug_swap_channels&quot;</span><span class="p">]:</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">channel_permutation</span> <span class="o">=</span> <span class="n">augmentation</span><span class="p">[</span><span class="s2">&quot;channel_permutation&quot;</span><span class="p">]</span>
+                <span class="n">image_channels</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">image</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">channel_permutation</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span>
+                    <span class="n">image</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">channel_permutation</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                    <span class="n">image</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">channel_permutation</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span>
+                <span class="p">]</span>
+                <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="o">*</span><span class="n">image_channels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis_name</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Finally, cast back to original dtype and clamp to valid range</span>
+            <span class="k">if</span> <span class="n">is_image_uint8</span><span class="p">:</span>
+                <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="mf">255.0</span>
+                <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dali_math</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+                <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">image_type</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dali_math</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">images</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_augmentation_setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">get_color_channel_permutation</span><span class="p">(</span><span class="n">perm_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataNode</span><span class="p">:</span>
+            <span class="c1"># In total, there are 3! = 6 possibilities for permutations.</span>
+            <span class="c1"># These are realized here as enumerated cases instead of a</span>
+            <span class="c1"># permutation. This simplifies the processing and allows</span>
+            <span class="c1"># for easier randomization (i.e. only need to generate a single</span>
+            <span class="c1"># random number instead of sampling without replacement). The random</span>
+            <span class="c1"># number is input to this function.</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">idata</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">INT32</span><span class="p">)</span>
+            <span class="c1"># Identity permutation</span>
+            <span class="k">if</span> <span class="n">perm_index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="c1"># Pair-wise switch elements (includes inverting the order)</span>
+            <span class="k">elif</span> <span class="n">perm_index</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">idata</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">INT32</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">perm_index</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">idata</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">INT32</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">perm_index</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">idata</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">INT32</span><span class="p">)</span>
+            <span class="c1"># Shift elements by 1</span>
+            <span class="k">elif</span> <span class="n">perm_index</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">idata</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">INT32</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">perm_index</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">idata</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">INT32</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">res</span>
+
+        <span class="n">aug_brightness</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">fn</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prob_brightness_aug</span>
+        <span class="p">)</span>
+        <span class="n">aug_contrast</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">fn</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prob_contrast_aug</span>
+        <span class="p">)</span>
+        <span class="n">aug_saturation</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">fn</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prob_saturation_aug</span>
+        <span class="p">)</span>
+        <span class="n">aug_hue</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prob_hue_aug</span>
+        <span class="n">aug_swap_channels</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">fn</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prob_swap_channels</span>
+        <span class="p">)</span>
+
+        <span class="n">contrast_mode</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">INT8</span><span class="p">)</span>
+
+        <span class="n">delta</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">saturation</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">hue</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">channel_permutation</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">idata</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">INT32</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">aug_brightness</span><span class="p">:</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_random_in_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_max_brightness</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">aug_contrast</span><span class="p">:</span>
+            <span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_random_in_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_max_contrast</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">aug_hue</span><span class="p">:</span>
+            <span class="n">hue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_random_in_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_max_hue</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">aug_saturation</span><span class="p">:</span>
+            <span class="n">saturation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_random_in_range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_max_saturation</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">aug_swap_channels</span><span class="p">:</span>
+            <span class="n">pertmutation_index</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">INT32</span><span class="p">)</span>
+            <span class="n">channel_permutation</span> <span class="o">=</span> <span class="n">get_color_channel_permutation</span><span class="p">(</span><span class="n">pertmutation_index</span><span class="p">)</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;contrast_mode&quot;</span><span class="p">:</span> <span class="n">contrast_mode</span><span class="p">,</span>
+            <span class="s2">&quot;aug_brightness&quot;</span><span class="p">:</span> <span class="n">aug_brightness</span><span class="p">,</span>
+            <span class="s2">&quot;aug_contrast&quot;</span><span class="p">:</span> <span class="n">aug_contrast</span><span class="p">,</span>
+            <span class="s2">&quot;aug_saturation&quot;</span><span class="p">:</span> <span class="n">aug_saturation</span><span class="p">,</span>
+            <span class="s2">&quot;aug_hue&quot;</span><span class="p">:</span> <span class="n">aug_hue</span><span class="p">,</span>
+            <span class="s2">&quot;aug_swap_channels&quot;</span><span class="p">:</span> <span class="n">aug_swap_channels</span><span class="p">,</span>
+            <span class="s2">&quot;delta&quot;</span><span class="p">:</span> <span class="n">delta</span><span class="p">,</span>
+            <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="n">alpha</span><span class="p">,</span>
+            <span class="s2">&quot;hue&quot;</span><span class="p">:</span> <span class="n">hue</span><span class="p">,</span>
+            <span class="s2">&quot;saturation&quot;</span><span class="p">:</span> <span class="n">saturation</span><span class="p">,</span>
+            <span class="s2">&quot;channel_permutation&quot;</span><span class="p">:</span> <span class="n">channel_permutation</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_random_in_range</span><span class="p">(</span><span class="nb">range</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">range</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="nb">range</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="nb">range</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="nb">range</span><span class="o">=</span><span class="nb">range</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

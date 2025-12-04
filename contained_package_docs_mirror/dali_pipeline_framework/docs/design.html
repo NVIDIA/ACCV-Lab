@@ -1,0 +1,270 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Introduction &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Data Format: Sample Data Group" href="design/sample_data_group.html" />
+    <link rel="prev" title="DALI Pipeline Framework" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">DALI Pipeline Framework</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#why-dali">Why DALI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#why-the-adas-dali-pipeline-framework">Why the ADAS DALI Pipeline Framework</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pytorch-dali-proxy">PyTorch DALI Proxy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#our-approach">Our Approach</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="design/sample_data_group.html">Data Format: Sample Data Group</a></li>
+<li class="toctree-l4"><a class="reference internal" href="design/pipeline_processing_steps.html">Pipeline &amp; Processing Steps</a></li>
+<li class="toctree-l4"><a class="reference internal" href="design/input.html">Input – Passing Data to the Pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="design/output.html">Output – DALI Structured Output Iterator</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/main_api.html">Main API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/additional_api.html">Additional API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">DALI Pipeline Framework</a></li>
+      <li class="breadcrumb-item active">Introduction</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/contained_package_docs_mirror/dali_pipeline_framework/docs/design.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h1>
+<p>This page provides an overview of the design of the <a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/index.html" title="(in NVIDIA DALI v1.53.0-55113c6)"><span class="xref std std-doc">DALI</span></a> pipeline framework for
+the ADAS domain provided by this package.</p>
+<section id="why-dali">
+<h2>Why DALI<a class="headerlink" href="#why-dali" title="Link to this heading"></a></h2>
+<p>The NVIDIA Data Loading Library (DALI; see <a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/index.html" title="(in NVIDIA DALI v1.53.0-55113c6)"><span class="xref std std-doc">DALI documentation</span></a>) can be used to
+implement efficient GPU-accelerated data loading &amp; pre-processing pipelines, aimed at use in Deep Learning
+training scenarios.</p>
+<p>On the one hand, it provides a set of efficient
+operators (such as e.g. image decoding, affine &amp; color transformations, etc.), where most of them can be run
+both on the CPU and the GPU. On the other hand, DALI is based on pipelines, which allow efficient utilization
+of both the CPU and the GPU, while avoiding the need to transfer of data between processes when passing the
+pipeline output to the training implementation (which would typically
+entail GPU to CPU transfers if any data is on the GPU). This is achieved by a design where the Python
+pipeline implementation is
+not executed directly, but instead, is used to construct a DALI graph, which then is executed in parallel to
+the training implementation using native threading. The individual operators can choose to utilize additional
+worker threads for the processing of the data or run in a single thread. This allows efficient
+multi-threading for the CPU operators, while allowing GPU operators to operate on whole batches of data
+(using a single CPU thread to orchestrate the GPU workload for the whole batch),
+improving the achieved utilization of the GPU.</p>
+<p>The complexity of the data batching and threading is transparent to the user.
+While the pipeline processes batches of data, the Python pipeline definition can be written in a way as
+if a single sample is processed, simplifying the implementation. When branching is needed, DALI will
+automatically take care of grouping the samples for each of the branches, so that the individual operators
+still operate on a (reduced) batch of samples for each of the branches.</p>
+</section>
+<section id="why-the-adas-dali-pipeline-framework">
+<h2>Why the ADAS DALI Pipeline Framework<a class="headerlink" href="#why-the-adas-dali-pipeline-framework" title="Link to this heading"></a></h2>
+<p>While DALI enables the creation of efficient pipelines, implementing pipelines directly with DALI for complex
+training sample data formats, as are typically needed in the ADAS domain, is challenging. Individual samples
+typically represent a whole scene. Such a scene may e.g. contain 3D annotations, as well as data from
+multiple points in time, where for each time point, there may be ego-pose related information, as well as
+images from multiple cameras, each with its own projection geometry and set of 2D annotations.</p>
+<p>This data format setup is challenging to manage in DALI, which does not support nested data formats
+out-of-the-box. Additionally, some non-standard or unsupported operations (e.g. string processing) may be
+challenging to implement in DALI.</p>
+<section id="pytorch-dali-proxy">
+<h3>PyTorch DALI Proxy<a class="headerlink" href="#pytorch-dali-proxy" title="Link to this heading"></a></h3>
+<p>To mitigate this, DALI provides a PyTorch DALI proxy, which allows to perform most of the processing in
+the PyTorch data loader, while still using DALI for the most computationally intensive parts, leveraging the
+best of the two worlds. In this way, it is possible to use efficient DALI-based processing for computationally
+intensive parts, while keeping cheap, but often non-standard, processing steps in the PyTorch data loader. The
+hierarchical data format supported by the PyTorch data loader can also be preserved. While the DALI
+pipeline(s) still operate on a flat format, it can be inserted into the hierarchical data format supported by
+the PyTorch data loader.</p>
+</section>
+<section id="our-approach">
+<h3>Our Approach<a class="headerlink" href="#our-approach" title="Link to this heading"></a></h3>
+<p>In this package, we use a complimentary approach to simplify DALI pipeline implementation: We create a DALI
+pipeline framework, which is designed specifically for the needs of the ADAS domain, and which is designed to
+be modular and flexible, and enable easy definition of pipelines from scratch, using the pre-implemented
+processing steps.</p>
+<p>While the PyTorch DALI proxy is a good match for fixed and/or already existing PyTorch DataLoader
+implementations, it is challenging to use with modular pipelines, where individual pre-implemented processing
+steps can be combined into a pipeline (as the results of the DALI processing are not available inside the
+PyTorch data loader). Therefore, we implement the whole processing pipeline in DALI. Apart from that, we make
+extended use of the DALI graph construction step to implement
+flexible processing steps which are highly adaptable to the input data without incurring a runtime cost once
+the graph is constructed.</p>
+<p>We provide a helper data container (<a class="reference internal" href="api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a>) to
+manage nested data formats in DALI. We also provide a selection of pre-implemented processing steps, which
+operate on the data in this format. The package furthermore contains other components needed to build a DALI
+pipeline and provide the output data in a structured format.</p>
+<p>This approach enables us to:</p>
+<ul class="simple">
+<li><p>Make the processing steps highly flexible and adaptive to the input data. Making use of the DALI graph
+construction step, we can implement processing steps which e.g. dynamically search the input data for
+relevant entries (e.g. all images, or all data from a single camera), and process it accordingly. This
+avoids the need to enforce a fixed data format in each processing step. At the same time, this automation
+only incurs a one-time cost at pipeline construction time, not during the pipeline execution.</p></li>
+<li><p>Utilizing the <a class="reference internal" href="api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> class in combination with
+the <a class="reference internal" href="api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator" title="accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIStructuredOutputIterator</span></code></a> wrapper for the pipeline,
+we can provide a structured output in the exact same format that a typical PyTorch DataLoader would provide
+(i.e. a nested dictionary), so that the DALI pipeline can be used as a drop-in replacement, without the need
+to change the training implementation (except for the construction of the pipeline instead of a PyTorch
+DataLoader). Note that while this may be possible with the PyTorch DALI proxy, it is not supported
+out-of-the-box for pure DALI pipelines.</p></li>
+<li><p>Enforce a well-defined data format (as a <a class="reference internal" href="api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a>
+blueprint instance, containing the format, but not the actual data) &amp; check the processing steps for
+compatibility with each other &amp; the input data.</p></li>
+</ul>
+</section>
+</section>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">dali_pipeline_framework</span></code> package provides a flexible pipeline framework on top of DALI. It is designed
+to simplify the creation of pipelines for typical use-cases in the AUTO domain, as well as to enable
+integration into existing training implementations with as few changes as possible. Ideally, the only changes
+needed are related to the creation of the pipeline, while the rest of the training implementation remains
+unchanged. Please also see the <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a>.</p>
+<p>The pipeline framework is used to provide input data to the training. This task can be further broken down
+into the following steps:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Loading of data (typically from files)</p></li>
+<li><p>Processing the data, including augmentations, but also e.g. decoding of images, etc.</p></li>
+<li><p>Potentially post-processing the data (e.g. converting to a format not directly supported by DALI),
+and outputting it to the training implementation</p></li>
+</ul>
+</div></blockquote>
+<figure class="align-center" id="id1">
+<a class="reference internal image-reference" href="../../../_images/high_level_pipeline.png"><img alt="High-level illustration of the pipeline design" src="../../../_images/high_level_pipeline.png" style="width: 75%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Example pipeline for loading &amp; pre-processing the NuScenes dataset for 2D object detection.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>In the following pages, the <a class="reference internal" href="api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> data format is
+discussed first, followed by a discussion of the pipeline processing steps. Then, we discuss how to obtain the
+input data for the pipeline. Finally, we discuss how to output the data from the pipeline to the training
+implementation, allowing the pipeline to be used as a drop-in replacement for a PyTorch DataLoader.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="design/sample_data_group.html">Data Format: Sample Data Group</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design/pipeline_processing_steps.html">Pipeline &amp; Processing Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design/input.html">Input – Passing Data to the Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design/output.html">Output – DALI Structured Output Iterator</a></li>
+</ul>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Reading &amp; inputting the data to the pipeline is data-set &amp; use-case specific, and therefore needs to be
+implemented by the user of the package (see <a class="reference internal" href="design/input.html"><span class="doc">Input – Passing Data to the Pipeline</span></a>). We discuss the suggested approach as well
+as an example implementation for the NuScenes dataset in more detail in
+<a class="reference internal" href="examples/use_case_specific/nuscenes_data_loader.html"><span class="doc">Data Loading for NuScenes</span></a>.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="DALI Pipeline Framework" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="design/sample_data_group.html" class="btn btn-neutral float-right" title="Data Format: Sample Data Group" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

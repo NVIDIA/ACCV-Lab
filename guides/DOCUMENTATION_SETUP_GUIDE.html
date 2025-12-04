@@ -1,0 +1,746 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sphinx Documentation Setup Guide &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Contribution Guide" href="CONTRIBUTION_GUIDE.html" />
+    <link rel="prev" title="Code Formatting Guide" href="FORMATTING_GUIDE.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../guides_index.html">Guides</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="INSTALLATION_GUIDE.html">Installation Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DOCKER_GUIDE.html">Docker Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DEVELOPMENT_GUIDE.html">Development Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FORMATTING_GUIDE.html">Code Formatting Guide</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Sphinx Documentation Setup Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#key-features">Key Features</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#explicit-namespace-package-configuration">Explicit Namespace Package Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dynamic-documentation-generation">Dynamic Documentation Generation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#comprehensive-documentation-structure">Comprehensive Documentation Structure</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#main-documentation-directory-docs">Main Documentation Directory (<code class="docutils literal notranslate"><span class="pre">docs/</span></code>)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#source-documentation-structure-packages-package-name">Source Documentation Structure (<code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/</span></code>)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#how-to-work-with-the-documentation-system">How to Work With the Documentation System</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#adding-new-namespace-packages">Adding New Namespace Packages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#referenced-directories-configuration">Referenced Directories Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#building-documentation-locally">Building Documentation Locally</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spell-checking">Spell-checking</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#customizing-documentation">Customizing Documentation</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#for-individual-namespace-packages">For Individual Namespace Packages</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#modifying-the-common-documentation-style">Modifying the Common Documentation &amp; Style</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#custom-sphinx-extensions-and-styling">Custom Sphinx Extensions and Styling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#the-note-literalinclude-directive">The <code class="docutils literal notranslate"><span class="pre">note-literalinclude</span></code> Directive</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-module-docstring-directive">The <code class="docutils literal notranslate"><span class="pre">module-docstring</span></code> Directive</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#markdown-note-important-conversion">Markdown “Note/Important” Conversion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#device-notes-in-autodoc-docstrings">Device Notes in Autodoc Docstrings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#table-classes-and-wrapping">Table Classes and Wrapping</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#technical-details">Technical Details</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#sphinx-configuration-docs-conf-py">Sphinx Configuration (<code class="docutils literal notranslate"><span class="pre">docs/conf.py</span></code>)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#build-system">Build System</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#makefile-docs-makefile">Makefile (<code class="docutils literal notranslate"><span class="pre">docs/Makefile</span></code>)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#build-script-scripts-build-docs-sh">Build Script (<code class="docutils literal notranslate"><span class="pre">scripts/build_docs.sh</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#documentation-dependencies">Documentation Dependencies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#file-descriptions">File Descriptions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#core-configuration-files">Core Configuration Files</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#generation-scripts">Generation Scripts</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#documentation-structure">Documentation Structure</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#supporting-files">Supporting Files</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#build-and-deployment-files">Build and Deployment Files</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="CONTRIBUTION_GUIDE.html">Contribution Guide</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../guides_index.html">Guides</a></li>
+      <li class="breadcrumb-item active">Sphinx Documentation Setup Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/guides/DOCUMENTATION_SETUP_GUIDE.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="sphinx-documentation-setup-guide">
+<h1>Sphinx Documentation Setup Guide<a class="headerlink" href="#sphinx-documentation-setup-guide" title="Link to this heading"></a></h1>
+<p>This document explains the Sphinx documentation setup for ACCV-Lab.</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The documentation system provides:</p>
+<ul class="simple">
+<li><p><strong>Explicit namespace package configuration</strong> through <code class="docutils literal notranslate"><span class="pre">namespace_packages_config.py</span></code></p></li>
+<li><p><strong>Dynamic documentation generation</strong> for each configured namespace package</p></li>
+<li><p><strong>Comprehensive API reference</strong> with auto-generated content (extracted from docstrings)</p></li>
+<li><p><strong>Referenced directories mirroring</strong> to access files from the individual namespace packages in the
+documentation by</p>
+<ul>
+<li><p>collecting all the needed files from the individual namespace packages</p></li>
+<li><p>without introducing duplicates</p></li>
+<li><p>and while not breaking any relative path references to files inside the package documentation &amp; additional
+locations such as e.g. an <code class="docutils literal notranslate"><span class="pre">examples</span></code> directory from which files need to be displayed in the documentation.</p></li>
+</ul>
+</li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>When using links and file paths inside documents (<code class="docutils literal notranslate"><span class="pre">.md</span></code>/<code class="docutils literal notranslate"><span class="pre">.rst</span></code>) and directives
+(e.g., <code class="docutils literal notranslate"><span class="pre">include</span></code>, <code class="docutils literal notranslate"><span class="pre">image</span></code>, <code class="docutils literal notranslate"><span class="pre">literalinclude</span></code>) inside the documentation of the contained packages, it is
+recommended to use relative paths (which will be understood as relative to the current document) rather
+than absolute paths. This keeps package docs portable, and the links are valid both in the original package
+directory and when mirrored into the main documentation location
+(<code class="docutils literal notranslate"><span class="pre">docs/contained_package_docs_mirror/&lt;package&gt;/docs/</span></code>; see the
+<a class="reference internal" href="#comprehensive-documentation-structure">Comprehensive Documentation Structure</a> section).</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>When using relative paths inside docstrings (e.g. to insert images), these paths are understood
+as relative to the documentation file which includes the docstring (e.g. the file containing the <code class="docutils literal notranslate"><span class="pre">autodoc</span></code>
+directive). In this case, absolute paths can be used.</p>
+</div>
+</section>
+<section id="key-features">
+<h2>Key Features<a class="headerlink" href="#key-features" title="Link to this heading"></a></h2>
+<section id="explicit-namespace-package-configuration">
+<h3>Explicit Namespace Package Configuration<a class="headerlink" href="#explicit-namespace-package-configuration" title="Link to this heading"></a></h3>
+<p>The system uses explicit namespace package configuration via <code class="docutils literal notranslate"><span class="pre">namespace_packages_config.py</span></code>
+(see the <a class="reference internal" href="DEVELOPMENT_GUIDE.html#how-it-works"><span class="std std-ref">How It Works</span></a> section in the Development Guide).</p>
+</section>
+<section id="dynamic-documentation-generation">
+<h3>Dynamic Documentation Generation<a class="headerlink" href="#dynamic-documentation-generation" title="Link to this heading"></a></h3>
+<p>The documentation generation makes use of multiple scripts:</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">generate_new_namespace_package_docs.py</span></code></strong>: Creates documentation structure for new namespace packages</p>
+<ul>
+<li><p><strong>Template-based</strong>: Uses consistent templates for all namespace packages (but generated files may be
+modified as needed)</p></li>
+<li><p><strong>Safe regeneration</strong>: Only creates missing files if no <code class="docutils literal notranslate"><span class="pre">index.rst</span></code> is present for the namespace package</p></li>
+</ul>
+</li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">update_docs_index.py</span></code></strong>: Updates main index file by including references to newly added namespace
+packages</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">mirror_referenced_dirs.py</span></code></strong>: Mirrors (symlinks by default) the <code class="docutils literal notranslate"><span class="pre">docs</span></code> directory and other needed
+directories from the individual packages</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">sync_root_readme_for_docs.py</span></code></strong>: Copies the project root <code class="docutils literal notranslate"><span class="pre">README.md</span></code> into
+<code class="docutils literal notranslate"><span class="pre">docs/project_overview/README.md</span></code>, adjusting guide links so that the same overview content works both when
+viewing the original <code class="docutils literal notranslate"><span class="pre">README.md</span></code> file and inside the built documentation</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>Documentation will only be generated for packages listed in the <code class="docutils literal notranslate"><span class="pre">NAMESPACE_PACKAGES</span></code>
+configuration. Packages not in this list will be ignored during the documentation build process (also see
+the <a class="reference internal" href="DEVELOPMENT_GUIDE.html"><span class="std std-doc">Development Guide</span></a>).</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>The documentation generation scripts are automatically run during the documentation
+build process (see also the <code class="docutils literal notranslate"><span class="pre">Generation</span> <span class="pre">Scripts</span></code> subsection in the <em>Technical Details</em> section). You do not
+need to run them manually.</p>
+</div>
+</section>
+<section id="comprehensive-documentation-structure">
+<h3>Comprehensive Documentation Structure<a class="headerlink" href="#comprehensive-documentation-structure" title="Link to this heading"></a></h3>
+<section id="main-documentation-directory-docs">
+<h4>Main Documentation Directory (<code class="docutils literal notranslate"><span class="pre">docs/</span></code>)<a class="headerlink" href="#main-documentation-directory-docs" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>docs/
+├── conf.py                        # Sphinx configuration using namespace_packages_config
+├── index.rst                      # Main documentation index
+├── generate_new_namespace_package_docs.py   # Creates structure for new namespace packages
+├── update_docs_index.py           # Updates navigation and indices
+├── mirror_referenced_dirs.py      # Mirrors referenced directories (symlinks by default)
+├── sync_root_readme_for_docs.py   # Syncs project root README into docs/project_overview
+├── Makefile                       # Build commands
+├── requirements.txt               # Documentation dependencies
+├── project_overview/              # Synced copy of the project root README used as docs overview
+├── contained_package_docs_mirror/ # Mirrored package documentation via symlinks (or copies)
+│   ├── example_package/           # Example namespace package docs (representative)
+│   │   ├── docs/                  # Documentation files
+│   │   │   ├── index.rst          # Namespace package overview
+│   │   │   ├── intro.rst          # Introduction (manual content)
+│   │   │   └── api.rst            # API reference (auto-generated)
+│   │   └── examples/              # Additional mirrored directory (referenced in docs)
+│   └── [other_packages]/          # Other configured namespace packages
+├── common/                        # Shared documentation resources
+├── _static/css/
+│           └── custom.css         # Custom styling
+└── _build/                        # Built documentation output
+</pre></div>
+</div>
+<p><strong>Notes</strong>:</p>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">docs/contained_package_docs_mirror</span></code> structure shows the build-time documentation mirrored via symlinks
+(or copies)</p></li>
+<li><p>While only the <code class="docutils literal notranslate"><span class="pre">example_package</span></code> is shown in detail here, the actual documentation will contain all
+configured namespace packages</p></li>
+<li><p>If you need to refer one contained package documentation from another contained package documentation, you
+can do this by using relative paths according to this structure or by using absolute paths</p></li>
+</ul>
+</section>
+<section id="source-documentation-structure-packages-package-name">
+<h4>Source Documentation Structure (<code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/</span></code>)<a class="headerlink" href="#source-documentation-structure-packages-package-name" title="Link to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>packages/
+└── example_package/               # Example namespace package (representative)
+    ├── docs/                      # Source documentation files
+    │   ├── index.rst              # Namespace package overview
+    │   ├── intro.rst              # Introduction (manual content)
+    │   └── api.rst                # API reference (auto-generated)
+    ├── docu_referenced_dirs.txt   # List of additional directories to copy
+    ├── examples/                  # Example code (mirrored and referenced by docs)
+    └── [other_dirs]/              # Other package directories
+</pre></div>
+</div>
+<p><strong>Notes</strong>:</p>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">packages/example_package/</span></code> structure shows the source documentation that gets mirrored during build</p></li>
+<li><p><strong>⚠️ Important</strong>: Content should be edited in the source locations (<code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/docs/</span></code>), not in
+the mirrored locations</p></li>
+<li><p>In case of the <code class="docutils literal notranslate"><span class="pre">example_package</span></code>, the <code class="docutils literal notranslate"><span class="pre">examples/</span></code> directory is mirrored to maintain documentation references
+to example code. This can be achieved by listing it in the <code class="docutils literal notranslate"><span class="pre">docu_referenced_dirs.txt</span></code> file (see
+<a class="reference internal" href="#referenced-directories-configuration">Referenced Directories Configuration</a>)</p></li>
+<li><p>While we focus on the <code class="docutils literal notranslate"><span class="pre">example_package</span></code> package, the documentation setup of other packages is analogous</p></li>
+</ul>
+</section>
+</section>
+</section>
+<section id="how-to-work-with-the-documentation-system">
+<h2>How to Work With the Documentation System<a class="headerlink" href="#how-to-work-with-the-documentation-system" title="Link to this heading"></a></h2>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>To ensure correct generation of the API documentation, the <code class="docutils literal notranslate"><span class="pre">ACCV-Lab</span></code> package (i.e. all
+relevant namespace packages) needs to be installed first before generating the documentation. API
+documentation for non-installed namespace packages may be empty.</p>
+<p>For packages installed in <strong>normal</strong>
+(non-editable) mode, changes to code or docstrings are only picked up after reinstalling the affected
+packages (for example via <code class="docutils literal notranslate"><span class="pre">./scripts/install_local.sh</span></code>) and then rebuilding the documentation. When using
+<strong>editable</strong> installs, changes to pure-Python code and docstrings are typically visible on the next docs
+build, but changes coming from compiled extensions still require rebuilding/reinstalling those extensions.</p>
+</div>
+<section id="adding-new-namespace-packages">
+<h3>Adding New Namespace Packages<a class="headerlink" href="#adding-new-namespace-packages" title="Link to this heading"></a></h3>
+<p>To add a new namespace package and its documentation, see
+<a class="reference internal" href="DEVELOPMENT_GUIDE.html#adding-a-new-package-step-by-step-process"><span class="std std-ref">Adding a new Package: Step-by-Step Process</span></a>.
+Setting up the documentation for a new namespace package (including how to build it locally) is described in
+the <a class="reference internal" href="#building-documentation-locally">Building Documentation Locally</a> section.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>New namespace package must be added to the <code class="docutils literal notranslate"><span class="pre">NAMESPACE_PACKAGES</span></code> list in
+<code class="docutils literal notranslate"><span class="pre">namespace_packages_config.py</span></code> for template generation to work (see
+<a class="reference internal" href="DEVELOPMENT_GUIDE.html"><span class="std std-doc">Development Guide</span></a> for details).</p>
+</div>
+</section>
+<section id="referenced-directories-configuration">
+<h3>Referenced Directories Configuration<a class="headerlink" href="#referenced-directories-configuration" title="Link to this heading"></a></h3>
+<p>Each namespace package can specify additional directories that are referenced by its documentation using a
+<code class="docutils literal notranslate"><span class="pre">docu_referenced_dirs.txt</span></code> file in the package root directory.</p>
+<p><strong>File location</strong>: <code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/docu_referenced_dirs.txt</span></code></p>
+<p><strong>Example</strong> (for <code class="docutils literal notranslate"><span class="pre">example_package</span></code>):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># This file lists additional directories (besides docs) that are referenced by documentation</span>
+<span class="c1"># The docs directory is always mirrored automatically</span>
+<span class="c1"># Add one directory name per line, without the docs directory</span>
+<span class="c1"># Lines starting with # are comments and are ignored</span>
+
+<span class="n">examples</span>
+</pre></div>
+</div>
+<p><strong>Default behavior</strong>: If <code class="docutils literal notranslate"><span class="pre">docu_referenced_dirs.txt</span></code> doesn’t exist, only the <code class="docutils literal notranslate"><span class="pre">docs</span></code> directory is mirrored.</p>
+<p><strong>Purpose</strong>: This ensures that e.g. files included in the documentation (images, code examples, test files,
+etc.) can still be found after the documentation is mirrored to the build location.</p>
+<p><strong>Note that</strong>:</p>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">docs</span></code> directory is <strong>always mirrored automatically</strong> and should not be listed in this file</p></li>
+<li><p>Lines starting with <code class="docutils literal notranslate"><span class="pre">#</span></code> are treated as comments and ignored</p></li>
+<li><p>Empty lines are ignored</p></li>
+<li><p>Only list additional directories that are referenced by your documentation. Note that the API documentation
+does not rely on this mirroring, but is extracted from the installed packages.</p></li>
+</ul>
+</section>
+<section id="building-documentation-locally">
+<h3>Building Documentation Locally<a class="headerlink" href="#building-documentation-locally" title="Link to this heading"></a></h3>
+<p><strong>Quick build using the script</strong> (can be run from any directory, example shows running from the project
+root directory):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./scripts/build_docs.sh
+</pre></div>
+</div>
+<p><strong>Manual build</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>docs
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+make<span class="w"> </span>html
+</pre></div>
+</div>
+<p><strong>Development with auto-rebuild</strong>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>docs
+make<span class="w"> </span>livehtml
+</pre></div>
+</div>
+<p><strong>Build Process Details</strong>:</p>
+<ul class="simple">
+<li><p>The build process automatically runs the necessary scripts (see <a class="reference internal" href="#generation-scripts">Generation Scripts</a>)
+in sequence</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">html</span></code> target ensures all scripts run before building</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">livehtml</span></code> target also runs the scripts for development builds</p></li>
+<li><p>When running spelling via the script, the generation scripts are executed first to ensure mirrored package
+docs are up to date</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong><code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">livehtml</span></code> watches the <code class="docutils literal notranslate"><span class="pre">docs/</span></code> tree and mirrored package documentation, but:</p>
+<ul class="simple">
+<li><p>It does <strong>not</strong> rerun the <code class="docutils literal notranslate"><span class="pre">sync_root_readme_for_docs.py</span></code> script when you edit the project root
+<code class="docutils literal notranslate"><span class="pre">README.md</span></code>. This means that if you change the root <code class="docutils literal notranslate"><span class="pre">README.md</span></code> and want to see those changes reflected
+in <code class="docutils literal notranslate"><span class="pre">docs/project_overview/README.md</span></code>, you need to restart <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">livehtml</span></code> (or run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">sync-readme</span></code>
+once before continuing to work).</p></li>
+<li><p>It does <strong>not</strong> reinstall or rebuild packages for you. This means that if you change the docstrings in
+the source tree of a package, you need to reinstall the package (for example via
+<code class="docutils literal notranslate"><span class="pre">./scripts/install_local.sh</span></code>) and then restart <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">livehtml</span></code> to see updated docstrings.</p></li>
+</ul>
+</div>
+</section>
+<section id="spell-checking">
+<h3>Spell-checking<a class="headerlink" href="#spell-checking" title="Link to this heading"></a></h3>
+<p><strong>Spell-checking with sphinxcontrib-spelling</strong>:</p>
+<ul>
+<li><p>Quick run using the script:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./scripts/build_docs.sh<span class="w"> </span>--spelling
+</pre></div>
+</div>
+<p>This runs the doc generation steps, and executes the Sphinx spelling builder. Results are written to
+<code class="docutils literal notranslate"><span class="pre">docs/_build/spelling/output.txt</span></code>.</p>
+</li>
+<li><p>Manual run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>sphinxcontrib-spelling<span class="w"> </span>pyenchant
+<span class="nb">cd</span><span class="w"> </span>docs
+make<span class="w"> </span>generate
+make<span class="w"> </span>spelling
+</pre></div>
+</div>
+<p>The spelling report will be at <code class="docutils literal notranslate"><span class="pre">_build/spelling/output.txt</span></code>.</p>
+</li>
+<li><p><strong>Note</strong>: On some Linux systems you may need a system-level Enchant library. If you see errors related to
+Enchant, install it via your package manager (e.g., <code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">apt</span> <span class="pre">install</span> <span class="pre">enchant-2</span></code> on Debian/Ubuntu).</p></li>
+<li><p>Whitelisting words (project-specific words or general words which are not part of the used dictionary):</p>
+<ul class="simple">
+<li><p>Add words (one per line) to <code class="docutils literal notranslate"><span class="pre">docs/spelling_wordlist.txt</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">namespace</span></code>, <code class="docutils literal notranslate"><span class="pre">ACCV-Lab</span></code>).</p></li>
+<li><p>Re-run the spelling check. These words will no longer be flagged.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="customizing-documentation">
+<h3>Customizing Documentation<a class="headerlink" href="#customizing-documentation" title="Link to this heading"></a></h3>
+<section id="for-individual-namespace-packages">
+<h4>For Individual Namespace Packages<a class="headerlink" href="#for-individual-namespace-packages" title="Link to this heading"></a></h4>
+<p>Each namespace package documentation is located in <code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/docs/</span></code> and is automatically
+mirrored to <code class="docutils literal notranslate"><span class="pre">docs/contained_package_docs_mirror/&lt;package_name&gt;/docs/</span></code>.</p>
+<p><strong>Example structure</strong> (for <code class="docutils literal notranslate"><span class="pre">example_package</span></code>):</p>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">intro.rst</span></code></strong>: Manual introduction and overview (customize this)</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">api.rst</span></code></strong>: Auto-generated API reference (the file can be modified e.g. to add short sections, but the
+API is auto-extracted)</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">index.rst</span></code></strong>: Table of contents for the namespace package as well as the “entry point”. This file needs
+to be present in the folder.</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>When editing documentation, work directly in the <code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/docs/</span></code>
+directory, not in the <code class="docutils literal notranslate"><span class="pre">docs/contained_package_docs_mirror/&lt;package_name&gt;/docs/</span></code> directory.</p>
+<p><strong>Example</strong>: For <code class="docutils literal notranslate"><span class="pre">example_package</span></code>, edit files in <code class="docutils literal notranslate"><span class="pre">packages/example_package/docs/</span></code>, not in
+<code class="docutils literal notranslate"><span class="pre">docs/contained_package_docs_mirror/example_package/docs/</span></code>.</p>
+</div>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">index.rst</span></code> is the “entry point” which is referenced by the <code class="docutils literal notranslate"><span class="pre">ACCV-Lab</span></code> documentation and needs to
+be present. All other files may be changed (e.g. removed, renamed) and new files may be added. In this case,
+ensure that within the namespace package, all the needed files are referenced from <code class="docutils literal notranslate"><span class="pre">index.rst</span></code> (either
+directly or indirectly).</p>
+</section>
+<section id="modifying-the-common-documentation-style">
+<h4>Modifying the Common Documentation &amp; Style<a class="headerlink" href="#modifying-the-common-documentation-style" title="Link to this heading"></a></h4>
+<p>Possible modifications include:</p>
+<ul class="simple">
+<li><p>Modify <code class="docutils literal notranslate"><span class="pre">docs/conf.py</span></code> for Sphinx configuration</p></li>
+<li><p>Edit <code class="docutils literal notranslate"><span class="pre">docs/_static/custom.css</span></code> for styling</p></li>
+<li><p>Add shared content in <code class="docutils literal notranslate"><span class="pre">docs/common/</span></code></p></li>
+<li><p>Update <code class="docutils literal notranslate"><span class="pre">docs/index.rst</span></code> for main navigation</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>The high-level project overview used in the documentation is sourced from the project root
+<code class="docutils literal notranslate"><span class="pre">README.md</span></code> and mirrored into <code class="docutils literal notranslate"><span class="pre">docs/project_overview/README.md</span></code> by <code class="docutils literal notranslate"><span class="pre">sync_root_readme_for_docs.py</span></code>. Edit the
+root <code class="docutils literal notranslate"><span class="pre">README.md</span></code> rather than the mirrored copy; the docs build will keep them in sync.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>When modifying the documentation in these ways, make sure to not break the documentation
+generation for any of the namespace packages.</p>
+</div>
+</section>
+</section>
+</section>
+<section id="custom-sphinx-extensions-and-styling">
+<h2>Custom Sphinx Extensions and Styling<a class="headerlink" href="#custom-sphinx-extensions-and-styling" title="Link to this heading"></a></h2>
+<p>The build adds several custom features that improve code inclusion, device notes in API docs, and table
+readability. These are configured in <code class="docutils literal notranslate"><span class="pre">docs/conf.py</span></code>, implemented in:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">docs/_ext/note_literalinclude.py</span></code> (note-literalinclude directive)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docs/_ext/module_docstring.py</span></code> (module-docstring directive)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docs/_ext/markdown_note_admonitions.py</span></code> (Markdown “Note/Important” → admonitions)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docs/conf.py</span></code> (autodoc device-note processing and configuration)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docs/_static/css/custom.css</span></code> (styling for <code class="docutils literal notranslate"><span class="pre">.device-note</span></code>, <code class="docutils literal notranslate"><span class="pre">no-scroll</span></code>, and autosummary tables)</p></li>
+</ul>
+<p>and styled via <code class="docutils literal notranslate"><span class="pre">docs/_static/css/custom.css</span></code>.</p>
+<section id="the-note-literalinclude-directive">
+<h3>The <code class="docutils literal notranslate"><span class="pre">note-literalinclude</span></code> Directive<a class="headerlink" href="#the-note-literalinclude-directive" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Include code files and automatically highlight “note blocks” inside the code (e.g., lines starting with a
+note tag and their continued lines).</p></li>
+<li><p>Example:</p></li>
+</ul>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span><span class="p">..</span> <span class="ow">note-literalinclude</span><span class="p">::</span> ../examples/basic_usage.py
+   <span class="nc">:language:</span> python
+   <span class="nc">:caption:</span> Simple usage example
+   <span class="nc">:note-tag:</span> #@NOTE;# @NOTE   # optional, defaults to &#39;#@NOTE;# @NOTE&#39;
+   <span class="nc">:note-cont:</span> #              # optional, defaults to &#39;#&#39;
+   <span class="nc">:highlight-notes:</span> true     # optional, defaults to true
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Behavior: Lines starting with any tag in <code class="docutils literal notranslate"><span class="pre">:note-tag:</span></code> (default: <code class="docutils literal notranslate"><span class="pre">#&#64;NOTE</span></code> or <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">&#64;NOTE</span></code>) are highlighted,
+and highlighting continues on subsequent lines that start with the continuation prefix (default: <code class="docutils literal notranslate"><span class="pre">#</span></code>)
+until a non-matching line is encountered.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">:highlight-notes:</span></code> is <code class="docutils literal notranslate"><span class="pre">false</span></code>, it behaves like a normal <code class="docutils literal notranslate"><span class="pre">literalinclude</span></code>.</p></li>
+</ul>
+</section>
+<section id="the-module-docstring-directive">
+<h3>The <code class="docutils literal notranslate"><span class="pre">module-docstring</span></code> Directive<a class="headerlink" href="#the-module-docstring-directive" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Render the top-level docstring of a Python module directly:</p></li>
+</ul>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span><span class="p">..</span> <span class="ow">module-docstring</span><span class="p">::</span> ../../packages/example_package/accvlab/example_package/__init__.py
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Behavior: Reads and parses the given module file and renders only its module-level docstring at the place
+of the directive. Note that in contrast to the API documentation, the docstring is read directly from the
+indicated file and not from the installed package. This is e.g. useful for docstrings originating from
+examples, which are not part of the installed package.</p></li>
+</ul>
+</section>
+<section id="markdown-note-important-conversion">
+<h3>Markdown “Note/Important” Conversion<a class="headerlink" href="#markdown-note-important-conversion" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Converts Markdown blockquoted notes into Sphinx admonitions at build time, while keeping the Markdown source
+readable in GitHub/IDEs.</p></li>
+<li><p>Implemented in: <code class="docutils literal notranslate"><span class="pre">docs/_ext/markdown_note_admonitions.py</span></code></p></li>
+<li><p>How to write notes in Markdown (examples):</p></li>
+</ul>
+<div class="highlight-md notranslate"><div class="highlight"><pre><span></span><span class="k">&gt; </span><span class="ge">**ℹ️ Note**: Short tip for the reader.</span>
+
+<span class="k">&gt; </span><span class="ge">**⚠️ Important**: Crucial warning users must not miss.</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Accepted variants:</p>
+<ul>
+<li><p>With or without symbols: <code class="docutils literal notranslate"><span class="pre">ℹ️</span></code>, <code class="docutils literal notranslate"><span class="pre">ⓘ</span></code>, <code class="docutils literal notranslate"><span class="pre">(i)</span></code>, <code class="docutils literal notranslate"><span class="pre">i</span></code>, <code class="docutils literal notranslate"><span class="pre">!</span></code>, <code class="docutils literal notranslate"><span class="pre">⚠️</span></code></p></li>
+<li><p>With or without bold around the word</p></li>
+<li><p>With or without a trailing colon after “Note”/“Important”</p></li>
+<li><p>Examples that also convert:</p></li>
+</ul>
+</li>
+</ul>
+<div class="highlight-md notranslate"><div class="highlight"><pre><span></span><span class="k">&gt; </span><span class="ge">Note: ...</span>
+<span class="k">&gt; </span><span class="ge">**Note** ...</span>
+<span class="k">&gt; </span><span class="ge">! Important ...</span>
+<span class="k">&gt; </span><span class="ge">(i) Note ...</span>
+<span class="k">&gt; </span><span class="ge">⚠️ Important ...</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>Multi-line notes are supported. In this case, all lines must start with <code class="docutils literal notranslate"><span class="pre">&gt;</span></code>, and the whole
+so defined block will be converted to an admonition.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>When using the MyST Markdown parser (used in the Sphinx documentation), you can also use the
+built-in fenced admonitions (for example <code class="docutils literal notranslate"><span class="pre">```{note}</span></code> / <code class="docutils literal notranslate"><span class="pre">```{important}</span></code> as opening fences). However,
+the blockquote-based syntax described here is meant to be compatible with plain Markdown viewers (such as
+GitHub or IDEs), also highlighting the note/important text if it is not converted to a Sphinx admonition.
+Therefore, this blockquote-based syntax is preferred for files that should work both as standalone <code class="docutils literal notranslate"><span class="pre">.md</span></code>
+files and as part of the built documentation. If the file is only used as part of the built documentation,
+the fenced admonitions should be used instead.</p>
+</div>
+<ul class="simple">
+<li><p>Scope:</p>
+<ul>
+<li><p>Only blockquotes are converted (lines starting with <code class="docutils literal notranslate"><span class="pre">&gt;</span></code>). Plain list items or inline text containing
+“Note:”/“Important:” are not converted.</p></li>
+<li><p>Nested blockquotes inside lists are supported (the quoted block is converted).</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="device-notes-in-autodoc-docstrings">
+<h3>Device Notes in Autodoc Docstrings<a class="headerlink" href="#device-notes-in-autodoc-docstrings" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Autodoc-rendered Python docstrings can show a highlighted “device” note at the top by adding one of the
+following markers as a separate line in the docstring:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">:gpu:</span></code> → renders a note that inputs are expected on GPU</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">:cpu:</span></code> → renders a note that inputs are expected on CPU</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">:device:</span> <span class="pre">&lt;TEXT&gt;</span></code> → renders a note that inputs are expected on the specified device text (e.g., <code class="docutils literal notranslate"><span class="pre">GPU</span></code>,
+<code class="docutils literal notranslate"><span class="pre">CPU</span></code>)</p></li>
+</ul>
+</li>
+<li><p>Example (Python):</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">my_function</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Short description.</span>
+
+<span class="sd">    :gpu:</span>
+
+<span class="sd">    More details about usage...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Behavior: During autodoc processing, these markers are detected and replaced with an emphasized note at
+the top of the rendered docstring. The note is styled with the <code class="docutils literal notranslate"><span class="pre">.device-note</span></code> CSS class.</p></li>
+</ul>
+</section>
+<section id="table-classes-and-wrapping">
+<h3>Table Classes and Wrapping<a class="headerlink" href="#table-classes-and-wrapping" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>To avoid horizontal scrolling and allow wrapping for specific tables, use the <code class="docutils literal notranslate"><span class="pre">no-scroll</span></code> table class:</p></li>
+</ul>
+<div class="highlight-rst notranslate"><div class="highlight"><pre><span></span><span class="p">..</span> <span class="ow">table</span><span class="p">::</span> Example table
+   <span class="nc">:class:</span> no-scroll
+
+   +------------------+---------------------+
+   <span class="o">|</span> Column A         | Column B            |
+   +------------------+---------------------+
+   <span class="o">|</span> Long content ... | More long content … |
+   +------------------+---------------------+
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Autosummary tables are styled to wrap cell contents automatically; no additional class is required.</p></li>
+</ul>
+</section>
+</section>
+<section id="technical-details">
+<h2>Technical Details<a class="headerlink" href="#technical-details" title="Link to this heading"></a></h2>
+<section id="sphinx-configuration-docs-conf-py">
+<h3>Sphinx Configuration (<code class="docutils literal notranslate"><span class="pre">docs/conf.py</span></code>)<a class="headerlink" href="#sphinx-configuration-docs-conf-py" title="Link to this heading"></a></h3>
+<p>The configuration includes:</p>
+<ul class="simple">
+<li><p><strong>Explicit namespace package import</strong> from <code class="docutils literal notranslate"><span class="pre">namespace_packages_config.py</span></code> (in the helper scripts)</p></li>
+<li><p><strong>Local extension path setup</strong> (<code class="docutils literal notranslate"><span class="pre">docs/_ext</span></code>); autodoc imports installed ACCV-Lab packages</p></li>
+<li><p><strong>Extension configuration</strong> for autodoc, autosummary, and more</p></li>
+<li><p><strong>Theme configuration</strong> with Read the Docs theme</p></li>
+<li><p><strong>Cross-reference setup</strong> with intersphinx</p></li>
+</ul>
+</section>
+<section id="build-system">
+<h3>Build System<a class="headerlink" href="#build-system" title="Link to this heading"></a></h3>
+<section id="makefile-docs-makefile">
+<h4>Makefile (<code class="docutils literal notranslate"><span class="pre">docs/Makefile</span></code>)<a class="headerlink" href="#makefile-docs-makefile" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Standard Sphinx targets</strong>: html, clean, etc.</p></li>
+<li><p><strong>Custom targets</strong>:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">generate</span></code>: Runs all documentation generation scripts for namespace packages</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sync-readme</span></code>: Syncs the project root <code class="docutils literal notranslate"><span class="pre">README.md</span></code> into <code class="docutils literal notranslate"><span class="pre">docs/project_overview/README.md</span></code> with adjusted
+links</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">livehtml</span></code>: Development build with auto-reload (also runs <code class="docutils literal notranslate"><span class="pre">sync-readme</span></code> and <code class="docutils literal notranslate"><span class="pre">generate</span></code> before starting)</p></li>
+</ul>
+</li>
+<li><p><strong>Development support</strong>: Live reload and other dev features</p></li>
+</ul>
+</section>
+<section id="build-script-scripts-build-docs-sh">
+<h4>Build Script (<code class="docutils literal notranslate"><span class="pre">scripts/build_docs.sh</span></code>)<a class="headerlink" href="#build-script-scripts-build-docs-sh" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong>Dependency installation</strong>: Installs documentation requirements from <code class="docutils literal notranslate"><span class="pre">docs/requirements.txt</span></code></p></li>
+<li><p><strong>Complete build process</strong>: Generation + Sphinx build</p></li>
+<li><p><strong>Browser integration</strong>: Optionally opens documentation</p></li>
+<li><p><strong>Error handling</strong>: Provides clear error messages</p></li>
+<li><p><strong>Location</strong>: Can be run from any directory (script automatically determines project root)</p></li>
+</ul>
+</section>
+</section>
+<section id="documentation-dependencies">
+<h3>Documentation Dependencies<a class="headerlink" href="#documentation-dependencies" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">docs/requirements.txt</span></code> file contains the Python packages needed for building documentation (separate from
+the per-package runtime dependencies defined in each package’s <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>):</p>
+<ul class="simple">
+<li><p>Sphinx and related extensions</p></li>
+<li><p>Theme packages</p></li>
+<li><p>Other documentation-specific dependencies</p></li>
+</ul>
+</section>
+<section id="file-descriptions">
+<h3>File Descriptions<a class="headerlink" href="#file-descriptions" title="Link to this heading"></a></h3>
+<section id="core-configuration-files">
+<h4>Core Configuration Files<a class="headerlink" href="#core-configuration-files" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">namespace_packages_config.py</span></code></strong>: Shared namespace package configuration (PROJECT ROOT)</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">docs/conf.py</span></code></strong>: Sphinx configuration using shared config</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">docs/index.rst</span></code></strong>: Main documentation index with navigation. Note that this file contains a template for
+including the namespace packages, as well as an auto-generated table of contents for the namespace packages
+using the template (see the comments in the file for more details).</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">docs/requirements.txt</span></code></strong>: Documentation dependencies</p></li>
+</ul>
+</section>
+<section id="generation-scripts">
+<h4>Generation Scripts<a class="headerlink" href="#generation-scripts" title="Link to this heading"></a></h4>
+<p>The documentation build relies on the helper scripts described in
+the <a class="reference internal" href="#dynamic-documentation-generation">Dynamic Documentation Generation</a> section. These scripts are invoked
+automatically as part of the docs build; you normally do not need to run them manually.</p>
+</section>
+<section id="documentation-structure">
+<h4>Documentation Structure<a class="headerlink" href="#documentation-structure" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/docs/index.rst</span></code></strong>: Namespace package overview (source)</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/docs/intro.rst</span></code></strong>: Manual introduction content (source)</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/docs/api.rst</span></code></strong>: Auto-generated API reference (source)</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/docu_referenced_dirs.txt</span></code></strong>: List of directories containing files used in the
+documentation in addition to <code class="docutils literal notranslate"><span class="pre">docs</span></code> (to mirror into the documentation source directory).</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">docs/contained_package_docs_mirror/&lt;package_name&gt;/docs/</span></code></strong>: Mirrored documentation (symlink to the
+individual packages by default)</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">docs/contained_package_docs_mirror/&lt;package_name&gt;/[other_dirs]/</span></code></strong>: Additional mirrored directories as
+specified in <code class="docutils literal notranslate"><span class="pre">docu_referenced_dirs.txt</span></code></p></li>
+</ul>
+<p>The individual <code class="docutils literal notranslate"><span class="pre">.rst</span></code> files for individual namespace packages can be changes (content, filenames, number of
+files, etc.), but <code class="docutils literal notranslate"><span class="pre">index.rst</span></code> is required as it is used as the “entry point” from the overarching
+documentation into the individual namespace package documentation.</p>
+</section>
+<section id="supporting-files">
+<h4>Supporting Files<a class="headerlink" href="#supporting-files" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">docs/common/</span></code></strong>: Shared documentation resources</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">docs/_static/custom.css</span></code></strong>: Custom styling (applied to all namespace packages)</p></li>
+</ul>
+</section>
+<section id="build-and-deployment-files">
+<h4>Build and Deployment Files<a class="headerlink" href="#build-and-deployment-files" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">scripts/build_docs.sh</span></code></strong>: Comprehensive build script (can be run from any directory)</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">docs/Makefile</span></code></strong>: Standard Sphinx build commands</p></li>
+</ul>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="FORMATTING_GUIDE.html" class="btn btn-neutral float-left" title="Code Formatting Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="CONTRIBUTION_GUIDE.html" class="btn btn-neutral float-right" title="Contribution Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

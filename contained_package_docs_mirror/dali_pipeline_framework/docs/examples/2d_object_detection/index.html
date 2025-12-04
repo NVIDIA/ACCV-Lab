@@ -1,0 +1,158 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2D Object Detection Pipeline &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+    <link rel="next" title="2D Object Detection Pipeline Setup" href="pipeline_setup.html" />
+    <link rel="prev" title="Examples" href="../../examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">DALI Pipeline Framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../design.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/main_api.html">Main API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/additional_api.html">Additional API Reference</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html">Examples</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../examples.html#pipeline-setup-examples">Pipeline Setup Examples</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">2D Object Detection Pipeline</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="pipeline_setup.html">2D Object Detection Pipeline Setup</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../stream_petr/index.html">StreamPETR Pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../flexible_step/index.html">Flexible Step Implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../examples.html#data-loaders-for-nuscenes">Data Loaders for NuScenes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">DALI Pipeline Framework</a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Examples</a></li>
+      <li class="breadcrumb-item active">2D Object Detection Pipeline</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../_sources/contained_package_docs_mirror/dali_pipeline_framework/docs/examples/2d_object_detection/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="d-object-detection-pipeline">
+<h1>2D Object Detection Pipeline<a class="headerlink" href="#d-object-detection-pipeline" title="Link to this heading"></a></h1>
+<p>This example consists of the following parts:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pipeline_setup.html">2D Object Detection Pipeline Setup</a></li>
+</ul>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>You can run the example using the script
+<code class="docutils literal notranslate"><span class="pre">packages/dali_pipeline_framework/examples/example_pipeline_obj_det_2d.py</span></code>.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Before running the example, you must prepare the NuScenes 2D image annotations by executing
+the script <code class="docutils literal notranslate"><span class="pre">packages/dali_pipeline_framework/examples/prepare_dataset.py</span></code>. This generates the
+<code class="docutils literal notranslate"><span class="pre">image_annotations.json</span></code> file expected by the 2D object detection pipeline.</p>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../../examples.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pipeline_setup.html" class="btn btn-neutral float-right" title="2D Object Detection Pipeline Setup" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

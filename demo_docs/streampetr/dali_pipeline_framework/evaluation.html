@@ -1,0 +1,505 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evaluation &mdash; ACCV-Lab 0.2.0.post1.dev84+gcbeeef9c7 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=0be6cc5f" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=0fa214d3"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Optimization Testing Tools Demo" href="../optim_test_tools/index.html" />
+    <link rel="prev" title="Replacing the Data Loader" href="replacing_data_loader.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/multi_tensor_copier/docs/index.html">Multi-Tensor Copier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/lane_helpers/docs/index.html">Lane Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Demos</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../demos.html">Demos</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../demos.html#streampetr">StreamPETR</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../demos.html#demos-for-contained-packages">Demos for Contained Packages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../batching_helpers/index.html">Batching Helpers Demo</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="index.html">DALI Pipeline Framework Demo</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="replacing_data_loader.html">Replacing the Data Loader</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../optim_test_tools/index.html">Optimization Testing Tools Demo</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#running-the-demos">Running the Demos</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#choosing-a-configuration">Choosing a Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#running-all-evaluations">Running All Evaluations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#measurement-and-profiling">Measurement and Profiling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../release_notes_page.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../third_party_licenses.html">Third-Party Licenses</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../demos.html">Demos</a></li>
+          <li class="breadcrumb-item"><a href="index.html">DALI Pipeline Framework Demo</a></li>
+      <li class="breadcrumb-item active">Evaluation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/demo_docs/streampetr/dali_pipeline_framework/evaluation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="evaluation">
+<h1>Evaluation<a class="headerlink" href="#evaluation" title="Link to this heading"></a></h1>
+<p>This page summarizes the performance impact of using the DALI Pipeline Framework
+as a replacement for a conventional PyTorch <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> + <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> when training
+StreamPETR on NuScenes mini. It also describes a separate data-loading-only evaluation,
+which measures data-loader iteration time without model training.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>For the pipeline and integration changes behind these results, see the
+<a class="reference internal" href="index.html"><span class="doc">DALI Pipeline Framework demo</span></a> and its
+<a class="reference internal" href="replacing_data_loader.html"><span class="doc">data-loader integration tutorial</span></a>.
+The <a class="reference internal" href="../optim_test_tools/index.html"><span class="doc">Optimization Testing Tools demo</span></a> explains the runtime
+measurements and profiling support used in the evaluation.</p>
+</div>
+<section id="training-experiment-setup">
+<span id="streampetr-dali-training-experiment"></span><h2>Training Experiment Setup<a class="headerlink" href="#training-experiment-setup" title="Link to this heading"></a></h2>
+<section id="configuration">
+<h3>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h3>
+<p>The training is performed for the NuScenes mini dataset, using the StreamPETR model. In order to evaluate
+a realistic setup with a high pre-processing overhead, we increase both the image resolution and the batch
+size compared to the original configuration. We use the following configuration:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Image size: 1024 × 372</p></li>
+<li><p>Batch size: 8 per GPU</p></li>
+</ul>
+</div></blockquote>
+<p>The training evaluation was performed with the standard PyTorch data loader and the data loader built
+with the DALI Pipeline Framework on 2 and 8 GPUs. The model implementation is fixed within each comparison.</p>
+</section>
+<section id="data">
+<span id="streampetr-dali-dataset-replication"></span><h3>Data<a class="headerlink" href="#data" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>NuScenes mini</p></li>
+<li><p>The mini training split is too small to populate ordinary sharded sampling with 8 GPUs
+and a batch size of 8 per GPU. For these evaluations, each GPU therefore samples the
+whole dataset instead of a separate shard. The DALI Pipeline Framework comparison and profiling
+configurations enable this behavior for both loaders by setting
+<code class="docutils literal notranslate"><span class="pre">data_loading_config.replicate_dataset_per_gpu=True</span></code>. This is a custom option added
+to the demo for these evaluations, not a standard NVIDIA DALI or StreamPETR configuration option.</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Replication allows performance measurements with a small dataset. Each GPU sees
+the same sample order within a run. The underlying NVIDIA DALI pipeline derives its reproducible
+augmentation seed from the sampling rank, so the provided configurations also use identical
+augmentations across GPUs. PyTorch worker seeds use the real rank, so its augmentations
+can differ across GPUs. Sample order is not guaranteed to match between the PyTorch and
+DALI Pipeline Framework variants.</p>
+<p>DDP, GPU assignment, and validation sharding are unchanged. These runs measure a
+replicated workload; they do not represent training on independent batches across
+GPUs. Disable the option for normal sharded training with enough data.
+With one GPU, the option does not change sampling. See the
+<a class="reference internal" href="replacing_data_loader.html"><span class="doc">data-loader integration tutorial</span></a> for the implementation.</p>
+</div>
+</section>
+<section id="adaptation-to-the-dali-pipeline-framework">
+<h3>Adaptation to the DALI Pipeline Framework<a class="headerlink" href="#adaptation-to-the-dali-pipeline-framework" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Replace the PyTorch <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code> by a DALI pipeline</p></li>
+<li><p>Code changes are limited to the pipeline setup vs. PyTorch <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> and <code class="docutils literal notranslate"><span class="pre">DataLoader</span></code></p></li>
+<li><p>The training loop implementation remains unchanged</p></li>
+</ul>
+</section>
+<section id="hardware-setup">
+<h3>Hardware Setup<a class="headerlink" href="#hardware-setup" title="Link to this heading"></a></h3>
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-text">Test Device</span><a class="headerlink" href="#id1" title="Link to this table"></a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>GPU</p></th>
+<th class="head"><p>CPU</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>8 × NVIDIA A100‑SXM4‑80GB</p></td>
+<td><p>2 × AMD EPYC 7742 64‑Core Processors</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="training-results-discussion">
+<h2>Training Results &amp; Discussion<a class="headerlink" href="#training-results-discussion" title="Link to this heading"></a></h2>
+<section id="results">
+<h3>Results<a class="headerlink" href="#results" title="Link to this heading"></a></h3>
+<p>The numbers report average run time per batch after the warm‑up phase. Each run performs
+1,000 iterations; the first 50 are warm-up iterations and the remaining 950 are measured.</p>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text">Runtime and CPU Usage</span><a class="headerlink" href="#id2" title="Link to this table"></a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Runtime [ms] (2‑GPU)</p></th>
+<th class="head"><p>CPU usage [%] (2‑GPU)</p></th>
+<th class="head"><p>Runtime [ms] (8‑GPU)</p></th>
+<th class="head"><p>CPU usage [%] (8‑GPU)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Reference (PyTorch DataLoader)</strong></p></td>
+<td><p>917</p></td>
+<td><p>3.4</p></td>
+<td><p>1027</p></td>
+<td><p>12.8</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>DALI Pipeline Framework</strong></p></td>
+<td><p>813</p></td>
+<td><p>1.4</p></td>
+<td><p>844</p></td>
+<td><p>5.5</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Speedup / Savings</strong></p></td>
+<td><p>× 1.13</p></td>
+<td><p>57%</p></td>
+<td><p>× 1.22</p></td>
+<td><p>57%</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="discussion">
+<h3>Discussion<a class="headerlink" href="#discussion" title="Link to this heading"></a></h3>
+<p>The results show that the DALI Pipeline Framework leads to a speedup of <strong>× 1.13</strong> for the 2-GPU configuration
+and <strong>× 1.22</strong> for the 8-GPU configuration, with the speedup being larger for the 8-GPU configuration.
+The CPU usage is reduced by around <strong>57%</strong> in both configurations. Note that for both the
+DALI Pipeline Framework and the reference implementation, the runtime increases for the
+8-GPU configuration compared to the 2-GPU configuration. However, the increase is much smaller
+for the framework-backed pipeline, indicating that while the CPU is not fully utilized in the
+reference approach, there are already bottlenecks present which can be overcome by the
+framework-backed pipeline.</p>
+</section>
+</section>
+<section id="data-loading-only">
+<span id="streampetr-dali-load-only"></span><h2>Data Loading Only<a class="headerlink" href="#data-loading-only" title="Link to this heading"></a></h2>
+<p>This experiment compares the PyTorch data loader and the data loader built with the DALI Pipeline
+Framework without running model forward or backward passes or optimizer steps. The
+<code class="docutils literal notranslate"><span class="pre">DataPipelineRuntimeEvalRunner</span></code> repeatedly fetches the next batch, measuring data loading and
+preprocessing separately from model training.
+Pipeline construction is outside the timed loop.</p>
+<p>Both use NuScenes mini, one GPU, a batch size of 8, and an output image size of 1024 × 372,
+matching the per-GPU batch size and preprocessing settings of the training experiments above.
+Random augmentations are enabled. The PyTorch reference uses eight DataLoader worker
+subprocesses (<code class="docutils literal notranslate"><span class="pre">workers_per_gpu=8</span></code>); it does not use a single worker. The DALI Pipeline Framework variant
+replaces the PyTorch DataLoader and uses one external-source Python worker
+(<code class="docutils literal notranslate"><span class="pre">py_num_workers=1</span></code>) plus four NVIDIA DALI CPU/mixed-operator threads (<code class="docutils literal notranslate"><span class="pre">num_threads=4</span></code>).</p>
+<p>Each run fetches 1,000 batches, excluding the first 300 as warm-up and averaging the runtime over
+the remaining 700 batches. The runner prints
+<code class="docutils literal notranslate"><span class="pre">Average</span> <span class="pre">runtime</span></code> in seconds per batch; multiply by 1,000 to report milliseconds below.</p>
+<p>Unlike the 2-GPU and 8-GPU training experiments, this comparison uses a single GPU and performs
+no model training. Report its runtimes separately from the training runtimes.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This experiment is measuring the data-loading performance in isolation. It is not a prediction of training
+speedup. During training, this work overlaps with the model computations, so faster data loading does not
+translate directly into an equivalent reduction in training time.</p>
+<p>The benefit during training depends on the available CPU and GPU resources and how they are
+shared. For example, increasing the number of workers per GPU can help keep the GPU supplied
+with data, but too many workers across GPUs can compete for CPU resources and slow data loading.
+Use experiments with the full training pipeline to assess the benefit for a particular use case (such as the
+<a class="reference internal" href="#streampetr-dali-training-experiment"><span class="std std-ref">experiment described above</span></a>).</p>
+</div>
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-text">Data-loading runtime (1 GPU)</span><a class="headerlink" href="#id3" title="Link to this table"></a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Average runtime [ms/batch]</p></th>
+<th class="head"><p>Average CPU usage [%]</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Reference (PyTorch DataLoader)</strong></p></td>
+<td><p>416</p></td>
+<td><p>3.2</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>DALI Pipeline Framework</strong></p></td>
+<td><p>181</p></td>
+<td><p>1.3</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Speedup / Savings</strong></p></td>
+<td><p>× 2.30</p></td>
+<td><p>59%</p></td>
+</tr>
+</tbody>
+</table>
+<p>The DALI Pipeline Framework reduces isolated data-loading time by <strong>× 2.30</strong> and CPU usage by
+approximately <strong>59%</strong> for this workload. Pipeline construction is excluded from these
+steady-state timings. In this run, DALI pipeline creation took 723 seconds and pipeline
+building took a further 5.8 seconds.</p>
+</section>
+<section id="how-to-run">
+<h2>How to Run<a class="headerlink" href="#how-to-run" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This section assumes that you are running the evaluation in the Docker container set up as described in the
+<a class="reference internal" href="../docker_setup.html"><span class="doc">StreamPETR Docker setup</span></a>, with the StreamPETR implementation
+located at <code class="docutils literal notranslate"><span class="pre">/streampetr</span></code>. Configuration paths below are relative to
+<code class="docutils literal notranslate"><span class="pre">demos/streampetr/projects/configs/StreamPETR/</span></code>.</p>
+</div>
+<section id="running-the-evaluated-training-variants">
+<h3>Running the Evaluated Training Variants<a class="headerlink" href="#running-the-evaluated-training-variants" title="Link to this heading"></a></h3>
+<p>The training evaluation used the following standard configuration pairs. Within each
+pair, the model implementation is fixed and only the data loader changes.</p>
+<table class="docutils align-default" id="id4">
+<caption><span class="caption-text">Evaluated DALI Pipeline Framework training configurations</span><a class="headerlink" href="#id4" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 40.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>GPU count</p></th>
+<th class="head"><p>PyTorch reference</p></th>
+<th class="head"><p>DALI Pipeline Framework</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Evals/dali_ref_2_gpu.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Evals/dali_test_2_gpu.py</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Evals/dali_ref_8_gpu.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Evals/dali_test_8_gpu.py</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>Run the configurations individually with the distributed training helper <code class="docutils literal notranslate"><span class="pre">dist_train.sh</span></code>.
+For this demo, the helper was modified to pass <code class="docutils literal notranslate"><span class="pre">--no-validate</span></code> to <code class="docutils literal notranslate"><span class="pre">train.py</span></code> and optionally
+launch training under <code class="docutils literal notranslate"><span class="pre">nsys</span> <span class="pre">profile</span></code>. It takes the configuration path and GPU count as its
+first two arguments:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/streampetr/tools
+
+<span class="c1"># 2-GPU comparison</span>
+bash<span class="w"> </span>dist_train.sh<span class="w"> </span>/streampetr/projects/configs/StreamPETR/Evals/dali_ref_2_gpu.py<span class="w"> </span><span class="m">2</span>
+bash<span class="w"> </span>dist_train.sh<span class="w"> </span>/streampetr/projects/configs/StreamPETR/Evals/dali_test_2_gpu.py<span class="w"> </span><span class="m">2</span>
+
+<span class="c1"># 8-GPU comparison</span>
+bash<span class="w"> </span>dist_train.sh<span class="w"> </span>/streampetr/projects/configs/StreamPETR/Evals/dali_ref_8_gpu.py<span class="w"> </span><span class="m">8</span>
+bash<span class="w"> </span>dist_train.sh<span class="w"> </span>/streampetr/projects/configs/StreamPETR/Evals/dali_test_8_gpu.py<span class="w"> </span><span class="m">8</span>
+</pre></div>
+</div>
+<p>Alternatively, run all four evaluated training configurations and save their logs with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/streampetr/tools
+bash<span class="w"> </span>run_dali_eval.sh
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">demos/streampetr/tools/run_dali_eval.sh</span></code> script stores the results in the
+<code class="docutils literal notranslate"><span class="pre">res_dali_eval</span></code> folder in the current working directory.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The GPU-specific configuration files inherit their settings from <code class="docutils literal notranslate"><span class="pre">Evals/_base_/</span></code>, which builds
+on the shared training configuration in <code class="docutils literal notranslate"><span class="pre">_Base/base.py</span></code>. The image size used by this evaluation
+(1024 × 372, as described in <a class="reference internal" href="#streampetr-dali-training-experiment"><span class="std std-ref">Training Experiment Setup</span></a>)
+is set in <code class="docutils literal notranslate"><span class="pre">_Base/dali_larger_images.py</span></code>. The configurations in <code class="docutils literal notranslate"><span class="pre">Evals/_base_/</span></code> select the
+data loader and whether to enable the Batching Helpers optimizations, and enable
+<a class="reference internal" href="#streampetr-dali-dataset-replication"><span class="std std-ref">replicated sampling</span></a>.
+The launch command determines the actual GPU count; <code class="docutils literal notranslate"><span class="pre">run_all_evaluations.sh</span></code> discovers the
+GPU-specific configurations and derives their GPU counts from the filenames.</p>
+</div>
+</section>
+<section id="running-the-evaluated-data-loading-only-variants">
+<h3>Running the Evaluated Data-Loading-Only Variants<a class="headerlink" href="#running-the-evaluated-data-loading-only-variants" title="Link to this heading"></a></h3>
+<p>The separate data-loading-only results use <code class="docutils literal notranslate"><span class="pre">DALILoadOnly/ref_load_only.py</span></code> for the
+PyTorch reference and <code class="docutils literal notranslate"><span class="pre">DALILoadOnly/dali_load_only.py</span></code> for the DALI Pipeline Framework
+variant. Run them individually with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/streampetr/tools
+
+python<span class="w"> </span>train.py<span class="w"> </span>/streampetr/projects/configs/StreamPETR/DALILoadOnly/ref_load_only.py<span class="w"> </span>--no-validate
+python<span class="w"> </span>train.py<span class="w"> </span>/streampetr/projects/configs/StreamPETR/DALILoadOnly/dali_load_only.py<span class="w"> </span>--no-validate
+</pre></div>
+</div>
+<p>Alternatively, run both configurations and save their stdout and stderr logs with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/streampetr/tools
+bash<span class="w"> </span>run_dali_load_only.sh
+</pre></div>
+</div>
+<p>The script writes the logs to <code class="docutils literal notranslate"><span class="pre">eval_res_dali_load_only</span></code> in the current working directory.</p>
+</section>
+<section id="additional-training-variants">
+<h3>Additional Training Variants<a class="headerlink" href="#additional-training-variants" title="Link to this heading"></a></h3>
+<p>The following configurations are included for further experiments but were not used in
+the evaluation described above:</p>
+<table class="docutils align-default" id="id5">
+<caption><span class="caption-text">Additional DALI Pipeline Framework training configurations</span><a class="headerlink" href="#id5" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 45.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Purpose</p></th>
+<th class="head"><p>Configuration files</p></th>
+<th class="head"><p>Notes</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Single-GPU standard comparison</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Evals/dali_ref_single_gpu.py</span></code> and <code class="docutils literal notranslate"><span class="pre">Evals/dali_test_single_gpu.py</span></code></p></td>
+<td><p>A paired comparison with the PyTorch reference.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Batching Helpers enabled</p></td>
+<td><p>Matching <code class="docutils literal notranslate"><span class="pre">Evals/dali_ref_bh_{2,8}_gpu.py</span></code> and
+<code class="docutils literal notranslate"><span class="pre">Evals/dali_test_bh_{2,8}_gpu.py</span></code> pairs.</p></td>
+<td><p>Both sides use the batched StreamPETR and Focal heads; only <code class="docutils literal notranslate"><span class="pre">test_bh</span></code> enables the
+DALI Pipeline Framework data loader.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The Batching-Helpers-enabled configurations answer a different question from the standard
+comparison: they measure the effect of replacing the loader after batching optimizations are
+already enabled. Do not compare a <code class="docutils literal notranslate"><span class="pre">*_bh_*</span></code> configuration with a standard configuration and
+attribute the full difference to the DALI Pipeline Framework.</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">train.py</span></code> for a single GPU and the distributed training helper <code class="docutils literal notranslate"><span class="pre">dist_train.sh</span></code>
+for the multi-GPU configurations:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/streampetr/tools
+
+<span class="c1"># Single-GPU standard comparison</span>
+<span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="m">0</span><span class="w"> </span>python<span class="w"> </span>train.py<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>/streampetr/projects/configs/StreamPETR/Evals/dali_ref_single_gpu.py<span class="w"> </span>--no-validate
+<span class="nv">CUDA_VISIBLE_DEVICES</span><span class="o">=</span><span class="m">0</span><span class="w"> </span>python<span class="w"> </span>train.py<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>/streampetr/projects/configs/StreamPETR/Evals/dali_test_single_gpu.py<span class="w"> </span>--no-validate
+
+<span class="c1"># 2-GPU comparison with Batching Helpers enabled on both sides</span>
+bash<span class="w"> </span>dist_train.sh<span class="w"> </span>/streampetr/projects/configs/StreamPETR/Evals/dali_ref_bh_2_gpu.py<span class="w"> </span><span class="m">2</span>
+bash<span class="w"> </span>dist_train.sh<span class="w"> </span>/streampetr/projects/configs/StreamPETR/Evals/dali_test_bh_2_gpu.py<span class="w"> </span><span class="m">2</span>
+
+<span class="c1"># 8-GPU comparison with Batching Helpers enabled on both sides</span>
+bash<span class="w"> </span>dist_train.sh<span class="w"> </span>/streampetr/projects/configs/StreamPETR/Evals/dali_ref_bh_8_gpu.py<span class="w"> </span><span class="m">8</span>
+bash<span class="w"> </span>dist_train.sh<span class="w"> </span>/streampetr/projects/configs/StreamPETR/Evals/dali_test_bh_8_gpu.py<span class="w"> </span><span class="m">8</span>
+</pre></div>
+</div>
+</section>
+<section id="profiling">
+<h3>Profiling<a class="headerlink" href="#profiling" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">demos/streampetr/tools/run_dali_profiling.sh</span></code> script captures Nsight Systems profiles
+for the PyTorch reference and DALI Pipeline Framework data loaders on eight GPUs. It uses
+the configurations under <code class="docutils literal notranslate"><span class="pre">Profiling/</span></code> with the same 1024 × 372 image workload and replicated
+sampling as the training comparison, shortened to 100 iterations with NVTX ranges enabled.</p>
+<p>Run it inside the prepared demo container, with the dataset available and the Nsight Systems
+<code class="docutils literal notranslate"><span class="pre">nsys</span></code> command on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/streampetr/tools
+bash<span class="w"> </span>run_dali_profiling.sh
+</pre></div>
+</div>
+<p>The profiling script calls <code class="docutils literal notranslate"><span class="pre">dist_train.sh</span></code> with <code class="docutils literal notranslate"><span class="pre">--profile</span></code> to enable Nsight Systems capture.
+The optional <code class="docutils literal notranslate"><span class="pre">--profile-output</span> <span class="pre">PREFIX</span></code> argument selects the report prefix; its default is
+<code class="docutils literal notranslate"><span class="pre">profile_output</span></code>. The helper parses these options itself and uses the prefix for the
+<code class="docutils literal notranslate"><span class="pre">nsys</span> <span class="pre">profile</span> <span class="pre">--output</span></code> option. Capture uses the CUDA profiler API start/stop calls in the training code.
+Validation remains disabled, as for other runs launched through <code class="docutils literal notranslate"><span class="pre">dist_train.sh</span></code>.</p>
+<p>The script writes reports to the current working directory with the prefixes <code class="docutils literal notranslate"><span class="pre">original_profile</span></code>
+and <code class="docutils literal notranslate"><span class="pre">dali_profile</span></code>, and stdout/stderr logs under <code class="docutils literal notranslate"><span class="pre">profiling_res/</span></code>. Open the reports in Nsight
+Systems to inspect the NVTX ranges. See the
+<a class="reference internal" href="../optim_test_tools/performance_eval_and_profiling.html"><span class="doc">profiling guide</span></a> for details of the
+instrumentation.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="replacing_data_loader.html" class="btn btn-neutral float-left" title="Replacing the Data Loader" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../optim_test_tools/index.html" class="btn btn-neutral float-right" title="Optimization Testing Tools Demo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

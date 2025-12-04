@@ -1,0 +1,1421 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Sample Code Documentation" href="sample.html" />
+    <link rel="prev" title="Dataset Preparation" href="dataset_preparation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">On Demand Video Decoder</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dataset_preparation.html">Dataset Preparation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder"><code class="docutils literal notranslate"><span class="pre">PyNvGopDecoder</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.Decode"><code class="docutils literal notranslate"><span class="pre">PyNvGopDecoder.Decode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOP"><code class="docutils literal notranslate"><span class="pre">PyNvGopDecoder.DecodeFromGOP()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOPListRGB"><code class="docutils literal notranslate"><span class="pre">PyNvGopDecoder.DecodeFromGOPListRGB()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOPRGB"><code class="docutils literal notranslate"><span class="pre">PyNvGopDecoder.DecodeFromGOPRGB()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromPacketListInitialize"><code class="docutils literal notranslate"><span class="pre">PyNvGopDecoder.DecodeFromPacketListInitialize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromPacketListRGB"><code class="docutils literal notranslate"><span class="pre">PyNvGopDecoder.DecodeFromPacketListRGB()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeN12ToRGB"><code class="docutils literal notranslate"><span class="pre">PyNvGopDecoder.DecodeN12ToRGB()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.GetGOP"><code class="docutils literal notranslate"><span class="pre">PyNvGopDecoder.GetGOP()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.GetGOPList"><code class="docutils literal notranslate"><span class="pre">PyNvGopDecoder.GetGOPList()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.LoadGops"><code class="docutils literal notranslate"><span class="pre">PyNvGopDecoder.LoadGops()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.LoadGopsToList"><code class="docutils literal notranslate"><span class="pre">PyNvGopDecoder.LoadGopsToList()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.MergePacketDataToOne"><code class="docutils literal notranslate"><span class="pre">PyNvGopDecoder.MergePacketDataToOne()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.ParseSerializedPacketBundle"><code class="docutils literal notranslate"><span class="pre">PyNvGopDecoder.ParseSerializedPacketBundle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.release_decoder"><code class="docutils literal notranslate"><span class="pre">PyNvGopDecoder.release_decoder()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.release_device_memory"><code class="docutils literal notranslate"><span class="pre">PyNvGopDecoder.release_device_memory()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvSampleReader"><code class="docutils literal notranslate"><span class="pre">PyNvSampleReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvSampleReader.Decode"><code class="docutils literal notranslate"><span class="pre">PyNvSampleReader.Decode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvSampleReader.DecodeN12ToRGB"><code class="docutils literal notranslate"><span class="pre">PyNvSampleReader.DecodeN12ToRGB()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvSampleReader.DecodeN12ToRGBAsync"><code class="docutils literal notranslate"><span class="pre">PyNvSampleReader.DecodeN12ToRGBAsync()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvSampleReader.DecodeN12ToRGBAsyncGetBuffer"><code class="docutils literal notranslate"><span class="pre">PyNvSampleReader.DecodeN12ToRGBAsyncGetBuffer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvSampleReader.clearAllReaders"><code class="docutils literal notranslate"><span class="pre">PyNvSampleReader.clearAllReaders()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvSampleReader.release_decoder"><code class="docutils literal notranslate"><span class="pre">PyNvSampleReader.release_decoder()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvSampleReader.release_device_memory"><code class="docutils literal notranslate"><span class="pre">PyNvSampleReader.release_device_memory()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo"><code class="docutils literal notranslate"><span class="pre">FastStreamInfo</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo.avg_frame_rate_den"><code class="docutils literal notranslate"><span class="pre">FastStreamInfo.avg_frame_rate_den</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo.avg_frame_rate_num"><code class="docutils literal notranslate"><span class="pre">FastStreamInfo.avg_frame_rate_num</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo.codec_id"><code class="docutils literal notranslate"><span class="pre">FastStreamInfo.codec_id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo.codec_type"><code class="docutils literal notranslate"><span class="pre">FastStreamInfo.codec_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo.duration"><code class="docutils literal notranslate"><span class="pre">FastStreamInfo.duration</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo.format"><code class="docutils literal notranslate"><span class="pre">FastStreamInfo.format</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo.height"><code class="docutils literal notranslate"><span class="pre">FastStreamInfo.height</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo.r_frame_rate_den"><code class="docutils literal notranslate"><span class="pre">FastStreamInfo.r_frame_rate_den</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo.r_frame_rate_num"><code class="docutils literal notranslate"><span class="pre">FastStreamInfo.r_frame_rate_num</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo.start_time"><code class="docutils literal notranslate"><span class="pre">FastStreamInfo.start_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo.time_base_den"><code class="docutils literal notranslate"><span class="pre">FastStreamInfo.time_base_den</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo.time_base_num"><code class="docutils literal notranslate"><span class="pre">FastStreamInfo.time_base_num</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo.width"><code class="docutils literal notranslate"><span class="pre">FastStreamInfo.width</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#accvlab.on_demand_video_decoder.DecodedFrameExt"><code class="docutils literal notranslate"><span class="pre">DecodedFrameExt</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.GetPtrToPlane"><code class="docutils literal notranslate"><span class="pre">DecodedFrameExt.GetPtrToPlane()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.color_range"><code class="docutils literal notranslate"><span class="pre">DecodedFrameExt.color_range</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.cuda"><code class="docutils literal notranslate"><span class="pre">DecodedFrameExt.cuda()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.dtype"><code class="docutils literal notranslate"><span class="pre">DecodedFrameExt.dtype</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.format"><code class="docutils literal notranslate"><span class="pre">DecodedFrameExt.format</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.framesize"><code class="docutils literal notranslate"><span class="pre">DecodedFrameExt.framesize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.nvcv_image"><code class="docutils literal notranslate"><span class="pre">DecodedFrameExt.nvcv_image()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.shape"><code class="docutils literal notranslate"><span class="pre">DecodedFrameExt.shape</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.strides"><code class="docutils literal notranslate"><span class="pre">DecodedFrameExt.strides</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.timestamp"><code class="docutils literal notranslate"><span class="pre">DecodedFrameExt.timestamp</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#accvlab.on_demand_video_decoder.RGBFrame"><code class="docutils literal notranslate"><span class="pre">RGBFrame</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.RGBFrame.data"><code class="docutils literal notranslate"><span class="pre">RGBFrame.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.RGBFrame.dataptr"><code class="docutils literal notranslate"><span class="pre">RGBFrame.dataptr</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.RGBFrame.isBGR"><code class="docutils literal notranslate"><span class="pre">RGBFrame.isBGR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.RGBFrame.shape"><code class="docutils literal notranslate"><span class="pre">RGBFrame.shape</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.RGBFrame.stride"><code class="docutils literal notranslate"><span class="pre">RGBFrame.stride</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#accvlab.on_demand_video_decoder.CreateGopDecoder"><code class="docutils literal notranslate"><span class="pre">CreateGopDecoder()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#accvlab.on_demand_video_decoder.CreateSampleReader"><code class="docutils literal notranslate"><span class="pre">CreateSampleReader()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#accvlab.on_demand_video_decoder.GetFastInitInfo"><code class="docutils literal notranslate"><span class="pre">GetFastInitInfo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#accvlab.on_demand_video_decoder.SavePacketsToFile"><code class="docutils literal notranslate"><span class="pre">SavePacketsToFile()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#accvlab.on_demand_video_decoder.Codec"><code class="docutils literal notranslate"><span class="pre">Codec</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.Codec.h264"><code class="docutils literal notranslate"><span class="pre">Codec.h264</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.Codec.hevc"><code class="docutils literal notranslate"><span class="pre">Codec.hevc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.on_demand_video_decoder.Codec.av1"><code class="docutils literal notranslate"><span class="pre">Codec.av1</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="sample.html">Sample Code Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pytorch_integration_examples/index.html">PyTorch Integration Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">On Demand Video Decoder</a></li>
+      <li class="breadcrumb-item active">API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/contained_package_docs_mirror/on_demand_video_decoder/docs/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
+<p>Complete API documentation for the on_demand_video_decoder package.</p>
+<dl class="py class" id="module-accvlab.on_demand_video_decoder">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvGopDecoder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.on_demand_video_decoder.</span></span><span class="sig-name descname"><span class="pre">PyNvGopDecoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxfiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">iGpu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppressNoColorRangeWarning</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Initialize decoder with set of particular parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>maxfiles</strong> – Maximum number of unique files that can be processed concurrently</p></li>
+<li><p><strong>iGpu</strong> – GPU device ID to use for decoding (0 for primary GPU)</p></li>
+<li><p><strong>suppressNoColorRangeWarning</strong> – Suppress warning when no color range can be extracted
+from video files (limited/MPEG range is assumed)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If GPU initialization fails or parameters are invalid</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvGopDecoder.Decode">
+<span class="sig-name descname"><span class="pre">Decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepaths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fastStreamInfos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.FastStreamInfo"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.FastStreamInfo</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#accvlab.on_demand_video_decoder.DecodedFrameExt" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.DecodedFrameExt"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.DecodedFrameExt</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.Decode" title="Link to this definition"></a></dt>
+<dd><p>Decodes video file stream into uncompressed YUV data.</p>
+<p>This method performs GPU-accelerated decoding of video frames using NVIDIA hardware.
+It supports multiple video files and can decode specific frame IDs from each file.
+The method uses GOP-based decoding for efficient random access.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepaths</strong> – List of video file paths to decode from. All files must be
+accessible and contain valid video streams.</p></li>
+<li><p><strong>frame_ids</strong> – List of frame IDs to decode. Each frame ID corresponds to
+a specific frame in the video sequence.</p></li>
+<li><p><strong>fastStreamInfos</strong> – Optional list of FastStreamInfo objects containing
+pre-extracted stream information by <cite>GetFastInitInfo</cite>.
+If provided, this can improve performance by avoiding
+stream analysis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of DecodedFrameExt objects containing the decoded frame data.
+Each frame includes YUV pixel data, metadata, and timing information.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If video files cannot be opened or decoded</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If frame_ids contain invalid indices</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">decoder</span> <span class="o">=</span> <span class="n">PyNvGopDecoder</span><span class="p">(</span><span class="n">maxfiles</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frames</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">Decode</span><span class="p">([</span><span class="s1">&#39;video1.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;video2.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Decoded </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">frames</span><span class="p">)</span><span class="si">}</span><span class="s2"> frames&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOP">
+<span class="sig-name descname"><span class="pre">DecodeFromGOP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">numpy_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint8</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepaths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#accvlab.on_demand_video_decoder.DecodedFrameExt" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.DecodedFrameExt"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.DecodedFrameExt</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOP" title="Link to this definition"></a></dt>
+<dd><p>Decodes video GOP data into YUV frames without demuxing again.</p>
+<p>This method decodes previously extracted GOP data into YUV frames. It’s
+useful for scenarios where you want to separate GOP extraction from
+decoding, or when you have pre-extracted GOP data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>numpy_data</strong> – Numpy array containing serialized GOP data from <cite>GetGOP</cite></p></li>
+<li><p><strong>filepaths</strong> – List of video file paths (for metadata purposes)</p></li>
+<li><p><strong>frame_ids</strong> – List of frame IDs to decode from the GOP data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of DecodedFrameExt objects containing the decoded YUV frame data</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If GOP data is invalid or decoding fails</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If frame_ids don’t match the GOP data</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gop_data</span><span class="p">,</span> <span class="n">first_ids</span><span class="p">,</span> <span class="n">gop_lens</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">GetGOP</span><span class="p">([</span><span class="s1">&#39;video.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;video2.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frames</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">DecodeFromGOP</span><span class="p">(</span><span class="n">gop_data</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;video.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;video2.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOPListRGB">
+<span class="sig-name descname"><span class="pre">DecodeFromGOPListRGB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">numpy_datas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint8</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepaths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_bgr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#accvlab.on_demand_video_decoder.RGBFrame" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.RGBFrame"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.RGBFrame</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOPListRGB" title="Link to this definition"></a></dt>
+<dd><p>Decodes multiple serialized GOP bundles into RGB/BGR frames.</p>
+<p>This method parses each bundle, reconstructs per-frame packet queues, and decodes
+via a unified pipeline. Useful for processing multiple GOP bundles simultaneously.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>numpy_datas</strong> – List of numpy arrays, each containing a SerializedPacketBundle from <cite>GetGOP</cite></p></li>
+<li><p><strong>filepaths</strong> – List of source file paths for each requested frame (aggregated)</p></li>
+<li><p><strong>frame_ids</strong> – List of target frame IDs (aggregated across all bundles)</p></li>
+<li><p><strong>as_bgr</strong> – Whether to output in BGR format (True) or RGB format (False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of decoded RGB/BGR frames</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If GOP data is invalid or decoding fails</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If input arrays have mismatched dimensions</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<p>Ref to Sample: <cite>samples/SampleSeparationAccessGOPListAPI.py</cite></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The method parses each bundle, reconstructs per-frame packet queues, and decodes
+via a unified pipeline.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOPRGB">
+<span class="sig-name descname"><span class="pre">DecodeFromGOPRGB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">numpy_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint8</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepaths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_bgr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#accvlab.on_demand_video_decoder.RGBFrame" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.RGBFrame"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.RGBFrame</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOPRGB" title="Link to this definition"></a></dt>
+<dd><p>Decodes video GOP data into RGB frames without demuxing again.</p>
+<p>This method decodes previously extracted GOP data into RGB/BGR frames.
+It’s useful for scenarios where you want to separate GOP extraction
+from decoding and need RGB output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>numpy_data</strong> – Numpy array containing serialized GOP data from <cite>GetGOP</cite></p></li>
+<li><p><strong>filepaths</strong> – List of video file paths (for metadata purposes)</p></li>
+<li><p><strong>frame_ids</strong> – List of frame IDs to decode from the GOP data</p></li>
+<li><p><strong>as_bgr</strong> – Whether to output in BGR format (True) or RGB format (False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of RGBFrame objects containing the decoded and color-converted frame data</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If GOP data is invalid or decoding fails</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If frame_ids don’t match the GOP data</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<p>Ref to Sample: <cite>samples/SampleSeparationAccess.py</cite></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gop_data</span><span class="p">,</span> <span class="n">first_ids</span><span class="p">,</span> <span class="n">gop_lens</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">GetGOP</span><span class="p">([</span><span class="s1">&#39;video.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;video2.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rgb_frames</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">DecodeFromGOPRGB</span><span class="p">(</span><span class="n">gop_data</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;video.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;video2.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">as_bgr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromPacketListInitialize">
+<span class="sig-name descname"><span class="pre">DecodeFromPacketListInitialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">codec_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromPacketListInitialize" title="Link to this definition"></a></dt>
+<dd><p>Initializes NvDecoder instances for video files.</p>
+<p>This method creates NvDecoder instances for each video file, preparing
+them for efficient decoding operations. It is used before <cite>DecodeFromPacketListRGB</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>codec_ids</strong> – List of video codec IDs from <cite>ParseSerializedPacketBundle</cite></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>0 if initialization successful</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If any parameters are invalid or initialization fails</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If codec_ids is empty</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<p>Ref to Sample: <cite>samples/SampleDecodeFromBinaryData.py</cite></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromPacketListRGB">
+<span class="sig-name descname"><span class="pre">DecodeFromPacketListRGB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">numpy_datas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint8</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet_idxs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">widths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heights</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_bgr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#accvlab.on_demand_video_decoder.RGBFrame" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.RGBFrame"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.RGBFrame</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromPacketListRGB" title="Link to this definition"></a></dt>
+<dd><p>Decodes video packets into RGB frames using separate packet data arrays (V2 interface).</p>
+<p>This advanced interface allows direct control over packet data by providing
+separate numpy arrays for each frame’s binary data even from other demuxer lib,
+enabling more flexible packet management and processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>numpy_datas</strong> – List of lists of numpy arrays containing binary packet data for each frame.
+Each inner list contains numpy arrays for packets of one frame.
+The function automatically extracts packet sizes and data pointers from these arrays.</p></li>
+<li><p><strong>packet_idxs</strong> – List of lists containing decode indices for each frame</p></li>
+<li><p><strong>widths</strong> – List of frame widths for each frame</p></li>
+<li><p><strong>heights</strong> – List of frame heights for each frame</p></li>
+<li><p><strong>frame_ids</strong> – List of frame IDs to decode</p></li>
+<li><p><strong>as_bgr</strong> – Whether to output in BGR format (True) or RGB format (False)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of decoded RGB/BGR frames</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If packet data is invalid or decoding fails</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If input arrays have mismatched dimensions</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<p>Ref to Sample: <cite>samples/SampleDecodeFromBinaryData.py</cite></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This interface allows direct control over packet data by providing separate numpy arrays
+for each frame’s binary data. The function automatically extracts packet sizes and data pointers
+from the numpy arrays, enabling more flexible packet management and processing.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeN12ToRGB">
+<span class="sig-name descname"><span class="pre">DecodeN12ToRGB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepaths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_bgr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fastStreamInfos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.FastStreamInfo"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.FastStreamInfo</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#accvlab.on_demand_video_decoder.RGBFrame" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.RGBFrame"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.RGBFrame</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeN12ToRGB" title="Link to this definition"></a></dt>
+<dd><p>Decodes video file stream into uncompressed RGB/BGR data.</p>
+<p>This method performs GPU-accelerated decoding and color space conversion
+from YUV to RGB/BGR format. It’s optimized for machine learning applications
+that require RGB input data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepaths</strong> – List of video file paths to decode from</p></li>
+<li><p><strong>frame_ids</strong> – List of frame IDs to decode from the video files</p></li>
+<li><p><strong>as_bgr</strong> – Whether to output in BGR format (True) or RGB format (False). BGR is commonly used in OpenCV applications.</p></li>
+<li><p><strong>fastStreamInfos</strong> – Optional list of FastStreamInfo objects containing pre-extracted stream information by <cite>GetFastInitInfo</cite>. If provided, this can improve performance by avoiding stream analysis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of RGBFrame objects containing the decoded and color-converted frame data.
+Each frame includes RGB/BGR pixel data and metadata.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If video files cannot be opened or decoded</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If frame_ids contain invalid indices</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<p>Ref to Sample: <cite>samples/SampleRandomAccess.py</cite>
+and <cite>samples/SampleRandomAccessWithFastInit.py</cite></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">decoder</span> <span class="o">=</span> <span class="n">PyNvGopDecoder</span><span class="p">(</span><span class="n">maxfiles</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rgb_frames</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">DecodeN12ToRGB</span><span class="p">([</span><span class="s1">&#39;video.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;video2.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">as_bgr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Decoded </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">rgb_frames</span><span class="p">)</span><span class="si">}</span><span class="s2"> RGB frames&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvGopDecoder.GetGOP">
+<span class="sig-name descname"><span class="pre">GetGOP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepaths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fastStreamInfos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.FastStreamInfo"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.FastStreamInfo</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.GetGOP" title="Link to this definition"></a></dt>
+<dd><p>Extracts video GOP data without performing the decode step.</p>
+<p>This method extracts video GOP (Group of Pictures) data from the specified frames and returns
+them in a self-contained binary format. The GOP data can be decoded later
+using <cite>DecodeFromPacket</cite> or <cite>DecodeFromPacketRGB</cite> methods, enabling separation
+of demuxing and decoding.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepaths</strong> – List of video file paths to extract GOP data from</p></li>
+<li><p><strong>frame_ids</strong> – List of frame IDs to extract GOP data for</p></li>
+<li><p><strong>fastStreamInfos</strong> – Optional list of FastStreamInfo objects containing pre-extracted stream information by <cite>GetFastInitInfo</cite>. If provided, this can improve performance by avoiding stream analysis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>numpy array with serialized GOP data</p></li>
+<li><p>list of first frame IDs for each GOP</p></li>
+<li><p>list of GOP lengths for each GOP</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple containing</p>
+</dd>
+</dl>
+<p>The numpy array contains a self-contained binary format with embedded frame offset table:
+- Header: total_frames (uint32_t) + frame_offsets array (size_t[total_frames])
+- Frame data blocks follow the header
+- Parse the header once to get direct access to any frame
+- Enables efficient random access and parallel processing
+- No external metadata files needed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If video files cannot be opened or GOP extraction fails</p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<p>Ref to Sample: <cite>samples/SampleSeparationAccess.py</cite></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">decoder</span> <span class="o">=</span> <span class="n">PyNvGopDecoder</span><span class="p">(</span><span class="n">maxfiles</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gop_data</span><span class="p">,</span> <span class="n">first_ids</span><span class="p">,</span> <span class="n">gop_lens</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">GetGOP</span><span class="p">([</span><span class="s1">&#39;video.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;video2.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted GOP data for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">first_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> GOPs&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvGopDecoder.GetGOPList">
+<span class="sig-name descname"><span class="pre">GetGOPList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepaths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fastStreamInfos</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.FastStreamInfo"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.FastStreamInfo</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.GetGOPList" title="Link to this definition"></a></dt>
+<dd><p>Extracts video GOP data for multiple videos and returns them as separate bundles.</p>
+<p>This method is similar to GetGOP but returns a separate bundle for each video file
+instead of merging all data into one bundle. This is useful when you want to cache
+or process each video’s data independently.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepaths</strong> – List of video file paths to extract GOP data from</p></li>
+<li><p><strong>frame_ids</strong> – List of frame IDs to extract GOP data for (one per video)</p></li>
+<li><p><strong>fastStreamInfos</strong> – Optional list of FastStreamInfo objects containing pre-extracted
+stream information by <cite>GetFastInitInfo</cite>. If provided, this can
+improve performance by avoiding stream analysis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>numpy array with serialized GOP data for that video</p></li>
+<li><p>list of first frame IDs for each GOP in that video</p></li>
+<li><p>list of GOP lengths for each GOP in that video</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of tuples, one per video file, each containing</p>
+</dd>
+</dl>
+<p>Each numpy array contains a self-contained binary format with embedded frame offset table:
+- Header: total_frames (uint32_t) + frame_offsets array (size_t[total_frames])
+- Frame data blocks follow the header
+- Parse the header once to get direct access to any frame
+- Enables efficient random access and parallel processing
+- No external metadata files needed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If video files cannot be opened or GOP extraction fails</p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<p>Ref to Sample: <cite>samples/SampleSeparationAccessGOPListAPI.py</cite></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">decoder</span> <span class="o">=</span> <span class="n">PyNvGopDecoder</span><span class="p">(</span><span class="n">maxfiles</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">results</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">GetGOPList</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="s1">&#39;video1.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;video2.mp4&#39;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">gop_data</span><span class="p">,</span> <span class="n">first_ids</span><span class="p">,</span> <span class="n">gop_lens</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Video </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: GOP data size = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">gop_data</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  First frame IDs: </span><span class="si">{</span><span class="n">first_ids</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  GOP lengths: </span><span class="si">{</span><span class="n">gop_lens</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvGopDecoder.LoadGops">
+<span class="sig-name descname"><span class="pre">LoadGops</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_paths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint8</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.LoadGops" title="Link to this definition"></a></dt>
+<dd><p>Merges multiple binary packet files into a single numpy array.</p>
+<p>This method merges multiple binary packet files into a single contiguous
+numpy array for efficient processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_paths</strong> – List of file paths to binary packet files</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Numpy array containing merged packet data compatible with decode_from_packet</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If files cannot be read or merged</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If file_paths is empty</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<p>Ref to Sample: <cite>samples/SampleDecodeFromGopFiles.py</cite></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvGopDecoder.LoadGopsToList">
+<span class="sig-name descname"><span class="pre">LoadGopsToList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_paths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.LoadGopsToList" title="Link to this definition"></a></dt>
+<dd><p>Load GOP data from multiple binary files and return as a list of numpy arrays.</p>
+<p>This method loads serialized GOP bundles from binary files (previously saved
+with SavePacketsToFile) and returns them as separate numpy arrays, one per file.
+This is the companion function to GetGOPList, enabling distributed GOP caching
+and selective loading workflows.</p>
+<p>Key Differences from LoadGops:
+- LoadGops: Merges all files into ONE numpy array (for use with DecodeFromGOPRGB)
+- LoadGopList: Returns separate numpy arrays (for use with DecodeFromGOPListRGB)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>file_paths</strong> – List of paths to GOP binary files to load</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of numpy arrays, each containing the GOP data from one file.
+Each numpy array has the same format as returned by GetGOP/GetGOPList.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If any file cannot be read or has invalid format</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If file_paths is empty or files have invalid GOP format</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<p>Ref to Sample: <cite>samples/SampleSeparationAccessGOPToListAPI.py</cite></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Workflow 1: Save GOP data to separate files (from GetGOPList)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decoder</span> <span class="o">=</span> <span class="n">PyNvGopDecoder</span><span class="p">(</span><span class="n">maxfiles</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gop_list</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">GetGOPList</span><span class="p">([</span><span class="s1">&#39;v1.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;v2.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">gop_data</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gop_list</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">SavePacketsToFile</span><span class="p">(</span><span class="n">gop_data</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;gop_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">.bin&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Workflow 2: Load GOP data back and decode</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">loaded_gop_list</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">LoadGopList</span><span class="p">([</span><span class="s1">&#39;gop_0.bin&#39;</span><span class="p">,</span> <span class="s1">&#39;gop_1.bin&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frames</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">DecodeFromGOPListRGB</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">loaded_gop_list</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="s1">&#39;v1.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;v2.mp4&#39;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">as_bgr</span><span class="o">=</span><span class="kc">True</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Workflow 3: Selective loading (only load needed videos)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Only load video 1&#39;s GOP data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">loaded_gop</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">LoadGopList</span><span class="p">([</span><span class="s1">&#39;gop_1.bin&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frames</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">DecodeFromGOPListRGB</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">loaded_gop</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="s1">&#39;v2.mp4&#39;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="mi">10</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">as_bgr</span><span class="o">=</span><span class="kc">True</span>
+<span class="gp">... </span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvGopDecoder.MergePacketDataToOne">
+<span class="sig-name descname"><span class="pre">MergePacketDataToOne</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet_data_arrays</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint8</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint8</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.MergePacketDataToOne" title="Link to this definition"></a></dt>
+<dd><p>Merges multiple packet data arrays into a single numpy array.</p>
+<p>This method takes multiple numpy arrays containing SerializedPacketBundle data
+and merges them into a single contiguous numpy array. This is useful for
+combining packet data from different sources or files into one unified
+data structure for processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packet_data_arrays</strong> – List of numpy arrays, each containing SerializedPacketBundle data</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Numpy array containing merged packet data</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If arrays cannot be merged</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If packet_data_arrays is empty</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method is designed to work efficiently with large datasets and uses
+parallel processing for optimal performance.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvGopDecoder.ParseSerializedPacketBundle">
+<span class="sig-name descname"><span class="pre">ParseSerializedPacketBundle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">numpy_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint8</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.ParseSerializedPacketBundle" title="Link to this definition"></a></dt>
+<dd><p>Parses a SerializedPacketBundle and extracts parameters for DecodeFromPacketListRGB.</p>
+<p>This method takes serialized packet data and extracts all the necessary parameters
+required for the DecodeFromPacketListRGB interface, including creating numpy arrays
+for the packet binary data. You can use this method to get the parameters from <cite>GetGOP</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>numpy_data</strong> – Numpy array containing serialized packet data from GetGOP</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>color_ranges: List of color ranges for each frame</p></li>
+<li><p>codec_ids: List of codec IDs for each frame</p></li>
+<li><p>widths: List of frame widths for each frame</p></li>
+<li><p>heights: List of frame heights for each frame</p></li>
+<li><p>frame_sizes: List of frame sizes for each frame</p></li>
+<li><p>gop_lens: List of GOP lengths for each frame</p></li>
+<li><p>first_frame_ids: List of first frame IDs for each GOP</p></li>
+<li><p>packet_binary_data_arrays: List of numpy arrays containing binary packet data for each frame</p></li>
+<li><p>packet_binary_data_sizes: List of sizes of the packet binary data for each frame</p></li>
+<li><p>packets_bytes: List of lists containing packet sizes for each frame</p></li>
+<li><p>decode_idxs: List of lists containing decode indices for each frame</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple containing</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If packet data is invalid or parsing fails</p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<p>Ref to Sample: <cite>samples/SampleDecodeFromBinaryData.py</cite></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvGopDecoder.release_decoder">
+<span class="sig-name descname"><span class="pre">release_decoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.release_decoder" title="Link to this definition"></a></dt>
+<dd><p>Release all decoder instances to free up GPU memory.</p>
+<p>This method clears all decoder instances, which releases:
+- NvDecoder instances and their GPU frame buffers</p>
+<p>This is useful for freeing GPU memory occupied by decoder instances.</p>
+<p>Note: After calling this method, decoder instances will need to be
+re-created on the next decode operation.</p>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">decoder</span> <span class="o">=</span> <span class="n">PyNvGopDecoder</span><span class="p">(</span><span class="n">maxfiles</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frames</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">Decode</span><span class="p">([</span><span class="s1">&#39;video1.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decoder</span><span class="o">.</span><span class="n">release_decoder</span><span class="p">()</span>  <span class="c1"># Free decoder instances</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvGopDecoder.release_device_memory">
+<span class="sig-name descname"><span class="pre">release_device_memory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvGopDecoder</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder.release_device_memory" title="Link to this definition"></a></dt>
+<dd><p>Release GPU device memory pool to free up GPU memory.</p>
+<p>This method releases the GPU memory pool and resets the pool state.
+This is useful for temporarily freeing excessive GPU memory usage.</p>
+<p>Note: After calling this method, the memory pool will need to be
+re-allocated on the next decode operation.</p>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">decoder</span> <span class="o">=</span> <span class="n">PyNvGopDecoder</span><span class="p">(</span><span class="n">maxfiles</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frames</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">Decode</span><span class="p">([</span><span class="s1">&#39;video1.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">decoder</span><span class="o">.</span><span class="n">release_device_memory</span><span class="p">()</span>  <span class="c1"># Free GPU memory pool</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvSampleReader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.on_demand_video_decoder.</span></span><span class="sig-name descname"><span class="pre">PyNvSampleReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvSampleReader" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvSampleReader"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvSampleReader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_of_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_of_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">iGpu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppressNoColorRangeWarning</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvSampleReader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>NVIDIA GPU-accelerated sample reader for multi-file video processing.</p>
+<p>This class provides high-performance video reading capabilities using NVIDIA
+hardware acceleration for multiple video files with multiple readers per file.
+It’s designed for scenarios requiring high-throughput processing of multiple
+video streams simultaneously.</p>
+<p>Key Features:
+- GPU-accelerated decoding using NVIDIA hardware
+- Multiple video readers per file for parallel processing
+- Multi-file support with configurable reader pools
+- RGB and YUV output formats
+- Resource management with explicit cleanup
+- Optimized for high-throughput batch processing</p>
+<p>Initialize sample reader with set of particular parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_of_set</strong> – Number of video readers per file for parallel processing</p></li>
+<li><p><strong>num_of_file</strong> – Number of files to handle simultaneously</p></li>
+<li><p><strong>iGpu</strong> – GPU device ID to use for decoding (0 for primary GPU)</p></li>
+<li><p><strong>suppressNoColorRangeWarning</strong> – Suppress warning when no color range can be extracted from video files (limited/MPEG range is assumed)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If GPU initialization fails or parameters are invalid</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The parameter <cite>num_of_set</cite> in <cite>nvc.CreateSampleReader</cite> controls the decoding cycle:
+- For a specific decoder instance, if you are decoding clipA, after calling <cite>DecodeN12ToRGB</cite> <cite>num_of_set</cite> times, the input returns to clipA again
+- If you are continuously decoding the same clip, then <cite>num_of_set</cite> can be set to 1</p>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvSampleReader.Decode">
+<span class="sig-name descname"><span class="pre">Decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvSampleReader" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvSampleReader"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvSampleReader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepaths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#accvlab.on_demand_video_decoder.DecodedFrameExt" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.DecodedFrameExt"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.DecodedFrameExt</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvSampleReader.Decode" title="Link to this definition"></a></dt>
+<dd><p>Decodes video frames into uncompressed YUV data.</p>
+<p>This method performs GPU-accelerated decoding of specific frames from multiple
+video files using the configured reader pools. It returns frames in YUV format
+with metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepaths</strong> – List of video file paths to decode from</p></li>
+<li><p><strong>frame_ids</strong> – List of frame IDs to decode from the video files</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of DecodedFrameExt objects containing the decoded frame data.
+Each frame includes YUV pixel data, metadata, and timing information.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If video files cannot be decoded or frame IDs are invalid</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If frame_ids contain invalid indices or filepaths is empty</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">reader</span> <span class="o">=</span> <span class="n">PyNvSampleReader</span><span class="p">(</span><span class="n">num_of_set</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_of_file</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frames</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">Decode</span><span class="p">([</span><span class="s1">&#39;video1.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;video2.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Decoded </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">frames</span><span class="p">)</span><span class="si">}</span><span class="s2"> frames&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvSampleReader.DecodeN12ToRGB">
+<span class="sig-name descname"><span class="pre">DecodeN12ToRGB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvSampleReader" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvSampleReader"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvSampleReader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepaths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_bgr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#accvlab.on_demand_video_decoder.RGBFrame" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.RGBFrame"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.RGBFrame</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvSampleReader.DecodeN12ToRGB" title="Link to this definition"></a></dt>
+<dd><p>Decodes video frames and converts them to RGB/BGR format.</p>
+<p>This method performs GPU-accelerated decoding and color space conversion
+from YUV to RGB/BGR format for multiple video files. It’s optimized for
+machine learning applications that require RGB input data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepaths</strong> – List of video file paths to decode from</p></li>
+<li><p><strong>frame_ids</strong> – List of frame IDs to decode from the video files</p></li>
+<li><p><strong>as_bgr</strong> – Whether to output in BGR format (True) or RGB format (False). BGR is commonly used in OpenCV applications.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of RGBFrame objects containing the decoded and color-converted frame data.
+Each frame includes RGB/BGR pixel data and metadata.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If video files cannot be decoded or frame IDs are invalid</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If frame_ids contain invalid indices or filepaths is empty</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<p>Ref to Sample: <cite>samples/SampleStreamAccess.py</cite></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">reader</span> <span class="o">=</span> <span class="n">PyNvSampleReader</span><span class="p">(</span><span class="n">num_of_set</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_of_file</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rgb_frames</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">DecodeN12ToRGB</span><span class="p">([</span><span class="s1">&#39;video1.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;video2.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">as_bgr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Decoded </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">rgb_frames</span><span class="p">)</span><span class="si">}</span><span class="s2"> RGB frames&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvSampleReader.DecodeN12ToRGBAsync">
+<span class="sig-name descname"><span class="pre">DecodeN12ToRGBAsync</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvSampleReader" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvSampleReader"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvSampleReader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepaths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_bgr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvSampleReader.DecodeN12ToRGBAsync" title="Link to this definition"></a></dt>
+<dd><p>Asynchronously decode video frames and convert them to RGB/BGR format.</p>
+<p>This method submits a decode task to a background thread and returns immediately.
+The decoded frames will be stored in an internal buffer and can be retrieved
+using DecodeN12ToRGBAsyncGetBuffer.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong>Buffer Clearing Behavior</strong>: Calling this method will clear any pending
+results from the internal buffer. You MUST ensure that you have already
+retrieved all buffered results using DecodeN12ToRGBAsyncGetBuffer before
+calling this method again. Otherwise, pending decoded frames will be
+discarded and cannot be recovered.</p>
+<p><strong>Deep Copy Requirement</strong>: After retrieving frames via DecodeN12ToRGBAsyncGetBuffer,
+you MUST ensure that the frames have been deep-copied (e.g., using PyTorch’s
+<code class="docutils literal notranslate"><span class="pre">clone()</span></code>, or other deep-copy operations) or have been fully
+consumed by post-processing operations (e.g., resize) before calling
+DecodeN12ToRGBAsync again. This is because RGBFrame objects use zero-copy
+semantics and reference GPU memory from the internal memory pool. The memory
+pool may reuse the same GPU memory allocation for new decode operations,
+which could corrupt data if the previous frames are still being referenced.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>GPU Memory Management</strong>: The GPU memory used by decoded frames is managed
+by an internal GPU memory pool (GPUMemoryPool), not by the RGBFrame objects
+themselves. This has important implications:</p>
+<ol class="arabic simple">
+<li><p><strong>Zero-Copy Memory Access</strong>: RGBFrame objects use zero-copy semantics
+through the <code class="docutils literal notranslate"><span class="pre">__cuda_array_interface__</span></code> protocol. When you convert them
+to PyTorch tensors using <code class="docutils literal notranslate"><span class="pre">torch.as_tensor(frame)</span></code>, the tensor directly
+references the GPU memory from the memory pool without copying.</p></li>
+<li><p><strong>No Explicit Memory Release</strong>: You cannot explicitly release the GPU
+memory of individual RGBFrame objects. The memory is only released when:
+- The PyNvVideoReader instance that owns the memory pool is destroyed
+- The memory pool is explicitly released via ReleaseMemPools()</p></li>
+<li><p><strong>Memory Lifetime</strong>: Even after calling DecodeN12ToRGBAsyncGetBuffer and
+getting the frames, the GPU memory remains allocated in the memory pool
+until the reader is destroyed or the pool is released. PyTorch tensors
+created from RGBFrame objects will continue to reference this memory.</p></li>
+</ol>
+</div>
+<p>If a previous async decode task is still running, this method will wait for
+it to complete before starting the new task, and print a warning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepaths</strong> – List of video file paths to decode from</p></li>
+<li><p><strong>frame_ids</strong> – List of frame IDs to decode from the video files</p></li>
+<li><p><strong>as_bgr</strong> – Whether to output in BGR format (True) or RGB format (False).
+BGR is commonly used in OpenCV applications.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Only one async decode task can be pending at a time. If you call this
+method while a previous task is still running, it will wait for the
+previous task to complete and print a warning.</p>
+</div>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">reader</span> <span class="o">=</span> <span class="n">PyNvSampleReader</span><span class="p">(</span><span class="n">num_of_set</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_of_file</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reader</span><span class="o">.</span><span class="n">DecodeN12ToRGBAsync</span><span class="p">([</span><span class="s1">&#39;video1.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;video2.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">as_bgr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Do other work...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frames</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">DecodeN12ToRGBAsyncGetBuffer</span><span class="p">([</span><span class="s1">&#39;video1.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;video2.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Process frames (memory is zero-copy referenced by PyTorch tensors)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tensor_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cuda&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span> <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Note: GPU memory is still allocated in the memory pool</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Memory will be released when reader is destroyed or ReleaseMemPools() is called</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvSampleReader.DecodeN12ToRGBAsyncGetBuffer">
+<span class="sig-name descname"><span class="pre">DecodeN12ToRGBAsyncGetBuffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvSampleReader" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvSampleReader"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvSampleReader</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepaths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_ids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_bgr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#accvlab.on_demand_video_decoder.RGBFrame" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.RGBFrame"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.RGBFrame</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvSampleReader.DecodeN12ToRGBAsyncGetBuffer" title="Link to this definition"></a></dt>
+<dd><p>Get decoded frames from the async decode buffer.</p>
+<p>This method retrieves decoded frames from the internal buffer that were
+previously submitted via DecodeN12ToRGBAsync. It validates that the
+requested filepaths and frame_ids match the buffered result.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>Zero-Copy GPU Memory Access</strong>: The returned RGBFrame objects use zero-copy
+semantics through the <code class="docutils literal notranslate"><span class="pre">__cuda_array_interface__</span></code> protocol. This means:</p>
+<ol class="arabic simple">
+<li><p><strong>Memory Ownership</strong>: The GPU memory is NOT owned by the RGBFrame objects.
+It is managed by an internal GPU memory pool (GPUMemoryPool) within the
+PyNvVideoReader instance.</p></li>
+<li><p><strong>PyTorch Tensor Conversion</strong>: When you convert RGBFrame to PyTorch tensors
+using <code class="docutils literal notranslate"><span class="pre">torch.as_tensor(frame,</span> <span class="pre">device='cuda')</span></code>, PyTorch will create a
+zero-copy tensor that directly references the GPU memory from the memory
+pool. No data is copied.</p></li>
+<li><p><strong>Memory Lifetime</strong>: The GPU memory remains allocated in the memory pool
+even after this method returns. It will NOT be released when:
+- RGBFrame objects go out of scope
+- PyTorch tensors are deleted
+- Python garbage collection runs</p></li>
+<li><p><strong>Memory Release</strong>: The GPU memory is only released when:
+- The PyNvSampleReader instance is destroyed
+- ReleaseMemPools() is explicitly called on the reader</p></li>
+<li><p><strong>Memory Pool Behavior</strong>: The memory pool reuses the same GPU memory
+allocation across multiple decode operations. Calling this method does
+NOT free the GPU memory - it only removes the frame data from the
+internal buffer queue.</p></li>
+</ol>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepaths</strong> – List of video file paths (must match the async request)</p></li>
+<li><p><strong>frame_ids</strong> – List of frame IDs (must match the async request)</p></li>
+<li><p><strong>as_bgr</strong> – BGR format flag (must match the async request)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of RGBFrame objects containing the decoded and color-converted frame data.
+Each frame includes RGB/BGR pixel data and metadata. The GPU memory is
+managed by the internal memory pool and uses zero-copy semantics.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If no matching result is found in buffer, validation fails, or decoding failed</p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">reader</span> <span class="o">=</span> <span class="n">PyNvSampleReader</span><span class="p">(</span><span class="n">num_of_set</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_of_file</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reader</span><span class="o">.</span><span class="n">DecodeN12ToRGBAsync</span><span class="p">([</span><span class="s1">&#39;video1.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;video2.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="n">as_bgr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Do other work...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frames</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">DecodeN12ToRGBAsyncGetBuffer</span><span class="p">([</span><span class="s1">&#39;video1.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;video2.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Convert to PyTorch tensors (zero-copy, no memory allocation)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tensor_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="s1">&#39;cuda&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span> <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Note: GPU memory is still in the memory pool, referenced by tensors</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Memory will persist until reader is destroyed or ReleaseMemPools() is called</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvSampleReader.clearAllReaders">
+<span class="sig-name descname"><span class="pre">clearAllReaders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvSampleReader" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvSampleReader"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvSampleReader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvSampleReader.clearAllReaders" title="Link to this definition"></a></dt>
+<dd><p>Clear all video readers and release associated resources.</p>
+<p>This method releases all video reader instances and their associated
+GPU resources. It should be called when the reader is no longer needed
+to free up GPU memory and other system resources.</p>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">reader</span> <span class="o">=</span> <span class="n">PyNvSampleReader</span><span class="p">(</span><span class="n">num_of_set</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_of_file</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frames</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">Decode</span><span class="p">([</span><span class="s1">&#39;video1.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reader</span><span class="o">.</span><span class="n">clearAllReaders</span><span class="p">()</span>  <span class="c1"># Clean up resources</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvSampleReader.release_decoder">
+<span class="sig-name descname"><span class="pre">release_decoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvSampleReader" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvSampleReader"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvSampleReader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvSampleReader.release_decoder" title="Link to this definition"></a></dt>
+<dd><p>Release all video decoder instances to free up GPU memory.</p>
+<p>This method clears all video readers, which releases:
+- NvDecoder instances and their GPU frame buffers
+- Each video reader’s GPUMemoryPool instances</p>
+<p>This is useful for freeing GPU memory occupied by decoder instances.</p>
+<p>Note: After calling this method, video readers will need to be
+re-created on the next decode operation.</p>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">reader</span> <span class="o">=</span> <span class="n">PyNvSampleReader</span><span class="p">(</span><span class="n">num_of_set</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_of_file</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frames</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">Decode</span><span class="p">([</span><span class="s1">&#39;video1.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reader</span><span class="o">.</span><span class="n">release_decoder</span><span class="p">()</span>  <span class="c1"># Free decoder instances</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.PyNvSampleReader.release_device_memory">
+<span class="sig-name descname"><span class="pre">release_device_memory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvSampleReader" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvSampleReader"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.PyNvSampleReader</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.PyNvSampleReader.release_device_memory" title="Link to this definition"></a></dt>
+<dd><p>Release GPU device memory pool to free up GPU memory.</p>
+<p>This method releases the GPU memory pool and resets the pool state.
+This is useful for temporarily freeing excessive GPU memory usage.</p>
+<p>Note: After calling this method, the memory pool will need to be
+re-allocated on the next decode operation.</p>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">reader</span> <span class="o">=</span> <span class="n">PyNvSampleReader</span><span class="p">(</span><span class="n">num_of_set</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_of_file</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frames</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">Decode</span><span class="p">([</span><span class="s1">&#39;video1.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reader</span><span class="o">.</span><span class="n">release_device_memory</span><span class="p">()</span>  <span class="c1"># Free GPU memory pool</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.FastStreamInfo">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.on_demand_video_decoder.</span></span><span class="sig-name descname"><span class="pre">FastStreamInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.FastStreamInfo"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.FastStreamInfo</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#accvlab.on_demand_video_decoder.FastStreamInfo" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<p>Fast stream information structure for video files.</p>
+<p>This structure contains essential metadata about video streams that can be
+extracted quickly without full video analysis. Used for performance optimization
+in multi-file decoding scenarios.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.FastStreamInfo.avg_frame_rate_den">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">avg_frame_rate_den</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.FastStreamInfo.avg_frame_rate_den" title="Link to this definition"></a></dt>
+<dd><p>Average frame rate denominator)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.FastStreamInfo.avg_frame_rate_num">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">avg_frame_rate_num</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.FastStreamInfo.avg_frame_rate_num" title="Link to this definition"></a></dt>
+<dd><p>Average frame rate numerator)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.FastStreamInfo.codec_id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">codec_id</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.FastStreamInfo.codec_id" title="Link to this definition"></a></dt>
+<dd><p>FFmpeg codec ID (AVCodecID enum value, e.g., AV_CODEC_ID_H264=27)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.FastStreamInfo.codec_type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">codec_type</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.FastStreamInfo.codec_type" title="Link to this definition"></a></dt>
+<dd><p>FFmpeg codec type (AVMediaType enum value)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.FastStreamInfo.duration">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.FastStreamInfo.duration" title="Link to this definition"></a></dt>
+<dd><p>Duration of the stream in time base units)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.FastStreamInfo.format">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">format</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.FastStreamInfo.format" title="Link to this definition"></a></dt>
+<dd><p>Pixel format (AVPixelFormat enum value)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.FastStreamInfo.height">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">height</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.FastStreamInfo.height" title="Link to this definition"></a></dt>
+<dd><p>Video frame height in pixels)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.FastStreamInfo.r_frame_rate_den">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">r_frame_rate_den</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.FastStreamInfo.r_frame_rate_den" title="Link to this definition"></a></dt>
+<dd><p>Real frame rate denominator)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.FastStreamInfo.r_frame_rate_num">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">r_frame_rate_num</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.FastStreamInfo.r_frame_rate_num" title="Link to this definition"></a></dt>
+<dd><p>Real frame rate numerator)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.FastStreamInfo.start_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.FastStreamInfo.start_time" title="Link to this definition"></a></dt>
+<dd><p>Start time of the stream in time base units)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.FastStreamInfo.time_base_den">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_base_den</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.FastStreamInfo.time_base_den" title="Link to this definition"></a></dt>
+<dd><p>Time base denominator for timestamp calculations)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.FastStreamInfo.time_base_num">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time_base_num</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.FastStreamInfo.time_base_num" title="Link to this definition"></a></dt>
+<dd><p>Time base numerator for timestamp calculations)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.FastStreamInfo.width">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">width</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.FastStreamInfo.width" title="Link to this definition"></a></dt>
+<dd><p>Video frame width in pixels)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.DecodedFrameExt">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.on_demand_video_decoder.</span></span><span class="sig-name descname"><span class="pre">DecodedFrameExt</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.DecodedFrameExt" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.DecodedFrameExt.GetPtrToPlane">
+<span class="sig-name descname"><span class="pre">GetPtrToPlane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.DecodedFrameExt" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.DecodedFrameExt"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.DecodedFrameExt</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.GetPtrToPlane" title="Link to this definition"></a></dt>
+<dd><p>return pointer to base address for plane index
+:param planeIdx : index to the plane</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.DecodedFrameExt.color_range">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">color_range</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.color_range" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.DecodedFrameExt.cuda">
+<span class="sig-name descname"><span class="pre">cuda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.DecodedFrameExt" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.DecodedFrameExt"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.DecodedFrameExt</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.CAIMemoryView</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.cuda" title="Link to this definition"></a></dt>
+<dd><p>return underlying views which implement CAI
+:param None: None</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.DecodedFrameExt.dtype">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dtype</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.dtype" title="Link to this definition"></a></dt>
+<dd><p>Get the data type of the buffer</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.DecodedFrameExt.format">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">format</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.format" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.DecodedFrameExt.framesize">
+<span class="sig-name descname"><span class="pre">framesize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.DecodedFrameExt" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.DecodedFrameExt"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.DecodedFrameExt</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.framesize" title="Link to this definition"></a></dt>
+<dd><p>return underlying views which implement CAI
+:param None: None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.DecodedFrameExt.nvcv_image">
+<span class="sig-name descname"><span class="pre">nvcv_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.DecodedFrameExt" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.DecodedFrameExt"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.DecodedFrameExt</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.CAIMemoryView</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.nvcv_image" title="Link to this definition"></a></dt>
+<dd><p>return underlying views which implement CAI
+:param None: None</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.DecodedFrameExt.shape">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.shape" title="Link to this definition"></a></dt>
+<dd><p>Get the shape of the buffer as an array</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.DecodedFrameExt.strides">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">strides</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.strides" title="Link to this definition"></a></dt>
+<dd><p>Get the strides of the buffer</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.DecodedFrameExt.timestamp">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">timestamp</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.DecodedFrameExt.timestamp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.RGBFrame">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.on_demand_video_decoder.</span></span><span class="sig-name descname"><span class="pre">RGBFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#accvlab.on_demand_video_decoder.RGBFrame" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.RGBFrame"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.RGBFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg3</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg4</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg5</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg6</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#accvlab.on_demand_video_decoder.RGBFrame" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_object</span></code></p>
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.RGBFrame.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.RGBFrame.data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.RGBFrame.dataptr">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dataptr</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.RGBFrame.dataptr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.RGBFrame.isBGR">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">isBGR</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.RGBFrame.isBGR" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.RGBFrame.shape">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.RGBFrame.shape" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.RGBFrame.stride">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stride</span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.RGBFrame.stride" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.CreateGopDecoder">
+<span class="sig-prename descclassname"><span class="pre">accvlab.on_demand_video_decoder.</span></span><span class="sig-name descname"><span class="pre">CreateGopDecoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxfiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">iGpu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppressNoColorRangeWarning</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvGopDecoder" title="accvlab.on_demand_video_decoder.PyNvGopDecoder"><span class="pre">PyNvGopDecoder</span></a></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.CreateGopDecoder" title="Link to this definition"></a></dt>
+<dd><p>Initialize GOP decoder with set of particular parameters.</p>
+<p>This factory function creates a PyNvGopDecoder instance with the specified
+configuration. It’s the recommended way to create decoder instances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>maxfiles</strong> – Maximum number of unique files that can be processed concurrently</p></li>
+<li><p><strong>iGpu</strong> – GPU device ID to use for decoding (0 for primary GPU)</p></li>
+<li><p><strong>suppressNoColorRangeWarning</strong> – Suppress warning when no color range can be extracted from video files (limited/MPEG range is assumed)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>PyNvGopDecoder instance configured with the specified parameters</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If GPU initialization fails or parameters are invalid</p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">decoder</span> <span class="o">=</span> <span class="n">CreateGopDecoder</span><span class="p">(</span><span class="n">maxfiles</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">iGpu</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frames</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">Decode</span><span class="p">([</span><span class="s1">&#39;v0.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;v1.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;v2.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.CreateSampleReader">
+<span class="sig-prename descclassname"><span class="pre">accvlab.on_demand_video_decoder.</span></span><span class="sig-name descname"><span class="pre">CreateSampleReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_of_set</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_of_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">iGpu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppressNoColorRangeWarning</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#accvlab.on_demand_video_decoder.PyNvSampleReader" title="accvlab.on_demand_video_decoder.PyNvSampleReader"><span class="pre">PyNvSampleReader</span></a></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.CreateSampleReader" title="Link to this definition"></a></dt>
+<dd><p>Initialize sample reader with multiple video readers.</p>
+<p>This factory function creates a PyNvSampleReader instance with the specified
+configuration for high-throughput multi-file video processing. It’s the
+recommended way to create sample reader instances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_of_set</strong> – Number of video readers per file for parallel processing</p></li>
+<li><p><strong>num_of_file</strong> – Number of files to handle simultaneously</p></li>
+<li><p><strong>iGpu</strong> – GPU device ID to use for decoding (0 for primary GPU)</p></li>
+<li><p><strong>suppressNoColorRangeWarning</strong> – Suppress warning when no color range can be extracted from video files (limited/MPEG range is assumed)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>PyNvSampleReader instance configured with the specified parameters</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If GPU initialization fails or parameters are invalid</p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">reader</span> <span class="o">=</span> <span class="n">CreateSampleReader</span><span class="p">(</span><span class="n">num_of_set</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_of_file</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">iGpu</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frames</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">Decode</span><span class="p">([</span><span class="s1">&#39;v0.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;v1.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The parameter <cite>num_of_set</cite> in <cite>nvc.CreateSampleReader</cite> controls the decoding cycle:
+- For a specific decoder instance, if you are decoding clipA, after calling <cite>DecodeN12ToRGB</cite> <cite>num_of_set</cite> times, the input returns to clipA again
+- If you are continuously decoding the same clip, then <cite>num_of_set</cite> can be set to 1</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.GetFastInitInfo">
+<span class="sig-prename descclassname"><span class="pre">accvlab.on_demand_video_decoder.</span></span><span class="sig-name descname"><span class="pre">GetFastInitInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepaths</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#accvlab.on_demand_video_decoder.FastStreamInfo" title="accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.FastStreamInfo"><span class="pre">accvlab.on_demand_video_decoder._PyNvOnDemandDecoder.FastStreamInfo</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.GetFastInitInfo" title="Link to this definition"></a></dt>
+<dd><p>Extracts FastStreamInfo from video files automatically.</p>
+<p>This function quickly extracts essential stream information from video files
+without performing full video analysis. The extracted information can be used
+to optimize decoding performance in multi-file scenarios.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filepaths</strong> – List of video file paths to analyze</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of FastStreamInfo objects containing stream information for each file</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If files cannot be opened or stream information cannot be extracted</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If filepaths is empty</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">stream_infos</span> <span class="o">=</span> <span class="n">GetFastInitInfo</span><span class="p">([</span><span class="s1">&#39;video1.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;video2.mp4&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.SavePacketsToFile">
+<span class="sig-prename descclassname"><span class="pre">accvlab.on_demand_video_decoder.</span></span><span class="sig-name descname"><span class="pre">SavePacketsToFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numpy_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.3)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">[</span></span><span class="pre">numpy.uint8</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dst_filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#accvlab.on_demand_video_decoder.SavePacketsToFile" title="Link to this definition"></a></dt>
+<dd><p>Saves numpy array data to a binary file.</p>
+<p>This function saves serialized packet data to a binary file for later use.
+Useful for caching packet data to avoid repeated extraction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>numpy_data</strong> – Numpy array containing binary data to save</p></li>
+<li><p><strong>dst_filepath</strong> – Destination file path where data will be saved</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If file cannot be written or data is invalid</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If dst_filepath is empty</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">gop_data</span><span class="p">,</span> <span class="n">first_ids</span><span class="p">,</span> <span class="n">gop_lens</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">GetGOP</span><span class="p">([</span><span class="s1">&#39;v0.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;v1.mp4&#39;</span><span class="p">,</span> <span class="s1">&#39;v2.mp4&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SavePacketsToFile</span><span class="p">(</span><span class="n">packets</span><span class="p">,</span> <span class="s1">&#39;cached_packets.bin&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.Codec">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.on_demand_video_decoder.</span></span><span class="sig-name descname"><span class="pre">Codec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/on_demand_video_decoder.html#Codec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.on_demand_video_decoder.Codec" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.Codec.h264">
+<span class="sig-name descname"><span class="pre">h264</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#accvlab.on_demand_video_decoder.Codec.h264" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.Codec.hevc">
+<span class="sig-name descname"><span class="pre">hevc</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#accvlab.on_demand_video_decoder.Codec.hevc" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="accvlab.on_demand_video_decoder.Codec.av1">
+<span class="sig-name descname"><span class="pre">av1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#accvlab.on_demand_video_decoder.Codec.av1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dataset_preparation.html" class="btn btn-neutral float-left" title="Dataset Preparation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="sample.html" class="btn btn-neutral float-right" title="Sample Code Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

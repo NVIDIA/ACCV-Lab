@@ -1,0 +1,190 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docker Guide &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Development Guide" href="DEVELOPMENT_GUIDE.html" />
+    <link rel="prev" title="Installation Guide" href="INSTALLATION_GUIDE.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../guides_index.html">Guides</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="INSTALLATION_GUIDE.html">Installation Guide</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Docker Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#setting-up-the-docker-image">Setting up the Docker Image</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-docker-image">Running the Docker Image</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="DEVELOPMENT_GUIDE.html">Development Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FORMATTING_GUIDE.html">Code Formatting Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html">Sphinx Documentation Setup Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CONTRIBUTION_GUIDE.html">Contribution Guide</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../guides_index.html">Guides</a></li>
+      <li class="breadcrumb-item active">Docker Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/guides/DOCKER_GUIDE.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="docker-guide">
+<h1>Docker Guide<a class="headerlink" href="#docker-guide" title="Link to this heading"></a></h1>
+<p>This guide covers how to use the Docker image for ACCV-Lab.</p>
+<section id="setting-up-the-docker-image">
+<h2>Setting up the Docker Image<a class="headerlink" href="#setting-up-the-docker-image" title="Link to this heading"></a></h2>
+<p>There is a <a class="reference download internal" download="" href="../_downloads/9c6d2dd30e172995ff9466799d6f77ed/Dockerfile"><span class="xref download myst">Dockerfile</span></a> that can be used to set up a Docker image with all the
+dependencies needed to build and install ACCV-Lab, including all the contained namespace packages.
+The Dockerfile is located in the <code class="docutils literal notranslate"><span class="pre">docker</span></code> directory of the ACCV-Lab repository.</p>
+<p>The Dockerfile uses the <a class="reference external" href="https://hub.docker.com/r/nvidia/cuda">nvidia/cuda</a> image
+(version: <code class="docutils literal notranslate"><span class="pre">nvidia/cuda:12.4.1-devel-ubuntu22.04</span></code>) as the base image.</p>
+<p>The Dockerfile has the following optional build arguments:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">USER_ID</span></code>: The ID of the user to use for the container.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">USER_NAME</span></code>: The name of the user to use for the container.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GROUP_ID</span></code>: The ID of the group to use for the container.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GROUP_NAME</span></code>: The name of the group to use for the container.</p></li>
+</ul>
+<p>If these are not set, the root user will be used.</p>
+<p>The Dockerfile can be built as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>accvlab<span class="w"> </span>.
+</pre></div>
+</div>
+<p>Additional to the dockerfile, there is the <code class="docutils literal notranslate"><span class="pre">run_docker_build.sh</span></code> script (located in the <code class="docutils literal notranslate"><span class="pre">docker</span></code> directory) that can
+be used to build the container for the current user.</p>
+</section>
+<section id="running-the-docker-image">
+<h2>Running the Docker Image<a class="headerlink" href="#running-the-docker-image" title="Link to this heading"></a></h2>
+<p>The container can be run as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>accvlab<span class="w"> </span>&lt;...additional<span class="w"> </span>arguments...&gt;
+</pre></div>
+</div>
+<p>The following arguments are recommended to be used when running the container to ensure optimal performance:
+<code class="docutils literal notranslate"><span class="pre">--gpus=all</span> <span class="pre">--cap-add</span> <span class="pre">SYS_NICE</span> <span class="pre">--privileged</span> <span class="pre">--shm-size=16g</span> <span class="pre">--ipc=host</span></code>.
+Note that the optimal shared memory size (<code class="docutils literal notranslate"><span class="pre">--shm-size</span></code>) may depend on the specific use case.</p>
+<p>To ensure that the the on-demand video decoder package can be used, the Nvidia container runtime needs to be
+used. The runtime can be installed by following the instructions
+<a class="reference external" href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html">here</a>.</p>
+<p>After installation, the runtime can be enabled by specifying the arguments:
+<code class="docutils literal notranslate"><span class="pre">--runtime=nvidia</span> <span class="pre">-e</span> <span class="pre">NVIDIA_DRIVER_CAPABILITIES=all</span></code>
+when running the container.</p>
+<p>An example for running the container with this repository, some additional data, and a project making use
+of the ACCV-Lab packages could be:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>run<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--gpus<span class="o">=</span>all<span class="w"> </span>--cap-add<span class="w"> </span>SYS_NICE<span class="w"> </span>--privileged<span class="w"> </span>--shm-size<span class="o">=</span>16g<span class="w"> </span>--ipc<span class="o">=</span>host<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--runtime<span class="o">=</span>nvidia<span class="w"> </span>-e<span class="w"> </span><span class="nv">NVIDIA_DRIVER_CAPABILITIES</span><span class="o">=</span>all<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>/path/to/accvlab_repo:/accvlab<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>/path/to/your/data:/data<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>/path/to/your/project:/project<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--rm<span class="w"> </span>-it<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-u<span class="w"> </span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span>:<span class="k">$(</span>id<span class="w"> </span>-g<span class="k">)</span><span class="w"> </span>-w<span class="w"> </span>/project<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>accvlab:latest
+</pre></div>
+</div>
+<p>If you want to run the container without the Nvidia container runtime, you can remove the
+<code class="docutils literal notranslate"><span class="pre">--runtime=nvidia</span> <span class="pre">-e</span> <span class="pre">NVIDIA_DRIVER_CAPABILITIES=all</span></code> arguments. However, note that this may prevent the
+on-demand video decoder package from working.</p>
+<p>Note that in this example, the container is run with the current user <code class="docutils literal notranslate"><span class="pre">$(id</span> <span class="pre">-u):$(id</span> <span class="pre">-g)</span></code> and the working
+directory is set to <code class="docutils literal notranslate"><span class="pre">/project</span></code>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="INSTALLATION_GUIDE.html" class="btn btn-neutral float-left" title="Installation Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="DEVELOPMENT_GUIDE.html" class="btn btn-neutral float-right" title="Development Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

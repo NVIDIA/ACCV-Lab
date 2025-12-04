@@ -1,0 +1,637 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.dali_pipeline_framework.processing_steps.bounding_box_to_heatmap_converter &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.dali_pipeline_framework.processing_steps.bounding_box_to_heatmap_converter</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.dali_pipeline_framework.processing_steps.bounding_box_to_heatmap_converter</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">nvidia.dali.fn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">nvidia.dali.math</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dmath</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">nvidia.dali.types</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">types</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">nvidia.dali.data_node</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">node</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..pipeline.sample_data_group</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleDataGroup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.pipeline_step_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">PipelineStepBase</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..operators_impl.python_operator_functions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">apply_clipping_and_get_with_clipping_info</span><span class="p">,</span>
+    <span class="n">get_is_active</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..operators_impl.numba_operators</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_center_from_bboxes</span><span class="p">,</span> <span class="n">get_radii_from_bboxes</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_load_custom_operator</span><span class="p">():</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+    <span class="n">parent_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)))</span>
+    <span class="n">custom_operator_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parent_dir</span><span class="p">,</span> <span class="s2">&quot;lib_draw_gaussians.so&quot;</span><span class="p">)</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">nvidia.dali.plugin_manager</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plugin_manager</span>
+
+    <span class="n">plugin_manager</span><span class="o">.</span><span class="n">load_library</span><span class="p">(</span><span class="n">custom_operator_file</span><span class="p">,</span> <span class="n">global_symbols</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">_load_custom_operator</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Failed to load custom operator: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="BoundingBoxToHeatmapConverter">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.BoundingBoxToHeatmapConverter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BoundingBoxToHeatmapConverter</span><span class="p">(</span><span class="n">PipelineStepBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Convert 2D object bounding box annotations into Gaussian heatmaps.</span>
+
+<span class="sd">    This step can process data from one or multiple cameras. It expects sibling fields in the input</span>
+<span class="sd">    :class:`SampleDataGroup`: an image-size field and an annotation field containing bounding boxes (and</span>
+<span class="sd">    optionally categories &amp; bounding box centers). Multiple occurrences are supported; each is processed</span>
+<span class="sd">    independently (see the constructor for details).</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The input bounding boxes (and centers, if provided) are clipped to the image size and</span>
+<span class="sd">        the corresponding output fields are corresponding to the clipped bounding boxes (scaled to the</span>
+<span class="sd">        heatmap resolution).</span>
+
+<span class="sd">    The following fields can be added inside each processed annotation. Note that apart from the heatmap,</span>
+<span class="sd">    all fields are optional and can be omitted if not needed:</span>
+
+<span class="sd">      - **heatmap**: Heatmap at the specified resolution. If per-category mode is enabled, the shape is</span>
+<span class="sd">        ``[num_categories, H, W]``; otherwise ``[H, W]``. The data type is ``FLOAT``.</span>
+<span class="sd">      - **is_active**: Boolean mask containing per-object flags indicating whether the object contributes</span>
+<span class="sd">        to the heatmap (after clipping and threshold checks). Inactive objects were not drawn. Note that</span>
+<span class="sd">        inactive objects are still contained in the other output fields.</span>
+<span class="sd">      - **center**: Integer pixel center per object in heatmap coordinates (full-pixel location of the</span>
+<span class="sd">        peak).</span>
+<span class="sd">      - **center_offset**: Sub-pixel offset from the integer center to the true center in heatmap coordinates.</span>
+<span class="sd">      - **height_width_bboxes_heatmap**: Per-object ``[height, width]`` in heatmap coordinates (after</span>
+<span class="sd">        clipping and scaling from image to heatmap).</span>
+<span class="sd">      - **bboxes_heatmap**: Per-object bounding box in heatmap coordinates (after clipping and scaling).</span>
+
+<span class="sd">    To define the size of the individual Gaussians in the heatmap, the radius of the bounding boxes is used</span>
+<span class="sd">    (with additional factors for the radius and the sigma-to-radius conversion of the Gaussians). The</span>
+<span class="sd">    radius of the bounding boxes is defined as the distance between the center and the nearest edge of the</span>
+<span class="sd">    bounding box. If the center is outside the box, the radius is 0 (and the minimum</span>
+<span class="sd">    radius as defined on construction is enforced).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">annotation_field_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+        <span class="n">bboxes_in_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+        <span class="n">heatmap_out_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+        <span class="n">heatmap_hw</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+        <span class="n">image_field_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">image_hw_field_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">categories_in_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_categories</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">min_object_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">per_category_min_object_sizes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_per_category_heatmap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">is_valid_opt_in_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">center_opt_in_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">is_active_opt_out_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">center_opt_out_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">center_offset_opt_out_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">height_width_bboxes_heatmap_opt_out_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">bboxes_heatmap_opt_out_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">min_fraction_area_clipping</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span>
+        <span class="n">min_radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">max_radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span>
+        <span class="n">radius_scaling_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
+        <span class="n">radius_to_sigma_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">3.0</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            annotation_field_name: Name of the field containing annotations. Bounding-box related fields</span>
+<span class="sd">                are read from here and outputs are added here.</span>
+<span class="sd">            bboxes_in_name: Name of the field containing bounding boxes.</span>
+<span class="sd">            heatmap_out_name: Name of the output field to write the heatmap to.</span>
+<span class="sd">            heatmap_hw: Heatmap size ``(height, width)``.</span>
+<span class="sd">            image_field_name: Name of the field containing the image from which to extract the size.</span>
+<span class="sd">                This field is expected to be a sibling field to the annotation field. Only one of</span>
+<span class="sd">                ``image_field_name`` or ``image_hw_field_name`` should be set (single source of truth).</span>
+<span class="sd">            image_hw_field_name: Name of the field containing the image height and width.</span>
+<span class="sd">                This field is expected to be a sibling field to the annotation field. Only one of</span>
+<span class="sd">                ``image_field_name`` or ``image_hw_field_name`` should be set (single source of truth).</span>
+<span class="sd">            categories_in_name: Name of the field containing per-object categories. Required if any of the</span>
+<span class="sd">                following holds: ``use_per_category_heatmap`` is ``True``,</span>
+<span class="sd">                ``per_category_min_object_sizes`` is not ``None``, or ``num_categories`` is not ``None``.</span>
+<span class="sd">                Otherwise set to ``None``.</span>
+<span class="sd">            num_categories: Number of distinct categories. Objects with ``category &gt;= num_categories`` are</span>
+<span class="sd">                marked inactive. Set to ``None`` when categories are not used.</span>
+<span class="sd">            min_object_size: Category-independent minimum object size ``[height, width]`` to be included.</span>
+<span class="sd">                Must be ``None`` when ``per_category_min_object_sizes`` is not ``None``.</span>
+<span class="sd">            per_category_min_object_sizes: Per-category minimum size ``[height, width]``. Must be ``None``</span>
+<span class="sd">                when ``min_object_size`` is not ``None``.</span>
+<span class="sd">            use_per_category_heatmap: If ``True``, draw a separate heatmap slice per category; otherwise draw</span>
+<span class="sd">                a single heatmap.</span>
+<span class="sd">            is_valid_opt_in_name: Optional field with per-object validity. Will be applied in addition to the</span>
+<span class="sd">                internal checks to determine if an object is active. If absent, all objects are treated</span>
+<span class="sd">                as valid (internal checks can still mark objects as inactive).</span>
+<span class="sd">            center_opt_in_name: Name of the field containing the center of the bounding boxes.</span>
+<span class="sd">                The so defined center is not necessarily the center of the 2D bounding box and could e.g.</span>
+<span class="sd">                be the projection of the center of the 3D bounding box onto the image plane.</span>
+<span class="sd">                Optional field. If not present, the centers are assumed to be the center of the 2D bounding</span>
+<span class="sd">                boxes.</span>
+<span class="sd">            is_active_opt_out_name: Output field name for the per-object active flag. Optional field. The</span>
+<span class="sd">                corresponding field will not be added if not provided.</span>
+<span class="sd">            center_opt_out_name: Output field name for integer center locations in the heatmap. The sub-pixel</span>
+<span class="sd">                offset is written to ``center_offset_opt_out_name``. Optional field. The corresponding field</span>
+<span class="sd">                will not be added if not provided.</span>
+<span class="sd">            center_offset_opt_out_name: Output field name for sub-pixel center offsets in heatmap coordinates.</span>
+<span class="sd">                Optional field. The corresponding field will not be added if not provided.</span>
+<span class="sd">            height_width_bboxes_heatmap_opt_out_name: Output field for per-object ``[height, width]`` in the</span>
+<span class="sd">                heatmap. Optional field. The corresponding field will not be added if not provided.</span>
+<span class="sd">            bboxes_heatmap_opt_out_name: Output field for per-object bounding boxes in the heatmap.</span>
+<span class="sd">                Optional field. The corresponding field will not be added if not provided.</span>
+<span class="sd">            min_fraction_area_clipping: Minimum remaining area fraction after clipping for an object to be</span>
+<span class="sd">                considered active. For example, with ``0.25``, boxes that lose more than ``75%`` of their</span>
+<span class="sd">                area due to clipping are set inactive.</span>
+<span class="sd">            min_radius: Minimum radius used when drawing Gaussians. Enforced lower bound is ``0.5``.</span>
+<span class="sd">            max_radius: Maximum radius used when drawing Gaussians. Larger radii are clipped to this value.</span>
+<span class="sd">            radius_scaling_factor: Scaling factor applied to the bbox-derived radius.</span>
+<span class="sd">            radius_to_sigma_factor: Factor to convert radius to Gaussian sigma.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Validate constructor arguments according to the consitions as described in the docstring.</span>
+
+        <span class="c1"># Ensure exactly one of image_field_name or image_hw_field_name is set (single source of truth)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">image_field_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">image_hw_field_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Exactly one of &#39;image_field_name&#39; or &#39;image_hw_field_name&#39; must be set (single source of truth for image size).&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># categories_in_name is required when per-category heatmaps are used or when category-related</span>
+        <span class="c1"># parameters are provided (as per docstring). Our current implementation always uses categories.</span>
+        <span class="n">categories_required</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">use_per_category_heatmap</span>
+            <span class="ow">or</span> <span class="n">num_categories</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="n">per_category_min_object_sizes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">categories_required</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">categories_in_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">),</span> <span class="s2">&quot;categories_in_name must be provided if categories are used (i.e. when use_per_category_heatmap=True, num_categories is not None, or per_category_min_object_sizes is not None).&quot;</span>
+            <span class="c1"># num_categories is required for per-category heatmaps (as per docstring) and must be positive.</span>
+            <span class="k">assert</span> <span class="n">num_categories</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;num_categories must be a positive integer (if used).&quot;</span>
+
+        <span class="c1"># min_object_size and per_category_min_object_sizes are mutually exclusive (as per docstring).</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">min_object_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">per_category_min_object_sizes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="p">),</span> <span class="s2">&quot;min_object_size and per_category_min_object_sizes are mutually exclusive; provide only one or None.&quot;</span>
+
+        <span class="c1"># If per-category size thresholds are provided, validate their shape matches num_categories and [h, w].</span>
+        <span class="k">if</span> <span class="n">per_category_min_object_sizes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">per_category_min_object_sizes</span><span class="p">)</span> <span class="o">==</span> <span class="n">num_categories</span>
+            <span class="p">),</span> <span class="s2">&quot;per_category_min_object_sizes must have length equal to num_categories.&quot;</span>
+            <span class="k">for</span> <span class="n">size_pair</span> <span class="ow">in</span> <span class="n">per_category_min_object_sizes</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="p">(</span>
+                    <span class="nb">isinstance</span><span class="p">(</span><span class="n">size_pair</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">size_pair</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+                <span class="p">),</span> <span class="s2">&quot;Each entry in per_category_min_object_sizes must be a [height, width] pair.&quot;</span>
+
+        <span class="c1"># Basic sanity checks for heatmap size.</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">heatmap_hw</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">heatmap_hw</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+        <span class="p">),</span> <span class="s2">&quot;heatmap_hw must be a (height, width) pair.&quot;</span>
+        <span class="k">assert</span> <span class="n">heatmap_hw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">heatmap_hw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;heatmap_hw dimensions must be positive.&quot;</span>
+
+        <span class="c1"># Parameters for the heatmap generation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_image_field_name</span> <span class="o">=</span> <span class="n">image_field_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_image_hw_field_name</span> <span class="o">=</span> <span class="n">image_hw_field_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extract_size_from_image</span> <span class="o">=</span> <span class="n">image_field_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_annotation_field_name</span> <span class="o">=</span> <span class="n">annotation_field_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_heatmap_hw</span> <span class="o">=</span> <span class="n">heatmap_hw</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_categories</span> <span class="o">=</span> <span class="n">num_categories</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_min_object_size</span> <span class="o">=</span> <span class="n">min_object_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_per_category_heatmap</span> <span class="o">=</span> <span class="n">use_per_category_heatmap</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_min_fraction_area_clipping</span> <span class="o">=</span> <span class="n">min_fraction_area_clipping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_min_radius</span> <span class="o">=</span> <span class="n">min_radius</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_radius</span> <span class="o">=</span> <span class="n">max_radius</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_radius_scaling_factor</span> <span class="o">=</span> <span class="n">radius_scaling_factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_radius_to_sigma_factor</span> <span class="o">=</span> <span class="n">radius_to_sigma_factor</span>
+        <span class="k">if</span> <span class="n">per_category_min_object_sizes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_per_class_min_object_size_thresholds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">per_category_min_object_sizes</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_per_class_min_object_size_thresholds</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Name of the inputs &amp; outputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bboxes_name</span> <span class="o">=</span> <span class="n">bboxes_in_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_categories_name</span> <span class="o">=</span> <span class="n">categories_in_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_valid_name</span> <span class="o">=</span> <span class="n">is_valid_opt_in_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_center_in_name</span> <span class="o">=</span> <span class="n">center_opt_in_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_heatmap_name</span> <span class="o">=</span> <span class="n">heatmap_out_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_active_name</span> <span class="o">=</span> <span class="n">is_active_opt_out_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_center_out_name</span> <span class="o">=</span> <span class="n">center_opt_out_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_center_offset_name</span> <span class="o">=</span> <span class="n">center_offset_opt_out_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_height_width_bboxes_heatmap_name</span> <span class="o">=</span> <span class="n">height_width_bboxes_heatmap_opt_out_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bboxes_heatmap_name</span> <span class="o">=</span> <span class="n">bboxes_heatmap_opt_out_name</span>
+
+        <span class="c1"># Helper flags based on the inputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_sizes</span> <span class="o">=</span> <span class="n">min_object_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">per_category_min_object_sizes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_per_category_size_check</span> <span class="o">=</span> <span class="n">per_category_min_object_sizes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_categories</span> <span class="o">=</span> <span class="n">num_categories</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+        <span class="n">annotation_paths</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">find_all_occurrences</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_annotation_field_name</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">ap</span> <span class="ow">in</span> <span class="n">annotation_paths</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_parent_of_path</span><span class="p">(</span><span class="n">ap</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_size_from_image</span><span class="p">:</span>
+                <span class="c1"># Extract size from image using .shape() method</span>
+                <span class="n">image</span> <span class="o">=</span> <span class="n">parent</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_field_name</span><span class="p">]</span>
+                <span class="n">image_shape</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">()</span>
+                <span class="c1"># Use fn.stack to create a proper tensor with [height, width]</span>
+                <span class="c1"># Cast to int32 for consistency with heatmap operations</span>
+                <span class="n">image_hw</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">image_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">],</span> <span class="n">image_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">INT32</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Use size field</span>
+                <span class="n">image_hw</span> <span class="o">=</span> <span class="n">parent</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_hw_field_name</span><span class="p">]</span>
+
+            <span class="n">annotation</span> <span class="o">=</span> <span class="n">parent</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_annotation_field_name</span><span class="p">]</span>
+
+            <span class="n">annotation</span><span class="p">,</span> <span class="n">image_hw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_heat_map</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span> <span class="n">image_hw</span><span class="p">)</span>
+
+            <span class="c1"># Only update image_hw field if we&#39;re using size fields (not extracting from images)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_size_from_image</span><span class="p">:</span>
+                <span class="n">parent</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_hw_field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">image_hw</span>
+            <span class="n">parent</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_annotation_field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">annotation</span>
+
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_and_adjust_data_format_input_to_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_empty</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+
+        <span class="n">annotation_paths</span> <span class="o">=</span> <span class="n">data_empty</span><span class="o">.</span><span class="n">find_all_occurrences</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_annotation_field_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotation_paths</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">annotation_paths</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No occurrences of images found. Fields containing images are expected to have the name &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_field_name</span><span class="si">}</span><span class="s2">&#39;, as specified in the constructor.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">for</span> <span class="n">ap</span> <span class="ow">in</span> <span class="n">annotation_paths</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">data_empty</span><span class="o">.</span><span class="n">get_parent_of_path</span><span class="p">(</span><span class="n">ap</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_size_from_image</span><span class="p">:</span>
+                <span class="c1"># Check for image field</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image_field_name</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">contained_top_level_field_names</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;For annotation in path &#39;</span><span class="si">{</span><span class="n">ap</span><span class="si">}</span><span class="s2">&#39;, no image was found (i.e. no sibling field with name &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_field_name</span><span class="si">}</span><span class="s2">&#39;)&quot;</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Check for size field</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image_hw_field_name</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">contained_top_level_field_names</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;For annotation in path &#39;</span><span class="si">{</span><span class="n">ap</span><span class="si">}</span><span class="s2">&#39;, no image size information was found (i.e. no sibling field with name &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_hw_field_name</span><span class="si">}</span><span class="s2">&#39;)&quot;</span>
+                    <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bboxes_name</span> <span class="ow">in</span> <span class="n">parent</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_annotation_field_name</span><span class="p">]</span><span class="o">.</span><span class="n">contained_top_level_field_names</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Inside annotation in path &#39;</span><span class="si">{</span><span class="n">ap</span><span class="si">}</span><span class="s2">&#39;, no &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_bboxes_name</span><span class="si">}</span><span class="s2">&#39; fields was not found.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center_in_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center_in_name</span>
+                    <span class="ow">in</span> <span class="n">parent</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_annotation_field_name</span><span class="p">]</span><span class="o">.</span><span class="n">contained_top_level_field_names</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Inside annotation in path &#39;</span><span class="si">{</span><span class="n">ap</span><span class="si">}</span><span class="s2">&#39;, no &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_center_in_name</span><span class="si">}</span><span class="s2">&#39; fields was not found.&quot;</span>
+                    <span class="p">)</span>
+
+            <span class="n">annotations</span> <span class="o">=</span> <span class="n">parent</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_annotation_field_name</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_fields_to_annotations</span><span class="p">(</span><span class="n">annotations</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data_empty</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_heat_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">annotations</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">,</span> <span class="n">image_hw</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">DataNode</span><span class="p">):</span>
+
+        <span class="c1"># Get an empty heatmap image. Keep the leading class dimension for draw_gaussians; use 1 when not per-category.</span>
+        <span class="n">num_slices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_categories</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_per_category_heatmap</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="n">heat_map</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span>
+            <span class="n">fdata</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="n">num_slices</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_heatmap_hw</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_heatmap_hw</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">,</span>
+            <span class="n">device</span><span class="o">=</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Scaling between the image and the heat map</span>
+        <span class="n">scaling_transformation</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">transforms</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span>
+            <span class="n">scale</span><span class="o">=</span><span class="n">fn</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_heatmap_hw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">image_hw</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_heatmap_hw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">image_hw</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="p">)</span>
+
+        <span class="n">categories</span> <span class="o">=</span> <span class="n">annotations</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_categories_name</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_categories_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">bboxes</span> <span class="o">=</span> <span class="n">annotations</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bboxes_name</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center_in_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">center_in</span> <span class="o">=</span> <span class="n">annotations</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_center_in_name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">center_in</span> <span class="o">=</span> <span class="n">get_center_from_bboxes</span><span class="p">(</span>
+                <span class="n">bboxes</span><span class="p">,</span> <span class="n">dtype_in</span><span class="o">=</span><span class="n">annotations</span><span class="o">.</span><span class="n">get_type_of_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bboxes_name</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Perform clipping of bounding boxes &amp; additional operations such as getting the resulting fraction of resulting &amp; original bbox area and center of croppped bounding box.</span>
+        <span class="c1"># Operations are performed in one operator to not introduce additional overhead</span>
+        <span class="n">bboxes_clipped</span><span class="p">,</span> <span class="n">centers_clipped</span><span class="p">,</span> <span class="n">hw_clipped</span><span class="p">,</span> <span class="n">fraction_areas</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">python_function</span><span class="p">(</span>
+            <span class="n">bboxes</span><span class="p">,</span>
+            <span class="n">center_in</span><span class="p">,</span>
+            <span class="n">scaling_transformation</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_heatmap_hw</span><span class="p">,</span>
+            <span class="n">num_outputs</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+            <span class="n">function</span><span class="o">=</span><span class="n">apply_clipping_and_get_with_clipping_info</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Get a full pixel location, as we want the peak to be in the center of the pixel (to avoid sub-pixel maximum detection later). Therefore,</span>
+        <span class="c1"># get the center location pixel. Note that using &#39;floor&#39; means that, e.g., values in [0, 1) belong to the first pixel. This means we assume</span>
+        <span class="c1"># the coordinates (0, 0) to be the upper-left border of the upper-left pixel.</span>
+        <span class="n">center_full_pixel</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">dmath</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">centers_clipped</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">INT32</span><span class="p">)</span>
+
+        <span class="c1"># This is the offset of the pixel</span>
+        <span class="n">center_offset</span> <span class="o">=</span> <span class="n">centers_clipped</span> <span class="o">-</span> <span class="n">center_full_pixel</span>
+
+        <span class="c1"># Note the use of the bitwise &quot;&amp;&quot; operator. Logical operators cannot be used in DALI for tensors with more than one element, and bitwise operators are equivalent for bool values.</span>
+        <span class="n">is_active</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_is_active</span><span class="p">(</span>
+            <span class="n">hw_clipped</span><span class="p">,</span>
+            <span class="p">(</span>
+                <span class="n">categories</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_use_per_category_heatmap</span>
+                    <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_categories</span>
+                    <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_per_category_size_check</span>
+                <span class="p">)</span>
+                <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">),</span>
+            <span class="n">fraction_areas</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># &#39;is_valid&#39; is optional. Therefore, it is not listed in &#39;_get_needed_fields_and_types()&#39;. If it is not available, assume all objects are valid</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_valid_name</span> <span class="ow">in</span> <span class="n">annotations</span><span class="o">.</span><span class="n">contained_top_level_field_names</span><span class="p">:</span>
+            <span class="n">is_active</span> <span class="o">=</span> <span class="n">is_active</span> <span class="o">&amp;</span> <span class="n">annotations</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_valid_name</span><span class="p">]</span>
+
+        <span class="n">radii</span> <span class="o">=</span> <span class="n">get_radii_from_bboxes</span><span class="p">(</span>
+            <span class="n">bboxes_clipped</span><span class="p">,</span> <span class="n">centers</span><span class="o">=</span><span class="n">centers_clipped</span><span class="p">,</span> <span class="n">scaling_factor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_radius_scaling_factor</span>
+        <span class="p">)</span>
+        <span class="n">radii</span> <span class="o">=</span> <span class="n">dmath</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dmath</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_radius</span><span class="p">,</span> <span class="n">radii</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_radius</span><span class="p">)</span>
+
+        <span class="c1"># Example of how to print tensors during graph runtime:</span>
+        <span class="c1"># print_tensor_op(radii, &quot;radii&quot;)</span>
+
+        <span class="c1"># Slice IDs: category IDs for per-category heatmap, 0 otherwise (single slice)</span>
+        <span class="n">slice_ids</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">categories</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_per_category_heatmap</span>
+            <span class="k">else</span> <span class="n">fn</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">fraction_areas</span> <span class="o">*</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">INT32</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">heat_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_draw_gaussians</span><span class="p">(</span><span class="n">heat_map</span><span class="p">,</span> <span class="n">is_active</span><span class="p">,</span> <span class="n">slice_ids</span><span class="p">,</span> <span class="n">center_full_pixel</span><span class="p">,</span> <span class="n">radii</span><span class="p">,</span> <span class="n">num_slices</span><span class="p">)</span>
+
+        <span class="c1"># Squeeze class dimension for single-heatmap mode</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_per_category_heatmap</span><span class="p">:</span>
+            <span class="n">heat_map</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">heat_map</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_heatmap_hw</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_heatmap_hw</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_fields_to_annotations</span><span class="p">(</span><span class="n">annotations</span><span class="p">)</span>
+
+        <span class="n">annotations</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_heatmap_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">heat_map</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_active_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">annotations</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_active_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">is_active</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center_out_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">annotations</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_center_out_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">center_full_pixel</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center_offset_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">annotations</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_center_offset_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">center_offset</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height_width_bboxes_heatmap_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">annotations</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_height_width_bboxes_heatmap_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">hw_clipped</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bboxes_heatmap_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">annotations</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bboxes_heatmap_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">bboxes_clipped</span>
+
+        <span class="k">return</span> <span class="n">annotations</span><span class="p">,</span> <span class="n">image_hw</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_fields_to_annotations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">annotations</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">annotations</span><span class="o">.</span><span class="n">add_data_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_heatmap_name</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The input annotation must not contain the field &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_heatmap_name</span><span class="si">}</span><span class="s2">&#39;, as it is added by this step (name configurable on construction).&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_active_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">annotations</span><span class="o">.</span><span class="n">add_data_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_active_name</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">BOOL</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;The input annotation must not contain the field &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_is_active_name</span><span class="si">}</span><span class="s2">&#39;, as it is added by this step (name configurable on construction).&quot;</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center_out_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">annotations</span><span class="o">.</span><span class="n">add_data_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_center_out_name</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">INT32</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;The input annotation must not contain the field &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_center_out_name</span><span class="si">}</span><span class="s2">&#39;, as it is added by this step (name configurable on construction).&quot;</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center_offset_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">annotations</span><span class="o">.</span><span class="n">add_data_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_center_offset_name</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;The input annotation must not contain the field &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_center_offset_name</span><span class="si">}</span><span class="s2">&#39;, as it is added by this step (name configurable on construction).&quot;</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height_width_bboxes_heatmap_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">annotations</span><span class="o">.</span><span class="n">add_data_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_height_width_bboxes_heatmap_name</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;The input annotation must not contain the field &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_height_width_bboxes_heatmap_name</span><span class="si">}</span><span class="s2">&#39;, as it is added by this step (name configurable on construction).&quot;</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bboxes_heatmap_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">annotations</span><span class="o">.</span><span class="n">add_data_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bboxes_heatmap_name</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;The input annotation must not contain the field &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_bboxes_heatmap_name</span><span class="si">}</span><span class="s2">&#39;, as it is added by this step (name configurable on construction).&quot;</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_is_active</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">hw_clip</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">DataNode</span><span class="p">,</span>
+        <span class="n">classes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">DataNode</span><span class="p">],</span>
+        <span class="n">fraction_areas</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">DataNode</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">classes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">min_obj_size_to_set</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_object_size</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_object_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">)</span>
+            <span class="n">function_to_use</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">hw_clip</span><span class="p">,</span> <span class="n">fraction_areas</span><span class="p">:</span> <span class="n">get_is_active</span><span class="p">(</span>
+                <span class="n">hw_clip</span><span class="p">,</span>
+                <span class="n">classes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">fraction_areas</span><span class="o">=</span><span class="n">fraction_areas</span><span class="p">,</span>
+                <span class="n">min_object_size</span><span class="o">=</span><span class="n">min_obj_size_to_set</span><span class="p">,</span>
+                <span class="n">per_class_min_object_sizes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">num_classes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">min_fraction_area_thresh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_fraction_area_clipping</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">active</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">python_function</span><span class="p">(</span>
+                <span class="n">hw_clip</span><span class="p">,</span>
+                <span class="n">fraction_areas</span><span class="p">,</span>
+                <span class="n">function</span><span class="o">=</span><span class="n">function_to_use</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">per_class_min_obj_size_to_set</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_per_class_min_object_size_thresholds</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_per_class_min_object_size_thresholds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">)</span>
+            <span class="n">function_to_use</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">hw_clip</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">fraction_areas</span><span class="p">:</span> <span class="n">get_is_active</span><span class="p">(</span>
+                <span class="n">hw_clip</span><span class="p">,</span>
+                <span class="n">classes</span><span class="p">,</span>
+                <span class="n">fraction_areas</span><span class="p">,</span>
+                <span class="n">min_object_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">per_class_min_object_sizes</span><span class="o">=</span><span class="n">per_class_min_obj_size_to_set</span><span class="p">,</span>
+                <span class="n">num_classes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_categories</span><span class="p">,</span>
+                <span class="n">min_fraction_area_thresh</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_min_fraction_area_clipping</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">active</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">python_function</span><span class="p">(</span>
+                <span class="n">hw_clip</span><span class="p">,</span>
+                <span class="n">classes</span><span class="p">,</span>
+                <span class="n">fraction_areas</span><span class="p">,</span>
+                <span class="n">function</span><span class="o">=</span><span class="n">function_to_use</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">active</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_draw_gaussians</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">heatmap</span><span class="p">,</span> <span class="n">active</span><span class="p">,</span> <span class="n">slice_ids</span><span class="p">,</span> <span class="n">centers</span><span class="p">,</span> <span class="n">radii</span><span class="p">,</span> <span class="n">num_slices</span><span class="p">):</span>
+        <span class="c1"># Use the custom operator for drawing Gaussians.</span>
+        <span class="n">heatmap</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">draw_gaussians</span><span class="p">(</span>
+            <span class="n">heatmap</span><span class="p">,</span>
+            <span class="n">fn</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">active</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">BOOL</span><span class="p">),</span>
+            <span class="n">slice_ids</span><span class="p">,</span>
+            <span class="n">centers</span><span class="p">,</span>
+            <span class="n">radii</span><span class="p">,</span>
+            <span class="n">k_for_classes</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_slices</span><span class="p">,</span>
+            <span class="n">radius_to_sigma_factor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_radius_to_sigma_factor</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">heatmap</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,340 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.dali_pipeline_framework.processing_steps.visible_bbox_selector &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.dali_pipeline_framework.processing_steps.visible_bbox_selector</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.dali_pipeline_framework.processing_steps.visible_bbox_selector</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="c1"># Used to enable type hints using a class type inside the implementation of that class itself.</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">nvidia.dali.fn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">nvidia.dali.types</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">types</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..pipeline.sample_data_group</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleDataGroup</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..operators_impl.python_operator_functions</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..operators_impl</span><span class="w"> </span><span class="kn">import</span> <span class="n">numba_operators</span> <span class="k">as</span> <span class="n">numba_ops</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..internal_helpers.debug_helpers</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.pipeline_step_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">PipelineStepBase</span>
+
+
+<div class="viewcode-block" id="VisibleBboxSelector">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.VisibleBboxSelector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">VisibleBboxSelector</span><span class="p">(</span><span class="n">PipelineStepBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Select visible 2D bounding boxes.</span>
+
+<span class="sd">    A box is considered visible if it is not completely overlapped by nearer boxes (occlusion test)</span>
+<span class="sd">    and/or if it meets a minimum size threshold. The result is written as a boolean mask to the</span>
+<span class="sd">    configured output path. Both checks are optional and can be enabled or disabled independently.</span>
+
+<span class="sd">    A mask is added which indicates which boxes are visible. The original bounding boxes are not modified.</span>
+
+<span class="sd">    See also:</span>
+<span class="sd">        - :class:`AnnotationElementConditionEval` can be used to combine the results of this step with other</span>
+<span class="sd">          conditions.</span>
+<span class="sd">        - :class:`ConditionalElementRemoval` can be used to remove elements from the data based on this</span>
+<span class="sd">          condition or a combination of this condition with other conditions.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">bboxes_field_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+        <span class="n">resulting_mask_field_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="o">...</span><span class="p">]],</span>
+        <span class="n">image_field_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">image_hw_field_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">image_hw</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">check_for_bbox_occlusion</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">check_for_minimum_size</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">depths_field_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">minimum_bbox_size</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">        Note that the step expects exactly one data field in the input :class:`SampleDataGroup` instance to</span>
+<span class="sd">        contain the bounding boxes (as well as only one field containing the depths). If multiple sets of</span>
+<span class="sd">        bounding boxes are present in the data, this processing steps has to be applied to parts (sub-trees)</span>
+<span class="sd">        of the input data individually so that each part contains only one set of bounding boxes, and</span>
+<span class="sd">        access modifier wrapper steps need to be used (see class :class:`GroupToApplyToSelectedStepBase` and</span>
+<span class="sd">        its subclasses).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            bboxes_field_name: Name of data field in the input :class:`SampleDataGroup` instance containing</span>
+<span class="sd">                the bounding boxes. Each row is expected to contain a bounding box in the format:</span>
+<span class="sd">                ``[min_x, min_y, max_x, max_y]``. The input data must contain exactly one field with this</span>
+<span class="sd">                name.</span>
+<span class="sd">            resulting_mask_field_path: Path of the data field to store the result as. The path is relative</span>
+<span class="sd">                to the root element. Note that if this step is wrapped by a sub-tree selection step, the</span>
+<span class="sd">                root of the selected sub-tree acts as the root.</span>
+<span class="sd">            image_field_name: Name of field containing the image from which to extract the size. Only one of</span>
+<span class="sd">                ``image_field_name``, ``image_hw_field_name``, or ``image_hw`` should be set (single source</span>
+<span class="sd">                of truth).</span>
+<span class="sd">            image_hw_field_name: Name of field containing the image size for which the bounding boxes are</span>
+<span class="sd">                defined. Only one of ``image_field_name``, ``image_hw_field_name``, or ``image_hw`` should</span>
+<span class="sd">                be set (single source of truth).</span>
+<span class="sd">            image_hw: Image size ``[height, width]`` for the image for which the bounding boxes are defined.</span>
+<span class="sd">                Only one of ``image_field_name``, ``image_hw_field_name``, or ``image_hw`` should be set</span>
+<span class="sd">                (single source of truth).</span>
+<span class="sd">            check_for_bbox_occlusion: Whether to consider boxes invisible if completely overlapped by nearer</span>
+<span class="sd">                boxes.</span>
+<span class="sd">            check_for_minimum_size: Whether to consider boxes invisible if below a minimum size.</span>
+<span class="sd">            depths_field_name: Name of the data field containing the bounding box depth. Needs to be set if</span>
+<span class="sd">                ``check_for_bbox_occlusion`` is set to ``True``. The input data must contain exactly one field</span>
+<span class="sd">                with this name.</span>
+<span class="sd">            minimum_bbox_size: Minimum size of a bounding box to be visible. Needs to be set if</span>
+<span class="sd">                ``check_for_minimum_size`` is set to ``True``.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Ensure exactly one of image_field_name, image_hw_field_name, or image_hw is set</span>
+        <span class="n">num_set</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">image_field_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="n">image_hw_field_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="n">image_hw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">])</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">num_set</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="p">),</span> <span class="s2">&quot;Exactly one of &#39;image_field_name&#39;, &#39;image_hw_field_name&#39;, or &#39;image_hw&#39; must be set (single source of truth)&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">check_for_bbox_occlusion</span> <span class="ow">or</span> <span class="n">check_for_minimum_size</span>
+        <span class="p">),</span> <span class="s2">&quot;At least one of the parameters `check_for_bbox_occlusion` and `check_for_minimum_size` has to be `True`&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="n">check_for_minimum_size</span> <span class="ow">or</span> <span class="n">minimum_bbox_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">),</span> <span class="s2">&quot;If ``check_for_minimum_size==True``, the parameter ``minimum_size`` has to be set to a non-None value&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="ow">not</span> <span class="n">check_for_bbox_occlusion</span> <span class="ow">or</span> <span class="n">depths_field_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">),</span> <span class="s2">&quot;If ``check_for_bbox_occlusion==True``, the parameter ``depths_field_name`` has to be set to a non-None value&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bboxes_field_name</span> <span class="o">=</span> <span class="n">bboxes_field_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_depths_field_name</span> <span class="o">=</span> <span class="n">depths_field_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_image_field_name</span> <span class="o">=</span> <span class="n">image_field_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_image_hw_field_name</span> <span class="o">=</span> <span class="n">image_hw_field_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_image_hw</span> <span class="o">=</span> <span class="n">image_hw</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extract_size_from_image</span> <span class="o">=</span> <span class="n">image_field_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_fixed_image_hw</span> <span class="o">=</span> <span class="n">image_hw</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_resulting_mask_field_path</span> <span class="o">=</span> <span class="n">resulting_mask_field_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_for_bbox_occlusion</span> <span class="o">=</span> <span class="n">check_for_bbox_occlusion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_for_minimum_size</span> <span class="o">=</span> <span class="n">check_for_minimum_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_minimum_bbox_size</span> <span class="o">=</span> <span class="n">minimum_bbox_size</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_fixed_image_hw</span><span class="p">:</span>
+            <span class="n">image_hw</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">idata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_hw</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">INT32</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_size_from_image</span><span class="p">:</span>
+            <span class="c1"># Extract size from image using .shape() method</span>
+            <span class="n">image_paths</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">find_all_occurrences</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_field_name</span><span class="p">)</span>
+            <span class="n">image</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_item_in_path</span><span class="p">(</span><span class="n">image_paths</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">image_shape</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">()</span>
+            <span class="c1"># Use fn.stack to create a proper tensor with [height, width]</span>
+            <span class="c1"># Cast to int32 for consistency with image_hw fields</span>
+            <span class="n">image_hw</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">fn</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">image_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">],</span> <span class="n">image_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">INT32</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Use size field</span>
+            <span class="n">image_hw_paths</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">find_all_occurrences</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_hw_field_name</span><span class="p">)</span>
+            <span class="n">image_hw</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_item_in_path</span><span class="p">(</span><span class="n">image_hw_paths</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">bboxes_paths</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">find_all_occurrences</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bboxes_field_name</span><span class="p">)</span>
+        <span class="n">bboxes</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_item_in_path</span><span class="p">(</span><span class="n">bboxes_paths</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">depths_paths</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">find_all_occurrences</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_depths_field_name</span><span class="p">)</span>
+        <span class="n">depths</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_item_in_path</span><span class="p">(</span><span class="n">depths_paths</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_for_bbox_occlusion</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">numba_ops</span><span class="o">.</span><span class="n">check_bbox_visibiity</span><span class="p">(</span>
+                <span class="n">bboxes</span><span class="p">,</span> <span class="n">depths</span><span class="p">,</span> <span class="n">image_hw</span><span class="p">,</span> <span class="n">shrink_bbox_to_obtain_int_coords</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_for_minimum_size</span><span class="p">:</span>
+                <span class="n">mask_size</span> <span class="o">=</span> <span class="n">numba_ops</span><span class="o">.</span><span class="n">check_minimum_bbox_size</span><span class="p">(</span><span class="n">bboxes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minimum_bbox_size</span><span class="p">,</span> <span class="n">image_hw</span><span class="p">)</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span> <span class="o">&amp;</span> <span class="n">mask_size</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># self._check_for_minimum_size has to be True, as one of the checks needs to be set to True (and this is ensured in the constructor)</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">numba_ops</span><span class="o">.</span><span class="n">check_minimum_bbox_size</span><span class="p">(</span><span class="n">bboxes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minimum_bbox_size</span><span class="p">,</span> <span class="n">image_hw</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_result_field</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="n">data</span><span class="o">.</span><span class="n">set_item_in_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_resulting_mask_field_path</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_and_adjust_data_format_input_to_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_empty</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+
+        <span class="n">num_bboxes_fields</span> <span class="o">=</span> <span class="n">data_empty</span><span class="o">.</span><span class="n">get_num_occurrences</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bboxes_field_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">num_bboxes_fields</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No bounding box fields found with name: &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_bboxes_field_name</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">num_bboxes_fields</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;More than one occurence of box fields found with name: &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_bboxes_field_name</span><span class="si">}</span><span class="s2">&#39;. Field needs to have an unique name.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_size_from_image</span><span class="p">:</span>
+            <span class="c1"># Check for image field</span>
+            <span class="n">num_image_fields</span> <span class="o">=</span> <span class="n">data_empty</span><span class="o">.</span><span class="n">get_num_occurrences</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_field_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">num_image_fields</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No image field found with name: &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_field_name</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">num_image_fields</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;More than one occurence of image field found with name: &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_field_name</span><span class="si">}</span><span class="s2">&#39;. Field needs to have an unique name.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_fixed_image_hw</span><span class="p">:</span>
+            <span class="c1"># Check for size field</span>
+            <span class="n">num_image_hw_fields</span> <span class="o">=</span> <span class="n">data_empty</span><span class="o">.</span><span class="n">get_num_occurrences</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_hw_field_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">num_image_hw_fields</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No image size field found with name: &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_hw_field_name</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">num_image_hw_fields</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;More than one occurence of image size field found with name: &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_image_hw_field_name</span><span class="si">}</span><span class="s2">&#39;. Field needs to have an unique name.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_for_bbox_occlusion</span><span class="p">:</span>
+            <span class="n">num_depths_fields</span> <span class="o">=</span> <span class="n">data_empty</span><span class="o">.</span><span class="n">get_num_occurrences</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_depths_field_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">num_depths_fields</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No depths field found with name: &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_depths_field_name</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">num_depths_fields</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;More than one occurence of depths field found with name: &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_depths_field_name</span><span class="si">}</span><span class="s2">&#39;. Field needs to have an unique name.&quot;</span>
+                <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_add_result_field</span><span class="p">(</span><span class="n">data_empty</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data_empty</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_add_result_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_inout</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">data_inout</span><span class="o">.</span><span class="n">path_is_single_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_resulting_mask_field_path</span><span class="p">):</span>
+            <span class="n">field_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resulting_mask_field_path</span>
+            <span class="k">if</span> <span class="n">data_inout</span><span class="o">.</span><span class="n">has_child</span><span class="p">(</span><span class="n">field_name</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;SampleDataGroup object already has a child with name &#39;</span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2">&#39;. Cannot create the field to store results.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">data_inout</span><span class="o">.</span><span class="n">add_data_field</span><span class="p">(</span><span class="n">field_name</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">BOOL</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">data_inout</span><span class="o">.</span><span class="n">get_parent_of_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_resulting_mask_field_path</span><span class="p">)</span>
+            <span class="n">field_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resulting_mask_field_path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">has_child</span><span class="p">(</span><span class="n">field_name</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Group data field at path </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_resulting_mask_field_path</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> already has a child with name &#39;</span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2">&#39;. Cannot create the field to store results.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">add_data_field</span><span class="p">(</span><span class="n">field_name</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">BOOL</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,267 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.dali_pipeline_framework.inputs.sampler_input_iterable &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.dali_pipeline_framework.inputs.sampler_input_iterable</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.dali_pipeline_framework.inputs.sampler_input_iterable</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">nvidia.dali</span><span class="w"> </span><span class="kn">import</span> <span class="n">types</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleDataGroup</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.iterable_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">IterableBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.sampler_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SamplerBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.data_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataProvider</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+
+
+<div class="viewcode-block" id="SamplerInputIterable">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/inputs.html#accvlab.dali_pipeline_framework.inputs.SamplerInputIterable">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SamplerInputIterable</span><span class="p">(</span><span class="n">IterableBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Input iterable using a sampler to provide batches according to the sampler (also see :class:`SamplerBase`).</span>
+
+<span class="sd">    The iterable can be used with a parallel external source. However, in this case, the data reading is</span>
+<span class="sd">    performed in one worker process due to serial nature of an iterable. This means that while the data</span>
+<span class="sd">    reading is asynchronous to the main thread, it is not further parallelized.</span>
+
+<span class="sd">    This iterable also handles indicating the end of an epoch (by raising :class:`StopIteration`). Information</span>
+<span class="sd">    on when an epoch ends is obtained from the sampler (which in turn should indicate this by raising</span>
+<span class="sd">    :class:`StopIteration`, see documentation of :class:`SamplerBase`).</span>
+<span class="sd">    After the end of the epoch, the iterable needs to be reset (by obtaining a new iterator) before data for</span>
+<span class="sd">    the next epoch can be obtained.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        If further parallelization is desired (i.e. more than one worker thread),</span>
+<span class="sd">        :class:`SamplerInputCallable` can be used instead of this class (at the cost of pre-computing look-up</span>
+<span class="sd">        tables in advance, see the corresponding note in the documentation of :class:`SamplerInputCallable`).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_provider</span><span class="p">:</span> <span class="n">DataProvider</span><span class="p">,</span>
+        <span class="n">sampler</span><span class="p">:</span> <span class="n">SamplerBase</span><span class="p">,</span>
+        <span class="n">shard_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">num_shards</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_provider: Data provider to use (following the interface defined in :class:`DataProvider`).</span>
+<span class="sd">            sampler: Sampler to use (following the interface defined in :class:`SamplerBase`).</span>
+<span class="sd">            shard_id: Shard ID (default value of 0 should be used if sharding is not used).</span>
+<span class="sd">            num_shards: Total of shards (default value of 1 should be used if sharding is not used).</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_provider</span> <span class="o">=</span> <span class="n">data_provider</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shard_id</span> <span class="o">=</span> <span class="n">shard_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_shards</span> <span class="o">=</span> <span class="n">num_shards</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sampler</span> <span class="o">=</span> <span class="n">sampler</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_local_batch_size</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_total_batch_size</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_epoch</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_before_first_iter_called</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sharding_set_up</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">used_sample_data_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Data format blueprint used for the individual samples&#39;&#39;&#39;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_provider</span><span class="o">.</span><span class="n">sample_data_structure</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">set_apply_mapping</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;SamplerInputIterable&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_before_first_iter_called</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_before_first_iter_called</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampler</span><span class="o">.</span><span class="n">is_epoch_based</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_sampler</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+
+        <span class="n">batch_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampler</span><span class="o">.</span><span class="n">get_next_batch_indices</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sharding_set_up</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_total_batch_size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_indices</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_local_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_batch_size</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_shards</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_local_batch_size</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_shards</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_batch_size</span>
+            <span class="p">),</span> <span class="s2">&quot;Total batch size is not divisible by the number of used shards.&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sharding_set_up</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">min_index_in_total_batch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shard_id</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_local_batch_size</span>
+
+        <span class="n">indices_to_use</span> <span class="o">=</span> <span class="n">batch_indices</span><span class="p">[</span>
+            <span class="n">min_index_in_total_batch</span> <span class="p">:</span> <span class="n">min_index_in_total_batch</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_local_batch_size</span>
+        <span class="p">]</span>
+
+        <span class="n">sample_data</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_provider</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">indices_to_use</span><span class="p">]</span>
+
+        <span class="n">batch_res_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">sd</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span> <span class="k">for</span> <span class="n">sd</span> <span class="ow">in</span> <span class="n">sample_data</span><span class="p">]</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_combine_res_to_batch</span><span class="p">(</span><span class="n">batch_res_data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Number of batches in one epoch.</span>
+
+<span class="sd">        If the underlying sampler is not epoch-based, ``None`` is returned.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sampler</span><span class="o">.</span><span class="n">length</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_combine_res_to_batch</span><span class="p">(</span><span class="n">per_sample_res</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Combine per-sample results into a batch format.</span>
+
+<span class="sd">        Transposes the data structure from ``per_sample_res[sample_idx][field_idx]`` to ``output[field_idx][sample_idx]``</span>
+<span class="sd">        to match the expected batch format for DALI. Here, ``fields`` are the individual data</span>
+<span class="sd">        fields of the sample data structure.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            per_sample_res: List of sample results, where each sample is a list of field values.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List of field results, where each field is a list of sample values.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">num_samples</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">per_sample_res</span><span class="p">)</span>
+        <span class="n">num_fields</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">per_sample_res</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_fields</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_fields</span><span class="p">):</span>
+            <span class="n">res</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">per_sample_res</span><span class="p">[</span><span class="n">s</span><span class="p">][</span><span class="n">f</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_samples</span><span class="p">)]</span>
+
+        <span class="k">return</span> <span class="n">res</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

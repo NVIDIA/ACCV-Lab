@@ -1,0 +1,247 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.dali_pipeline_framework.inputs.iterable_base &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.dali_pipeline_framework.inputs.iterable_base</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.dali_pipeline_framework.inputs.iterable_base</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleDataGroup</span>
+
+
+<div class="viewcode-block" id="IterableBase">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/inputs.html#accvlab.dali_pipeline_framework.inputs.IterableBase">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">IterableBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Abstract base class for an iterable class which can be used in the pipeline.</span>
+
+<span class="sd">    Classes derived from :class:`IterableBase` are expected to run in the DALI external source in batch-mode,</span>
+<span class="sd">    i.e. returning one batch at a time.</span>
+
+<span class="sd">    Also see [1] for how an input iterable class is used to load the input data into a DALI pipeline.</span>
+
+<span class="sd">    Iterables are more flexible than callables as they can have an internal state, which is not possible for</span>
+<span class="sd">    callables. However, they are less efficient than callables as they only allow to distribute the work onto</span>
+<span class="sd">    a single worker when using the DALI parallel external source.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The :attr:`used_sample_data_structure` property is used by our pipeline to obtain the data format</span>
+<span class="sd">        blueprint used for the input. Note that the actual output of a callable is the flattened data</span>
+<span class="sd">        from this format (see</span>
+<span class="sd">        :meth:`SampleDataGroup.get_data() &lt;accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.get_data&gt;`), and the</span>
+<span class="sd">        returned blueprint can be used</span>
+<span class="sd">        to fill the data back into its structured form (see</span>
+<span class="sd">        :meth:`SampleDataGroup.set_data() &lt;accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.set_data&gt;`).</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        A ready-to-use :class:`SamplerInputIterable` is provided. Also see :class:`SamplerInputCallable`</span>
+<span class="sd">        and :class:`ShuffledShardedInputCallable` for more ready-to-use options.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Also see :class:`CallableBase` for an alternative to the iterable interface. Note that the callable</span>
+<span class="sd">        interface is potentially more efficient than the iterable interface (as it allows to distribute the</span>
+<span class="sd">        work onto multiple workers), and should be preferred in general. However, for use cases requiring the</span>
+<span class="sd">        input object to have an internal state, the iterable interface needs to be used as callables are</span>
+<span class="sd">        expected to be stateless.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        To be used with the DALI parallel external source, the iterable needs to be serializable.</span>
+<span class="sd">        If it contains any objects that cannot be serialized, these objects should not be created in the</span>
+<span class="sd">        constructor, but rather created when the :meth:`__next__` method is called for the first time.</span>
+<span class="sd">        At this point, the iterable is already in the worker process, and therefore, it does not need</span>
+<span class="sd">        to be serializable anymore.</span>
+
+<span class="sd">    [1] https://docs.nvidia.com/deeplearning/dali/user-guide/docs/examples/general/data_loading/external_input.html#Define-the-Data-Source</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">used_sample_data_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Sample data format of the input.</span>
+
+<span class="sd">        Get the blueprint (as defined in documentation of</span>
+<span class="sd">        :class:`~accvlab.dali_pipeline_framework.pipeline.SampleDataGroup`, i.e. a</span>
+<span class="sd">        :class:`~accvlab.dali_pipeline_framework.pipeline.SampleDataGroup` object without any actual data but with the</span>
+<span class="sd">        data format set up) describing the input data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`~accvlab.dali_pipeline_framework.pipeline.SampleDataGroup` object describing the input data format</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="IterableBase.__iter__">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/inputs.html#accvlab.dali_pipeline_framework.inputs.IterableBase.__iter__">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IterableBase&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Get the iterator (can be the same object as self) starting from the beginning.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The iterator starting from the beginning.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="IterableBase.__next__">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/inputs.html#accvlab.dali_pipeline_framework.inputs.IterableBase.__next__">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Get the next batch of data.</span>
+
+<span class="sd">        The data is a flattened sequence of data set according to the data format described by</span>
+<span class="sd">        :attr:`used_sample_data_structure` and then flattened. This means that</span>
+<span class="sd">        ``self.used_sample_data_structure.set_data(self.__next__())`` would return a</span>
+<span class="sd">        :class:`~accvlab.dali_pipeline_framework.pipeline.SampleDataGroup` with the correct input data format and filled</span>
+<span class="sd">        with the actual data.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            A flat sequence is returned here as this is the format expected by the DALI external source,</span>
+<span class="sd">            which will use this object. The flat sequence can be obtained by calling</span>
+<span class="sd">            :meth:`SampleDataGroup.get_data() &lt;accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.get_data&gt;` on</span>
+<span class="sd">            the :class:`~accvlab.dali_pipeline_framework.pipeline.SampleDataGroup` object containing the</span>
+<span class="sd">            input data (according to :attr:`used_sample_data_structure`).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The input data fields (as flat sequence)</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            StopIteration: When there are no more batches to provide. Note that this is part of the</span>
+<span class="sd">                normal behavior once the epoch is exhausted and is expected by the external source,</span>
+<span class="sd">                and is not an error.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Length of one epoch.</span>
+
+<span class="sd">        Providing the length is optional. If it is not implemented, this method still needs to be overridden.</span>
+<span class="sd">        In this case, it has to indicate that the length is not available (by returning ``None``).</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            The number of batches in the epoch, or ``None`` if not available.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

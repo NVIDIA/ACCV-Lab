@@ -1,0 +1,273 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Input – Passing Data to the Pipeline &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Output – DALI Structured Output Iterator" href="output.html" />
+    <link rel="prev" title="Pipeline &amp; Processing Steps" href="pipeline_processing_steps.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">DALI Pipeline Framework</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../design.html">Introduction</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../design.html#why-dali">Why DALI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#why-the-adas-dali-pipeline-framework">Why the ADAS DALI Pipeline Framework</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../design.html#overview">Overview</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="sample_data_group.html">Data Format: Sample Data Group</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pipeline_processing_steps.html">Pipeline &amp; Processing Steps</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Input – Passing Data to the Pipeline</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#input-callables-iterables">Input Callables &amp; Iterables</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#input-data-provider">Input Data Provider</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="output.html">Output – DALI Structured Output Iterator</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api/main_api.html">Main API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/additional_api.html">Additional API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">DALI Pipeline Framework</a></li>
+          <li class="breadcrumb-item"><a href="../design.html">Introduction</a></li>
+      <li class="breadcrumb-item active">Input – Passing Data to the Pipeline</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/contained_package_docs_mirror/dali_pipeline_framework/docs/design/input.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="input-passing-data-to-the-pipeline">
+<h1>Input – Passing Data to the Pipeline<a class="headerlink" href="#input-passing-data-to-the-pipeline" title="Link to this heading"></a></h1>
+<section id="input-callables-iterables">
+<h2>Input Callables &amp; Iterables<a class="headerlink" href="#input-callables-iterables" title="Link to this heading"></a></h2>
+<p>The input data for the pipeline is provided by a callable or iterable class, i.e. an object which implements
+the <a class="reference internal" href="../api/inputs.html#accvlab.dali_pipeline_framework.inputs.IterableBase" title="accvlab.dali_pipeline_framework.inputs.IterableBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">IterableBase</span></code></a> or <a class="reference internal" href="../api/inputs.html#accvlab.dali_pipeline_framework.inputs.CallableBase" title="accvlab.dali_pipeline_framework.inputs.CallableBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">CallableBase</span></code></a>
+interface. These classes are expected to provide the data &amp; format blueprint as follows:</p>
+<blockquote>
+<div><ul>
+<li><p>Providing the data format blueprint (also see <a class="reference internal" href="sample_data_group.html"><span class="doc">Data Format: Sample Data Group</span></a>):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Described by a <a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> blueprint (i.e. object with the
+data format set up, but without any actual data)</p></li>
+<li><p>Needs to be returned by the overriden
+<a class="reference internal" href="../api/inputs.html#accvlab.dali_pipeline_framework.inputs.CallableBase.used_sample_data_structure" title="accvlab.dali_pipeline_framework.inputs.CallableBase.used_sample_data_structure"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CallableBase.used_sample_data_structure()</span></code></a>
+or
+<a class="reference internal" href="../api/inputs.html#accvlab.dali_pipeline_framework.inputs.IterableBase.used_sample_data_structure" title="accvlab.dali_pipeline_framework.inputs.IterableBase.used_sample_data_structure"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IterableBase.used_sample_data_structure()</span></code></a></p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Providing the actual data:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Data is output from the input callable/iterable as a flat sequence of data fields, as can be obtained
+by calling <a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.get_data" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.get_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_data()</span></code></a> on a
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> object where the data format corresponds to
+the provided blueprint</p></li>
+<li><p>Note that while for both input callable and iterable, the data structure is the same (as described by
+the blueprint), the actual data fields (returned as a flat sequence) are different in that:</p>
+<ul>
+<li><p>For input callables, each data field corresponds to one sample</p></li>
+<li><p>For input iterables, each data field corresponds to one batch</p></li>
+</ul>
+</li>
+<li><p>The data needs to be returned by the overriden
+<a class="reference internal" href="../api/inputs.html#accvlab.dali_pipeline_framework.inputs.CallableBase.__call__" title="accvlab.dali_pipeline_framework.inputs.CallableBase.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CallableBase.__call__()</span></code></a> or
+<a class="reference internal" href="../api/inputs.html#accvlab.dali_pipeline_framework.inputs.IterableBase.__next__" title="accvlab.dali_pipeline_framework.inputs.IterableBase.__next__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IterableBase.__next__()</span></code></a></p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The flattened data sequence returned by the input callable/iterable is converted back into the
+structured format automatically by the pipeline using the provided blueprint, so that the user does not
+need to worry about the conversion and can assume that
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> objects are used throughout the
+pipeline.</p>
+</div>
+<p>The blueprint provided by the input callable/iterable is used by the pipeline to obtain the data format
+after each processing step and check for compatibility (see <a class="reference internal" href="pipeline_processing_steps.html"><span class="doc">Pipeline &amp; Processing Steps</span></a>).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The data format for the output of the pipeline is in turn needed to auto-convert the output
+from the flat sequence back into the structured format, e.g. using the
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator" title="accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIStructuredOutputIterator</span></code></a> (see <a class="reference internal" href="output.html"><span class="doc">Output – DALI Structured Output Iterator</span></a>).</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Note that there are pre-defined input callables/iterables which cover a wide range of use-cases, so that
+often there is no need to implement a custom callable/iterable. These are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="../api/inputs.html#accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable" title="accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShuffledShardedInputCallable</span></code></a></p></li>
+<li><p><a class="reference internal" href="../api/inputs.html#accvlab.dali_pipeline_framework.inputs.SamplerInputIterable" title="accvlab.dali_pipeline_framework.inputs.SamplerInputIterable"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerInputIterable</span></code></a></p></li>
+<li><p><a class="reference internal" href="../api/inputs.html#accvlab.dali_pipeline_framework.inputs.SamplerInputCallable" title="accvlab.dali_pipeline_framework.inputs.SamplerInputCallable"><code class="xref py py-class docutils literal notranslate"><span class="pre">SamplerInputCallable</span></code></a></p></li>
+</ul>
+</div></blockquote>
+<p>The pre-defined input callables/iterables are designed to be agnostic of the actual dataset, which is
+interfaced through a <a class="reference internal" href="../api/inputs.html#accvlab.dali_pipeline_framework.inputs.DataProvider" title="accvlab.dali_pipeline_framework.inputs.DataProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataProvider</span></code></a> class (see section
+below).
+The input data provider is expected to provide the data in the structured format (i.e. as a
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> object) one sample at a time,
+and the conversion to the flattened format (and batching of samples if needed) is performed
+internally by the input callable/iterable. In this way, the conversion is transparent to the user of the
+package when using the included input callables/iterables.</p>
+</div>
+</section>
+<section id="input-data-provider">
+<h2>Input Data Provider<a class="headerlink" href="#input-data-provider" title="Link to this heading"></a></h2>
+<p>The pre-defined input callables/iterables are generic, and do not assume a specific dataset. Dataset- (and
+use-case-) specific functionality is provided by a class implementing the
+<a class="reference internal" href="../api/inputs.html#accvlab.dali_pipeline_framework.inputs.DataProvider" title="accvlab.dali_pipeline_framework.inputs.DataProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataProvider</span></code></a> interface. Such data providers can be used by
+the input callable/iterable to read the actual data from the dataset. The task of data reading is split as
+follows:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Input callable/iterable:</p>
+<ul>
+<li><p>Define which sample(s) to load</p></li>
+<li><p>Use the data provider to load the actual data</p></li>
+<li><p>Convert the data to the flat format which needs to be returned by the input callable/iterable</p></li>
+<li><p>When outputting the data format (
+<a class="reference internal" href="../api/inputs.html#accvlab.dali_pipeline_framework.inputs.CallableBase.used_sample_data_structure" title="accvlab.dali_pipeline_framework.inputs.CallableBase.used_sample_data_structure"><code class="xref py py-meth docutils literal notranslate"><span class="pre">used_sample_data_structure()</span></code></a>
+or <a class="reference internal" href="../api/inputs.html#accvlab.dali_pipeline_framework.inputs.IterableBase.used_sample_data_structure" title="accvlab.dali_pipeline_framework.inputs.IterableBase.used_sample_data_structure"><code class="xref py py-meth docutils literal notranslate"><span class="pre">used_sample_data_structure()</span></code></a>), this information
+is internally obtained from the data provider</p></li>
+<li><p>Similarly, the length of the dataset is internally derived from the data provider (but may be modified,
+e.g. by sharding, dropping of samples, converting to number of batches, etc.)</p></li>
+</ul>
+</li>
+<li><p>Data provider:</p>
+<ul>
+<li><p>Given a sample index, return the corresponding sample data (see
+<a class="reference internal" href="../api/inputs.html#accvlab.dali_pipeline_framework.inputs.DataProvider.get_data" title="accvlab.dali_pipeline_framework.inputs.DataProvider.get_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_data()</span></code></a>)</p></li>
+<li><p>Define the data format for the sample data (see
+<a class="reference internal" href="../api/inputs.html#accvlab.dali_pipeline_framework.inputs.DataProvider.sample_data_structure" title="accvlab.dali_pipeline_framework.inputs.DataProvider.sample_data_structure"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sample_data_structure()</span></code></a>)</p></li>
+<li><p>Provide the number of samples in the dataset (see
+<a class="reference internal" href="../api/inputs.html#accvlab.dali_pipeline_framework.inputs.DataProvider.get_number_of_samples" title="accvlab.dali_pipeline_framework.inputs.DataProvider.get_number_of_samples"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_number_of_samples()</span></code></a>)</p></li>
+</ul>
+</li>
+</ul>
+</div></blockquote>
+<p>This means that while the pre-defined input callables/iterables are a fixed and re-usable part of the package,
+the data provider is specific and needs to be implemented by the user of the package.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>Note that there are data providers for the NuScenes dataset in the examples folder of the package (
+<code class="docutils literal notranslate"><span class="pre">packages/dali_pipeline_framework/examples/pipeline_setup/additional_impl/data_loading</span></code>). They can be used
+as a reference for implementing data providers for other datasets. They do not read all the data available
+in NuScenes (e.g. lidar point clouds), but rather focus on the data which is needed for the use cases
+at hand. Depending on your use-case, it may be possible to use them as is, or at least as a starting point
+for a customized implementation.</p>
+<p>Please also see the <a class="reference internal" href="../examples/use_case_specific/nuscenes_data_loader.html"><span class="doc">Data Loading for NuScenes</span></a> page for more details on
+the design of the data loaders.</p>
+<p>Also, note that some re-usability between use-cases is possible by implementing common functionality which
+can be used by different data provides. This is also discussed in the
+<a class="reference internal" href="../examples/use_case_specific/nuscenes_data_loader.html"><span class="doc">Data Loading for NuScenes</span></a> page.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pipeline_processing_steps.html" class="btn btn-neutral float-left" title="Pipeline &amp; Processing Steps" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="output.html" class="btn btn-neutral float-right" title="Output – DALI Structured Output Iterator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,445 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contribution Guide &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="On Demand Video Decoder" href="../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html" />
+    <link rel="prev" title="Sphinx Documentation Setup Guide" href="DOCUMENTATION_SETUP_GUIDE.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../guides_index.html">Guides</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="INSTALLATION_GUIDE.html">Installation Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DOCKER_GUIDE.html">Docker Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DEVELOPMENT_GUIDE.html">Development Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FORMATTING_GUIDE.html">Code Formatting Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html">Sphinx Documentation Setup Guide</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Contribution Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#testing-requirements">Testing Requirements</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#unit-testing">Unit Testing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#testing-approaches">Testing Approaches</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#testing-functions-which-implement-gradient-propagation">Testing Functions which Implement Gradient Propagation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#test-structure">Test Structure</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#documentation-requirements">Documentation Requirements</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#general-description">General Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#detailed-specifications">Detailed Specifications</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#limitations-and-constraints">Limitations and Constraints</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#api-documentation">API Documentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#documentation-checks">Documentation Checks</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#examples-and-tutorials">Examples and Tutorials</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#examples">Examples</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tutorials">Tutorials</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#demos">Demos</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#code-quality-standards">Code Quality Standards</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#formatting">Formatting</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#structure">Structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#getting-help">Getting Help</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#signing-your-work-developer-certificate-of-origin-dco">Signing Your Work &amp; Developer Certificate of Origin (DCO)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#summary-checklist">Summary Checklist</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../guides_index.html">Guides</a></li>
+      <li class="breadcrumb-item active">Contribution Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/guides/CONTRIBUTION_GUIDE.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="contribution-guide">
+<h1>Contribution Guide<a class="headerlink" href="#contribution-guide" title="Link to this heading"></a></h1>
+<p>This guide contains the guidelines for contributing to ACCV-Lab. It focuses on what should be done rather than
+how to do it, as this is covered in the other guides.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>For technical details, see:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="INSTALLATION_GUIDE.html"><span class="std std-doc">Installation Guide</span></a> - How to install the package</p></li>
+<li><p><a class="reference internal" href="DEVELOPMENT_GUIDE.html"><span class="std std-doc">Development Guide</span></a> - Package structure and build system</p></li>
+<li><p><a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html"><span class="std std-doc">Documentation Setup Guide</span></a> - Documentation creation and management</p></li>
+<li><p><a class="reference internal" href="FORMATTING_GUIDE.html"><span class="std std-doc">Formatting Guide</span></a> - Code formatting</p></li>
+</ul>
+</div>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>When contributing to ACCV-Lab, your contributions should include comprehensive testing, thorough
+documentation, and examples to both showcase the achieved benefit and to provide guidance on how to use the
+contained functionality.</p>
+</section>
+<section id="testing-requirements">
+<h2>Testing Requirements<a class="headerlink" href="#testing-requirements" title="Link to this heading"></a></h2>
+<section id="unit-testing">
+<h3>Unit Testing<a class="headerlink" href="#unit-testing" title="Link to this heading"></a></h3>
+<p>Contributions with new functionality should include comprehensive unit tests that cover:</p>
+<ul class="simple">
+<li><p><strong>Core Functionality</strong>: Test all major features and functions</p></li>
+<li><p><strong>Edge Cases</strong>: Test boundary conditions, special cases, and error conditions</p></li>
+<li><p><strong>Failure Handling</strong>: Verify that your code properly handles and reports errors</p></li>
+</ul>
+</section>
+<section id="testing-approaches">
+<h3>Testing Approaches<a class="headerlink" href="#testing-approaches" title="Link to this heading"></a></h3>
+<p>Use appropriate testing strategies based on your contribution:</p>
+<ul class="simple">
+<li><p><strong>Deterministic Testing</strong>: For algorithms and mathematical functions, test against known inputs and expected
+outputs.</p></li>
+<li><p><strong>Randomized Testing</strong>: Where appropriate and feasible, test against random inputs and verify expected
+output (e.g. testing an optimized implementation using a baseline reference implementation).</p></li>
+</ul>
+</section>
+<section id="testing-functions-which-implement-gradient-propagation">
+<h3>Testing Functions which Implement Gradient Propagation<a class="headerlink" href="#testing-functions-which-implement-gradient-propagation" title="Link to this heading"></a></h3>
+<p>When implementing differentiable building blocks (e.g. as <code class="docutils literal notranslate"><span class="pre">PyTorch</span></code> custom operators), it is important to
+test not only the forward pass, but also the gradient computation.</p>
+<p>When testing gradient propagation functionality, it is best to ensure that the gradient which is input to the
+gradient computation to test is not simply 1.0 in each case (or for each element e.g. of a tensor). This can
+e.g. be achieved by applying another function to the output of the function to test in the forward step.</p>
+</section>
+<section id="test-structure">
+<h3>Test Structure<a class="headerlink" href="#test-structure" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>For Python</p>
+<ul>
+<li><p>Place tests in <code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/tests/</span></code> directory (will be automatically discovered by the
+repository test runner)</p></li>
+<li><p>Use pytest</p></li>
+</ul>
+</li>
+<li><p>For C++/CUDA tests, ensure your build scripts return appropriate error codes on test failure</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>If you would like to include “manual” tests (i.e. tests which one can run during development but
+which are not part of the unit tests), you can place them in a different directory (not <code class="docutils literal notranslate"><span class="pre">tests/</span></code>). This will
+prevent them from being automatically run by the repository test runner.</p>
+</div>
+</section>
+</section>
+<section id="documentation-requirements">
+<h2>Documentation Requirements<a class="headerlink" href="#documentation-requirements" title="Link to this heading"></a></h2>
+<section id="general-description">
+<h3>General Description<a class="headerlink" href="#general-description" title="Link to this heading"></a></h3>
+<p>Please add documentation to your new namespace package. Provide a clear overview that explains:</p>
+<ul class="simple">
+<li><p><strong>Problem Statement</strong>: What problem does your contribution solve?</p></li>
+<li><p><strong>Use Cases</strong>: When and why would someone use this functionality?</p></li>
+<li><p><strong>Details of the Approach</strong> from a user perspective: Include info e.g. on</p>
+<ul>
+<li><p>Limitations (e.g. which problem sizes are supported)</p></li>
+<li><p>Performance</p>
+<ul>
+<li><p>Performance gain of using the optimized implementation (e.g. as part of demo description)</p></li>
+<li><p>Are there cases for which the implementation is not optimal and which may see low performance?
+If so, provide guidance on when to use the implementation and for which cases it is not a good fit.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="detailed-specifications">
+<h3>Detailed Specifications<a class="headerlink" href="#detailed-specifications" title="Link to this heading"></a></h3>
+<p>Document all aspects of your implementation, e.g.:</p>
+<ul class="simple">
+<li><p><strong>Input Parameters</strong>: Types, formats, other considerations/constraints, …</p></li>
+<li><p><strong>Output Values</strong>: Return types, formats, and interpretation</p></li>
+<li><p><strong>Side Effects</strong>: Any modifications to input data or (e.g. object) state</p></li>
+<li><p><strong>Constraints</strong>: Limitations on input sizes, data types, or operating conditions</p></li>
+</ul>
+<p>Note that this kind of documentation should typically be done as part of the API documentation by adding
+docstrings and type hints to the code.</p>
+</section>
+<section id="limitations-and-constraints">
+<h3>Limitations and Constraints<a class="headerlink" href="#limitations-and-constraints" title="Link to this heading"></a></h3>
+<p>Be transparent about limitations:</p>
+<ul class="simple">
+<li><p><strong>Performance Limitations</strong>: When your implementation may not be optimal (e.g., overhead for small problems,
+memory trade-offs)</p></li>
+<li><p><strong>Functional Limitations</strong>: Size limits, data type restrictions, or unsupported use cases</p></li>
+</ul>
+</section>
+<section id="api-documentation">
+<h3>API Documentation<a class="headerlink" href="#api-documentation" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>API documentation is automatically extracted from your code</p></li>
+<li><p>Ensure your code includes proper docstrings and type hints</p></li>
+<li><p>Follow the documentation structure described in the
+<a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html"><span class="std std-doc">Documentation Setup Guide</span></a>.</p></li>
+</ul>
+</section>
+<section id="documentation-checks">
+<h3>Documentation Checks<a class="headerlink" href="#documentation-checks" title="Link to this heading"></a></h3>
+<p>Before submitting your contribution, please ensure that the documentation can be build successfully without
+errors. Please also check any warnings as these may indicate issues which may make the documentation
+hard to read or understand (such as broken links, missing images or code, …), and fix the warnings where
+feasible. This helps to ensure that the documentation is of high quality, and also helps with pinpointing any
+warnings introduced by future changes to the documentation.</p>
+<p>Please also check for spelling errors (see
+the <a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html#spell-checking"><span class="std std-ref">section on spell-checking</span></a> in the
+<a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html"><span class="std std-doc">Documentation Setup Guide</span></a>).
+Note that some of the reported errors may not represent actual spelling errors, but rather words picked up
+from the code, file path, specific abbreviations, etc. However, if actual spelling errors are present, they
+should be fixed. If correctly spelled words are picked up as errors, they should be added to the spelling
+word list (see the <a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html#spell-checking"><span class="std std-ref">section on spell-checking</span></a> in the
+<a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html"><span class="std std-doc">Documentation Setup Guide</span></a>).</p>
+</section>
+</section>
+<section id="examples-and-tutorials">
+<h2>Examples and Tutorials<a class="headerlink" href="#examples-and-tutorials" title="Link to this heading"></a></h2>
+<p>Provide practical demonstrations of your contribution through one or more of the following:</p>
+<section id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h3>
+<p>Create simple, self-contained examples that demonstrate basic usage:</p>
+<ul class="simple">
+<li><p><strong>Location</strong>: <code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/examples/</span></code></p></li>
+<li><p><strong>Scope</strong>: Focus on single functions or simple workflows</p></li>
+<li><p><strong>Purpose</strong>: Demonstrate basic usage patterns; potentially show the benefits of the approach</p></li>
+</ul>
+</section>
+<section id="tutorials">
+<h3>Tutorials<a class="headerlink" href="#tutorials" title="Link to this heading"></a></h3>
+<p>Develop comprehensive tutorials that guide users through your functionality:</p>
+<ul class="simple">
+<li><p><strong>Content</strong>: Include both code and detailed explanations</p></li>
+<li><p><strong>Progression</strong>: Start with simple concepts and build to complex applications</p></li>
+<li><p><strong>Variety</strong>: Include both toy examples and real-world scenarios</p></li>
+<li><p><strong>Ordering</strong>: Suggest a logical progression through your tutorials</p></li>
+<li><p><strong>Format</strong>: You may choose a format of your choice (e.g. Sphinx, Jupyter notebooks, …).</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>For the tutorials, the examples and demos can be “re-used”. For example, using Sphinx, you can
+write a description and insert code (snippets) and notes in a structured way.
+Please also refer to the <a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html"><span class="std std-doc">Documentation Setup Guide</span></a> for further details.
+The <a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html#the-note-literalinclude-directive"><span class="std std-ref">note-literalinclude</span></a> is especially
+useful for this purpose, as it allows to conveniently highlight specific comment blocks, which can be used
+as part of the tutorial.</p>
+</div>
+</section>
+<section id="demos">
+<h3>Demos<a class="headerlink" href="#demos" title="Link to this heading"></a></h3>
+<p>Create demonstrations for real-world scenarios that showcase the benefits of the contribution (for example
+faster run time, less memory consumption, …).</p>
+<p>Note that demos for the contained packages will be added in the future.</p>
+</section>
+</section>
+<section id="code-quality-standards">
+<h2>Code Quality Standards<a class="headerlink" href="#code-quality-standards" title="Link to this heading"></a></h2>
+<section id="formatting">
+<h3>Formatting<a class="headerlink" href="#formatting" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Follow the formatting standards outlined in the <a class="reference internal" href="FORMATTING_GUIDE.html"><span class="std std-doc">Formatting Guide</span></a></p></li>
+<li><p>Use the automated formatting tools provided by the project</p></li>
+<li><p>Ensure consistent code style</p></li>
+</ul>
+</section>
+<section id="structure">
+<h3>Structure<a class="headerlink" href="#structure" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Follow the package structure described in the <a class="reference internal" href="DEVELOPMENT_GUIDE.html"><span class="std std-doc">Development Guide</span></a></p></li>
+<li><p>Organize code logically within the appropriate namespace package</p></li>
+<li><p>Use clear, descriptive names for functions, classes, and variables</p></li>
+</ul>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Minimize external dependencies where possible</p></li>
+<li><p>Declare required runtime dependencies in each package’s <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> under <code class="docutils literal notranslate"><span class="pre">[project.dependencies]</span></code></p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">[project.optional-dependencies]</span></code> in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> for non-essential or optional features</p></li>
+<li><p>Follow the dependency management patterns established in the project</p></li>
+</ul>
+</section>
+</section>
+<section id="getting-help">
+<h2>Getting Help<a class="headerlink" href="#getting-help" title="Link to this heading"></a></h2>
+<p>If you need assistance with any aspect of contributing, please consider the following options:</p>
+<ul class="simple">
+<li><p>Check the existing guides for technical implementation details</p></li>
+<li><p>Review existing contained packages for examples of good practices and patterns</p></li>
+<li><p>Consult the project maintainers for further questions and/or guidance on complex contributions</p></li>
+</ul>
+</section>
+<section id="signing-your-work-developer-certificate-of-origin-dco">
+<h2>Signing Your Work &amp; Developer Certificate of Origin (DCO)<a class="headerlink" href="#signing-your-work-developer-certificate-of-origin-dco" title="Link to this heading"></a></h2>
+<ul>
+<li><p>We require that all contributors “sign-off” on their commits. This certifies that the contribution is your
+original work, or you have rights to submit it under the same license, or a compatible license.</p>
+<ul class="simple">
+<li><p>Any contribution which contains commits that are not Signed-Off will not be accepted.</p></li>
+</ul>
+</li>
+<li><p>To sign off on a commit you simply use the <code class="docutils literal notranslate"><span class="pre">--signoff</span></code> (or <code class="docutils literal notranslate"><span class="pre">-s</span></code>) option when committing your changes:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-s<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Add cool feature.&quot;</span>
+</pre></div>
+</div>
+<p>This will append the following to your commit message:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Signed</span><span class="o">-</span><span class="n">off</span><span class="o">-</span><span class="n">by</span><span class="p">:</span> <span class="n">Your</span> <span class="n">Name</span> <span class="o">&lt;</span><span class="n">your</span><span class="nd">@email</span><span class="o">.</span><span class="n">com</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+<li><p>Full text of the DCO:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>  Developer Certificate of Origin
+  Version 1.1
+  
+  Copyright (C) 2004, 2006 The Linux Foundation and its contributors.
+  1 Letterman Drive
+  Suite D4700
+  San Francisco, CA, 94129
+  
+  Everyone is permitted to copy and distribute verbatim copies of this license document, but changing it is not allowed.
+
+
+  Developer&#39;s Certificate of Origin 1.1
+  
+  By making a contribution to this project, I certify that:
+  
+  (a) The contribution was created in whole or in part by me and I have the right to submit it under the open source license indicated in the file; or
+  
+  (b) The contribution is based upon previous work that, to the best of my knowledge, is covered under an appropriate open source license and I have the right under that license to submit that work with modifications, whether created in whole or in part by me, under the same open source license (unless I am permitted to submit under a different license), as indicated in the file; or
+  
+  (c) The contribution was provided directly to me by some other person who certified (a), (b) or (c) and I have not modified it.
+  
+  (d) I understand and agree that this project and the contribution are public and that a record of the contribution (including all personal information I submit with it, including my sign-off) is maintained indefinitely and may be redistributed consistent with this project or the open source license(s) involved.
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="summary-checklist">
+<h2>Summary Checklist<a class="headerlink" href="#summary-checklist" title="Link to this heading"></a></h2>
+<p>Before submitting your contribution, please consider the following checklist:</p>
+<ul class="contains-task-list simple">
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Comprehensive Unit Tests</strong>: Covering core functionality, edge cases, and error handling</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Complete Documentation</strong>: General description, detailed specifications, and performance metrics (where relevant)</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Limitations Documented</strong>: Clear explanation of constraints and trade-offs</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Examples Provided</strong>: Simple demonstrations of basic usage (where relevant)</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Tutorials Created</strong>: Detailed guides for learning and understanding (where relevant)</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Demos Available</strong>: Real-world showcases of key features (where relevant)</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Code Formatted</strong>: Following project formatting standards</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Dependencies Managed</strong>: Properly configured in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code></p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Repository Test Runner Passing</strong>: Verified functionality and integration across all namespace
+packages (scripts/run_tests.sh). Note that this will be automated in the future</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Documentation Build Checked</strong>: Documentation building successful and the checks outlined in the
+<a class="reference internal" href="#documentation-checks">Documentation Checks</a> section above are performed.</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Signed-Off Commits</strong>: All contained commits are signed-off</p></li>
+</ul>
+<p>Note that the <strong>checklist is a guideline</strong>. Individual points may be omitted if this makes sense for the
+contribution (e.g. no tutorials are provided because the functionality is easy to use and examples are
+sufficient for comprehensive understanding of how to use the package). Please use your best judgment and
+add comments in merge requests to explain why you have omitted certain points where this may be not obvious.</p>
+<p><strong>Remember</strong>: The goal is to create contributions that are not only functional but also well-tested,
+well-documented, and easy to use.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="DOCUMENTATION_SETUP_GUIDE.html" class="btn btn-neutral float-left" title="Sphinx Documentation Setup Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html" class="btn btn-neutral float-right" title="On Demand Video Decoder" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,376 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.optim_test_tools.nvtx_range_wrapper &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.optim_test_tools.nvtx_range_wrapper</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.optim_test_tools.nvtx_range_wrapper</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">!=</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.singleton_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingletonBase</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">singleton_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SingletonBase</span>
+
+
+<div class="viewcode-block" id="NVTXRangeWrapper">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/optim_test_tools/docs/api.html#accvlab.optim_test_tools.NVTXRangeWrapper">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NVTXRangeWrapper</span><span class="p">(</span><span class="n">SingletonBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Wrapper for NVTX ranges.</span>
+
+<span class="sd">    This is a singleton class which allows for enabling the use of NVTX ranges and configuring how the ranges</span>
+<span class="sd">    are used from any part of the implementation.</span>
+
+<span class="sd">    The wrapper must be first enabled before any measurements are performed. If not enabled, calls to any</span>
+<span class="sd">    methods have minimal overhead. Enabling can be done from any part of the code (as this is a singleton).</span>
+
+<span class="sd">    Compared to using the NVTX range push/pop functionality directly, it offers the following advantages:</span>
+
+<span class="sd">    - It is possible to easily configure whether CUDA synchronization is performed when pushing/popping a</span>
+<span class="sd">      range. The synchronization is part of the push/pop methods and so can be turned on and off without</span>
+<span class="sd">      changes to the code where the ranges are used, and is not performed if not needed.</span>
+<span class="sd">    - If not enabled, calls to push/pop have minimal overhead (call to an empty function). Note that while the</span>
+<span class="sd">      pushing/popping of ranges itself also has negligible overhead using NVTX directly, profiling-related</span>
+<span class="sd">      CUDA synchronizations need to be handled manually in this case.</span>
+<span class="sd">    - Range mismatch checks: The wrapper allows for checks whether the popped range corresponds to the range</span>
+<span class="sd">      that is expected to be popped. This functionality can be turned on or off as part of the configuration</span>
+<span class="sd">      when enabling the wrapper. This functionality has an overhead, and so should be only enabled for</span>
+<span class="sd">      debugging purposes, and be turned off when actual profiling is performed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            When obtaining an object using (``NVTXRangeWrapper()``) the singleton is returned if already</span>
+<span class="sd">            created.</span>
+
+<span class="sd">            If parameters are provided when calling ``NVTXRangeWrapper()``, this will enable the NVTX range</span>
+<span class="sd">            wrapper (equivalent to calling :meth:`enable`).</span>
+<span class="sd">            Note that enabling can only be done once, and will lead to an error if attempted a second time.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sync_on_push: Whether to synchronize the CUDA device every time before pushing a range</span>
+<span class="sd">            sync_on_pop: Whether to synchronize the CUDA device every time before popping a range</span>
+<span class="sd">            keep_track_of_range_order: Whether to keep track of the range stack internally. A range name may</span>
+<span class="sd">                be specified optionally when popping a range, and a check is performed whether the popped range</span>
+<span class="sd">                corresponds to the range that is expected to be popped if this is set to ``True``. Note</span>
+<span class="sd">                that this has an overhead and so should be only enabled for debugging purposes, and be turned</span>
+<span class="sd">                off when performing the actual profiling.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_initialized&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_initialized</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_enabled</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_SET_DOCSTRINGS_OF_ENABLED_METHOD_VARIANTS</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enable</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="NVTXRangeWrapper.enable">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/optim_test_tools/docs/api.html#accvlab.optim_test_tools.NVTXRangeWrapper.enable">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">enable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sync_on_push</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">sync_on_pop</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">keep_track_of_range_order</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Enable the NVTX range wrapper.</span>
+
+<span class="sd">        This method can be called only once and enables the NVTXRangeWrapper singleton.</span>
+<span class="sd">        Any use of the singleton before enabling it is ignored.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sync_on_push: Whether to synchronize the CUDA device every time before pushing a range</span>
+<span class="sd">            sync_on_pop: Whether to synchronize the CUDA device every time before popping a range</span>
+<span class="sd">            keep_track_of_range_order: Whether to keep track of the range stack internally. A range name may</span>
+<span class="sd">                be specified optionally when popping a range, and a check is performed whether the popped range</span>
+<span class="sd">                corresponds to the range that is expected to be popped if this is set to ``True``. Note</span>
+<span class="sd">                that this has an overhead and so should be only enabled for debugging purposes, and be turned</span>
+<span class="sd">                off when performing the actual profiling.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enabled</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;NVTXRangeWrapper singleton can be enabled only once (either by passing arguments when it &quot;</span>
+            <span class="s2">&quot;is obtained, or by calling :meth:`enable` directly)&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_enabled</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">sync_on_push</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_maybe_sync_push</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_maybe_sync_push</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">sync_on_pop</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_maybe_sync_pop</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_maybe_sync_pop</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_keep_track_of_range_order</span> <span class="o">=</span> <span class="n">keep_track_of_range_order</span>
+        <span class="k">if</span> <span class="n">keep_track_of_range_order</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_range_stacks</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Set the methods</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">range_push</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_range_push_enabled</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">range_pop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_range_pop_enabled</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Whether the NVTXRangeWrapper is enabled&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enabled</span>
+
+<div class="viewcode-block" id="NVTXRangeWrapper.range_push">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/optim_test_tools/docs/api.html#accvlab.optim_test_tools.NVTXRangeWrapper.range_push">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">range_push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">range_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Push a NVTX range</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            range_name: Range name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Empty method to minimize overhead if not enabled. Will be replaced when enabling.</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NVTXRangeWrapper.range_pop">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/optim_test_tools/docs/api.html#accvlab.optim_test_tools.NVTXRangeWrapper.range_pop">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">range_pop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">range_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pop a NVTX range and optionally check if the popped range</span>
+<span class="sd">        is the expected range to be popped.</span>
+
+<span class="sd">        Note that the check is performed only if configured to be used</span>
+<span class="sd">        when calling `enable()`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            range_name: Range name. If set, will be used to check whether the popped</span>
+<span class="sd">                range name corresponds to the given name and raise an assertion</span>
+<span class="sd">                error if not.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Empty method to minimize overhead if not enabled. Will be replaced when enabling.</span>
+        <span class="k">pass</span></div>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_SET_DOCSTRINGS_OF_ENABLED_METHOD_VARIANTS</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the docstrings of the enabled method variants.</span>
+
+<span class="sd">        This is done to ensure that the correct docstring is present in the methods</span>
+<span class="sd">        once the NVTXRangeWrapper is enabled, and the original (disabled) methods are</span>
+<span class="sd">        replaced by the</span>
+<span class="sd">        enabled variants.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_range_push_enabled</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">range_push</span><span class="o">.</span><span class="vm">__doc__</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_range_pop_enabled</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">range_pop</span><span class="o">.</span><span class="vm">__doc__</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_range_push_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">range_name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;TEMPORARY DOCSTRING</span>
+<span class="sd">        This is the enabled variant of the corresponding method (same name without leading `_` and training `_enabled`).</span>
+<span class="sd">        This docstring will be replaced with the docstring of the corresponding method when an instance is requested</span>
+<span class="sd">        for the first time.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_maybe_sync_push</span><span class="p">()</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="n">range_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keep_track_of_range_order</span><span class="p">:</span>
+            <span class="n">thread_id</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">get_native_id</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">thread_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_range_stacks</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_range_stacks</span><span class="p">[</span><span class="n">thread_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_range_stacks</span><span class="p">[</span><span class="n">thread_id</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">range_name</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_range_pop_enabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">range_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;TEMPORARY DOCSTRING</span>
+<span class="sd">        This is the enabled variant of the corresponding method (same name without leading `_` and training `_enabled`).</span>
+<span class="sd">        This docstring will be replaced with the docstring of the corresponding method when an instance is requested for</span>
+<span class="sd">        the first time.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_maybe_sync_pop</span><span class="p">()</span>
+        <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_keep_track_of_range_order</span><span class="p">:</span>
+            <span class="n">thread_id</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">get_native_id</span><span class="p">()</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">thread_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_range_stacks</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_range_stacks</span><span class="p">[</span><span class="n">thread_id</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="p">),</span> <span class="s2">&quot;No ranges are present for the thread in which a range is being popped&quot;</span>
+            <span class="n">last_range</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_range_stacks</span><span class="p">[</span><span class="n">thread_id</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">range_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">range_name</span> <span class="o">==</span> <span class="n">last_range</span><span class="p">,</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Popped range (`</span><span class="si">{</span><span class="n">last_range</span><span class="si">}</span><span class="s2">`) does not correspond to expected range to pop (`</span><span class="si">{</span><span class="n">range_name</span><span class="si">}</span><span class="s2">`)</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;  Range stack for thread </span><span class="si">{</span><span class="n">thread_id</span><span class="si">}</span><span class="s2"> before the pop is: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_range_stacks</span><span class="p">[</span><span class="n">thread_id</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">[</span><span class="n">last_range</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+
+    <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+    <span class="c1"># --------------------------- Main Script ---------------------------</span>
+    <span class="n">nvtx_wrp</span> <span class="o">=</span> <span class="n">NVTXRangeWrapper</span><span class="p">()</span>
+    <span class="c1"># To activate the nvtx wrapper, it needs to be enabled.</span>
+    <span class="c1"># If the following step is omitted, pushing and popping ranges will have no effect.</span>
+    <span class="c1"># Try commenting out the following line:</span>
+    <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">enable</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># Note that if the wrapper is not enabled, calling its methods has minimal overhead</span>
+    <span class="c1"># (call to an empty method).</span>
+    <span class="c1"># -------------------------------------------------------------------</span>
+
+    <span class="c1"># Note that if a code part (see below) is used in isolation, the actual functionality will be disabled and</span>
+    <span class="c1"># no error will occur. The overhead for the wrapper is minimal in this case (call to an empty function).</span>
+
+    <span class="n">num_iters</span> <span class="o">=</span> <span class="mi">16</span>
+
+    <span class="c1"># &quot;Initialize&quot; the GPU</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_iters</span><span class="p">):</span>
+        <span class="c1"># --------------------------- Code Part I ---------------------------</span>
+        <span class="c1"># This will not create a new instance, but re-use the instance created above.</span>
+        <span class="c1"># No configuration should be done (passing parameters will raise error).</span>
+        <span class="n">nvtx_wrp</span> <span class="o">=</span> <span class="n">NVTXRangeWrapper</span><span class="p">()</span>
+        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;meas1&quot;</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.02</span><span class="p">)</span>
+        <span class="c1"># ... continue and at some point call code part II ...</span>
+        <span class="c1"># -------------------------------------------------------------------</span>
+
+        <span class="c1"># --------------------------- Code Part II --------------------------</span>
+        <span class="n">nvtx_wrp</span> <span class="o">=</span> <span class="n">NVTXRangeWrapper</span><span class="p">()</span>
+        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;meas2&quot;</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
+        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+        <span class="c1"># NOTE: If the following range is pushed but not popped, then</span>
+        <span class="c1"># `nvtx_wrp.range_pop(&quot;meas1&quot;)` (see below) will trigger an error</span>
+        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;unexpected range&quot;</span><span class="p">)</span>
+        <span class="c1"># -------------------------------------------------------------------</span>
+
+        <span class="c1"># ------------------------ Code Part I (back) -----------------------</span>
+        <span class="c1"># ... back from the call to code part II ...</span>
+        <span class="c1"># Here we want to check whether the range that we are popping is the expected one</span>
+        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">(</span><span class="s2">&quot;meas1&quot;</span><span class="p">)</span>
+        <span class="c1"># -------------------------------------------------------------------</span>
+
+        <span class="c1"># -------------------------- Code Part III --------------------------</span>
+        <span class="n">nvtx_wrp</span> <span class="o">=</span> <span class="n">NVTXRangeWrapper</span><span class="p">()</span>
+        <span class="c1"># Measurements can be performed in only some of the iterations</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">3</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;meas3&quot;</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+            <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+        <span class="c1"># We can perform a measurement for the same entry multiple times in a</span>
+        <span class="c1"># single iteration. This can be in the same or different code parts.</span>
+        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;meas2&quot;</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+        <span class="c1"># -------------------------------------------------------------------</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time: </span><span class="si">{</span><span class="n">end</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

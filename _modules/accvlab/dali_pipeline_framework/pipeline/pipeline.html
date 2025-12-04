@@ -1,0 +1,326 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.dali_pipeline_framework.pipeline.pipeline &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.dali_pipeline_framework.pipeline.pipeline</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.dali_pipeline_framework.pipeline.pipeline</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">nvidia.dali.pipeline.experimental</span><span class="w"> </span><span class="kn">import</span> <span class="n">pipeline_def</span>
+
+<span class="c1"># from nvidia.dali.pipeline import pipeline_def</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">nvidia.dali.fn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">fn</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">nvidia.dali</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dali</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.sample_data_group</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleDataGroup</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..processing_steps</span><span class="w"> </span><span class="kn">import</span> <span class="n">PipelineStepBase</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">..inputs</span><span class="w"> </span><span class="kn">import</span> <span class="n">CallableBase</span><span class="p">,</span> <span class="n">IterableBase</span>
+
+
+<div class="viewcode-block" id="PipelineDefinition">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.PipelineDefinition">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PipelineDefinition</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Definition for the data loading and pre-processing pipeline.</span>
+
+<span class="sd">    Configure with a data-loading functor and an ordered list of processing steps. Exposes utilities to</span>
+<span class="sd">    retrieve the input data format (blueprint), infer the output data format by applying each step&#39;s</span>
+<span class="sd">    format-checking logic, and build a DALI pipeline that combined the data loading functor and the</span>
+<span class="sd">    processing steps.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_loading_callable_iterable</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="s1">&#39;CallableBase&#39;</span><span class="p">,</span> <span class="s1">&#39;IterableBase&#39;</span><span class="p">],</span>
+        <span class="n">preprocess_functors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">PipelineStepBase</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">check_data_format</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">use_parallel_external_source</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">prefetch_queue_depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">print_sample_data_group_format</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_loading_callable_iterable: Callable or iterable performing the loading of the data.</span>
+<span class="sd">            preprocess_functors: Functors for the individual processing steps which will be executed in</span>
+<span class="sd">                sequence on the input data. May contain ``None``-elements, which are ignored.</span>
+<span class="sd">                Optional, if not set, the loaded data is returned as is.</span>
+<span class="sd">            use_parallel_external_source: Whether to use the parallel external source.</span>
+<span class="sd">            prefetch_queue_depth: The depth of the prefetch queue. Only used if `use_parallel_external_source`</span>
+<span class="sd">                is True.</span>
+<span class="sd">            print_sample_data_group_format: Whether to print the sample data group formats after each</span>
+<span class="sd">                processing step during the setup of the pipeline (e.g. for debugging purposes).</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_loading_callable_iterable</span> <span class="o">=</span> <span class="n">data_loading_callable_iterable</span>
+        <span class="c1"># Remove pre-processing steps which are None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_functors</span> <span class="o">=</span> <span class="p">[</span><span class="n">pf</span> <span class="k">for</span> <span class="n">pf</span> <span class="ow">in</span> <span class="n">preprocess_functors</span> <span class="ow">or</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">pf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_format</span> <span class="o">=</span> <span class="n">check_data_format</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_use_parallel_external_source</span> <span class="o">=</span> <span class="n">use_parallel_external_source</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prefetch_queue_depth</span> <span class="o">=</span> <span class="n">prefetch_queue_depth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_print_sample_data_group_format</span> <span class="o">=</span> <span class="n">print_sample_data_group_format</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_data_format</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Data format checking is enabled. This may add some overhead. &quot;</span>
+                <span class="s2">&quot;It is recommended to disable it in production. &quot;</span>
+                <span class="s2">&quot;You can disable it by setting `check_data_format=False` in the constructor of the &quot;</span>
+                <span class="s2">&quot;`PipelineDefinition` class.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">input_data_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Get the input data format (blueprint).</span>
+
+<span class="sd">        The input blueprint is provided by the data-loading functor passed at construction time.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`SampleDataGroup` blueprint object describing the input data format (no actual data).</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_loading_callable_iterable</span><span class="o">.</span><span class="n">used_sample_data_structure</span>
+
+<div class="viewcode-block" id="PipelineDefinition.check_and_get_output_data_structure">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.PipelineDefinition.check_and_get_output_data_structure">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">check_and_get_output_data_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Infer and return the output data format (blueprint).</span>
+
+<span class="sd">        Starting from the input blueprint provided by the loading functor, each processing step validates</span>
+<span class="sd">        compatibility and transforms the blueprint (e.g., adding fields or changing types). Steps are applied</span>
+<span class="sd">        in sequence to obtain the final output blueprint. If an incompatibility is detected, an exception is</span>
+<span class="sd">        raised.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`SampleDataGroup` blueprint object describing the output data format (no actual data).</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the data loading functor is not compatible with the first processing step.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Get the input data format blueprint</span>
+        <span class="n">intermediate_setup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data_structure</span>
+
+        <span class="c1"># For each of the processing steps, check if it is compatible with the blueprint and adjust the blueprint to how the data format will look like after</span>
+        <span class="c1"># the processing step is applied.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_functors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">pf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_functors</span><span class="p">:</span>
+                <span class="n">intermediate_setup</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">check_input_data_format_and_set_output_data_format</span><span class="p">(</span><span class="n">intermediate_setup</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">intermediate_setup</span></div>
+
+
+<div class="viewcode-block" id="PipelineDefinition.get_dali_pipeline">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.PipelineDefinition.get_dali_pipeline">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_dali_pipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dali</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Get the DALI pipeline as configured.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This calls a function decorated with ``@pipeline_def`` used by DALI to create a pipeline object.</span>
+<span class="sd">            The resulting pipeline object is returned. For more information on the possible arguments</span>
+<span class="sd">            (i.e. ``*args`` and ``**kwargs`` in this function), see the documentation of</span>
+<span class="sd">            the :func:`nvidia.dali.pipeline.experimental.pipeline_def` decorator.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            *args: Arguments for the DALI pipeline.</span>
+<span class="sd">            **kwargs: Keyword arguments for the DALI pipeline.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The DALI pipeline as configured.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_print_sample_data_group_format</span><span class="p">:</span>
+            <span class="n">input_data_structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data_structure</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DALI Pipeline ///////////////////////////////////////////////////////////////&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Input format:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">input_data_structure</span><span class="o">.</span><span class="n">get_string_no_details</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pf</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_functors</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;After processing step # </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">pf</span><span class="si">}</span><span class="s2">):&quot;</span><span class="p">)</span>
+                <span class="n">input_data_structure</span> <span class="o">=</span> <span class="n">pf</span><span class="o">.</span><span class="n">check_input_data_format_and_set_output_data_format</span><span class="p">(</span>
+                    <span class="n">input_data_structure</span>
+                <span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">input_data_structure</span><span class="o">.</span><span class="n">get_string_no_details</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;///////////////////////////////////////////////////////////////&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If no pre-processing steps are provided, we still need to check the compatibility of the data</span>
+            <span class="c1"># loading functors with the output of the previous step (or data provider).</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">check_and_get_output_data_structure</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_dali_pipeline_inner</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+    <span class="nd">@pipeline_def</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_dali_pipeline_inner</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">dali</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Get the DALI pipeline as configured.</span>
+
+<span class="sd">        This function is not called directly. As it is decorated with ``@pipeline_def``, it can be used by DALI to create a pipeline object,</span>
+<span class="sd">        which then can be used to obtain batch after batch of data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The DALI pipeline as configured.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Get the input data format blueprint</span>
+        <span class="n">data_structure_used</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_data_structure</span>
+        <span class="n">data_structure_used</span><span class="o">.</span><span class="n">set_apply_mapping</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">data_structure_used</span><span class="o">.</span><span class="n">set_do_check_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_check_data_format</span><span class="p">)</span>
+
+        <span class="c1"># Get the input data types (as a flat sequence) as well as the number of data fields</span>
+        <span class="n">input_types</span> <span class="o">=</span> <span class="n">data_structure_used</span><span class="o">.</span><span class="n">field_types_flat</span>
+        <span class="n">num_data</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_types</span><span class="p">)</span>
+
+        <span class="c1"># Some parameters of the external source depend on whether the data loading functor is a callable or</span>
+        <span class="c1"># an iterable. Set these parameters up here.</span>
+        <span class="n">is_callable</span> <span class="o">=</span> <span class="nb">callable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_loading_callable_iterable</span><span class="p">)</span>
+        <span class="n">batch_mode</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">is_callable</span>
+        <span class="n">cycle_mode</span> <span class="o">=</span> <span class="s2">&quot;raise&quot;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">is_callable</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="c1"># Use the external source. Note how it uses input_types. The output will also be a flat sequence of data.</span>
+        <span class="c1"># The data loading functor is expected to use the same blueprint as data_structure_used, fill it with data,</span>
+        <span class="c1"># and output a flattened version (using the `get_data()` method).</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">external_source</span><span class="p">(</span>
+            <span class="n">source</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_loading_callable_iterable</span><span class="p">,</span>
+            <span class="n">num_outputs</span><span class="o">=</span><span class="n">num_data</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">input_types</span><span class="p">,</span>
+            <span class="n">batch</span><span class="o">=</span><span class="n">batch_mode</span><span class="p">,</span>
+            <span class="n">parallel</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_use_parallel_external_source</span><span class="p">,</span>
+            <span class="n">prefetch_queue_depth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_prefetch_queue_depth</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_parallel_external_source</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">cycle</span><span class="o">=</span><span class="n">cycle_mode</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># We got the flattened output; fill it back to the blueprint to obtain a correctly filled structure.</span>
+        <span class="n">data_structure_used</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c1"># Perform the individual processing steps</span>
+        <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_functors</span><span class="p">:</span>
+            <span class="n">data_structure_used</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">data_structure_used</span><span class="p">)</span>
+
+        <span class="c1"># Pad each string fiels to the same length in the batch</span>
+        <span class="n">data_structure_used</span><span class="o">.</span><span class="n">ensure_uniform_size_in_batch_for_all_strings</span><span class="p">()</span>
+
+        <span class="c1"># Get the data as a flat sequence. Similar to the external source, we can only output sequences of DataNode elements, no nested data structures.</span>
+        <span class="n">data_out</span> <span class="o">=</span> <span class="n">data_structure_used</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+        <span class="c1"># And return the flat data.</span>
+        <span class="k">return</span> <span class="n">data_out</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

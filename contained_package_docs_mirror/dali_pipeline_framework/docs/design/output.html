@@ -1,0 +1,175 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Output – DALI Structured Output Iterator &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Main API Reference" href="../api/main_api.html" />
+    <link rel="prev" title="Input – Passing Data to the Pipeline" href="input.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">DALI Pipeline Framework</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../design.html">Introduction</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../design.html#why-dali">Why DALI</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../design.html#why-the-adas-dali-pipeline-framework">Why the ADAS DALI Pipeline Framework</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../design.html#overview">Overview</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="sample_data_group.html">Data Format: Sample Data Group</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pipeline_processing_steps.html">Pipeline &amp; Processing Steps</a></li>
+<li class="toctree-l4"><a class="reference internal" href="input.html">Input – Passing Data to the Pipeline</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Output – DALI Structured Output Iterator</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api/main_api.html">Main API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/additional_api.html">Additional API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">DALI Pipeline Framework</a></li>
+          <li class="breadcrumb-item"><a href="../design.html">Introduction</a></li>
+      <li class="breadcrumb-item active">Output – DALI Structured Output Iterator</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/contained_package_docs_mirror/dali_pipeline_framework/docs/design/output.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="output-dali-structured-output-iterator">
+<h1>Output – DALI Structured Output Iterator<a class="headerlink" href="#output-dali-structured-output-iterator" title="Link to this heading"></a></h1>
+<p>In general, the DALI pipeline emits a flat sequence of tensors (or DALI tensor lists). In case of our
+framework, these are the results obtained from calling
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.get_data" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.get_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get_data()</span></code></a> on the
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> object used in the pipeline.</p>
+<p>For complex data formats, a flat list quickly becomes hard to manage. Therefore, we introduce the
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator" title="accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIStructuredOutputIterator</span></code></a> class, which re-assembles the data
+to its original structure.</p>
+<p>The <a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator" title="accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIStructuredOutputIterator</span></code></a> is designed to be a drop-in
+replacement for a PyTorch DataLoader. Apart from the re-assembly of the data, this is achieved by:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Using the same interface as a PyTorch DataLoader (i.e. the iterator interface)</p></li>
+<li><p>Option to auto-convert the output to a nested dictionary (using
+<a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.to_dictionary" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup.to_dictionary"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dictionary()</span></code></a> internally)</p></li>
+<li><p>Option to apply a user-defined post-processing function whenever obtaining the data (to perform
+light-weight steps not possible in the pipeline, e.g. convert certain fields to a type not directly
+supported by DALI)</p></li>
+</ul>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The user-defined post-processing in <a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator" title="accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIStructuredOutputIterator</span></code></a>
+runs in the training thread when data is requested; keep it lightweight and prefer doing work inside the
+DALI pipeline where possible.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While the <a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator" title="accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIStructuredOutputIterator</span></code></a> class is designed to be a
+drop-in replacement for a PyTorch DataLoader, there may be issues if the training implementation
+contains checks in the form of <code class="docutils literal notranslate"><span class="pre">assert</span> <span class="pre">isinstance(iterator_object,</span> <span class="pre">DataLoader)</span></code>. These checks may be
+inside dependencies used by the training implementation, and so cannot be changed easily in a clean way. For
+these cases, the <a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator" title="accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIStructuredOutputIterator</span></code></a> provides
+a <a class="reference internal" href="../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator.CreateAsDataLoaderObject" title="accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator.CreateAsDataLoaderObject"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CreateAsDataLoaderObject()</span></code></a> method,
+which creates an iterator object masked as a PyTorch DataLoader object, so that these checks pass.</p>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="input.html" class="btn btn-neutral float-left" title="Input – Passing Data to the Pipeline" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../api/main_api.html" class="btn btn-neutral float-right" title="Main API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

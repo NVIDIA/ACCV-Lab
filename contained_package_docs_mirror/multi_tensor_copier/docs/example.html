@@ -1,0 +1,265 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Example &mdash; ACCV-Lab 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Evaluation" href="evaluation.html" />
+    <link rel="prev" title="API Reference" href="api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Multi-Tensor Copier</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Example</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#example-data-structure">Example Data Structure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#workflow">Workflow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../release_notes_page.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Multi-Tensor Copier</a></li>
+      <li class="breadcrumb-item active">Example</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/contained_package_docs_mirror/multi_tensor_copier/docs/example.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="example">
+<h1>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h1>
+<p>Here, we provide an example of how to use the <code class="docutils literal notranslate"><span class="pre">multi-tensor-copier</span></code> package to efficiently copy data
+containing many small tensors in a nested structure (here: training meta-data) from CPU to GPU.</p>
+<p>The example consists of the following steps:</p>
+<ol class="arabic simple">
+<li><p>Construction of per-sample meta-data with variable-size tensors (for illustration purposes; in a real
+use-case, the meta-data originates e.g. from a PyTorch DataLoader)</p></li>
+<li><p>Asynchronous copy of the entire batch of meta-data to the GPU</p></li>
+<li><p>Overlapping useful work with the transfer</p></li>
+<li><p>Retrieval and consumption of the GPU-resident meta-data</p></li>
+</ol>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>You can run the example using the script <code class="docutils literal notranslate"><span class="pre">packages/multi_tensor_copier/example/example.py</span></code>.</p>
+</div>
+<section id="example-data-structure">
+<h2>Example Data Structure<a class="headerlink" href="#example-data-structure" title="Link to this heading"></a></h2>
+<p>The meta-data is organized as a list of per-sample dictionaries (one per batch element). Each sample
+dictionary contains:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;cams_gt&quot;</span></code>: a list of 6 camera dicts, each holding:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;bounding_boxes&quot;</span></code>: an <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">4)</span></code> tensor of 2D bounding boxes, where <code class="docutils literal notranslate"><span class="pre">N</span></code> varies per image
+(number of visible objects)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;class_ids&quot;</span></code>: an <code class="docutils literal notranslate"><span class="pre">(N,)</span></code> tensor of integer class IDs</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;active&quot;</span></code>: an <code class="docutils literal notranslate"><span class="pre">(N,)</span></code> boolean tensor indicating active objects</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;depths&quot;</span></code>: an <code class="docutils literal notranslate"><span class="pre">(N,)</span></code> tensor of depth values</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;proj_mat&quot;</span></code>: a <code class="docutils literal notranslate"><span class="pre">(3,</span> <span class="pre">4)</span></code> projection matrix from camera coordinates to image coordinates</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;gt_data&quot;</span></code>: a dict with:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;bounding_boxes_3d&quot;</span></code>: an <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">7)</span></code> tensor of 3D ground truth bounding boxes, where <code class="docutils literal notranslate"><span class="pre">N</span></code> varies per
+sample (number of ground truth objects)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;class_ids&quot;</span></code>: an <code class="docutils literal notranslate"><span class="pre">(N,)</span></code> tensor of integer class IDs</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;active&quot;</span></code>: an <code class="docutils literal notranslate"><span class="pre">(N,)</span></code> boolean tensor indicating active objects</p></li>
+</ul>
+</li>
+</ul>
+<p>This nested structure of lists, dicts, and variable-size tensors is representative of real-world
+training tasks (e.g. a multi-camera 3D object detection like
+<a class="reference external" href="https://arxiv.org/abs/2303.11926">StreamPETR</a>). It is also a
+scenario where standard PyTorch <code class="docutils literal notranslate"><span class="pre">.to()</span></code> calls are particularly inefficient: the batch contains many small
+tensors in non-pinned memory, and each individual <code class="docutils literal notranslate"><span class="pre">.to()</span></code> call incurs overhead that can
+dominate the actual transfer time for a small tensor. See the <a class="reference internal" href="intro.html"><span class="doc">introduction</span></a> for a detailed discussion of the
+motivation and the optimizations that <code class="docutils literal notranslate"><span class="pre">multi-tensor-copier</span></code> applies to ensure efficient copying in this
+scenario.</p>
+</section>
+<section id="workflow">
+<h2>Workflow<a class="headerlink" href="#workflow" title="Link to this heading"></a></h2>
+<p>The optimizations described in the <a class="reference internal" href="intro.html"><span class="doc">Introduction</span></a> are applied automatically (all enabled by default).</p>
+<p>The following snippet shows the core workflow. After the batch meta-data has been assembled (see the
+full script at <code class="docutils literal notranslate"><span class="pre">packages/multi_tensor_copier/example/example.py</span></code> for the data creation helpers used in this
+example), we pass it to <a class="reference internal" href="api.html#accvlab.multi_tensor_copier.start_copy" title="accvlab.multi_tensor_copier.start_copy"><code class="xref py py-func docutils literal notranslate"><span class="pre">start_copy()</span></code></a> together with the target device.
+The function traverses the nested structure and returns an
+<a class="reference internal" href="api.html#accvlab.multi_tensor_copier.AsyncCopyHandle" title="accvlab.multi_tensor_copier.AsyncCopyHandle"><code class="xref py py-class docutils literal notranslate"><span class="pre">AsyncCopyHandle</span></code></a> while the transfer proceeds in the background.
+Because the copy runs asynchronously, the main thread is free to perform other operations while the
+transfer is in flight (e.g. computations not involving the copied data, logging, etc.).
+Finally, <a class="reference internal" href="api.html#accvlab.multi_tensor_copier.AsyncCopyHandle.get" title="accvlab.multi_tensor_copier.AsyncCopyHandle.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> blocks until the copy is complete
+and returns the a nested structure corresponding to the input, but with all tensors now residing on the GPU.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">packages/multi_tensor_copier/example/example.py</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 99</span>    <span class="c1"># ----------------------- Create the batch meta-data -----------------------</span>
+<span class="linenos">100</span>
+<span class="hll"><span class="linenos">101</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">102</span>    <span class="c1"># Here, the per-sample meta-data tensors are not combined into per-batch meta-data tensors. This is due to</span>
+</span><span class="hll"><span class="linenos">103</span>    <span class="c1"># the fact that e.g. the number of visible objects per camera varies per sample, making combination &amp;</span>
+</span><span class="hll"><span class="linenos">104</span>    <span class="c1"># handling of combined tensors cumbersome.</span>
+</span><span class="linenos">105</span>    <span class="n">batch_meta_data</span> <span class="o">=</span> <span class="n">create_batch_meta_data</span><span class="p">()</span>
+<span class="linenos">106</span>
+<span class="linenos">107</span>    <span class="c1"># ------------------------ Start the asynchronous copy ------------------------</span>
+<span class="linenos">108</span>
+<span class="hll"><span class="linenos">109</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">110</span>    <span class="c1"># `start_copy()` traverses the nested structure of lists, tuples, and dicts, and</span>
+</span><span class="hll"><span class="linenos">111</span>    <span class="c1"># asynchronously copies all contained tensors to the target device. It returns a handle</span>
+</span><span class="hll"><span class="linenos">112</span>    <span class="c1"># before the copy is complete so that the calling thread can continue with other work while the transfer</span>
+</span><span class="hll"><span class="linenos">113</span>    <span class="c1"># is in progress.</span>
+</span><span class="hll"><span class="linenos">114</span>    <span class="c1"># Under the hood, the package applies several optimizations automatically (all enabled by</span>
+</span><span class="hll"><span class="linenos">115</span>    <span class="c1"># default): tensors are staged into pinned host memory for truly non-blocking H2D copies,</span>
+</span><span class="hll"><span class="linenos">116</span>    <span class="c1"># and small tensors are packed into (one or more) staging buffers to reduce per-tensor overhead. All of</span>
+</span><span class="hll"><span class="linenos">117</span>    <span class="c1"># this runs on a background thread, so this call returns before the copies complete.</span>
+</span><span class="hll"><span class="linenos">118</span>    <span class="c1">#</span>
+</span><span class="hll"><span class="linenos">119</span>    <span class="c1"># Note that this copy can be started anywhere the data is needed (i.e. not only when obtaining the data</span>
+</span><span class="hll"><span class="linenos">120</span>    <span class="c1"># from a DataLoader), so that it can be used with only local modifications to the training loop. For</span>
+</span><span class="hll"><span class="linenos">121</span>    <span class="c1"># example, if the meta-data on the GPU is only needed for loss computation, the copy can</span>
+</span><span class="hll"><span class="linenos">122</span>    <span class="c1"># be started inside the loss computation implementation (ideally with some work done in the meantime to</span>
+</span><span class="hll"><span class="linenos">123</span>    <span class="c1"># overlap with the asynchronous copy).</span>
+</span><span class="linenos">124</span>    <span class="n">handle</span> <span class="o">=</span> <span class="n">mtc</span><span class="o">.</span><span class="n">start_copy</span><span class="p">(</span><span class="n">batch_meta_data</span><span class="p">,</span> <span class="s2">&quot;cuda:0&quot;</span><span class="p">)</span>
+<span class="linenos">125</span>
+<span class="hll"><span class="linenos">126</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">127</span>    <span class="c1"># IMPORTANT: Because the copy runs asynchronously, the input tensors must not be freed or</span>
+</span><span class="hll"><span class="linenos">128</span>    <span class="c1"># modified in-place until the copy has completed (i.e. until `handle.get()` returns or</span>
+</span><span class="hll"><span class="linenos">129</span>    <span class="c1"># `handle.ready()` returns `True`). See the `start_copy()` function documentation for details.</span>
+</span><span class="linenos">130</span>
+<span class="linenos">131</span>    <span class="c1"># -------------------- Overlap with other work --------------------</span>
+<span class="linenos">132</span>
+<span class="hll"><span class="linenos">133</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">134</span>    <span class="c1"># Because `start_copy()` is asynchronous, we can overlap the CPU-to-GPU transfer with</span>
+</span><span class="hll"><span class="linenos">135</span>    <span class="c1"># other computation. Note that running asynchrounously with the copy is not the only (and not the most</span>
+</span><span class="hll"><span class="linenos">136</span>    <span class="c1"># important) optimization that is applied, so that this is beneficial but optional.</span>
+</span><span class="linenos">137</span>    <span class="n">dummy_compute</span><span class="p">()</span>
+<span class="linenos">138</span>
+<span class="linenos">139</span>    <span class="c1"># -------------------- Retrieve and use the results --------------------</span>
+<span class="linenos">140</span>
+<span class="hll"><span class="linenos">141</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">142</span>    <span class="c1"># `handle.get()` blocks until the copy is complete and returns the same nested structure</span>
+</span><span class="hll"><span class="linenos">143</span>    <span class="c1"># with all tensors now residing on the target device. Non-tensor leaves (if any) are</span>
+</span><span class="hll"><span class="linenos">144</span>    <span class="c1"># passed through unchanged.</span>
+</span><span class="linenos">145</span>    <span class="n">gpu_meta_data</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<span class="linenos">146</span>
+<span class="hll"><span class="linenos">147</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">148</span>    <span class="c1"># The copied data can now be consumed by downstream GPU operations (e.g. the detection</span>
+</span><span class="hll"><span class="linenos">149</span>    <span class="c1"># head, loss computation, etc.).</span>
+</span><span class="hll"><span class="linenos">150</span>    <span class="c1">#</span>
+</span><span class="hll"><span class="linenos">151</span>    <span class="c1"># Note on performance: For this simplified example, multi_tensor_copier achieves a</span>
+</span><span class="hll"><span class="linenos">152</span>    <span class="c1"># significant speedup over naive per-tensor .to() calls (see the evaluation script for</span>
+</span><span class="hll"><span class="linenos">153</span>    <span class="c1"># measurements). However, the absolute overhead of meta-data copying is moderate here.</span>
+</span><span class="hll"><span class="linenos">154</span>    <span class="c1"># In more complex real-world pipelines, the meta-data can be more extensive (e.g. additional</span>
+</span><span class="hll"><span class="linenos">155</span>    <span class="c1"># variable-length lane geometry where multiple lanes per sample cannot be combined into</span>
+</span><span class="hll"><span class="linenos">156</span>    <span class="c1"># single tensors due to variable size; or additional sensor modalities), which increases the number of</span>
+</span><span class="hll"><span class="linenos">157</span>    <span class="c1"># tensors and thus the per-tensor overhead. In such cases -- and with larger batch sizes -- the absolute</span>
+</span><span class="hll"><span class="linenos">158</span>    <span class="c1"># time savings grow accordingly.</span>
+</span><span class="linenos">159</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;GPU meta-data ready:&quot;</span><span class="p">)</span>
+<span class="linenos">160</span>    <span class="n">dummy_process</span><span class="p">(</span><span class="n">gpu_meta_data</span><span class="p">)</span>
+<span class="linenos">161</span>
+<span class="linenos">162</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api.html" class="btn btn-neutral float-left" title="API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="evaluation.html" class="btn btn-neutral float-right" title="Evaluation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

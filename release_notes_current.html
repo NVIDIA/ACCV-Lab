@@ -1,0 +1,214 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Current Release (0.2.0) &mdash; ACCV-Lab 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Previous Releases" href="release_notes_previous.html" />
+    <link rel="prev" title="Release Notes" href="release_notes_page.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contained_package_docs_mirror/multi_tensor_copier/docs/index.html">Multi-Tensor Copier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="release_notes_page.html">Release Notes</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Current Release (<code class="docutils literal notranslate"><span class="pre">0.2.0</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="release_notes_previous.html">Previous Releases</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="release_notes_page.html">Release Notes</a></li>
+      <li class="breadcrumb-item active">Current Release (<code class="docutils literal notranslate"><span class="pre">0.2.0</span></code>)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/release_notes_current.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="current-release-0-2-0">
+<h1>Current Release (<code class="docutils literal notranslate"><span class="pre">0.2.0</span></code>)<a class="headerlink" href="#current-release-0-2-0" title="Link to this heading"></a></h1>
+<section id="on-demand-video-decoder">
+<h2>on_demand_video_decoder<a class="headerlink" href="#on-demand-video-decoder" title="Link to this heading"></a></h2>
+<p>New features:</p>
+<ul class="simple">
+<li><p>AV1 codec support: decode AV1-encoded video alongside H.264 and HEVC.</p></li>
+<li><p>Stream async decoder: asynchronous frame decoding with prefetching via
+<code class="docutils literal notranslate"><span class="pre">DecodeN12ToRGBAsync()</span></code> / <code class="docutils literal notranslate"><span class="pre">DecodeN12ToRGBAsyncGetBuffer()</span></code> in
+<code class="docutils literal notranslate"><span class="pre">PyNvSampleReader</span></code>. See the new <code class="docutils literal notranslate"><span class="pre">SampleStreamAsyncAccess.py</span></code> sample for a
+usage walkthrough.</p></li>
+<li><p>Cached separation decode: the new <code class="docutils literal notranslate"><span class="pre">CachedGopDecoder</span></code> wraps <code class="docutils literal notranslate"><span class="pre">PyNvGopDecoder</span></code>
+with transparent GOP caching. When the same GOP is requested again (e.g. for
+a different frame within the same GOP), the cached result is returned
+directly, avoiding redundant demuxing. Controlled via the <code class="docutils literal notranslate"><span class="pre">useGOPCache</span></code>
+parameter in <code class="docutils literal notranslate"><span class="pre">GetGOP()</span></code> / <code class="docutils literal notranslate"><span class="pre">GetGOPList()</span></code>.</p></li>
+<li><p>GPU memory management: new <code class="docutils literal notranslate"><span class="pre">release_device_memory()</span></code> and <code class="docutils literal notranslate"><span class="pre">release_decoder()</span></code>
+methods to explicitly free GPU resources without destroying the decoder.</p></li>
+<li><p>Drop paged cache utility: call <code class="docutils literal notranslate"><span class="pre">drop_videos_cache()</span></code> to evict video files
+from the OS page cache. This frees host memory occupied by cached pages of
+videos that are no longer needed, e.g. when switching to a different video
+dataset during training (and enables reproducible I/O benchmarks by
+ensuring reads hit disk rather than the page cache).</p></li>
+</ul>
+<p>Improvements:</p>
+<ul class="simple">
+<li><p>Concurrency: added releasing the Python GIL in existing decode and demux
+bindings, improving performance in multi-threaded Python code.</p></li>
+<li><p>Various stability &amp; error message improvements.</p></li>
+</ul>
+</section>
+<section id="new-package-multi-tensor-copier-fast-easy-transfers-of-many-small-tensors">
+<h2>New Package: <code class="docutils literal notranslate"><span class="pre">multi_tensor_copier</span></code> – Fast &amp; Easy Transfers of Many Small Tensors<a class="headerlink" href="#new-package-multi-tensor-copier-fast-easy-transfers-of-many-small-tensors" title="Link to this heading"></a></h2>
+<p>A new package for efficiently &amp; easily copying many (small) tensors between
+devices in a single call. Pass any nested structure of lists, tuples, and dicts
+containing tensors (or numpy arrays) and get them transferred – optimized
+end-to-end with a focus on CPU -&gt; GPU transfers:</p>
+<ul class="simple">
+<li><p>Automatically packs many small CPU tensors (mixed dtypes allowed) into one
+buffer for a single host-to-device copy, drastically reducing per-tensor
+overhead.</p></li>
+<li><p>Stages non-pinned memory into pinned buffers (in parallel) so that all
+tensor transfers can proceed asynchronously.</p></li>
+<li><p>Distributes work across multiple CUDA streams.</p></li>
+<li><p>Runs the orchestration on a background C++ thread, keeping the Python
+thread free.</p></li>
+<li><p>While the optimization is focused on CPU -&gt; GPU, the package also
+supports GPU-&gt;CPU, GPU-&gt;GPU, and CPU-&gt;CPU directions (with some
+of the optimizations also applied to those).</p></li>
+</ul>
+<p>The individual optimizations may be optionally turned off (e.g. to limit
+pinned memory usage).</p>
+<p>Usage is straightforward:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>handle = multi_tensor_copier.start_copy(nested_data, device=&quot;cuda:0&quot;)
+# ... do other work while the copy runs ...
+result = handle.get()   # same nested structure, now on GPU
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">~8x</span></code> speedup over per-tensor <code class="docutils literal notranslate"><span class="pre">.to()</span></code> calls in an example benchmark with 528
+small tensors (simplified synthetic meta-data for object detection similar
+to StreamPETR). See the included examples, evaluation script, and documentation.</p>
+</section>
+<section id="optim-test-tools-enhancements">
+<h2><code class="docutils literal notranslate"><span class="pre">optim_test_tools</span></code> – Enhancements<a class="headerlink" href="#optim-test-tools-enhancements" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">TensorDumper</span></code>: added ranges for context/disambiguation, <code class="docutils literal notranslate"><span class="pre">PICKLE</span></code> dump type,
+and <code class="docutils literal notranslate"><span class="pre">allow_missing_data_in_previous</span></code> comparison option.</p></li>
+<li><p>Numba NVTX: new <code class="docutils literal notranslate"><span class="pre">numba_nvtx</span></code> submodule enabling use of NVTX ranges from
+Numba-compiled CPU code.</p></li>
+</ul>
+</section>
+<section id="documentation-and-tooling">
+<h2>Documentation and Tooling<a class="headerlink" href="#documentation-and-tooling" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Changes in<code class="docutils literal notranslate"><span class="pre">package_manager.sh</span></code></p>
+<ul>
+<li><p>Now uses <code class="docutils literal notranslate"><span class="pre">--no-deps</span></code> for wheels by default; added options for build isolation control.</p></li>
+<li><p>Fixed issue where re-installation of new version over existing one would leave the old version in place (additionally to the
+new one).</p></li>
+</ul>
+</li>
+<li><p>Various documentation improvements (e.g. online documentation, references to related
+resources such as videos and WeChat discussion group; improvements in various guides).</p></li>
+<li><p>Pinned cupy version in the dockerfile to 13.6.0 to avoid compatibility issues.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="release_notes_page.html" class="btn btn-neutral float-left" title="Release Notes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="release_notes_previous.html" class="btn btn-neutral float-right" title="Previous Releases" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

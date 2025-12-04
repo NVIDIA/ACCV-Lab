@@ -1,0 +1,298 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.multi_tensor_copier.async_copy &mdash; ACCV-Lab 0.2.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=938c9ccc"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/multi_tensor_copier/docs/index.html">Multi-Tensor Copier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../release_notes_page.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.multi_tensor_copier.async_copy</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.multi_tensor_copier.async_copy</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2026, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_ext</span>
+
+
+<div class="viewcode-block" id="AsyncCopyHandle">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/multi_tensor_copier/docs/api.html#accvlab.multi_tensor_copier.AsyncCopyHandle">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AsyncCopyHandle</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handle to an in-progress asynchronous copy started by :func:`start_copy`.</span>
+
+<span class="sd">    Use :meth:`ready` to poll for completion without blocking, or :meth:`get` to block until</span>
+<span class="sd">    the result is available. The handle must be kept alive until the copy is consumed or goes</span>
+<span class="sd">    out of scope; dropping it early triggers a synchronous wait in the destructor to ensure</span>
+<span class="sd">    staging buffers are not freed while transfers are in flight.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_h</span><span class="p">:</span> <span class="n">Any</span>
+
+<div class="viewcode-block" id="AsyncCopyHandle.ready">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/multi_tensor_copier/docs/api.html#accvlab.multi_tensor_copier.AsyncCopyHandle.ready">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ready</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether the copy has completed.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ``True`` if the copy has completed, ``False`` otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_h</span><span class="o">.</span><span class="n">ready</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="AsyncCopyHandle.get">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/multi_tensor_copier/docs/api.html#accvlab.multi_tensor_copier.AsyncCopyHandle.get">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Block until the copy is done and return the result.</span>
+
+<span class="sd">        The returned structure mirrors the input to :func:`start_copy`, with all tensors</span>
+<span class="sd">        copied to the target device.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The structure with the contained tensors copied to the target device (and numpy arrays replaced by</span>
+<span class="sd">            PyTorch tensors).</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: If the copy fails</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_h</span><span class="o">.</span><span class="n">get</span><span class="p">()</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="start_copy">
+<a class="viewcode-back" href="../../../contained_package_docs_mirror/multi_tensor_copier/docs/api.html#accvlab.multi_tensor_copier.start_copy">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">start_copy</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">use_pinned_staging</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">pack_cpu_tensors</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">min_packed_alignment_bytes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span>
+    <span class="n">max_packed_chunk_bytes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span> <span class="o">*</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>
+    <span class="n">use_background_thread</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncCopyHandle</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Asynchronously copy tensors in a nested structure to ``device``.</span>
+
+<span class="sd">    Traverses an arbitrarily nested combination of :class:`list`, :class:`tuple`, and :class:`dict`</span>
+<span class="sd">    containers, copies every :class:`torch.Tensor` and :class:`numpy.ndarray` (automatically converted to</span>
+<span class="sd">    PyTorch tensors) leaf to ``device``, and returns an :class:`AsyncCopyHandle` whose</span>
+<span class="sd">    :meth:`~AsyncCopyHandle.get` method yields the copied structure. The output preserves container types and</span>
+<span class="sd">    passes through non-tensor, non-container leaves (e.g. strings) unchanged.</span>
+
+<span class="sd">    The primary optimization target is **CPU → GPU** transfers of many small tensors in non-pinned</span>
+<span class="sd">    memory. Other copy directions (GPU → CPU, GPU → GPU, CPU → CPU) are supported and benefit from</span>
+<span class="sd">    some optimizations (e.g. background-thread scheduling for all directions, parallel pinned staging for</span>
+<span class="sd">    D2H), but are not the main focus.</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">       The input tensors do not need to all be on the same device, copying tensors from different devices is</span>
+<span class="sd">       supported. If some tensors are already on the target device, they will be re-used as is.</span>
+
+<span class="sd">    .. important::</span>
+
+<span class="sd">        Packing of small tensors (see ``pack_cpu_tensors`` parameter below) is a major contribution to the</span>
+<span class="sd">        overall performance optimization vs. using standard PyTorch ``.to()`` calls on the individual tensors.</span>
+<span class="sd">        For this optimization to be applied, the input CPU tensors must be contiguous.</span>
+
+<span class="sd">    .. warning::</span>
+
+<span class="sd">        The caller must not **free** or **modify in-place** any input tensors until the copy has completed</span>
+<span class="sd">        (i.e. until :meth:`~AsyncCopyHandle.get` returns or :meth:`~AsyncCopyHandle.ready` returns ``True``).</span>
+<span class="sd">        Because copies are submitted asynchronously — potentially on a background thread — input tensor memory</span>
+<span class="sd">        may still be read by the GPU after this function returns. Violating this contract leads to undefined</span>
+<span class="sd">        behavior (silent data corruption, stale reads, or CUDA errors).</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        Only :class:`list`, :class:`tuple`, and :class:`dict` are recognized as container types.</span>
+<span class="sd">        Other container-like objects (e.g. custom classes, named tuples) are treated as opaque</span>
+<span class="sd">        leaves and returned unchanged; any tensors nested inside them will **not** be copied.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data: The structure to copy. May be a single :class:`torch.Tensor` or</span>
+<span class="sd">            :class:`numpy.ndarray`, or a nested :class:`list`/:class:`tuple`/:class:`dict` objects containing</span>
+<span class="sd">            tensor/numpy arrays.</span>
+<span class="sd">        device: Target PyTorch device (e.g. ``&quot;cuda:0&quot;``, ``&quot;cpu&quot;``).</span>
+<span class="sd">        use_pinned_staging: When ``True``, allocate pinned (page-locked) host buffers as</span>
+<span class="sd">            intermediate staging for CPU → CUDA and CUDA → CPU transfers. For H2D this enables</span>
+<span class="sd">            ``non_blocking`` copies; for D2H the pinned buffer **is** the returned output tensor.</span>
+<span class="sd">            Has no effect on CPU → CPU or GPU → GPU copies.</span>
+<span class="sd">        pack_cpu_tensors: When ``True``, pack multiple small contiguous CPU tensors (≤ 256 KB</span>
+<span class="sd">            each, mixed dtypes supported) into one or more staging buffers (each at most</span>
+<span class="sd">            ``max_packed_chunk_bytes``) and issue one H2D transfer per chunk instead of per tensor.</span>
+<span class="sd">            Only applies to CPU → CUDA copies.</span>
+<span class="sd">        min_packed_alignment_bytes: Minimum byte-alignment of each tensor&#39;s start offset within</span>
+<span class="sd">            the packed buffer. The effective alignment for each tensor which participates in the packing is</span>
+<span class="sd">            ``max(min_packed_alignment_bytes, tensor.element_size())``.</span>
+<span class="sd">        max_packed_chunk_bytes: Maximum payload size in bytes of each packed staging chunk (tensor</span>
+<span class="sd">            data plus inter-tensor alignment padding; the actual allocation may be slightly larger to</span>
+<span class="sd">            satisfy buffer-start alignment).  When the total packed data exceeds this limit, multiple</span>
+<span class="sd">            packed chunks are allocated and transferred.  Defaults to 32 MB.</span>
+<span class="sd">        use_background_thread: When ``True``, the copy orchestration (buffer allocation, staging,</span>
+<span class="sd">            and CUDA copy submission) runs on a C++ background thread (from a shared pool) so that this</span>
+<span class="sd">            function returns before the copies complete. Note that CPU staging is done parallelly regardless</span>
+<span class="sd">            of this setting. Benefits all copy directions.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Handle to the in-progress copy. Call :meth:`~AsyncCopyHandle.get` to block until completion</span>
+<span class="sd">        and retrieve the result, or :meth:`~AsyncCopyHandle.ready` to poll without blocking.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RuntimeError: If the copy fails (propagated on :meth:`~AsyncCopyHandle.get`).</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        Copy a nested structure of tensors to the GPU::</span>
+
+<span class="sd">            data = [torch.tensor([1, 2, 3]), torch.tensor([4, 5, 6])]</span>
+<span class="sd">            handle = start_copy(data, &quot;cuda:0&quot;)</span>
+<span class="sd">            # ... do other work ...</span>
+<span class="sd">            result = handle.get()  # [tensor([1,2,3], device=&#39;cuda:0&#39;), ...]</span>
+
+<span class="sd">        Convert numpy arrays to CPU tensors (makes use of the fact that numpy arrays can be used as inputs and</span>
+<span class="sd">        benefits from background-thread scheduling)::</span>
+
+<span class="sd">            data = [np.array([1, 2, 3]), np.array([4, 5, 6])]</span>
+<span class="sd">            handle = start_copy(data, &quot;cpu&quot;)</span>
+<span class="sd">            result = handle.get()  # [tensor([1, 2, 3]), tensor([4, 5, 6])]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dev</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    <span class="n">h</span> <span class="o">=</span> <span class="n">_ext</span><span class="o">.</span><span class="n">start_copy</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">,</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">dev</span><span class="p">),</span>
+        <span class="nb">bool</span><span class="p">(</span><span class="n">use_pinned_staging</span><span class="p">),</span>
+        <span class="nb">bool</span><span class="p">(</span><span class="n">use_background_thread</span><span class="p">),</span>
+        <span class="nb">bool</span><span class="p">(</span><span class="n">pack_cpu_tensors</span><span class="p">),</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">min_packed_alignment_bytes</span><span class="p">),</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">max_packed_chunk_bytes</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">handle</span> <span class="o">=</span> <span class="n">AsyncCopyHandle</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">handle</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

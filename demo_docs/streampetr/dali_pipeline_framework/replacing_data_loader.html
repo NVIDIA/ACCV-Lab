@@ -1,0 +1,401 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Replacing the Data Loader &mdash; ACCV-Lab 0.2.0.post1.dev82+g949b17665 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=0be6cc5f" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=f4de544b"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Evaluation" href="evaluation.html" />
+    <link rel="prev" title="DALI Pipeline Framework Demo" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/multi_tensor_copier/docs/index.html">Multi-Tensor Copier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/lane_helpers/docs/index.html">Lane Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Demos</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../demos.html">Demos</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../demos.html#streampetr">StreamPETR</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../demos.html#demos-for-contained-packages">Demos for Contained Packages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../batching_helpers/index.html">Batching Helpers Demo</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="index.html">DALI Pipeline Framework Demo</a><ul class="current">
+<li class="toctree-l5 current"><a class="current reference internal" href="#">Replacing the Data Loader</a></li>
+<li class="toctree-l5"><a class="reference internal" href="evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../optim_test_tools/index.html">Optimization Testing Tools Demo</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#running-the-demos">Running the Demos</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#choosing-a-configuration">Choosing a Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#running-all-evaluations">Running All Evaluations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#measurement-and-profiling">Measurement and Profiling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../release_notes_page.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../third_party_licenses.html">Third-Party Licenses</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../demos.html">Demos</a></li>
+          <li class="breadcrumb-item"><a href="index.html">DALI Pipeline Framework Demo</a></li>
+      <li class="breadcrumb-item active">Replacing the Data Loader</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/demo_docs/streampetr/dali_pipeline_framework/replacing_data_loader.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="replacing-the-data-loader">
+<h1>Replacing the Data Loader<a class="headerlink" href="#replacing-the-data-loader" title="Link to this heading"></a></h1>
+<p>The DALI pipeline for StreamPETR is created using the pipeline described in the
+<a class="reference internal" href="../../../contained_package_docs_mirror/dali_pipeline_framework/docs/examples/stream_petr/index.html"><span class="doc">StreamPETR Pipeline</span></a> example (including the
+pipeline itself, the custom processing step, and the custom post-processing function). It also uses the
+NuScenes loading implementation described in
+<a class="reference internal" href="../../../contained_package_docs_mirror/dali_pipeline_framework/docs/examples/use_case_specific/nuscenes_data_loader.html"><span class="doc">Data Loading for NuScenes</span></a>.</p>
+<p>The goal is to replace the original PyTorch DataLoader (used for the training data loading) with the DALI
+pipeline. Note that we focus on the training data loading, and do not replace the validation data loading.</p>
+<p>This page describes the changes needed to the training script to enable the use of the DALI pipeline.</p>
+<p>See the <a class="reference internal" href="evaluation.html"><span class="doc">Evaluation</span></a> for the runtime and CPU usage gains from this integration and instructions
+for comparing it with the PyTorch data loader.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This demo re-uses the StreamPETR pipeline setup already described in the
+<a class="reference internal" href="../../../contained_package_docs_mirror/dali_pipeline_framework/docs/examples/stream_petr/pipeline_setup.html"><span class="doc">StreamPETR Pipeline Setup</span></a>
+example, and assumes that the <code class="docutils literal notranslate"><span class="pre">pipeline_setup</span></code> module is available in the Python path. That example
+primarily describes the design and construction of the DALI pipeline. Please make sure that you are
+familiar with it before continuing here. This page focuses on the remaining integration work needed to
+use the completed pipeline inside the StreamPETR training implementation.</p>
+</div>
+<section id="main-training-script">
+<h2>Main Training Script<a class="headerlink" href="#main-training-script" title="Link to this heading"></a></h2>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The main training script can be found at <code class="docutils literal notranslate"><span class="pre">demos/streampetr/tools/train.py</span></code> in the repository.</p>
+</div>
+<section id="environment-and-paths">
+<h3>Environment and Paths<a class="headerlink" href="#environment-and-paths" title="Link to this heading"></a></h3>
+<p>Before creating the pipeline, the script configures the Python path to include the DALI example module and
+project roots needed by the demo.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/tools/train.py</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 95</span><span class="c1"># ===== Setting up the Python Path (including DALI pipeline) =====</span>
+<span class="linenos"> 96</span>
+<span class="linenos"> 97</span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="linenos"> 98</span><span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;/streampetr&quot;</span><span class="p">)</span>
+<span class="hll"><span class="linenos"> 99</span><span class="c1">#@NOTE: Make the DALI pipeline example code available.</span>
+</span><span class="linenos">100</span><span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;/ACCV-Lab/packages/dali_pipeline_framework/examples&quot;</span><span class="p">)</span>
+<span class="linenos">101</span>
+<span class="linenos">102</span><span class="c1"># ===== End of Setting up the Python Path (including DALI pipeline) =====</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="dali-pipeline-setup">
+<h3>DALI Pipeline Setup<a class="headerlink" href="#dali-pipeline-setup" title="Link to this heading"></a></h3>
+<p>The major change is the creation of the DALI pipeline instead of a PyTorch Dataset. Both options are supported
+in our modified implementation, and can be enabled by setting the <code class="docutils literal notranslate"><span class="pre">use_dali_pipeline</span></code> flag to <code class="docutils literal notranslate"><span class="pre">True</span></code> in
+the used configuration file.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/tools/train.py</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">388</span>    <span class="c1"># ===== Get Dataset or DALI Output Iterator =====</span>
+<span class="hll"><span class="linenos">389</span>    <span class="c1">#@NOTE: The if-branch is for the DALI pipeline, the else-branch is for the original PyTorch Dataset.</span>
+</span><span class="linenos">390</span>    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">data_loading_config</span><span class="o">.</span><span class="n">use_dali_pipeline</span><span class="p">:</span>
+<span class="linenos">391</span>
+<span class="hll"><span class="linenos">392</span>        <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">393</span>        <span class="c1"># Import the StreamPETR pipeline setup from the DALI pipeline example (and notify user if it is not </span>
+</span><span class="hll"><span class="linenos">394</span>        <span class="c1"># found).</span>
+</span><span class="linenos">395</span>        <span class="k">try</span><span class="p">:</span>
+<span class="linenos">396</span>            <span class="kn">from</span><span class="w"> </span><span class="nn">pipeline_setup</span><span class="w"> </span><span class="kn">import</span> <span class="n">stream_petr_pipeline</span>
+<span class="linenos">397</span>        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+<span class="linenos">398</span>            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+<span class="linenos">399</span>                <span class="s2">&quot;Could not import `stream_petr_pipeline` from `pipeline_setup`. When running with the DALI &quot;</span>
+<span class="linenos">400</span>                <span class="s2">&quot;pipeline, please make sure that the `pipeline_setup` module from the &quot;</span>
+<span class="linenos">401</span>                <span class="s2">&quot;dali_pipeline_framework example (packages/dali_pipeline_framework/examples) is in the python path, as &quot;</span>
+<span class="linenos">402</span>                <span class="s2">&quot;this demo re-uses the StreamPETR pipeline setup showcased there.&quot;</span>
+<span class="linenos">403</span>            <span class="p">)</span>
+<span class="linenos">404</span>
+<span class="hll"><span class="linenos">405</span>        <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">406</span>        <span class="c1"># Use the same dataset root for DALI training and the PyTorch validation dataset. The NuScenes</span>
+</span><span class="hll"><span class="linenos">407</span>        <span class="c1"># version is specified separately.</span>
+</span><span class="linenos">408</span>        <span class="n">nuscenes_base_dir</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">data_root</span>
+<span class="linenos">409</span>        <span class="n">nuscenes_version</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">data_loading_config</span><span class="o">.</span><span class="n">nuscenes_version</span>
+<span class="linenos">410</span>
+<span class="linenos">411</span>        <span class="n">num_batches_in_epoch</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">num_iters_per_epoch</span>
+<span class="linenos">412</span>
+<span class="hll"><span class="linenos">413</span>        <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">414</span>        <span class="c1"># Create the DALI pipeline. Note that the returned object is a </span>
+</span><span class="hll"><span class="linenos">415</span>        <span class="c1"># `dali_pipeline_framework.DALIStructuredOutputIterator` object, which can be used as a drop-in replacement for </span>
+</span><span class="hll"><span class="linenos">416</span>        <span class="c1"># a PyTorch DataLoader. This means that if DALI is used, one needs to skip the creation of a PyTorch </span>
+</span><span class="hll"><span class="linenos">417</span>        <span class="c1"># DataLoader from this object, and use it directly instead. This is done in </span>
+</span><span class="hll"><span class="linenos">418</span>        <span class="c1"># `projects/mmdet3d_plugin/core/apis/mmdet_train.py`.</span>
+</span><span class="linenos">419</span>        <span class="n">dali_iterator</span> <span class="o">=</span> <span class="n">stream_petr_pipeline</span><span class="o">.</span><span class="n">setup_dali_pipeline_stream_petr_train</span><span class="p">(</span>
+<span class="linenos">420</span>            <span class="n">nuscenes_base_dir</span><span class="p">,</span> <span class="n">nuscenes_version</span><span class="p">,</span> <span class="n">num_batches_in_epoch</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">dali_preproc_config</span><span class="p">,</span> 
+<span class="linenos">421</span>            <span class="n">batch_size</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">samples_per_gpu</span><span class="p">,</span>
+<span class="linenos">422</span>            <span class="o">**</span><span class="n">get_dali_pipeline_distributed_args</span><span class="p">(</span>
+<span class="linenos">423</span>                <span class="n">local_rank</span><span class="p">,</span> <span class="n">rank</span><span class="p">,</span> <span class="n">world_size</span><span class="p">,</span>
+<span class="linenos">424</span>                <span class="n">cfg</span><span class="o">.</span><span class="n">data_loading_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;replicate_dataset_per_gpu&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+<span class="linenos">425</span>            <span class="p">),</span>
+<span class="linenos">426</span>        <span class="p">)</span>
+<span class="linenos">427</span>        
+<span class="hll"><span class="linenos">428</span>        <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">429</span>        <span class="c1"># Store as the only element in the `datasets` list. In case DALI is not used, the same variable will </span>
+</span><span class="hll"><span class="linenos">430</span>        <span class="c1"># contain the actual PyTorch Dataset (also as a single-element list), see else-branch below.</span>
+</span><span class="linenos">431</span>        <span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span><span class="n">dali_iterator</span><span class="p">]</span>
+<span class="linenos">432</span>        
+<span class="hll"><span class="linenos">433</span>        <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">434</span>        <span class="c1"># The classes can be obtrained from the Dataset object if DALI is not used. Here, we manually</span>
+</span><span class="hll"><span class="linenos">435</span>        <span class="c1"># set the classes instead. </span>
+</span><span class="linenos">436</span>        <span class="n">classes</span> <span class="o">=</span> <span class="p">[</span>
+<span class="linenos">437</span>            <span class="s1">&#39;car&#39;</span><span class="p">,</span> <span class="s1">&#39;truck&#39;</span><span class="p">,</span> <span class="s1">&#39;construction_vehicle&#39;</span><span class="p">,</span> <span class="s1">&#39;bus&#39;</span><span class="p">,</span> <span class="s1">&#39;trailer&#39;</span><span class="p">,</span> <span class="s1">&#39;barrier&#39;</span><span class="p">,</span> <span class="s1">&#39;motorcycle&#39;</span><span class="p">,</span> <span class="s1">&#39;bicycle&#39;</span><span class="p">,</span> 
+<span class="linenos">438</span>            <span class="s1">&#39;pedestrian&#39;</span><span class="p">,</span> <span class="s1">&#39;traffic_cone&#39;</span>
+<span class="linenos">439</span>        <span class="p">]</span>
+<span class="linenos">440</span>
+<span class="linenos">441</span>    <span class="k">else</span><span class="p">:</span>
+<span class="linenos">442</span>
+<span class="hll"><span class="linenos">443</span>        <span class="c1">#@NOTE: This corresponds to the original implementation, where a PyTorch Dataset is created and used.</span>
+</span><span class="linenos">444</span>
+<span class="linenos">445</span>        <span class="n">datasets</span> <span class="o">=</span> <span class="p">[</span><span class="n">build_dataset</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">train</span><span class="p">)]</span>
+<span class="linenos">446</span>        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">workflow</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+<span class="linenos">447</span>            <span class="n">val_dataset</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">val</span><span class="p">)</span>
+<span class="linenos">448</span>            <span class="c1"># in case we use a dataset wrapper</span>
+<span class="linenos">449</span>            <span class="k">if</span> <span class="s1">&#39;dataset&#39;</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">train</span><span class="p">:</span>
+<span class="linenos">450</span>                <span class="n">val_dataset</span><span class="o">.</span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">pipeline</span>
+<span class="linenos">451</span>            <span class="k">else</span><span class="p">:</span>
+<span class="linenos">452</span>                <span class="n">val_dataset</span><span class="o">.</span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">train</span><span class="o">.</span><span class="n">pipeline</span>
+<span class="linenos">453</span>            <span class="c1"># set test_mode=False here in deep copied config</span>
+<span class="linenos">454</span>            <span class="c1"># which do not affect AP/AR calculation later</span>
+<span class="linenos">455</span>            <span class="c1"># refer to https://mmdetection3d.readthedocs.io/en/latest/tutorials/customize_runtime.html#customize-workflow  # noqa</span>
+<span class="linenos">456</span>            <span class="n">val_dataset</span><span class="o">.</span><span class="n">test_mode</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="linenos">457</span>            <span class="n">datasets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">build_dataset</span><span class="p">(</span><span class="n">val_dataset</span><span class="p">))</span>
+<span class="linenos">458</span>        
+<span class="hll"><span class="linenos">459</span>        <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">460</span>        <span class="c1"># Extract the classes here, to obtain the `classes` variable, equivalent to the one created if using</span>
+</span><span class="hll"><span class="linenos">461</span>        <span class="c1"># DALI. This is done to avoid calling `datasets[0].CLASSES` below, which would not work DALI is used.</span>
+</span><span class="linenos">462</span>        <span class="n">classes</span> <span class="o">=</span> <span class="n">datasets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">CLASSES</span>
+<span class="linenos">463</span>    <span class="c1"># ===== End of Getting Dataset or DALI Output Iterator =====</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="checkpoint-configuration">
+<h3>Checkpoint Configuration<a class="headerlink" href="#checkpoint-configuration" title="Link to this heading"></a></h3>
+<p>The setting of the checkpoint meta information is slightly adjusted to use the <code class="docutils literal notranslate"><span class="pre">classes</span></code> variable instead of
+<code class="docutils literal notranslate"><span class="pre">dataset[0].CLASSES</span></code> (as the latter is not available when DALI is used).</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/tools/train.py</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">466</span>    <span class="c1"># ===== Checkpoint Configuration =====</span>
+<span class="hll"><span class="linenos">467</span>    <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">468</span>    <span class="c1"># Note that here, we use the previously obtained `classes` variable. In the original implementation, </span>
+</span><span class="hll"><span class="linenos">469</span>    <span class="c1"># `dataset[0].CLASSES` is used instead.</span>
+</span><span class="linenos">470</span>    <span class="k">if</span> <span class="n">cfg</span><span class="o">.</span><span class="n">checkpoint_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">471</span>        <span class="c1"># save mmdet version, config file content and class names in</span>
+<span class="linenos">472</span>        <span class="c1"># checkpoints as meta data</span>
+<span class="linenos">473</span>        <span class="n">cfg</span><span class="o">.</span><span class="n">checkpoint_config</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+<span class="linenos">474</span>            <span class="n">mmdet_version</span><span class="o">=</span><span class="n">mmdet_version</span><span class="p">,</span>
+<span class="linenos">475</span>            <span class="n">mmseg_version</span><span class="o">=</span><span class="n">mmseg_version</span><span class="p">,</span>
+<span class="linenos">476</span>            <span class="n">mmdet3d_version</span><span class="o">=</span><span class="n">mmdet3d_version</span><span class="p">,</span>
+<span class="linenos">477</span>            <span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">pretty_text</span><span class="p">,</span>
+<span class="linenos">478</span>            <span class="n">CLASSES</span><span class="o">=</span><span class="n">classes</span><span class="p">,</span>
+<span class="linenos">479</span>            <span class="n">PALETTE</span><span class="o">=</span><span class="n">datasets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">PALETTE</span>  <span class="c1"># for segmentors</span>
+<span class="linenos">480</span>            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">datasets</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;PALETTE&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+<span class="linenos">481</span>    <span class="c1"># add an attribute for visualization convenience</span>
+<span class="linenos">482</span>    <span class="n">model</span><span class="o">.</span><span class="n">CLASSES</span> <span class="o">=</span> <span class="n">classes</span>
+<span class="linenos">483</span>    <span class="c1"># ===== End of Checkpoint Configuration =====</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="training-entry-point">
+<h3>Training Entry Point<a class="headerlink" href="#training-entry-point" title="Link to this heading"></a></h3>
+<p>The training call is unchanged except that the dataset list may contain a DALI iterator. This case needs to
+be handled correctly in the training function (see the next section for details).</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/tools/train.py</span><a class="headerlink" href="#id4" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">495</span>    <span class="c1"># ===== Train the model =====</span>
+<span class="hll"><span class="linenos">496</span>    <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">497</span>    <span class="c1"># Call the training function. Note that datasets is passed to the model. As this now may be a DALI </span>
+</span><span class="hll"><span class="linenos">498</span>    <span class="c1"># iterator, one needs to make sure that the training function is able to handle this (by using it directly</span>
+</span><span class="hll"><span class="linenos">499</span>    <span class="c1"># as a drop-in replacement for a PyTorch DataLoader, instead of creating a PyTorch DataLoader from it). </span>
+</span><span class="hll"><span class="linenos">500</span>    <span class="c1"># This is done in `projects/mmdet3d_plugin/core/apis/mmdet_train.py`.</span>
+</span><span class="linenos">501</span>    <span class="n">custom_train_model</span><span class="p">(</span>
+<span class="linenos">502</span>        <span class="n">model</span><span class="p">,</span>
+<span class="linenos">503</span>        <span class="n">datasets</span><span class="p">,</span>
+<span class="linenos">504</span>        <span class="n">cfg</span><span class="p">,</span>
+<span class="linenos">505</span>        <span class="n">distributed</span><span class="o">=</span><span class="n">distributed</span><span class="p">,</span>
+<span class="linenos">506</span>        <span class="n">validate</span><span class="o">=</span><span class="p">(</span><span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">no_validate</span><span class="p">),</span>
+<span class="linenos">507</span>        <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>
+<span class="linenos">508</span>        <span class="n">meta</span><span class="o">=</span><span class="n">meta</span><span class="p">)</span>
+<span class="linenos">509</span>    <span class="c1"># ===== End of Train the model =====</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="adjustments-to-the-training-function">
+<h2>Adjustments to the Training Function<a class="headerlink" href="#adjustments-to-the-training-function" title="Link to this heading"></a></h2>
+<p>In the training script, we call <code class="docutils literal notranslate"><span class="pre">custom_train_model()</span></code> to train the model, which in turn calls
+<code class="docutils literal notranslate"><span class="pre">custom_train_detector()</span></code> (with the latter defined in <code class="docutils literal notranslate"><span class="pre">projects/mmdet3d_plugin/core/apis/mmdet_train.py</span></code>).
+The implementation of <code class="docutils literal notranslate"><span class="pre">custom_train_detector()</span></code> needs to be adjusted to handle the case that the passed
+dataset is actually a <a class="reference internal" href="../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator" title="accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIStructuredOutputIterator</span></code></a> object. Please see
+the code snippet below for details on how this is done.</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/core/apis/mmdet_train.py</span><a class="headerlink" href="#id5" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 84</span>    <span class="c1"># ===== Using the DALI Iterator Directly (if used) =====</span>
+<span class="hll"><span class="linenos"> 85</span>    <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos"> 86</span>    <span class="c1"># If the passed dataset is a `DALIStructuredOutputIterator` object, use it directly instead of creating a </span>
+</span><span class="hll"><span class="linenos"> 87</span>    <span class="c1"># PyTorch DataLoader from it.</span>
+</span><span class="hll"><span class="linenos"> 88</span>    <span class="c1">#</span>
+</span><span class="hll"><span class="linenos"> 89</span>    <span class="c1"># Note that the `else` branch is the original implementation. This means that if a PyTorch Dataset is</span>
+</span><span class="hll"><span class="linenos"> 90</span>    <span class="c1"># input, the behavior of the original implementation is preserved.</span>
+</span><span class="linenos"> 91</span>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">DALIStructuredOutputIterator</span><span class="p">):</span>
+<span class="linenos"> 92</span>        <span class="n">data_loaders</span> <span class="o">=</span> <span class="n">dataset</span>
+<span class="linenos"> 93</span>    <span class="k">else</span><span class="p">:</span>
+<span class="linenos"> 94</span>        <span class="n">data_loaders</span> <span class="o">=</span> <span class="p">[</span>
+<span class="linenos"> 95</span>            <span class="n">build_dataloader</span><span class="p">(</span>
+<span class="linenos"> 96</span>                <span class="n">ds</span><span class="p">,</span>
+<span class="linenos"> 97</span>                <span class="n">cfg</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">samples_per_gpu</span><span class="p">,</span>
+<span class="linenos"> 98</span>                <span class="n">cfg</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">workers_per_gpu</span><span class="p">,</span>
+<span class="linenos"> 99</span>                <span class="c1"># cfg.gpus will be ignored if distributed</span>
+<span class="linenos">100</span>                <span class="nb">len</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">gpu_ids</span><span class="p">),</span>
+<span class="linenos">101</span>                <span class="n">dist</span><span class="o">=</span><span class="n">distributed</span><span class="p">,</span>
+<span class="linenos">102</span>                <span class="n">seed</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
+<span class="linenos">103</span>                <span class="n">shuffler_sampler</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shuffler_sampler</span><span class="p">,</span>  <span class="c1"># dict(type=&#39;DistributedGroupSampler&#39;),</span>
+<span class="linenos">104</span>                <span class="n">nonshuffler_sampler</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">nonshuffler_sampler</span><span class="p">,</span>  <span class="c1"># dict(type=&#39;DistributedSampler&#39;),</span>
+<span class="linenos">105</span>                <span class="n">runner_type</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">runner</span><span class="p">,</span>
+<span class="linenos">106</span>                <span class="c1"># Use unsharded mini-dataset sampling for the evaluation. This does not represent the real training use-case,</span>
+<span class="linenos">107</span>                <span class="c1"># but enables the use of the mini-dataset for performance evaluations.</span>
+<span class="linenos">108</span>                <span class="n">replicate_dataset_per_gpu</span><span class="o">=</span><span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;data_loading_config&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+<span class="linenos">109</span>                    <span class="s1">&#39;replicate_dataset_per_gpu&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+<span class="linenos">110</span>            <span class="p">)</span> <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">dataset</span>
+<span class="linenos">111</span>        <span class="p">]</span>
+<span class="linenos">112</span>    <span class="c1"># ===== End of Using the DALI Iterator Directly (if used) =====</span>
+</pre></div>
+</div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Note that from this point on, the <a class="reference internal" href="../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator" title="accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIStructuredOutputIterator</span></code></a>
+acts as a drop-in replacement for the original PyTorch DataLoader (in case DALI is used), and no changes
+deeper in the training code are needed to switch from the original PyTorch DataLoader to the DALI
+pipeline.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Mini-dataset replication.</strong> The performance configurations set
+<code class="docutils literal notranslate"><span class="pre">data_loading_config.replicate_dataset_per_gpu=True</span></code> for both loaders because
+NuScenes mini has too few sequences for the global batch size. This lets each GPU
+sample the full dataset. It is an evaluation setting, not a required step when
+integrating DALI into another project; the option defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">tools/train.py</span></code>, <code class="docutils literal notranslate"><span class="pre">get_dali_pipeline_distributed_args()</span></code> passes <code class="docutils literal notranslate"><span class="pre">rank=0</span></code> and
+<code class="docutils literal notranslate"><span class="pre">world_size=1</span></code> to the pipeline setup, while keeping <code class="docutils literal notranslate"><span class="pre">device_id=local_rank</span></code>.
+DDP continues to use the real distributed ranks.</p>
+<p>For PyTorch, <code class="docutils literal notranslate"><span class="pre">core/apis/mmdet_train.py</span></code> forwards the flag to <code class="docutils literal notranslate"><span class="pre">datasets/builder.py</span></code>,
+which passes <code class="docutils literal notranslate"><span class="pre">rank=0</span></code> and <code class="docutils literal notranslate"><span class="pre">num_replicas=1</span></code> to the training sequence sampler.
+Worker initialization still uses the real rank, and validation retains its normal sampler.
+See <a class="reference internal" href="evaluation.html#streampetr-dali-dataset-replication"><span class="std std-ref">the evaluation’s replication policy</span></a>
+for the workload and augmentation-seed limitations.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="DALI Pipeline Framework Demo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="evaluation.html" class="btn btn-neutral float-right" title="Evaluation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

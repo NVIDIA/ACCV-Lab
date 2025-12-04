@@ -1,0 +1,229 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docker Setup &amp; Running StreamPETR &mdash; ACCV-Lab 0.2.0.post1.dev82+g949b17665 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css?v=0be6cc5f" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f4de544b"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Release Notes" href="../../release_notes_page.html" />
+    <link rel="prev" title="Dumping the Training Data (for Debugging/Demonstration)" href="optim_test_tools/dumping_training_data.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contained_package_docs_mirror/multi_tensor_copier/docs/index.html">Multi-Tensor Copier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contained_package_docs_mirror/lane_helpers/docs/index.html">Lane Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Demos</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../demos.html">Demos</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../demos.html#streampetr">StreamPETR</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../demos.html#demos-for-contained-packages">Demos for Contained Packages</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../demos.html#running-the-demos">Running the Demos</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Docker Setup &amp; Running StreamPETR</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#preparing-the-docker-image">Preparing the Docker Image</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#running-the-docker-container">Running the Docker Container</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#installing-accv-lab-in-the-container">Installing ACCV-Lab in the Container</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#running-regression-tests">Running Regression Tests</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../demos.html#choosing-a-configuration">Choosing a Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos.html#running-all-evaluations">Running All Evaluations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../demos.html#measurement-and-profiling">Measurement and Profiling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../release_notes_page.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../third_party_licenses.html">Third-Party Licenses</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../demos.html">Demos</a></li>
+      <li class="breadcrumb-item active">Docker Setup &amp; Running StreamPETR</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/demo_docs/streampetr/docker_setup.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="docker-setup-running-streampetr">
+<h1>Docker Setup &amp; Running StreamPETR<a class="headerlink" href="#docker-setup-running-streampetr" title="Link to this heading"></a></h1>
+<section id="preparing-the-docker-image">
+<h2>Preparing the Docker Image<a class="headerlink" href="#preparing-the-docker-image" title="Link to this heading"></a></h2>
+<p>The Dockerfile at <code class="docutils literal notranslate"><span class="pre">demos/streampetr/docker/Dockerfile</span></code> installs the dependencies for ACCV-Lab and
+StreamPETR. ACCV-Lab itself must then be installed from the repository, as described below.</p>
+<p>Build the image with the demo’s build script. Setting <code class="docutils literal notranslate"><span class="pre">TAG</span></code> explicitly gives the image the name used
+in the run command below; the script otherwise defaults to <code class="docutils literal notranslate"><span class="pre">accvlab</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># From the root of the repository</span>
+<span class="nb">cd</span><span class="w"> </span>demos/streampetr/docker
+<span class="nv">TAG</span><span class="o">=</span>streampetr:latest<span class="w"> </span>bash<span class="w"> </span>run_docker_build.sh
+</pre></div>
+</div>
+</section>
+<section id="running-the-docker-container">
+<h2>Running the Docker Container<a class="headerlink" href="#running-the-docker-container" title="Link to this heading"></a></h2>
+<p>Replace the host paths below with your ACCV-Lab checkout and prepared NuScenes dataset directory.
+All Docker options, including mounts, must come before the image name.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--gpus<span class="o">=</span>all<span class="w"> </span>--ipc<span class="o">=</span>host<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--runtime<span class="o">=</span>nvidia<span class="w"> </span>-e<span class="w"> </span><span class="nv">NVIDIA_DRIVER_CAPABILITIES</span><span class="o">=</span>all<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>/path/to/ACCV-Lab:/ACCV-Lab<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>/path/to/ACCV-Lab/demos/streampetr:/streampetr<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>/path/to/nuscenes:/data/nuscenes<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-w<span class="w"> </span>/streampetr<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>streampetr:latest<span class="w"> </span>bash
+</pre></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Mount the demo at <code class="docutils literal notranslate"><span class="pre">/streampetr</span></code> and the full ACCV-Lab repository at <code class="docutils literal notranslate"><span class="pre">/ACCV-Lab</span></code>. The training
+script uses both paths: the latter provides the DALI Pipeline Framework example imported by the demo. Both
+mounts must refer to the same checkout.</p>
+<p>The provided configurations expect the prepared dataset under <code class="docutils literal notranslate"><span class="pre">/data/nuscenes/</span></code>. The reference
+loader reads camera paths stored in the converted <code class="docutils literal notranslate"><span class="pre">.pkl</span></code> files verbatim. The documented
+conversion command stores absolute paths, so the dataset must be available at the same
+in-container path during conversion and training. Regenerate the files if that path changes.</p>
+<p>To use another location, update <code class="docutils literal notranslate"><span class="pre">data_root</span></code> in the configuration files. DALI uses this same root;
+its NuScenes version is set separately as <code class="docutils literal notranslate"><span class="pre">data_loading_config.nuscenes_version</span></code>. See
+<a class="reference internal" href="../demos.html"><span class="doc">Running the Demos</span></a> for data-preparation guidance.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>See the <a class="reference internal" href="../../guides/DOCKER_GUIDE.html"><span class="doc">ACCV-Lab Docker Guide</span></a> for NVIDIA Container Toolkit setup
+and additional runtime options.</p>
+</div>
+</section>
+<section id="installing-accv-lab-in-the-container">
+<h2>Installing ACCV-Lab in the Container<a class="headerlink" href="#installing-accv-lab-in-the-container" title="Link to this heading"></a></h2>
+<p>If ACCV-Lab is not already installed from this checkout, follow the
+<a class="reference internal" href="../../guides/INSTALLATION_GUIDE.html"><span class="doc">Installation Guide</span></a>. With the repository’s Git submodules
+initialized, the standard installation command inside the container is:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>/ACCV-Lab
+./scripts/install_local.sh
+<span class="nb">cd</span><span class="w"> </span>/streampetr
+</pre></div>
+</div>
+<p>Then follow the configuration guidance and commands in the evaluation section of the demo you want
+to run. For example, see the <a class="reference internal" href="batching_helpers/evaluation.html"><span class="doc">Batching Helpers evaluation</span></a> or
+the <a class="reference internal" href="dali_pipeline_framework/evaluation.html"><span class="doc">DALI Pipeline Framework evaluation</span></a>.</p>
+</section>
+<section id="running-regression-tests">
+<span id="streampetr-running-regression-tests"></span><h2>Running Regression Tests<a class="headerlink" href="#running-regression-tests" title="Link to this heading"></a></h2>
+<p>The demo’s regression tests are separate from the repository’s core package tests.
+After installing ACCV-Lab, run them inside the prepared StreamPETR container:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bash<span class="w"> </span>/streampetr/tools/run_unit_tests.sh
+</pre></div>
+</div>
+<p>The script runs <code class="docutils literal notranslate"><span class="pre">demos/streampetr/tests/</span></code> with pytest. Additional pytest options can be passed to
+the script, for example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bash<span class="w"> </span>/streampetr/tools/run_unit_tests.sh<span class="w"> </span>-v<span class="w"> </span>-k<span class="w"> </span>sampling
+</pre></div>
+</div>
+<p>The tests do not require the NuScenes dataset. CUDA-dependent tests are skipped when no GPU is
+available; use the GPU-enabled container to run the full suite. Some tests also skip when their
+optional dependencies are unavailable. Pass <code class="docutils literal notranslate"><span class="pre">-ra</span></code> to list skipped tests and their reasons.</p>
+<p>These tests check correctness; they do not run training-performance evaluations. For performance
+measurements, follow the <a class="reference internal" href="batching_helpers/evaluation.html"><span class="doc">Batching Helpers evaluation</span></a> or
+<a class="reference internal" href="dali_pipeline_framework/evaluation.html"><span class="doc">DALI Pipeline Framework evaluation</span></a> page.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="optim_test_tools/dumping_training_data.html" class="btn btn-neutral float-left" title="Dumping the Training Data (for Debugging/Demonstration)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../release_notes_page.html" class="btn btn-neutral float-right" title="Release Notes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

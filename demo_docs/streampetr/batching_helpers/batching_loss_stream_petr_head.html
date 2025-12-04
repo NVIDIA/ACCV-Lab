@@ -1,0 +1,680 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Batching Loss — StreamPETR Head &mdash; ACCV-Lab 0.2.0.post1.dev82+g949b17665 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=0be6cc5f" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=f4de544b"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Evaluation" href="evaluation.html" />
+    <link rel="prev" title="Batching Loss — Focal Head" href="batching_loss_focal_head.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/multi_tensor_copier/docs/index.html">Multi-Tensor Copier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/lane_helpers/docs/index.html">Lane Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Demos</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../demos.html">Demos</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../demos.html#streampetr">StreamPETR</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../demos.html#demos-for-contained-packages">Demos for Contained Packages</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="index.html">Batching Helpers Demo</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l5"><a class="reference internal" href="batching_matching.html">Batching Matching</a></li>
+<li class="toctree-l5"><a class="reference internal" href="batching_loss_focal_head.html">Batching Loss — Focal Head</a></li>
+<li class="toctree-l5 current"><a class="current reference internal" href="#">Batching Loss — StreamPETR Head</a></li>
+<li class="toctree-l5"><a class="reference internal" href="evaluation.html">Evaluation</a></li>
+<li class="toctree-l5"><a class="reference internal" href="summary.html">Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../dali_pipeline_framework/index.html">DALI Pipeline Framework Demo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../optim_test_tools/index.html">Optimization Testing Tools Demo</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#running-the-demos">Running the Demos</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#choosing-a-configuration">Choosing a Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#running-all-evaluations">Running All Evaluations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../demos.html#measurement-and-profiling">Measurement and Profiling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../release_notes_page.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../third_party_licenses.html">Third-Party Licenses</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../demos.html">Demos</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Batching Helpers Demo</a></li>
+      <li class="breadcrumb-item active">Batching Loss — StreamPETR Head</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/demo_docs/streampetr/batching_helpers/batching_loss_stream_petr_head.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="batching-loss-streampetr-head">
+<h1>Batching Loss — StreamPETR Head<a class="headerlink" href="#batching-loss-streampetr-head" title="Link to this heading"></a></h1>
+<p>This page documents the batched loss computation used by <code class="docutils literal notranslate"><span class="pre">StreamPETRHeadBatched</span></code>. It builds on the same
+approach as the focal head but extends it to multiple decoder layers, keeping the computation batched over
+both samples and layers while returning per-layer losses.</p>
+<p>The reference head is already partially batched over samples: within each decoder layer, it concatenates
+the per-sample targets and invokes each classification and bounding-box loss function once. The optimized
+head does not newly batch those loss-function calls over samples. Instead, it batches the surrounding
+per-sample target preparation, keeps variable-length ground truth in <code class="docutils literal notranslate"><span class="pre">RaggedBatch</span></code> objects, computes
+assignment cost matrices in batches, and computes bounding-box loss only for matched prediction/target
+pairs. The SciPy Hungarian solver still handles each layer/sample entry separately. The optimized head
+additionally invokes the classification and bounding-box loss functions across all decoder layers at once,
+including the DN losses; the reference processes one layer at a time.</p>
+<dl class="simple">
+<dt>You can find the implementation in the repository here:</dt><dd><ul class="simple">
+<li><p>StreamPETRHeadBatched:
+<code class="docutils literal notranslate"><span class="pre">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/streampetr_head_batched.py</span></code></p></li>
+<li><p>StreamPETRHead (reference):
+<code class="docutils literal notranslate"><span class="pre">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/streampetr_head.py</span></code></p></li>
+<li><p>Helper classes:</p>
+<ul>
+<li><p>HungarianAssigner3DBatched:
+<code class="docutils literal notranslate"><span class="pre">demos/streampetr/projects/mmdet3d_plugin/core/bbox/assigners/hungarian_assigner_3d_batched.py</span></code></p></li>
+<li><p>HungarianAssigner3D (non-batched reference):
+<code class="docutils literal notranslate"><span class="pre">demos/streampetr/projects/mmdet3d_plugin/core/bbox/assigners/hungarian_assigner_3d.py</span></code></p></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The used <code class="docutils literal notranslate"><span class="pre">HungarianAssigner3DBatched</span></code> follows the same approach as the <code class="docutils literal notranslate"><span class="pre">HungarianAssigner2DBatched</span></code>,
+with some changes in the cost matrix computation (but still using the same approach to compute the
+matrices). For more details, please also see the source code of the <code class="docutils literal notranslate"><span class="pre">HungarianAssigner3DBatched</span></code>
+and the page on the <a class="reference internal" href="batching_matching.html"><span class="doc">matching implementation</span></a>.</p>
+</div>
+<section id="overview-and-goals">
+<h2>Overview and Goals<a class="headerlink" href="#overview-and-goals" title="Link to this heading"></a></h2>
+<div class="docutils container">
+<p>The more fully batched loss computation is based on the same approach as used in <code class="docutils literal notranslate"><span class="pre">focal_head_batched.py</span></code>.
+Please, see the notes in <code class="docutils literal notranslate"><span class="pre">focal_head_batched.py</span></code> first for a detailed explanation of the approach.</p>
+<p>The original StreamPETR head already batches the final classification and bounding-box loss-function calls
+over samples within each decoder layer: it concatenates the per-sample targets and flattens the sample and
+query dimensions before invoking the loss functions. The changes here instead batch the surrounding target
+preparation and cost-matrix computation over samples and decoder layers, preserve the structured batch
+dimensions until the loss-function boundary, and compute bounding-box loss only for matched
+prediction/target pairs. The SciPy Hungarian solver itself still runs separately for each layer/sample
+entry. The changes also add batching of the loss-function calls across decoder layers, including the DN
+losses, which is not present in the original implementation.</p>
+<p>Here, we extend the approach to the case of multiple decoder layers, where the loss is computed 
+for each decoder layer (i.e. batched, but not reduced over the layers). The explanation here is focused 
+on this extension. The extension is done as follows:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>The GT data is duplicated for each decoder layer to match the shape of the predictions.
+This is similar to the original implementation. However, lists are used there. Here,
+we use <a class="reference internal" href="../../../contained_package_docs_mirror/batching_helpers/docs/api.html#accvlab.batching_helpers.RaggedBatch" title="accvlab.batching_helpers.RaggedBatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code></a> instances. After converting the GT data 
+to <a class="reference internal" href="../../../contained_package_docs_mirror/batching_helpers/docs/api.html#accvlab.batching_helpers.RaggedBatch" title="accvlab.batching_helpers.RaggedBatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code></a> objects, an additional batch dimension is added, and 
+the GT data is duplicated for each decoder layer, so that the additional batch dimension iterates over 
+the decoder layers.</p></li>
+<li><p>The method <code class="docutils literal notranslate"><span class="pre">_compute_per_layer_loss()</span></code> is used as a wrapper around the actual loss 
+functions and allows for reduction of the loss over the samples while retaining the 
+per-decoder-layer separation. Note that this is done to work around the fact that the loss
+functions can only reduce over all objects in the batch at once, but cannot return per-sample 
+losses, i.e. they cannot reduce over the objects only, keeping the batch dimension(s) intact.</p></li>
+</ol>
+</div></blockquote>
+<p>Also note that the loss computation includes the DN loss computation (<code class="docutils literal notranslate"><span class="pre">dn_loss_batched()</span></code>),
+which is not present for the focal head. The inputs for the DN loss computation are obtained from
+<code class="docutils literal notranslate"><span class="pre">prepare_for_loss()</span></code>, which returns the data with the first dimension being the decoder layers,
+so that the inputs can be directly used for batched loss computation.</p>
+<p>The implementation of the loss computation is done in the <code class="docutils literal notranslate"><span class="pre">loss()</span></code> function. Please see the 
+notes &amp; doc-strings there and in the related functions called from there for more details.</p>
+</div>
+<p>Below, we discuss the implementation in detail, focusing on the parts of the implementation that differ from
+or extend the focal head case.</p>
+</section>
+<section id="top-level-loss-computation">
+<h2>Top-level Loss Computation<a class="headerlink" href="#top-level-loss-computation" title="Link to this heading"></a></h2>
+<section id="pre-processing">
+<h3>Pre-processing<a class="headerlink" href="#pre-processing" title="Link to this heading"></a></h3>
+<p>Initial validation and GT preparation (combining samples as ragged) mirrors the focal head.</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/streampetr_head_batched.py</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1084</span>        <span class="c1"># ===== Pre-processing (`loss()`) =====</span>
+<span class="linenos">1085</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;StreamPETRHeadBatched.loss&quot;</span><span class="p">)</span>
+<span class="linenos">1086</span>        <span class="n">stopwatch</span><span class="o">.</span><span class="n">start_meas</span><span class="p">(</span><span class="s2">&quot;StreamPETRHeadBatched.loss&quot;</span><span class="p">)</span>
+<span class="linenos">1087</span>        <span class="k">assert</span> <span class="n">gt_bboxes_ignore</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> \
+<span class="linenos">1088</span>            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1"> only supports &#39;</span> \
+<span class="linenos">1089</span>            <span class="sa">f</span><span class="s1">&#39;for gt_bboxes_ignore setting to None.&#39;</span>
+<span class="linenos">1090</span>        
+<span class="linenos">1091</span>        <span class="n">loss_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+<span class="linenos">1092</span>
+<span class="linenos">1093</span>        <span class="n">all_cls_scores</span> <span class="o">=</span> <span class="n">preds_dicts</span><span class="p">[</span><span class="s1">&#39;all_cls_scores&#39;</span><span class="p">]</span>
+<span class="linenos">1094</span>        <span class="n">all_bbox_preds</span> <span class="o">=</span> <span class="n">preds_dicts</span><span class="p">[</span><span class="s1">&#39;all_bbox_preds&#39;</span><span class="p">]</span>
+<span class="linenos">1095</span>
+<span class="linenos">1096</span>        <span class="n">num_dec_layers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_cls_scores</span><span class="p">)</span>
+<span class="linenos">1097</span>        <span class="n">device</span> <span class="o">=</span> <span class="n">gt_labels_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">device</span>
+<span class="hll"><span class="linenos">1098</span>        <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">1099</span>        <span class="c1"># Note that `gt_bboxes_list` is on the CPU, so we need to transfer it to the GPU.</span>
+</span><span class="hll"><span class="linenos">1100</span>        <span class="c1"># However, this is done when calling `combine_data()` below. Typically, it is more efficient to</span>
+</span><span class="hll"><span class="linenos">1101</span>        <span class="c1"># do the combining of samples onto batched on the CPU, so we do not not transfer the data to the GPU</span>
+</span><span class="hll"><span class="linenos">1102</span>        <span class="c1"># before calling `combine_data()`.</span>
+</span><span class="linenos">1103</span>        <span class="n">gt_bboxes_list</span> <span class="o">=</span> <span class="p">[</span>
+<span class="linenos">1104</span>            <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">gt_bboxes</span><span class="o">.</span><span class="n">gravity_center</span><span class="p">,</span> <span class="n">gt_bboxes</span><span class="o">.</span><span class="n">tensor</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">:]),</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">1105</span>            <span class="k">for</span> <span class="n">gt_bboxes</span> <span class="ow">in</span> <span class="n">gt_bboxes_list</span>
+<span class="linenos">1106</span>        <span class="p">]</span>
+<span class="linenos">1107</span>        <span class="n">gt_bboxes</span> <span class="o">=</span> <span class="n">bhl</span><span class="o">.</span><span class="n">combine_data</span><span class="p">(</span><span class="n">gt_bboxes_list</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">,</span> <span class="n">flatten_batch_dims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">1108</span>
+<span class="hll"><span class="linenos">1109</span>        <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">1110</span>        <span class="c1"># Using `other_with_same_sample_sizes=gt_bboxes` to share the memory for the </span>
+</span><span class="hll"><span class="linenos">1111</span>        <span class="c1"># `sample_sizes` and `mask` tensors of the two RaggedBatch instances.</span>
+</span><span class="linenos">1112</span>        <span class="n">gt_labels</span> <span class="o">=</span> <span class="n">bhl</span><span class="o">.</span><span class="n">combine_data</span><span class="p">(</span><span class="n">gt_labels_list</span><span class="p">,</span> <span class="n">other_with_same_sample_sizes</span><span class="o">=</span><span class="n">gt_bboxes</span><span class="p">,</span> <span class="n">flatten_batch_dims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">1113</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="prepare-per-layer-gt">
+<h3>Prepare Per-layer GT<a class="headerlink" href="#prepare-per-layer-gt" title="Link to this heading"></a></h3>
+<p>A key difference comes next where GT is duplicated across decoder layers to match prediction shapes.
+Introduce a new batch dimension for decoder layers and repeat GT along it to match prediction layout:</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/streampetr_head_batched.py</span><a class="headerlink" href="#id4" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1114</span>        <span class="c1"># ===== Prepare per-layer GT =====</span>
+<span class="hll"><span class="linenos">1115</span>        <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">1116</span>        <span class="c1"># Duplicating the GT for each layer in order to match the shape of the predictions, which</span>
+</span><span class="hll"><span class="linenos">1117</span>        <span class="c1"># are also per-layer (but in contrast to the GT, the predictions differ for each layer). </span>
+</span><span class="hll"><span class="linenos">1118</span>        <span class="c1"># This is done by introducing a new batch dimension (iterating over decoder layers) and repeating the GT data </span>
+</span><span class="hll"><span class="linenos">1119</span>        <span class="c1"># for each decoder layer along that dimension.</span>
+</span><span class="linenos">1120</span>        <span class="n">gt_bboxes</span> <span class="o">=</span> <span class="n">gt_bboxes</span><span class="o">.</span><span class="n">unsqueeze_batch_dim</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos">1121</span>        <span class="n">gt_bboxes</span> <span class="o">=</span> <span class="n">gt_bboxes</span><span class="o">.</span><span class="n">repeat_samples</span><span class="p">(</span><span class="n">num_dec_layers</span><span class="p">,</span> <span class="n">batch_dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos">1122</span>        <span class="n">gt_labels</span> <span class="o">=</span> <span class="n">gt_labels</span><span class="o">.</span><span class="n">unsqueeze_batch_dim</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos">1123</span>        <span class="n">gt_labels</span> <span class="o">=</span> <span class="n">gt_labels</span><span class="o">.</span><span class="n">repeat_samples</span><span class="p">(</span><span class="n">num_dec_layers</span><span class="p">,</span> <span class="n">batch_dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos">1124</span>        
+</pre></div>
+</div>
+</div>
+</section>
+<section id="compute-batched-loss-over-decoder-layers">
+<h3>Compute Batched Loss over Decoder Layers<a class="headerlink" href="#compute-batched-loss-over-decoder-layers" title="Link to this heading"></a></h3>
+<p>Delegate to <code class="docutils literal notranslate"><span class="pre">loss_batched</span></code> to compute per-layer losses in a batched manner:</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/streampetr_head_batched.py</span><a class="headerlink" href="#id5" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1125</span>        <span class="c1"># ===== Compute batched loss over decoder layers =====</span>
+<span class="hll"><span class="linenos">1126</span>        <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">1127</span>        <span class="c1"># Compute the loss for each decoder layer. Note that in the original implementation, the loss is </span>
+</span><span class="hll"><span class="linenos">1128</span>        <span class="c1"># computed for each decoder layer separately. Here, we batch the computation over all decoder layers. </span>
+</span><span class="hll"><span class="linenos">1129</span>        <span class="c1"># </span>
+</span><span class="hll"><span class="linenos">1130</span>        <span class="c1"># Batching over the individual samples in the batch is done both in the original and our </span>
+</span><span class="hll"><span class="linenos">1131</span>        <span class="c1"># implementations (although the approaches differ).</span>
+</span><span class="linenos">1132</span>        <span class="n">losses_cls</span><span class="p">,</span> <span class="n">losses_bbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_batched</span><span class="p">(</span><span class="n">all_cls_scores</span><span class="p">,</span> <span class="n">all_bbox_preds</span><span class="p">,</span> <span class="n">gt_bboxes</span><span class="p">,</span> <span class="n">gt_labels</span><span class="p">)</span>
+<span class="linenos">1133</span>
+<span class="linenos">1134</span>        <span class="c1"># loss from the last decoder layer</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="assemble-results">
+<h3>Assemble Results<a class="headerlink" href="#assemble-results" title="Link to this heading"></a></h3>
+<p>Collect losses into the output dictionary and finalize timers:</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/streampetr_head_batched.py</span><a class="headerlink" href="#id6" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1135</span>        <span class="c1"># ===== Assemble results =====</span>
+<span class="linenos">1136</span>        <span class="n">loss_dict</span><span class="p">[</span><span class="s1">&#39;loss_cls&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">losses_cls</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="linenos">1137</span>        <span class="n">loss_dict</span><span class="p">[</span><span class="s1">&#39;loss_bbox&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">losses_bbox</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="linenos">1138</span>
+<span class="linenos">1139</span>        <span class="c1"># loss from other decoder layers</span>
+<span class="linenos">1140</span>        <span class="k">for</span> <span class="n">ndl</span><span class="p">,</span> <span class="p">(</span><span class="n">loss_cls_i</span><span class="p">,</span> <span class="n">loss_bbox_i</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">losses_cls</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">losses_bbox</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])):</span>
+<span class="linenos">1141</span>            <span class="n">loss_dict</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;d</span><span class="si">{</span><span class="n">ndl</span><span class="si">}</span><span class="s1">.loss_cls&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss_cls_i</span>
+<span class="linenos">1142</span>            <span class="n">loss_dict</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;d</span><span class="si">{</span><span class="n">ndl</span><span class="si">}</span><span class="s1">.loss_bbox&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss_bbox_i</span>
+<span class="linenos">1143</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="dn-loss-batched-over-layers-build-loss-dictionary">
+<h3>DN Loss (Batched over Layers) &amp; Build Loss Dictionary<a class="headerlink" href="#dn-loss-batched-over-layers-build-loss-dictionary" title="Link to this heading"></a></h3>
+<p>When DN is enabled, DN losses are also computed batched over decoder layers and merged into the dictionary.
+Note that in the original implementation, the <code class="docutils literal notranslate"><span class="pre">dn_loss_single()</span></code> function is called for each decoder layer
+separately. Here, we implement <code class="docutils literal notranslate"><span class="pre">dn_loss_batched()</span></code> to compute the DN loss batched over all decoder layers.</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/streampetr_head_batched.py</span><a class="headerlink" href="#id7" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1144</span>        <span class="c1"># ===== DN Loss (batched over layers) =====</span>
+<span class="hll"><span class="linenos">1145</span>        <span class="c1">#@NOTE: Compute the DN loss. </span>
+</span><span class="linenos">1146</span>        <span class="k">if</span> <span class="n">preds_dicts</span><span class="p">[</span><span class="s1">&#39;dn_mask_dict&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">1147</span>            <span class="n">known_labels</span><span class="p">,</span> <span class="n">known_bboxs</span><span class="p">,</span> <span class="n">output_known_class</span><span class="p">,</span> <span class="n">output_known_coord</span><span class="p">,</span> <span class="n">num_tgt</span> <span class="o">=</span> \
+<span class="linenos">1148</span>                <span class="bp">self</span><span class="o">.</span><span class="n">prepare_for_loss</span><span class="p">(</span><span class="n">preds_dicts</span><span class="p">[</span><span class="s1">&#39;dn_mask_dict&#39;</span><span class="p">])</span>
+<span class="hll"><span class="linenos">1149</span>            <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">1150</span>            <span class="c1"># Duplicating the GT for each decoder layer to match the shape of the predictions, which</span>
+</span><span class="hll"><span class="linenos">1151</span>            <span class="c1"># are also per-layer (but differ for each layer in contrast to the GT). In the original </span>
+</span><span class="hll"><span class="linenos">1152</span>            <span class="c1"># implementation, lists are used instead of `repeat()`, as the GT is not batched over the decoder </span>
+</span><span class="hll"><span class="linenos">1153</span>            <span class="c1"># layers and instead, the loss is computed for each layer individually. Here, the computation is </span>
+</span><span class="hll"><span class="linenos">1154</span>            <span class="c1"># batched, so we need the GT data to be repeated for each decoder layer.</span>
+</span><span class="hll"><span class="linenos">1155</span>            <span class="c1">#   </span>
+</span><span class="hll"><span class="linenos">1156</span>            <span class="c1"># Also, note that here, we use tensors and not `RaggedBatch` instances for the GT data, as the </span>
+</span><span class="hll"><span class="linenos">1157</span>            <span class="c1"># GT is of uniform size.</span>
+</span><span class="linenos">1158</span>            <span class="n">all_known_bboxs</span> <span class="o">=</span> <span class="n">known_bboxs</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">repeat</span><span class="p">((</span><span class="n">num_dec_layers</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="linenos">1159</span>            <span class="n">all_known_labels</span> <span class="o">=</span> <span class="n">known_labels</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">repeat</span><span class="p">((</span><span class="n">num_dec_layers</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="linenos">1160</span>            <span class="n">all_num_tgt</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">(</span>
+<span class="linenos">1161</span>                <span class="p">(</span><span class="n">num_dec_layers</span><span class="p">,),</span> <span class="n">num_tgt</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">all_known_labels</span><span class="o">.</span><span class="n">device</span>
+<span class="linenos">1162</span>            <span class="p">)</span>
+<span class="linenos">1163</span>
+<span class="hll"><span class="linenos">1164</span>            <span class="c1">#@NOTE: Computing the DN loss batched over the decoder layers.</span>
+</span><span class="linenos">1165</span>            <span class="n">dn_losses_cls</span><span class="p">,</span> <span class="n">dn_losses_bbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dn_loss_batched</span><span class="p">(</span>
+<span class="linenos">1166</span>                <span class="n">output_known_class</span><span class="p">,</span> <span class="n">output_known_coord</span><span class="p">,</span> <span class="n">all_known_bboxs</span><span class="p">,</span> <span class="n">all_known_labels</span><span class="p">,</span> <span class="n">all_num_tgt</span>
+<span class="linenos">1167</span>            <span class="p">)</span>
+<span class="linenos">1168</span>
+<span class="linenos">1169</span>            <span class="n">loss_dict</span><span class="p">[</span><span class="s1">&#39;dn_loss_cls&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dn_losses_cls</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="linenos">1170</span>            <span class="n">loss_dict</span><span class="p">[</span><span class="s1">&#39;dn_loss_bbox&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dn_losses_bbox</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="hll"><span class="linenos">1171</span>            <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">1172</span>            <span class="c1"># Here, we split the loss for each decoder layer and store them in the loss dictionary</span>
+</span><span class="hll"><span class="linenos">1173</span>            <span class="c1"># This results in a dictionary with the same structure as in the original implementation.</span>
+</span><span class="linenos">1174</span>            <span class="k">for</span> <span class="n">ndl</span><span class="p">,</span> <span class="p">(</span><span class="n">dn_l_cls_i</span><span class="p">,</span> <span class="n">dn_l_bbox_i</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">dn_losses_cls</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">dn_losses_bbox</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])):</span>
+<span class="linenos">1175</span>                <span class="n">loss_dict</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;d</span><span class="si">{</span><span class="n">ndl</span><span class="si">}</span><span class="s1">.dn_loss_cls&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dn_l_cls_i</span>
+<span class="linenos">1176</span>                <span class="n">loss_dict</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;d</span><span class="si">{</span><span class="n">ndl</span><span class="si">}</span><span class="s1">.dn_loss_bbox&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dn_l_bbox_i</span>
+<span class="linenos">1177</span>        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_dn</span><span class="p">:</span>
+<span class="hll"><span class="linenos">1178</span>            <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">1179</span>            <span class="c1"># In this case, the DN loss computation is the same as the loss computation, so we</span>
+</span><span class="hll"><span class="linenos">1180</span>            <span class="c1"># re-use the results from the loss computation. Note that this is different from the original </span>
+</span><span class="hll"><span class="linenos">1181</span>            <span class="c1"># implementation, where the loss is re-computed. </span>
+</span><span class="hll"><span class="linenos">1182</span>            <span class="c1"># </span>
+</span><span class="hll"><span class="linenos">1183</span>            <span class="c1"># This branch is not used in the configurations used for the runtime experiments and</span>
+</span><span class="hll"><span class="linenos">1184</span>            <span class="c1"># is only added for feature completeness w.r.t. the original implementation.</span>
+</span><span class="linenos">1185</span>            <span class="n">loss_dict</span><span class="p">[</span><span class="s1">&#39;dn_loss_cls&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss_dict</span><span class="p">[</span><span class="s1">&#39;loss_cls&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+<span class="linenos">1186</span>            <span class="n">loss_dict</span><span class="p">[</span><span class="s1">&#39;dn_loss_bbox&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss_dict</span><span class="p">[</span><span class="s1">&#39;loss_bbox&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+<span class="linenos">1187</span>            <span class="k">for</span> <span class="n">ndl</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_dec_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+<span class="linenos">1188</span>                <span class="n">loss_dict</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;d</span><span class="si">{</span><span class="n">ndl</span><span class="si">}</span><span class="s1">.dn_loss_cls&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss_dict</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;d</span><span class="si">{</span><span class="n">ndl</span><span class="si">}</span><span class="s1">.loss_cls&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+<span class="linenos">1189</span>                <span class="n">loss_dict</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;d</span><span class="si">{</span><span class="n">ndl</span><span class="si">}</span><span class="s1">.dn_loss_bbox&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss_dict</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;d</span><span class="si">{</span><span class="n">ndl</span><span class="si">}</span><span class="s1">.loss_bbox&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+<span class="linenos">1190</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="finalize">
+<h3>Finalize<a class="headerlink" href="#finalize" title="Link to this heading"></a></h3>
+<p>The final step is to return the loss dictionary.</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/streampetr_head_batched.py</span><a class="headerlink" href="#id8" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1191</span>        <span class="c1"># ===== Finalize (`loss()`) =====</span>
+<span class="linenos">1192</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">(</span><span class="s2">&quot;StreamPETRHeadBatched.loss&quot;</span><span class="p">)</span>
+<span class="linenos">1193</span>        <span class="n">stopwatch</span><span class="o">.</span><span class="n">end_meas</span><span class="p">(</span><span class="s2">&quot;StreamPETRHeadBatched.loss&quot;</span><span class="p">)</span>
+<span class="linenos">1194</span>
+<span class="linenos">1195</span>        <span class="k">return</span> <span class="n">loss_dict</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="inside-loss-batched">
+<h2>Inside <code class="docutils literal notranslate"><span class="pre">loss_batched()</span></code><a class="headerlink" href="#inside-loss-batched" title="Link to this heading"></a></h2>
+<section id="id1">
+<h3>Pre-processing<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>Shape extraction and entry-point for the per-layer batched computation:</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/streampetr_head_batched.py</span><a class="headerlink" href="#id9" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">797</span>        <span class="c1"># ===== Pre-processing (`loss_batched()`) =====</span>
+<span class="linenos">798</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;StreamPETRHeadBatched.loss_batched&quot;</span><span class="p">)</span>
+<span class="linenos">799</span>        <span class="n">num_dec_layers</span> <span class="o">=</span> <span class="n">cls_scores</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos">800</span>        <span class="n">num_samples_in_batch</span> <span class="o">=</span> <span class="n">cls_scores</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">801</span>        <span class="n">num_preds</span> <span class="o">=</span> <span class="n">cls_scores</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="linenos">802</span>        
+</pre></div>
+</div>
+</div>
+</section>
+<section id="perform-the-matching">
+<h3>Perform the Matching<a class="headerlink" href="#perform-the-matching" title="Link to this heading"></a></h3>
+<p>Call the 3D batched assigner to obtain matched indices. Note that this is analogous to the focal head case.</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/streampetr_head_batched.py</span><a class="headerlink" href="#id10" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">803</span>        <span class="c1"># ===== Perform the matching =====</span>
+<span class="hll"><span class="linenos">804</span>        <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">805</span>        <span class="c1"># The following is the same as the case of `FocalHeadBatched.loss_batched()`, i.e. we</span>
+</span><span class="hll"><span class="linenos">806</span>        <span class="c1"># call the assign() method directly and obtain the matched indices.</span>
+</span><span class="hll"><span class="linenos">807</span>        <span class="c1"># </span>
+</span><span class="hll"><span class="linenos">808</span>        <span class="c1"># This is the same as in the focal head case. However, the assigner itself if a different class</span>
+</span><span class="hll"><span class="linenos">809</span>        <span class="c1"># (i.e. `HungarianAssigner3DBatched` instead of `HungarianAssigner2DBatched`). Also, the data</span>
+</span><span class="hll"><span class="linenos">810</span>        <span class="c1"># has multiple batch dimensions (which are handled automatically by the assigner implementation).</span>
+</span><span class="linenos">811</span>        <span class="n">matched_pred_indices</span><span class="p">,</span> <span class="n">matched_gt_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assigner</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">bbox_preds</span><span class="p">,</span> <span class="n">cls_scores</span><span class="p">,</span> <span class="n">gt_bboxes</span><span class="p">,</span>
+<span class="linenos">812</span>                                                                        <span class="n">gt_labels</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">match_costs</span><span class="p">,</span> 
+<span class="linenos">813</span>                                                                        <span class="bp">self</span><span class="o">.</span><span class="n">match_with_velo</span><span class="p">)</span>
+<span class="linenos">814</span>        
+</pre></div>
+</div>
+</div>
+</section>
+<section id="per-decoder-layer-counts-and-average-factors">
+<h3>Per-decoder-layer Counts and Average Factors<a class="headerlink" href="#per-decoder-layer-counts-and-average-factors" title="Link to this heading"></a></h3>
+<p>Compute per-layer number of positives/negatives and average factors. In contrast to the focal head case,
+the number of positives/negatives is computed for each decoder layer separately.</p>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/streampetr_head_batched.py</span><a class="headerlink" href="#id11" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">815</span>        <span class="c1"># ===== Per-layer counts and avg factors =====</span>
+<span class="hll"><span class="linenos">816</span>        <span class="c1">#@NOTE: `per_sample_nums_pos` will have the same shape as the batch dimensions.</span>
+</span><span class="linenos">817</span>        <span class="n">per_sample_nums_pos</span> <span class="o">=</span> <span class="n">matched_pred_indices</span><span class="o">.</span><span class="n">sample_sizes</span>
+<span class="hll"><span class="linenos">818</span>        <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">819</span>        <span class="c1"># Here, we sum over the samples (the second batch dimension, i.e. `dim==1`) to obtain the total </span>
+</span><span class="hll"><span class="linenos">820</span>        <span class="c1"># number of positive samples for each decoder layer. Note that the first batch dimension, i.e. </span>
+</span><span class="hll"><span class="linenos">821</span>        <span class="c1"># `dim==0`, is over the decoder layers, and we keep that dimension.</span>
+</span><span class="hll"><span class="linenos">822</span>        <span class="c1">#   </span>
+</span><span class="hll"><span class="linenos">823</span>        <span class="c1"># For comparison: In the original implementation, the number of positive samples is </span>
+</span><span class="hll"><span class="linenos">824</span>        <span class="c1"># computed for each decoder layer separately (in the `get_targets()` function).</span>
+</span><span class="linenos">825</span>        <span class="n">per_layer_nums_pos</span> <span class="o">=</span> <span class="n">per_sample_nums_pos</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">826</span>        <span class="n">per_layer_nums_neg</span> <span class="o">=</span> <span class="n">num_preds</span> <span class="o">*</span> <span class="n">num_samples_in_batch</span> <span class="o">-</span> <span class="n">per_layer_nums_pos</span>
+<span class="linenos">827</span>
+<span class="hll"><span class="linenos">828</span>        <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">829</span>        <span class="c1"># The following is the batched version of the per-layer normalization factor computation (for the </span>
+</span><span class="hll"><span class="linenos">830</span>        <span class="c1"># classification loss). This is equivalent to the (per-sample) computation in the original </span>
+</span><span class="hll"><span class="linenos">831</span>        <span class="c1"># implementation.</span>
+</span><span class="linenos">832</span>        <span class="n">per_layer_cls_avg_factors</span> <span class="o">=</span> <span class="n">per_layer_nums_pos</span> <span class="o">*</span> <span class="mf">1.0</span> <span class="o">+</span> \
+<span class="linenos">833</span>            <span class="n">per_layer_nums_neg</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">bg_cls_weight</span>
+<span class="linenos">834</span>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sync_cls_avg_factor</span><span class="p">:</span>
+<span class="linenos">835</span>            <span class="n">per_layer_cls_avg_factors</span> <span class="o">=</span> <span class="n">reduce_mean</span><span class="p">(</span><span class="n">per_layer_cls_avg_factors</span><span class="p">)</span>
+<span class="hll"><span class="linenos">836</span>        <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">837</span>        <span class="c1"># Make sure we don&#39;t have any division by zero (similar to original implementation).</span>
+</span><span class="hll"><span class="linenos">838</span>        <span class="c1"># This is equivalent to the original implementation, but done here for tensor elements</span>
+</span><span class="hll"><span class="linenos">839</span>        <span class="c1"># instead of for a scalar value.</span>
+</span><span class="linenos">840</span>        <span class="n">per_layer_cls_avg_factors</span><span class="p">[</span><span class="n">per_layer_cls_avg_factors</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="linenos">841</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="align-labels-and-align-matched-boxes">
+<h3>Align Labels and Align Matched Boxes<a class="headerlink" href="#align-labels-and-align-matched-boxes" title="Link to this heading"></a></h3>
+<p>Map GT labels to predictions (for classification) and align matched GT/prediction boxes (for bounding
+box regression loss):</p>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/streampetr_head_batched.py</span><a class="headerlink" href="#id12" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">842</span>        <span class="c1"># ===== Align labels and align matched boxes =====</span>
+<span class="linenos">843</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;Indexing [StreamPETRHeadBatched.loss_batched]&quot;</span><span class="p">)</span>
+<span class="hll"><span class="linenos">844</span>        <span class="c1">#@NOTE:</span>
+</span><span class="hll"><span class="linenos">845</span>        <span class="c1"># Align/map back the GT labels to the predicted labels as is done for losses which </span>
+</span><span class="hll"><span class="linenos">846</span>        <span class="c1"># are computed for all predictions, not just the matched ones. This is analogous to the focal head </span>
+</span><span class="hll"><span class="linenos">847</span>        <span class="c1"># classification loss. Please have a look at the notes in `focal_head_batched.py` for a more detailed </span>
+</span><span class="hll"><span class="linenos">848</span>        <span class="c1"># description. The main difference is that here, we have multiple batch dimensions. However, this is </span>
+</span><span class="hll"><span class="linenos">849</span>        <span class="c1"># handled automatically by `bhl.batched_index_mapping()`.</span>
+</span><span class="linenos">850</span>        <span class="n">gt_labels_mapped_to_pred</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">(</span>
+<span class="linenos">851</span>            <span class="p">(</span><span class="n">num_dec_layers</span><span class="p">,</span> <span class="n">num_samples_in_batch</span><span class="p">,</span> <span class="n">num_preds</span><span class="p">),</span> 
+<span class="linenos">852</span>            <span class="n">fill_value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cls_out_channels</span><span class="p">,</span> 
+<span class="linenos">853</span>            <span class="n">dtype</span><span class="o">=</span><span class="n">gt_labels</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">gt_labels</span><span class="o">.</span><span class="n">device</span>
+<span class="linenos">854</span>        <span class="p">)</span>
+<span class="linenos">855</span>        <span class="n">gt_labels_mapped_to_pred</span> <span class="o">=</span> <span class="n">bhl</span><span class="o">.</span><span class="n">batched_index_mapping</span><span class="p">(</span>
+<span class="linenos">856</span>            <span class="n">gt_labels</span><span class="p">,</span> <span class="n">matched_gt_indices</span><span class="p">,</span> <span class="n">matched_pred_indices</span><span class="p">,</span> <span class="n">gt_labels_mapped_to_pred</span>
+<span class="linenos">857</span>        <span class="p">)</span>
+<span class="linenos">858</span>
+<span class="hll"><span class="linenos">859</span>        <span class="c1">#@NOTE:</span>
+</span><span class="hll"><span class="linenos">860</span>        <span class="c1"># Get the aligned (i.e. indexed using indices obtained from the matching) versions of the </span>
+</span><span class="hll"><span class="linenos">861</span>        <span class="c1"># bounding boxes. Again, this is analogous to the focal head case (except for the additional batch </span>
+</span><span class="hll"><span class="linenos">862</span>        <span class="c1"># dimensions). Please have a look at the notes in `focal_head_batched.py` for a more detailed </span>
+</span><span class="hll"><span class="linenos">863</span>        <span class="c1"># description.</span>
+</span><span class="linenos">864</span>        <span class="n">gt_bboxes_matched</span> <span class="o">=</span> <span class="n">bhl</span><span class="o">.</span><span class="n">batched_indexing_access</span><span class="p">(</span><span class="n">gt_bboxes</span><span class="p">,</span> <span class="n">matched_gt_indices</span><span class="p">)</span>
+<span class="linenos">865</span>        <span class="n">pred_bboxes_matched</span> <span class="o">=</span> <span class="n">bhl</span><span class="o">.</span><span class="n">batched_indexing_access</span><span class="p">(</span><span class="n">bbox_preds</span><span class="p">,</span> <span class="n">matched_pred_indices</span><span class="p">)</span>
+<span class="linenos">866</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">867</span>
+<span class="linenos">868</span>        <span class="n">label_weights</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span>
+<span class="linenos">869</span>            <span class="p">(</span><span class="n">num_dec_layers</span><span class="p">,</span> <span class="n">num_samples_in_batch</span><span class="p">,</span> <span class="n">num_preds</span><span class="p">),</span> 
+<span class="linenos">870</span>            <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">device</span> <span class="o">=</span> <span class="n">gt_labels</span><span class="o">.</span><span class="n">device</span>
+<span class="linenos">871</span>        <span class="p">)</span>
+<span class="linenos">872</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="losses-classification">
+<h3>Losses: Classification<a class="headerlink" href="#losses-classification" title="Link to this heading"></a></h3>
+<p>Compute classification loss per layer using the wrapper to reduce over samples while keeping layers separate.</p>
+<div class="literal-block-wrapper docutils container" id="id13">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/streampetr_head_batched.py</span><a class="headerlink" href="#id13" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">873</span>        <span class="c1"># ===== Losses: Classification (per-layer wrapper) =====</span>
+<span class="linenos">874</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;loss_cls computation[StreamPETRHeadBatched.loss_batched]&quot;</span><span class="p">)</span>
+<span class="hll"><span class="linenos">875</span>        <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">876</span>        <span class="c1"># The method `_compute_per_layer_loss()` is a wrapper to the actual loss computation and enables</span>
+</span><span class="hll"><span class="linenos">877</span>        <span class="c1"># batching over both samples and decoder layers, with the possibility to compute the loss for each</span>
+</span><span class="hll"><span class="linenos">878</span>        <span class="c1"># layer separately, while combining (i.e. summing or computing the average) the loss over the samples.</span>
+</span><span class="hll"><span class="linenos">879</span>        <span class="c1"># This is necessary as the loss function does not differentiate between the entries in a batch. </span>
+</span><span class="hll"><span class="linenos">880</span>        <span class="c1"># Using the loss function directly, it would be not possible to compute the per-layer loss separately.</span>
+</span><span class="hll"><span class="linenos">881</span>        <span class="c1"># Please refer to the documentation of `_compute_per_layer_loss()` and the comments</span>
+</span><span class="hll"><span class="linenos">882</span>        <span class="c1"># in that function for more details.</span>
+</span><span class="hll"><span class="linenos">883</span>        <span class="c1"># </span>
+</span><span class="hll"><span class="linenos">884</span>        <span class="c1"># Furthermore, note that the classification loss is computed for all predictions, not just the matched </span>
+</span><span class="hll"><span class="linenos">885</span>        <span class="c1"># ones (also see the discussion of the classification loss in `focal_head_batched.py`).</span>
+</span><span class="linenos">886</span>        <span class="n">loss_cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_per_layer_loss</span><span class="p">(</span>
+<span class="linenos">887</span>            <span class="bp">self</span><span class="o">.</span><span class="n">loss_cls</span><span class="p">,</span> <span class="n">gt_labels_mapped_to_pred</span><span class="p">,</span> <span class="n">cls_scores</span><span class="p">,</span> <span class="n">label_weights</span><span class="p">,</span> <span class="n">per_layer_cls_avg_factors</span><span class="p">,</span> 
+<span class="linenos">888</span>            <span class="n">num_batch_dims</span><span class="o">=</span><span class="mi">2</span>
+<span class="linenos">889</span>        <span class="p">)</span>
+<span class="linenos">890</span>
+<span class="linenos">891</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">892</span>        <span class="n">loss_cls</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">loss_cls</span><span class="p">)</span>
+<span class="linenos">893</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="synchronize-positives">
+<h3>Synchronize Positives<a class="headerlink" href="#synchronize-positives" title="Link to this heading"></a></h3>
+<p>Synchronize positive counts across devices:</p>
+<div class="literal-block-wrapper docutils container" id="id14">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/streampetr_head_batched.py</span><a class="headerlink" href="#id14" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">894</span>        <span class="c1"># ===== Synchronize positives =====</span>
+<span class="hll"><span class="linenos">895</span>        <span class="c1">#@NOTE: reduce_mean is used to synchronize over all devices, as in the original implementation.</span>
+</span><span class="linenos">896</span>        <span class="n">per_layer_nums_pos</span> <span class="o">=</span> <span class="n">per_layer_nums_pos</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">loss_cls</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+<span class="linenos">897</span>        <span class="n">per_layer_nums_pos</span> <span class="o">=</span> <span class="n">reduce_mean</span><span class="p">(</span><span class="n">per_layer_nums_pos</span><span class="p">)</span>
+<span class="linenos">898</span>        <span class="n">per_layer_nums_pos</span><span class="p">[</span><span class="n">per_layer_nums_pos</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="linenos">899</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="prepare-bounding-box-targets-masks">
+<h3>Prepare Bounding Box Targets &amp; Masks<a class="headerlink" href="#prepare-bounding-box-targets-masks" title="Link to this heading"></a></h3>
+<p>Next, we prepare the bounding box targets and masks:</p>
+<div class="literal-block-wrapper docutils container" id="id15">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/streampetr_head_batched.py</span><a class="headerlink" href="#id15" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">900</span>        <span class="c1"># ===== Prepare bbox targets &amp; masks =====</span>
+<span class="linenos">901</span>        <span class="n">gt_bboxes_matched_normalized</span> <span class="o">=</span> <span class="n">gt_bboxes_matched</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+<span class="linenos">902</span>            <span class="k">lambda</span> <span class="n">bboxs</span><span class="p">:</span> <span class="n">normalize_bbox</span><span class="p">(</span><span class="n">bboxs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pc_range</span><span class="p">)</span>
+<span class="linenos">903</span>        <span class="p">)</span>
+<span class="linenos">904</span>
+<span class="linenos">905</span>        <span class="n">isnotnan</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">gt_bboxes_matched_normalized</span><span class="o">.</span><span class="n">tensor</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">906</span>        
+<span class="hll"><span class="linenos">907</span>        <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">908</span>        <span class="c1"># Get the existence weights. In the original implementation, the weights are returned </span>
+</span><span class="hll"><span class="linenos">909</span>        <span class="c1"># by the `get_targets()` function (also see notes in `FocalHeadBatched.loss_batched()`). Note that</span>
+</span><span class="hll"><span class="linenos">910</span>        <span class="c1"># the weights here do not exactly correspond to the weights in the original implementation, as the </span>
+</span><span class="hll"><span class="linenos">911</span>        <span class="c1"># existence weights here are computed for the data tensor (i.e. `tensor`) of the `RaggedBatch` </span>
+</span><span class="hll"><span class="linenos">912</span>        <span class="c1"># instance (containing filler values to ensure uniform shape), while in the original implementation, </span>
+</span><span class="hll"><span class="linenos">913</span>        <span class="c1"># the weights are computed for a tensor with the same shape as the predictions.</span>
+</span><span class="linenos">914</span>        <span class="n">bbox_existence_weights_matched</span> <span class="o">=</span> <span class="n">gt_bboxes_matched_normalized</span><span class="o">.</span><span class="n">get_existence_weights</span><span class="p">()</span>
+<span class="linenos">915</span>
+<span class="hll"><span class="linenos">916</span>        <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">917</span>        <span class="c1"># The code weights are per-element weights for the individual elements which describe a single</span>
+</span><span class="hll"><span class="linenos">918</span>        <span class="c1"># bounding box. Therefore, they can be directly multiplied with the existence weights without any</span>
+</span><span class="hll"><span class="linenos">919</span>        <span class="c1"># adaptations regarding the batch shape, as long as the size of the inner-most dimension of the </span>
+</span><span class="hll"><span class="linenos">920</span>        <span class="c1"># existence weights corresponds to the bounding box descriptors.</span>
+</span><span class="linenos">921</span>        <span class="n">bbox_weights_matched</span> <span class="o">=</span> <span class="n">bbox_existence_weights_matched</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">code_weights</span>
+<span class="linenos">922</span>
+<span class="hll"><span class="linenos">923</span>        <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">924</span>        <span class="c1"># The handling of non-finite values differs from the original implementation. In the original code,</span>
+</span><span class="hll"><span class="linenos">925</span>        <span class="c1"># boolean indexing with `isnotnan` as a mask is used to filter out non-finite values. However, </span>
+</span><span class="hll"><span class="linenos">926</span>        <span class="c1"># this would lead to flattening of the batch dimensions and the dimension iterating over individual </span>
+</span><span class="hll"><span class="linenos">927</span>        <span class="c1"># objects inside a sample. Here, we use `apply_mask_to_tensor()` to zero out non-finite values while </span>
+</span><span class="hll"><span class="linenos">928</span>        <span class="c1"># preserving the current shape of the data.</span>
+</span><span class="hll"><span class="linenos">929</span>        <span class="c1"># This approach:</span>
+</span><span class="hll"><span class="linenos">930</span>        <span class="c1">#   1. Maintains the batch dimensions for efficient batched processing</span>
+</span><span class="hll"><span class="linenos">931</span>        <span class="c1">#   2. Properly handles `NaN` values (unlike simple multiplication, where `NaN * 0 = NaN`)</span>
+</span><span class="hll"><span class="linenos">932</span>        <span class="c1"># </span>
+</span><span class="hll"><span class="linenos">933</span>        <span class="c1"># Note that our approach changes elements containing `NaN` values to filler (0) values, while the </span>
+</span><span class="hll"><span class="linenos">934</span>        <span class="c1"># original implementation removes the `NaN` elements instead (using boolean indexing).</span>
+</span><span class="linenos">935</span>        <span class="n">gt_bboxes_matched_normalized</span> <span class="o">=</span> <span class="n">gt_bboxes_matched_normalized</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+<span class="linenos">936</span>            <span class="k">lambda</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">bhl</span><span class="o">.</span><span class="n">apply_mask_to_tensor</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">isnotnan</span><span class="p">)</span>
+<span class="linenos">937</span>        <span class="p">)</span>
+<span class="linenos">938</span>
+<span class="hll"><span class="linenos">939</span>        <span class="c1">#@NOTE </span>
+</span><span class="hll"><span class="linenos">940</span>        <span class="c1"># Here, we can multiply instead of using `apply_mask_to_tensor()` as the predictions and weights do </span>
+</span><span class="hll"><span class="linenos">941</span>        <span class="c1"># not contain `NaN` values.</span>
+</span><span class="linenos">942</span>        <span class="n">pred_bboxes_matched</span> <span class="o">=</span> <span class="n">pred_bboxes_matched</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">bboxs</span><span class="p">:</span> <span class="n">bboxs</span> <span class="o">*</span> <span class="n">isnotnan</span><span class="p">)</span>
+<span class="linenos">943</span>        <span class="n">bbox_weights_matched</span> <span class="o">=</span> <span class="n">bbox_weights_matched</span> <span class="o">*</span> <span class="n">isnotnan</span>
+<span class="linenos">944</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="losses-bounding-box-overlap">
+<h3>Losses: Bounding Box Overlap<a class="headerlink" href="#losses-bounding-box-overlap" title="Link to this heading"></a></h3>
+<p>Compute bbox regression loss per layer using the wrapper, operating only on matched predictions:</p>
+<div class="literal-block-wrapper docutils container" id="id16">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/streampetr_head_batched.py</span><a class="headerlink" href="#id16" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">945</span>        <span class="c1"># ===== Losses: BBox (per-layer wrapper) =====</span>
+<span class="linenos">946</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;loss_bbox computation[StreamPETRHeadBatched.loss_batched]&quot;</span><span class="p">)</span>
+<span class="hll"><span class="linenos">947</span>        <span class="c1">#@NOTE</span>
+</span><span class="hll"><span class="linenos">948</span>        <span class="c1"># The wrapper method `_compute_per_layer_loss()` is used again here.</span>
+</span><span class="hll"><span class="linenos">949</span>        <span class="c1"># </span>
+</span><span class="hll"><span class="linenos">950</span>        <span class="c1"># In contrast to the classification loss, the bounding box loss is computed only for matched </span>
+</span><span class="hll"><span class="linenos">951</span>        <span class="c1"># predictions. See notes in `focal_head_batched.py` for a discussion of how the input data differs </span>
+</span><span class="hll"><span class="linenos">952</span>        <span class="c1"># between the two cases.</span>
+</span><span class="linenos">953</span>        <span class="n">loss_bbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_per_layer_loss</span><span class="p">(</span>
+<span class="linenos">954</span>            <span class="bp">self</span><span class="o">.</span><span class="n">loss_bbox</span><span class="p">,</span> <span class="n">gt_bboxes_matched_normalized</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="n">pred_bboxes_matched</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> 
+<span class="linenos">955</span>            <span class="n">bbox_weights_matched</span><span class="p">,</span> <span class="n">per_layer_nums_pos</span><span class="p">,</span> <span class="n">num_batch_dims</span><span class="o">=</span><span class="mi">2</span>
+<span class="linenos">956</span>        <span class="p">)</span>
+<span class="linenos">957</span>
+<span class="linenos">958</span>        <span class="n">loss_bbox</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">loss_bbox</span><span class="p">)</span>
+<span class="linenos">959</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">960</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="id2">
+<h3>Finalize<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<p>End of per-layer loss computation:</p>
+<div class="literal-block-wrapper docutils container" id="id17">
+<div class="code-block-caption"><span class="caption-text">demos/streampetr/projects/mmdet3d_plugin/models/dense_heads/streampetr_head_batched.py</span><a class="headerlink" href="#id17" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">961</span>        <span class="c1"># ===== Finalize (`loss_batched()`) =====</span>
+<span class="linenos">962</span>        <span class="n">nvtx_wrp</span><span class="o">.</span><span class="n">range_pop</span><span class="p">(</span><span class="s2">&quot;StreamPETRHeadBatched.loss_batched&quot;</span><span class="p">)</span>
+<span class="linenos">963</span>        <span class="k">return</span> <span class="n">loss_cls</span><span class="p">,</span> <span class="n">loss_bbox</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="other-notable-implementations-changes">
+<h2>Other Notable Implementations Changes<a class="headerlink" href="#other-notable-implementations-changes" title="Link to this heading"></a></h2>
+<p>In this section, we discussed the changes needed to implement the batched loss computation for the StreamPETR
+head.</p>
+<p>In addition to the changes discussed above, there are some other notable changes to the implementation.
+Please refer to the source code (<code class="docutils literal notranslate"><span class="pre">streampetr_head_batched.py</span></code>, see beginning of this page) for more details.
+Changes not discussed above in detail are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">dn_loss_batched()</span></code> method is used to compute the DN loss batched over all decoder layers. As the
+GT data is of uniform size, there is not need to use the <code class="docutils literal notranslate"><span class="pre">RaggedBatch</span></code> data format. However, the
+implementation is similar to <code class="docutils literal notranslate"><span class="pre">loss_batched()</span></code> in that the GT data is repeated for the individual decoder
+layers, and the loss is computed in a batched manner.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">_compute_per_layer_loss()</span></code> method is used to compute the loss for the individual decoder layers.
+This is achieved by disabling the reduction in the called loss function, and performing the reduction
+after the call in <code class="docutils literal notranslate"><span class="pre">_compute_per_layer_loss()</span></code> instead. In this way, we can decide over which dimensions
+to reduce, allowing us to keep the batch dimension corresponding to the decoder layers intact, while
+reducing over the individual samples. Note that the type of reduction can still be configured for the
+loss function, and the configuration will be read and applied accordingly in the
+<code class="docutils literal notranslate"><span class="pre">_compute_per_layer_loss()</span></code> method.</p></li>
+</ul>
+</div></blockquote>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="batching_loss_focal_head.html" class="btn btn-neutral float-left" title="Batching Loss — Focal Head" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="evaluation.html" class="btn btn-neutral float-right" title="Evaluation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

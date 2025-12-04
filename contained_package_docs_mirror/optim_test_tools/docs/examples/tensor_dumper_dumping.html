@@ -1,0 +1,520 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tensor Dumper – Extended Dumping Example &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="prev" title="Tensor Dumper – Comparison Example" href="tensor_dumper_comparison.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Optimization Testing Tools</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../examples.html">Examples</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="stopwatch.html">Stopwatch Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nvtx_range_wrapper.html">NVTX Range Wrapper Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tensor_dumper_comparison.html">Tensor Dumper – Comparison Example</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Tensor Dumper – Extended Dumping Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#details">Details</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#create-synthetic-inputs-helpers">Create Synthetic Inputs Helpers</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#initialize-and-configure-the-dumper">Initialize and Configure the Dumper</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#register-custom-converters">Register Custom Converters</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#main-loop">Main Loop</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#create-the-test-data">Create the Test Data</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#add-tensors">Add Tensors</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#add-gradients">Add Gradients</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#custom-processing-prior-to-dumping">Custom Processing Prior to Dumping</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#raggedbatch-dumping">RaggedBatch Dumping</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#placeholder-for-e-g-loss-computation">Placeholder for e.g. Loss Computation</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#set-the-gradients">Set the Gradients</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#dump-data">Dump Data</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#related-examples">Related Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Optimization Testing Tools</a></li>
+          <li class="breadcrumb-item"><a href="../examples.html">Examples</a></li>
+      <li class="breadcrumb-item active">Tensor Dumper – Extended Dumping Example</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/contained_package_docs_mirror/optim_test_tools/docs/examples/tensor_dumper_dumping.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tensor-dumper-extended-dumping-example">
+<h1>Tensor Dumper – Extended Dumping Example<a class="headerlink" href="#tensor-dumper-extended-dumping-example" title="Link to this heading"></a></h1>
+<p>This example demonstrates advanced features: custom converters, per‑tensor dump type/permute overrides,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code> handling, custom processing executed only when the dumper is enabled, and
+early exit after a fixed number of dumps.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>It is advisable to start with the comparison example first: <a class="reference internal" href="tensor_dumper_comparison.html"><span class="doc">Tensor Dumper – Comparison Example</span></a>, which
+also introduces the dumping functionality, but keeps it simple.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The code of this example can be found in the repository under
+<code class="docutils literal notranslate"><span class="pre">packages/optim_test_tools/examples/tensor_dumper_dumping_example.py</span></code>.</p>
+</div>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Register custom converters for non‑tensor containers.</p></li>
+<li><p>Use per‑tensor overrides (format, axis permutation, exclusion) within nested structures.</p></li>
+<li><p>Dump gradients by registering tensors first and providing scalar losses to <code class="docutils literal notranslate"><span class="pre">set_gradients([...])</span></code>.</p></li>
+<li><p>RaggedBatch support: dump as per‑sample or as a structured <code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code>.</p></li>
+<li><p>Run custom pre‑dump logic only when enabled via <code class="docutils literal notranslate"><span class="pre">run_if_enabled</span></code>.</p></li>
+</ul>
+</section>
+<section id="details">
+<h2>Details<a class="headerlink" href="#details" title="Link to this heading"></a></h2>
+<p>Below, we walk through the example section by section. Notes in the code are highlighted.</p>
+<section id="create-synthetic-inputs-helpers">
+<h3>Create Synthetic Inputs Helpers<a class="headerlink" href="#create-synthetic-inputs-helpers" title="Link to this heading"></a></h3>
+<p>Here, we define a helper function to create some synthetic inputs to be dumped as well as a wrapper class for
+demonstrating the custom converter functionality.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">packages/optim_test_tools/examples/tensor_dumper_dumping_example.py</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">31</span><span class="c1"># ------------------------- Helper: Create synthetic inputs -------------------------</span>
+<span class="hll"><span class="linenos">32</span><span class="c1"># @NOTE: Create a test tensor representing an image with smooth gradients</span>
+</span><span class="linenos">33</span><span class="k">def</span><span class="w"> </span><span class="nf">create_simple_gradient_image</span><span class="p">(</span>
+<span class="linenos">34</span>    <span class="n">height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">256</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">256</span><span class="p">,</span> <span class="n">blue_channel_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="linenos">35</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="linenos">36</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a tensor representing an image with smooth gradients on different channels.&quot;&quot;&quot;</span>
+<span class="linenos">37</span>
+<span class="linenos">38</span>    <span class="c1"># Create coordinate grids as a single tensor</span>
+<span class="linenos">39</span>    <span class="n">coords</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+<span class="linenos">40</span>        <span class="n">torch</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">height</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">width</span><span class="p">),</span> <span class="n">indexing</span><span class="o">=</span><span class="s1">&#39;ij&#39;</span><span class="p">),</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span>
+<span class="linenos">41</span>    <span class="p">)</span>
+<span class="linenos">42</span>
+<span class="linenos">43</span>    <span class="c1"># Create smooth gradients on different channels</span>
+<span class="linenos">44</span>    <span class="n">image</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="linenos">45</span>    <span class="n">image</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># Red channel: horizontal gradient</span>
+<span class="linenos">46</span>    <span class="n">image</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># Green channel: vertical gradient</span>
+<span class="linenos">47</span>    <span class="n">image</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">blue_channel_value</span>  <span class="c1"># Blue channel: diagonal gradient</span>
+<span class="linenos">48</span>
+<span class="linenos">49</span>    <span class="k">return</span> <span class="n">image</span>
+<span class="linenos">50</span>
+<span class="linenos">51</span>
+<span class="linenos">52</span><span class="k">def</span><span class="w"> </span><span class="nf">create_bboxes</span><span class="p">(</span><span class="n">num_bboxes</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">image_shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="linenos">53</span>    <span class="n">bboxes</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">54</span>    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_bboxes</span><span class="p">):</span>
+<span class="linenos">55</span>        <span class="n">x1</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">image_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">(</span><span class="mi">1</span><span class="p">,))</span>
+<span class="linenos">56</span>        <span class="n">y1</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">image_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="mi">1</span><span class="p">,))</span>
+<span class="linenos">57</span>        <span class="n">x2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">x1</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="n">image_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">(</span><span class="mi">1</span><span class="p">,))</span>
+<span class="linenos">58</span>        <span class="n">y2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">y1</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="n">image_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="mi">1</span><span class="p">,))</span>
+<span class="linenos">59</span>        <span class="n">bboxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">]))</span>
+<span class="linenos">60</span>    <span class="n">bboxes</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">bboxes</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos">61</span>    <span class="k">return</span> <span class="n">bboxes</span>
+<span class="linenos">62</span>
+<span class="linenos">63</span>
+<span class="hll"><span class="linenos">64</span><span class="c1"># @NOTE: Define a simple wrapper class for demonstrating the custom converter functionality.</span>
+</span><span class="linenos">65</span><span class="k">class</span><span class="w"> </span><span class="nc">TensorWrapper</span><span class="p">:</span>
+<span class="linenos">66</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">):</span>
+<span class="linenos">67</span>        <span class="bp">self</span><span class="o">.</span><span class="n">tensor</span> <span class="o">=</span> <span class="n">tensor</span>
+<span class="linenos">68</span>        <span class="bp">self</span><span class="o">.</span><span class="n">some_addition_text</span> <span class="o">=</span> <span class="s2">&quot;hello!&quot;</span>
+<span class="linenos">69</span>
+<span class="linenos">70</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="initialize-and-configure-the-dumper">
+<h3>Initialize and Configure the Dumper<a class="headerlink" href="#initialize-and-configure-the-dumper" title="Link to this heading"></a></h3>
+<p>Here, we initialize and configure the dumper.</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">packages/optim_test_tools/examples/tensor_dumper_dumping_example.py</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">71</span><span class="c1"># ------------------- Initialize and configure the dumper -------------------</span>
+<span class="hll"><span class="linenos">72</span><span class="c1"># @NOTE: Get instance and enable the dumper. Configure early‑exit after a fixed number of dumps.</span>
+</span><span class="linenos">73</span><span class="n">_current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+<span class="linenos">74</span><span class="n">dumper</span> <span class="o">=</span> <span class="n">TensorDumper</span><span class="p">()</span>
+<span class="linenos">75</span><span class="n">dumper</span><span class="o">.</span><span class="n">enable</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_current_dir</span><span class="p">,</span> <span class="s2">&quot;test_dump&quot;</span><span class="p">))</span>
+<span class="hll"><span class="linenos">76</span><span class="c1"># @NOTE: Exit the program after 3 dumps. Useful to capture only a few iterations without changing outer loops.</span>
+</span><span class="linenos">77</span><span class="n">dumper</span><span class="o">.</span><span class="n">perform_after_dump_count</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">exit</span><span class="p">)</span>
+<span class="linenos">78</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="register-custom-converters">
+<h3>Register Custom Converters<a class="headerlink" href="#register-custom-converters" title="Link to this heading"></a></h3>
+<p>Here, we register a custom converter for the <code class="docutils literal notranslate"><span class="pre">TensorWrapper</span></code> class (which is a simple wrapper used for
+demonstrating the custom converter functionality).</p>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">packages/optim_test_tools/examples/tensor_dumper_dumping_example.py</span><a class="headerlink" href="#id3" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">79</span><span class="c1"># ------------------------- Register custom converters -------------------------</span>
+<span class="hll"><span class="linenos">80</span><span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">81</span><span class="c1"># Register a custom converter for `TensorWrapper`. Any tensors returned by the converter are treated</span>
+</span><span class="hll"><span class="linenos">82</span><span class="c1"># the same as tensors added directly via `add_tensor_data`.</span>
+</span><span class="linenos">83</span><span class="n">dumper</span><span class="o">.</span><span class="n">register_custom_converter</span><span class="p">(</span>
+<span class="linenos">84</span>    <span class="n">TensorWrapper</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;tensor&quot;</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">tensor</span><span class="p">,</span> <span class="s2">&quot;some_addition_text&quot;</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">some_addition_text</span><span class="p">}</span>
+<span class="linenos">85</span><span class="p">)</span>
+<span class="linenos">86</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="main-loop">
+<h3>Main Loop<a class="headerlink" href="#main-loop" title="Link to this heading"></a></h3>
+<p>Here, we loop over some iterations (e.g. training iterations) and dump the data (see following sections).</p>
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">packages/optim_test_tools/examples/tensor_dumper_dumping_example.py</span><a class="headerlink" href="#id4" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">87</span><span class="c1"># ------------------------------- Main loop -------------------------------</span>
+<span class="hll"><span class="linenos">88</span><span class="c1"># @NOTE: While the loop has 10 iterations, the program will exit after 3 dumps due to the configuration above.</span>
+</span><span class="linenos">89</span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="create-the-test-data">
+<h3>Create the Test Data<a class="headerlink" href="#create-the-test-data" title="Link to this heading"></a></h3>
+<p>Here, we create some synthetic test data to be dumped.</p>
+<div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">packages/optim_test_tools/examples/tensor_dumper_dumping_example.py</span><a class="headerlink" href="#id5" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 90</span>    <span class="c1"># --------------------------- Create the test data ---------------------------</span>
+<span class="hll"><span class="linenos"> 91</span>    <span class="c1"># @NOTE: Generate simple images, small tensors, and random bounding boxes.</span>
+</span><span class="linenos"> 92</span>    <span class="n">i_scaled</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="mf">0.1</span>
+<span class="linenos"> 93</span>    <span class="n">test_image_1</span> <span class="o">=</span> <span class="n">create_simple_gradient_image</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mf">0.0</span> <span class="o">+</span> <span class="n">i_scaled</span><span class="p">)</span>
+<span class="linenos"> 94</span>    <span class="n">test_image_2</span> <span class="o">=</span> <span class="n">create_simple_gradient_image</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="n">i_scaled</span><span class="p">)</span>
+<span class="linenos"> 95</span>    <span class="n">test_image_3</span> <span class="o">=</span> <span class="n">create_simple_gradient_image</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">i_scaled</span><span class="p">)</span>
+<span class="linenos"> 96</span>    <span class="n">test_image_4</span> <span class="o">=</span> <span class="n">create_simple_gradient_image</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mf">0.25</span> <span class="o">+</span> <span class="n">i_scaled</span><span class="p">)</span>
+<span class="linenos"> 97</span>    <span class="n">test_image_5</span> <span class="o">=</span> <span class="n">create_simple_gradient_image</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mf">0.75</span> <span class="o">+</span> <span class="n">i_scaled</span><span class="p">)</span>
+<span class="linenos"> 98</span>    <span class="n">test_simple_tensor1</span> <span class="o">=</span> <span class="n">create_simple_gradient_image</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.0</span> <span class="o">+</span> <span class="n">i_scaled</span><span class="p">)</span>
+<span class="linenos"> 99</span>    <span class="n">test_simple_tensor2</span> <span class="o">=</span> <span class="n">create_simple_gradient_image</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">+</span> <span class="n">i_scaled</span><span class="p">)</span>
+<span class="linenos">100</span>    <span class="n">test_bboxes1</span> <span class="o">=</span> <span class="n">create_bboxes</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">))</span>
+<span class="linenos">101</span>    <span class="n">test_bboxes2</span> <span class="o">=</span> <span class="n">create_bboxes</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">))</span>
+<span class="linenos">102</span>    <span class="n">test_bboxes3</span> <span class="o">=</span> <span class="n">create_bboxes</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">))</span>
+<span class="linenos">103</span>
+<span class="hll"><span class="linenos">104</span>    <span class="c1"># @NOTE: This is a non‑tensor object that needs custom handling (converter registered above).</span>
+</span><span class="linenos">105</span>    <span class="n">wrapped_tensor1</span> <span class="o">=</span> <span class="n">TensorWrapper</span><span class="p">(</span><span class="n">test_image_1</span><span class="p">)</span>
+<span class="linenos">106</span>
+<span class="hll"><span class="linenos">107</span>    <span class="c1"># @NOTE: Mark selected tensors as requiring gradients to demonstrate gradient dumping.</span>
+</span><span class="linenos">108</span>    <span class="n">test_image_3</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos">109</span>    <span class="n">test_image_5</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos">110</span>    <span class="n">test_image_1</span><span class="o">.</span><span class="n">requires_grad</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos">111</span>
+<span class="hll"><span class="linenos">112</span>    <span class="c1"># @NOTE: Create a combined image</span>
+</span><span class="linenos">113</span>    <span class="n">test_image_combined</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="linenos">114</span>    <span class="n">test_image_combined</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">test_image_1</span>
+<span class="linenos">115</span>    <span class="n">test_image_combined</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">test_image_2</span>
+<span class="linenos">116</span>    <span class="n">test_image_combined</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">test_image_3</span>
+<span class="linenos">117</span>    <span class="n">test_image_combined</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">test_image_4</span>
+<span class="hll"><span class="linenos">118</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">119</span>    <span class="c1"># Add a permutation (to demonstrate the permute axes override, see beow).</span>
+</span><span class="hll"><span class="linenos">120</span>    <span class="c1"># The inverse permutation to be applied is: (0, 1, 5, 2, 4, 3)</span>
+</span><span class="linenos">121</span>    <span class="n">test_image_combined</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="n">test_image_combined</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="linenos">122</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="add-tensors">
+<h3>Add Tensors<a class="headerlink" href="#add-tensors" title="Link to this heading"></a></h3>
+<p>Here, we add the tensors to be dumped.</p>
+<div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">packages/optim_test_tools/examples/tensor_dumper_dumping_example.py</span><a class="headerlink" href="#id6" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">123</span>    <span class="c1"># ------------------------------- Add tensors -------------------------------</span>
+<span class="hll"><span class="linenos">124</span>    <span class="c1"># @NOTE: Add a single image at a new path</span>
+</span><span class="linenos">125</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">add_tensor_data</span><span class="p">(</span><span class="s2">&quot;images.image_1&quot;</span><span class="p">,</span> <span class="n">test_image_1</span><span class="p">,</span> <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">IMAGE_RGB</span><span class="p">)</span>
+<span class="hll"><span class="linenos">126</span>    <span class="c1"># @NOTE: Add a dictionary of images; override dump type for `bboxes` to JSON while keeping images as RGB.</span>
+</span><span class="linenos">127</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">add_tensor_data</span><span class="p">(</span>
+<span class="linenos">128</span>        <span class="s2">&quot;images.other_images&quot;</span><span class="p">,</span>
+<span class="linenos">129</span>        <span class="p">{</span><span class="s2">&quot;image_2&quot;</span><span class="p">:</span> <span class="n">test_image_2</span><span class="p">,</span> <span class="s2">&quot;image_3&quot;</span><span class="p">:</span> <span class="n">test_image_3</span><span class="p">,</span> <span class="s2">&quot;bboxes&quot;</span><span class="p">:</span> <span class="n">test_bboxes1</span><span class="p">},</span>
+<span class="linenos">130</span>        <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">IMAGE_RGB</span><span class="p">,</span>
+<span class="linenos">131</span>        <span class="n">dump_type_override</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;bboxes&quot;</span><span class="p">:</span> <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">JSON</span><span class="p">},</span>
+<span class="linenos">132</span>    <span class="p">)</span>
+<span class="hll"><span class="linenos">133</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">134</span>    <span class="c1"># Add a dictionary of images. This time, set the to be dumped as binary files.</span>
+</span><span class="hll"><span class="linenos">135</span>    <span class="c1"># Note that</span>
+</span><span class="hll"><span class="linenos">136</span>    <span class="c1"># 1. `test_image_combined` is inside the structure, but is handled differently (i.e. a permutation is</span>
+</span><span class="hll"><span class="linenos">137</span>    <span class="c1">#    applied and it is dumped as an image). This is useful to e.g. dump structures which contain many</span>
+</span><span class="hll"><span class="linenos">138</span>    <span class="c1">#    tensors, but only one or a few of them need to be handled differently. In this way, this can be</span>
+</span><span class="hll"><span class="linenos">139</span>    <span class="c1">#    achieved within a single call to `add_tensor_data`.</span>
+</span><span class="hll"><span class="linenos">140</span>    <span class="c1"># 2. `wrapped_tensor1` is a non-tensor object, which needs custom handling.</span>
+</span><span class="hll"><span class="linenos">141</span>    <span class="c1">#    The custom handling is done by adding a custom extension to the dumper, which is then used to dump</span>
+</span><span class="hll"><span class="linenos">142</span>    <span class="c1">#    the object (the custom converter is registered above).</span>
+</span><span class="hll"><span class="linenos">143</span>    <span class="c1"># 3. `unneeded_data` is excluded from the dump.</span>
+</span><span class="hll"><span class="linenos">144</span>    <span class="c1">#    This is useful to e.g. exclude data which is part of the structure, but either not needed in the dump,</span>
+</span><span class="hll"><span class="linenos">145</span>    <span class="c1">#    or which will be added to the dump later via custom processing logic (see below for bounding box</span>
+</span><span class="hll"><span class="linenos">146</span>    <span class="c1">#    images).</span>
+</span><span class="linenos">147</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">add_tensor_data</span><span class="p">(</span>
+<span class="linenos">148</span>        <span class="s2">&quot;images.other_images&quot;</span><span class="p">,</span>
+<span class="linenos">149</span>        <span class="p">{</span>
+<span class="linenos">150</span>            <span class="s2">&quot;binary_image_1&quot;</span><span class="p">:</span> <span class="n">test_image_4</span><span class="p">,</span>
+<span class="linenos">151</span>            <span class="s2">&quot;binary_image_2&quot;</span><span class="p">:</span> <span class="n">test_image_5</span><span class="p">,</span>
+<span class="linenos">152</span>            <span class="s2">&quot;image_combined&quot;</span><span class="p">:</span> <span class="n">test_image_combined</span><span class="p">,</span>
+<span class="linenos">153</span>            <span class="s2">&quot;wrapped_tensor&quot;</span><span class="p">:</span> <span class="n">wrapped_tensor1</span><span class="p">,</span>
+<span class="linenos">154</span>            <span class="s2">&quot;unneeded_data&quot;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+<span class="linenos">155</span>        <span class="p">},</span>
+<span class="linenos">156</span>        <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">BINARY</span><span class="p">,</span>
+<span class="linenos">157</span>        <span class="n">dump_type_override</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;image_combined&quot;</span><span class="p">:</span> <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">IMAGE_RGB</span><span class="p">},</span>
+<span class="linenos">158</span>        <span class="n">permute_axes_override</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;image_combined&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">)},</span>
+<span class="linenos">159</span>        <span class="n">exclude</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;unneeded_data&quot;</span><span class="p">],</span>
+<span class="linenos">160</span>    <span class="p">)</span>
+<span class="hll"><span class="linenos">161</span>    <span class="c1"># @NOTE: Add small tensors dumped directly into main JSON.</span>
+</span><span class="linenos">162</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">add_tensor_data</span><span class="p">(</span>
+<span class="linenos">163</span>        <span class="s2">&quot;images.other_images&quot;</span><span class="p">,</span>
+<span class="linenos">164</span>        <span class="p">{</span><span class="s2">&quot;tensor_1&quot;</span><span class="p">:</span> <span class="n">test_simple_tensor1</span><span class="p">,</span> <span class="s2">&quot;tensor_2&quot;</span><span class="p">:</span> <span class="n">test_simple_tensor2</span><span class="p">},</span>
+<span class="linenos">165</span>        <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">JSON</span><span class="p">,</span>
+<span class="linenos">166</span>    <span class="p">)</span>
+<span class="linenos">167</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="add-gradients">
+<h3>Add Gradients<a class="headerlink" href="#add-gradients" title="Link to this heading"></a></h3>
+<p>Here, we add the gradients to be dumped.</p>
+<div class="literal-block-wrapper docutils container" id="id7">
+<div class="code-block-caption"><span class="caption-text">packages/optim_test_tools/examples/tensor_dumper_dumping_example.py</span><a class="headerlink" href="#id7" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">168</span>    <span class="c1"># ------------------------------- Add gradients ------------------------------</span>
+<span class="hll"><span class="linenos">169</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">170</span>    <span class="c1"># Add gradients for single tensors and for a dictionary of tensors. Note that the gradients are computed</span>
+</span><span class="hll"><span class="linenos">171</span>    <span class="c1"># later automatically (loss value(s) need to be provided to the `set_gradients` method, see below).</span>
+</span><span class="linenos">172</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">add_grad_data</span><span class="p">(</span><span class="s2">&quot;images.image_1&quot;</span><span class="p">,</span> <span class="n">test_image_1</span><span class="p">,</span> <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">IMAGE_RGB</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<span class="linenos">173</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">add_grad_data</span><span class="p">(</span>
+<span class="linenos">174</span>        <span class="s2">&quot;images.other_images&quot;</span><span class="p">,</span>
+<span class="linenos">175</span>        <span class="p">{</span><span class="s2">&quot;image_2&quot;</span><span class="p">:</span> <span class="n">test_image_2</span><span class="p">,</span> <span class="s2">&quot;image_3&quot;</span><span class="p">:</span> <span class="n">test_image_3</span><span class="p">},</span>
+<span class="linenos">176</span>        <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">IMAGE_RGB</span><span class="p">,</span>
+<span class="linenos">177</span>    <span class="p">)</span>
+<span class="hll"><span class="linenos">178</span>    <span class="c1"># @NOTE: Add gradients dumped as binary files.</span>
+</span><span class="linenos">179</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">add_grad_data</span><span class="p">(</span>
+<span class="linenos">180</span>        <span class="s2">&quot;images.other_images&quot;</span><span class="p">,</span>
+<span class="linenos">181</span>        <span class="p">{</span><span class="s2">&quot;binary_image_1&quot;</span><span class="p">:</span> <span class="n">test_image_4</span><span class="p">,</span> <span class="s2">&quot;binary_image_2&quot;</span><span class="p">:</span> <span class="n">test_image_5</span><span class="p">},</span>
+<span class="linenos">182</span>        <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">BINARY</span><span class="p">,</span>
+<span class="linenos">183</span>    <span class="p">)</span>
+<span class="linenos">184</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="custom-processing-prior-to-dumping">
+<h3>Custom Processing Prior to Dumping<a class="headerlink" href="#custom-processing-prior-to-dumping" title="Link to this heading"></a></h3>
+<p>Here, we run some custom processing prior to dumping to enable dumping of in a more accessible format.</p>
+<div class="literal-block-wrapper docutils container" id="id8">
+<div class="code-block-caption"><span class="caption-text">packages/optim_test_tools/examples/tensor_dumper_dumping_example.py</span><a class="headerlink" href="#id8" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">185</span>    <span class="c1"># --------------------- Custom processing prior to dumping --------------------</span>
+<span class="hll"><span class="linenos">186</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">187</span>    <span class="c1"># Convert bounding boxes to images through custom logic that only runs if the dumper is enabled.</span>
+</span><span class="hll"><span class="linenos">188</span>    <span class="c1"># This pattern allows flexible transformations or aggregations before dumping, while still incurring no</span>
+</span><span class="hll"><span class="linenos">189</span>    <span class="c1"># overhead if the dumper is not enabled.</span>
+</span><span class="hll"><span class="linenos">190</span>    <span class="c1">#</span>
+</span><span class="hll"><span class="linenos">191</span>    <span class="c1"># Note that the custom processing does not have parameters and instead, uses the enclosing function&#39;s</span>
+</span><span class="hll"><span class="linenos">192</span>    <span class="c1"># scope. This enables writing the custom processing logic as if it runs in-line with the rest of the code,</span>
+</span><span class="hll"><span class="linenos">193</span>    <span class="c1"># and also avoids the need to pass parameters to the custom processing function.</span>
+</span><span class="linenos">194</span>    <span class="k">def</span><span class="w"> </span><span class="nf">process_and_add_bboxes</span><span class="p">():</span>
+<span class="linenos">195</span>        <span class="k">def</span><span class="w"> </span><span class="nf">draw_bboxes</span><span class="p">(</span><span class="n">bboxes</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">image_shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="linenos">196</span>            <span class="n">image</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">image_shape</span><span class="p">)</span>
+<span class="linenos">197</span>            <span class="k">for</span> <span class="n">bbox</span> <span class="ow">in</span> <span class="n">bboxes</span><span class="p">:</span>
+<span class="linenos">198</span>                <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">bbox</span>
+<span class="linenos">199</span>                <span class="c1"># Draw the outline of the bbox</span>
+<span class="linenos">200</span>                <span class="n">image</span><span class="p">[</span><span class="n">y1</span><span class="p">,</span> <span class="n">x1</span><span class="p">:</span><span class="n">x2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Top edge</span>
+<span class="linenos">201</span>                <span class="n">image</span><span class="p">[</span><span class="n">y2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x1</span><span class="p">:</span><span class="n">x2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Bottom edge</span>
+<span class="linenos">202</span>                <span class="n">image</span><span class="p">[</span><span class="n">y1</span><span class="p">:</span><span class="n">y2</span><span class="p">,</span> <span class="n">x1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Left edge</span>
+<span class="linenos">203</span>                <span class="n">image</span><span class="p">[</span><span class="n">y1</span><span class="p">:</span><span class="n">y2</span><span class="p">,</span> <span class="n">x2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Right edge</span>
+<span class="linenos">204</span>
+<span class="linenos">205</span>                <span class="c1"># Fill the interior: set to 0.1 if current value is 0.0 and do not change otherwise</span>
+<span class="linenos">206</span>                <span class="n">interior_region</span> <span class="o">=</span> <span class="n">image</span><span class="p">[</span><span class="n">y1</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">y2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x1</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">x2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+<span class="linenos">207</span>                <span class="n">interior_region</span> <span class="o">+=</span> <span class="mf">0.1</span>
+<span class="linenos">208</span>                <span class="n">interior_region</span><span class="p">[</span><span class="n">interior_region</span> <span class="o">&gt;</span> <span class="mf">1.0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="linenos">209</span>            <span class="k">return</span> <span class="n">image</span>
+<span class="linenos">210</span>
+<span class="linenos">211</span>        <span class="n">test_bboxes1_processed</span> <span class="o">=</span> <span class="n">draw_bboxes</span><span class="p">(</span><span class="n">test_bboxes1</span><span class="p">,</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">))</span>
+<span class="linenos">212</span>        <span class="n">test_bboxes2_processed</span> <span class="o">=</span> <span class="n">draw_bboxes</span><span class="p">(</span><span class="n">test_bboxes2</span><span class="p">,</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">))</span>
+<span class="linenos">213</span>        <span class="n">test_bboxes3_processed</span> <span class="o">=</span> <span class="n">draw_bboxes</span><span class="p">(</span><span class="n">test_bboxes3</span><span class="p">,</span> <span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">))</span>
+<span class="linenos">214</span>        <span class="n">dumper</span><span class="o">.</span><span class="n">add_tensor_data</span><span class="p">(</span>
+<span class="linenos">215</span>            <span class="s2">&quot;images.other_images&quot;</span><span class="p">,</span>
+<span class="linenos">216</span>            <span class="p">{</span>
+<span class="linenos">217</span>                <span class="s2">&quot;bboxes1&quot;</span><span class="p">:</span> <span class="n">test_bboxes1_processed</span><span class="p">,</span>
+<span class="linenos">218</span>                <span class="s2">&quot;additional_boxes&quot;</span><span class="p">:</span> <span class="p">{</span>
+<span class="linenos">219</span>                    <span class="s2">&quot;bboxes2&quot;</span><span class="p">:</span> <span class="n">test_bboxes2_processed</span><span class="p">,</span>
+<span class="linenos">220</span>                    <span class="s2">&quot;bboxes3&quot;</span><span class="p">:</span> <span class="n">test_bboxes3_processed</span><span class="p">,</span>
+<span class="linenos">221</span>                <span class="p">},</span>
+<span class="linenos">222</span>            <span class="p">},</span>
+<span class="linenos">223</span>            <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">IMAGE_I</span><span class="p">,</span>
+<span class="linenos">224</span>        <span class="p">)</span>
+<span class="linenos">225</span>
+<span class="hll"><span class="linenos">226</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">227</span>    <span class="c1"># Run the custom processing logic if the dumper is enabled. Note that the function also hanfles calls</span>
+</span><span class="hll"><span class="linenos">228</span>    <span class="c1"># to `add_tensor_data` internally.</span>
+</span><span class="linenos">229</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">run_if_enabled</span><span class="p">(</span><span class="n">process_and_add_bboxes</span><span class="p">)</span>
+<span class="linenos">230</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="raggedbatch-dumping">
+<h3>RaggedBatch Dumping<a class="headerlink" href="#raggedbatch-dumping" title="Link to this heading"></a></h3>
+<p>Here, we dump the RaggedBatch data.</p>
+<div class="literal-block-wrapper docutils container" id="id9">
+<div class="code-block-caption"><span class="caption-text">packages/optim_test_tools/examples/tensor_dumper_dumping_example.py</span><a class="headerlink" href="#id9" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">231</span>    <span class="c1"># ---------------------------- RaggedBatch dumping ----------------------------</span>
+<span class="hll"><span class="linenos">232</span>    <span class="c1"># @NOTE: Dump RaggedBatch structures both as per‑sample and as full RaggedBatch objects.</span>
+</span><span class="linenos">233</span>    <span class="n">ragged_batch_1</span> <span class="o">=</span> <span class="n">RaggedBatch</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">sample_sizes</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+<span class="linenos">234</span>    <span class="n">ragged_batch_2</span> <span class="o">=</span> <span class="n">RaggedBatch</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">sample_sizes</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+<span class="hll"><span class="linenos">235</span>    <span class="c1"># @NOTE: Demonstrate toggling `as_per_sample` and prefer JSON for structured RaggedBatch content.</span>
+</span><span class="linenos">236</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">enable_ragged_batch_dumping</span><span class="p">(</span><span class="n">as_per_sample</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">237</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">add_tensor_data</span><span class="p">(</span><span class="s2">&quot;ragged_batches.batch_1&quot;</span><span class="p">,</span> <span class="n">ragged_batch_1</span><span class="p">,</span> <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">JSON</span><span class="p">)</span>
+<span class="linenos">238</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">enable_ragged_batch_dumping</span><span class="p">(</span><span class="n">as_per_sample</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="linenos">239</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">add_tensor_data</span><span class="p">(</span><span class="s2">&quot;ragged_batches.batch_2&quot;</span><span class="p">,</span> <span class="n">ragged_batch_2</span><span class="p">,</span> <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">JSON</span><span class="p">)</span>
+<span class="linenos">240</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="placeholder-for-e-g-loss-computation">
+<h3>Placeholder for e.g. Loss Computation<a class="headerlink" href="#placeholder-for-e-g-loss-computation" title="Link to this heading"></a></h3>
+<p>Here, we place a placeholder for e.g. the loss computation to demonstrate how the gradients are computed
+automatically.</p>
+<div class="literal-block-wrapper docutils container" id="id10">
+<div class="code-block-caption"><span class="caption-text">packages/optim_test_tools/examples/tensor_dumper_dumping_example.py</span><a class="headerlink" href="#id10" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">241</span>    <span class="c1"># ------------------- Placeholder for e.g. loss computation -------------------</span>
+<span class="hll"><span class="linenos">242</span>    <span class="c1"># @NOTE: Dummy loss computation to demonstrate auto-computing &amp; dumping of gradients.</span>
+</span><span class="linenos">243</span>    <span class="n">image_sin_3</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">test_image_3</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mf">3.0</span><span class="p">)</span>
+<span class="linenos">244</span>    <span class="n">image_sin_5</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">test_image_5</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mf">3.0</span><span class="p">)</span>
+<span class="linenos">245</span>    <span class="n">summed_3</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">image_sin_3</span><span class="p">)</span>
+<span class="linenos">246</span>    <span class="n">summed_5</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">image_sin_5</span><span class="p">)</span>
+<span class="linenos">247</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="set-the-gradients">
+<h3>Set the Gradients<a class="headerlink" href="#set-the-gradients" title="Link to this heading"></a></h3>
+<p>Here, we set the gradients to be dumped.</p>
+<div class="literal-block-wrapper docutils container" id="id11">
+<div class="code-block-caption"><span class="caption-text">packages/optim_test_tools/examples/tensor_dumper_dumping_example.py</span><a class="headerlink" href="#id11" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">248</span>    <span class="c1"># ----------------------------- Set the gradients -----------------------------</span>
+<span class="hll"><span class="linenos">249</span>    <span class="c1"># @NOTE: Provide scalar values from which gradients are computed for all tensors that require them.</span>
+</span><span class="linenos">250</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">set_gradients</span><span class="p">([</span><span class="n">summed_3</span><span class="p">,</span> <span class="n">summed_5</span><span class="p">])</span>
+<span class="linenos">251</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="dump-data">
+<h3>Dump Data<a class="headerlink" href="#dump-data" title="Link to this heading"></a></h3>
+<p>Finally, we dump the data. We invite the reader to run the example and inspect the dumped data.</p>
+<div class="literal-block-wrapper docutils container" id="id12">
+<div class="code-block-caption"><span class="caption-text">packages/optim_test_tools/examples/tensor_dumper_dumping_example.py</span><a class="headerlink" href="#id12" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">252</span>    <span class="c1"># ---------------------------------- Dump ----------------------------------</span>
+<span class="hll"><span class="linenos">253</span>    <span class="c1"># @NOTE: Trigger a dump for this iteration.</span>
+</span><span class="linenos">254</span>    <span class="n">dumper</span><span class="o">.</span><span class="n">dump</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="related-examples">
+<h2>Related Examples<a class="headerlink" href="#related-examples" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>See <a class="reference internal" href="tensor_dumper_comparison.html"><span class="doc">Tensor Dumper – Comparison Example</span></a> for a minimal setup and comparison flow.</p></li>
+<li><p>See <a class="reference internal" href="stopwatch.html"><span class="doc">Stopwatch Example</span></a> and <a class="reference internal" href="nvtx_range_wrapper.html"><span class="doc">NVTX Range Wrapper Example</span></a> for examples of singleton tools used across multiple
+code parts.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tensor_dumper_comparison.html" class="btn btn-neutral float-left" title="Tensor Dumper – Comparison Example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

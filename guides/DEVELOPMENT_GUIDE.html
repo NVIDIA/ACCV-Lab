@@ -1,0 +1,1351 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Development Guide &mdash; ACCV-Lab 0.2.0.post1.dev69+g3791096a0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=0be6cc5f" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=3ba0d6b7"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Code Formatting Guide" href="FORMATTING_GUIDE.html" />
+    <link rel="prev" title="Docker Guide" href="DOCKER_GUIDE.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../guides_index.html">Guides</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="INSTALLATION_GUIDE.html">Installation Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DOCKER_GUIDE.html">Docker Guide</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Development Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#how-it-works">How It Works</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#package-structure-overview-adding-new-packages">Package Structure Overview &amp; Adding new Packages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#structure">Structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#adding-a-new-package-step-by-step-process">Adding a new Package: Step-by-Step Process</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#create-the-directory-structure">1. Create the Directory Structure</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#create-the-implementation">2. Create the Implementation</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#create-setup-py">3. Create <code class="docutils literal notranslate"><span class="pre">setup.py</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#create-pyproject-toml">4. Create <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#add-to-namespace-packages-list">5. Add to NAMESPACE_PACKAGES List</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#create-tests">6. Create Tests</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#set-up-documentation">7. Set Up Documentation</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#test-your-package">8. Test Your Package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#build-the-documentation">9. Build the Documentation</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#summary-checklist">Summary Checklist</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#cmake-based-packages-with-skbuild">CMake-Based Packages with SKBuild</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#skbuild-package-structure">SKBuild Package Structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skbuild-setup-configuration">SKBuild Setup Configuration</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#setting-up-setup-py-with-skbuild">1. Setting up <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> with SKBuild</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#cmakelists-txt-configuration">2. CMakeLists.txt Configuration</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#setting-up-pyproject-toml-with-skbuild">3. Setting up <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> with SKBuild</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#python-package-structure">4. Python Package Structure</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#skbuild-best-practices">SKBuild Best Practices</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#package-discovery-configuration-cmake-install-configuration">1. Package Discovery Configuration &amp; CMake Install Configuration</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#package-discovery-configuration">Package Discovery Configuration</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#extension-module-naming">2. Extension Module Naming</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pytorch-integration">3. PyTorch Integration</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#the-build-configuration-system">The Build Configuration System</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#purpose-and-benefits">Purpose and Benefits</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#shared-build-configuration-utilities">Shared Build &amp; Configuration Utilities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#usage-in-namespace-packages">Usage in Namespace Packages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#how-build-variables-are-picked-up">How Build Variables Are Picked Up</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#configuration-options">Configuration Options</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#development-workflow">Development Workflow</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#testing-during-development">Testing During Development</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#running-tests">Running Tests</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#native-tests">Native Tests</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#install-in-development-mode">Install in Development Mode</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#documentation-development">Documentation Development</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#code-formatting">Code Formatting</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#script-features">Script Features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#typical-workflows">Typical Workflows</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#during-development">During Development</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#before-committing">Before Committing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#repository-test-runner-scripts-run-tests-sh">Repository Test Runner (<code class="docutils literal notranslate"><span class="pre">scripts/run_tests.sh</span></code>)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#namespace-package-structure-and-configuration">Namespace Package Structure and Configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#understanding-the-package-structure">Understanding the Package Structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1">Package Discovery Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#handling-subpackages">Handling Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#notes">Notes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="FORMATTING_GUIDE.html">Code Formatting Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html">Sphinx Documentation Setup Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CONTRIBUTION_GUIDE.html">Contribution Guide</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/multi_tensor_copier/docs/index.html">Multi-Tensor Copier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/lane_helpers/docs/index.html">Lane Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../release_notes_page.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../guides_index.html">Guides</a></li>
+      <li class="breadcrumb-item active">Development Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/guides/DEVELOPMENT_GUIDE.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="development-guide">
+<h1>Development Guide<a class="headerlink" href="#development-guide" title="Link to this heading"></a></h1>
+<p>This guide covers the development aspects of ACCV-Lab: how the project is structured, how to add new namespace
+packages, and how to work with the build system.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>For installation instructions, see the <a class="reference internal" href="INSTALLATION_GUIDE.html"><span class="std std-doc">Installation Guide</span></a>.</p>
+</div>
+<section id="how-it-works">
+<h2>How It Works<a class="headerlink" href="#how-it-works" title="Link to this heading"></a></h2>
+<p>The project uses a shared configuration system where namespace packages are explicitly defined in
+<code class="docutils literal notranslate"><span class="pre">namespace_packages_config.py</span></code> (please also note the comments in the code snippet for more details):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># List of all ACCV-Lab namespace packages</span>
+<span class="c1"># Each namespace package should:</span>
+<span class="c1"># - Be a directory under the packages/ subdirectory</span>
+<span class="c1"># - Have a pyproject.toml and setup.py file for building</span>
+<span class="c1"># - Be added to this list to be included in builds and documentation</span>
+<span class="c1"># Please note that:</span>
+<span class="c1"># - Packages that are not listed here will be ignored when installing all packages, building the </span>
+<span class="c1">#   documentation, running the tests, etc.</span>
+<span class="c1"># - The order in which the packages are listed here is the order in which they will be installed, and in which</span>
+<span class="c1">#   they will appear in the documentation.</span>
+<span class="n">NAMESPACE_PACKAGES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># The commented out packages below this line are examples (see the development guide):</span>
+    <span class="c1"># &#39;accvlab.example_package&#39;,</span>
+    <span class="c1"># &#39;accvlab.example_skbuild_package&#39;,</span>
+    <span class="s1">&#39;accvlab.on_demand_video_decoder&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;accvlab.batching_helpers&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;accvlab.multi_tensor_copier&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;accvlab.dali_pipeline_framework&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;accvlab.lane_helpers&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;accvlab.draw_heatmap&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;accvlab.optim_test_tools&#39;</span><span class="p">,</span>
+    <span class="c1"># Add new namespace packages in the same way as above</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Each namespace package is self-contained with its own <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> and <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> files and can be built
+and installed independently. The build configuration is handled directly in each package’s <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> using
+shared build utilities from the <code class="docutils literal notranslate"><span class="pre">accvlab_build_config</span></code> package (located in the <code class="docutils literal notranslate"><span class="pre">build_config/</span></code> directory
+and installed as part of the ACCV-Lab installation) as well as the <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> file for the package;
+see the <a class="reference internal" href="INSTALLATION_GUIDE.html"><span class="std std-doc">Installation Guide</span></a> for more details on how to build and the
+<a class="reference internal" href="#the-build-configuration-system">Build Configuration</a> section for more details on how to use the shared build
+utilities inside the package’s <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> file.</p>
+</section>
+<section id="package-structure-overview-adding-new-packages">
+<h2>Package Structure Overview &amp; Adding new Packages<a class="headerlink" href="#package-structure-overview-adding-new-packages" title="Link to this heading"></a></h2>
+<p>There are two example projects which showcase supported package patterns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">packages/example_package</span></code>: Shows a setuptools package with PyTorch C++/CUDA extensions built using
+<code class="docutils literal notranslate"><span class="pre">CppExtension</span></code> and <code class="docutils literal notranslate"><span class="pre">CUDAExtension</span></code>. It also includes a package-local documentation asset hook that
+generates a simple plot from committed CSV data under <code class="docutils literal notranslate"><span class="pre">evaluation_results/</span></code> during the docs build.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">packages/example_skbuild_package</span></code>: Shows the supported CMake-based package pattern using <code class="docutils literal notranslate"><span class="pre">scikit-build</span></code>.
+See <a class="reference internal" href="#cmake-based-packages-with-skbuild">CMake-Based Packages with SKBuild</a> for details.</p></li>
+</ul>
+<p>First, we will focus on <code class="docutils literal notranslate"><span class="pre">example_package</span></code> and explain how to set up a setuptools/PyTorch-extension package
+from scratch. For CMake-based packages, use the SKBuild pattern described later in this guide.</p>
+<section id="overview">
+<h3>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h3>
+<p>To add a new namespace package (e.g., <code class="docutils literal notranslate"><span class="pre">example_package</span></code>), you need to create:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Component</p></th>
+<th class="head"><p>Directory</p></th>
+<th class="head"><p>Purpose</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>Implementation</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">packages/example_package/accvlab/example_package/</span></code></p></td>
+<td><p>Python package with your actual code</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Native extension sources</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">packages/example_package/accvlab/example_package/csrc/</span></code> and <code class="docutils literal notranslate"><span class="pre">packages/example_package/accvlab/example_package/include/</span></code></p></td>
+<td><p>C++/CUDA sources and headers used by PyTorch <code class="docutils literal notranslate"><span class="pre">CppExtension</span></code>/<code class="docutils literal notranslate"><span class="pre">CUDAExtension</span></code> packages</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Documentation</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">packages/example_package/docs/</span></code></p></td>
+<td><p>API reference and user guides (template will be auto-generated)</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Tests</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">packages/example_package/tests/</span></code></p></td>
+<td><p>Python-based unit tests (will be automatically picked up by the test runner)</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Setup</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">packages/example_package/setup.py</span></code></p></td>
+<td><p>Package build configuration</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Project Config</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">packages/example_package/pyproject.toml</span></code></p></td>
+<td><p>Modern Python project configuration and authoritative dependency definition</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Documentation include list (optional)</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">packages/example_package/docu_referenced_dirs.txt</span></code></p></td>
+<td><p>List additional directories referenced by the docs (besides <code class="docutils literal notranslate"><span class="pre">docs/</span></code>). See <a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html"><span class="std std-doc">Documentation Setup Guide</span></a> for more details.</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Documentation asset hook (optional)</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">packages/example_package/docs/_on_doc_generation.py</span></code></p></td>
+<td><p>Generate package-owned docs assets such as plots from committed evaluation data. See <a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html#package-local-generated-assets"><span class="std std-ref">Documentation Setup Guide</span></a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Evaluation results (optional)</strong></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">packages/example_package/evaluation_results/</span></code></p></td>
+<td><p>Package-owned committed inputs for generating docs assets, such as data to plot.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>Apart from the above, further folders/files can be included (and made use of manually or added to the
+documentation) if needed. A typical use case is to include e.g. an <code class="docutils literal notranslate"><span class="pre">examples</span></code> directory which is:</p>
+<ul class="simple">
+<li><p>Referenced by the documentation (added to <code class="docutils literal notranslate"><span class="pre">docu_referenced_dirs.txt</span></code>) and from which code snippets are
+included in the documentation.</p></li>
+<li><p>Can be used directly by navigating to the <code class="docutils literal notranslate"><span class="pre">examples/</span></code> directory and running the contained code.</p></li>
+</ul>
+</div>
+</section>
+<section id="structure">
+<h3>Structure<a class="headerlink" href="#structure" title="Link to this heading"></a></h3>
+<p>The following diagram shows the relevant project structure containing the folders which correspond to the
+<code class="docutils literal notranslate"><span class="pre">example_package</span></code> namespace package:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>accvlab/
+├── packages/                         # Namespace packages directory
+│   ├── optim_test_tools/...
+│   ├── batching_helpers/...
+│   └── example_package/              # ← New namespace package
+│       ├── accvlab/                  # ← Namespace root
+│       │   └── example_package/      # ← Implementation for &quot;example_package&quot; package
+│       │       ├── __init__.py
+│       │       ├── csrc/             # ← C++/CUDA sources
+│       │       └── include/          # ← Headers
+│       ├── tests/                    # ← Tests for &quot;example_package&quot; package
+│       ├── examples/                 # ← Optional runnable examples referenced by the docs
+│       ├── evaluation_results/       # ← Optional committed inputs for generated docs assets
+│       ├── docs/                     # ← Documentation for &quot;example_package&quot; package
+│       │   ├── _on_doc_generation.py # ← Optional docs asset hook
+│       │   └── ...
+│       ├── setup.py                  # ← Package build configuration
+│       ├── pyproject.toml            # ← Project configuration (including dependencies)
+│       └── docu_referenced_dirs.txt  # ← Optional: list additional directories referenced by the docs (besides `docs/`)
+├── build_config/                     # Shared build utilities
+├── docs/                             # Main documentation
+└── namespace_packages_config.py      # ← Namespace package needs to be listed here
+</pre></div>
+</div>
+<p>Note that inside the package, there is the directory structure <code class="docutils literal notranslate"><span class="pre">accvlab/example_package</span></code>. This is where the
+Python implementation of the namespace package is located, and it is named according to the package name (in
+this case <code class="docutils literal notranslate"><span class="pre">accvlab.example_package</span></code>). Other packages are structured in the same way, with <code class="docutils literal notranslate"><span class="pre">example_package</span></code>
+replaced by the name of the respective package.</p>
+</section>
+<section id="adding-a-new-package-step-by-step-process">
+<h3>Adding a new Package: Step-by-Step Process<a class="headerlink" href="#adding-a-new-package-step-by-step-process" title="Link to this heading"></a></h3>
+<p>To add a new namespace package (e.g., <code class="docutils literal notranslate"><span class="pre">example_package</span></code>):</p>
+<section id="create-the-directory-structure">
+<h4>1. Create the Directory Structure<a class="headerlink" href="#create-the-directory-structure" title="Link to this heading"></a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create the namespace package directory</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>packages/example_package
+mkdir<span class="w"> </span>-p<span class="w"> </span>packages/example_package/accvlab/example_package<span class="w">           </span><span class="c1"># For the implementation</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>packages/example_package/accvlab/example_package/csrc<span class="w">      </span><span class="c1"># For C++/CUDA sources</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>packages/example_package/accvlab/example_package/include<span class="w">   </span><span class="c1"># For headers</span>
+
+<span class="c1"># Documentation include list file (optional - see Documentation Setup Guide)</span>
+touch<span class="w"> </span>packages/example_package/docu_referenced_dirs.txt
+
+<span class="c1"># Examples directory (optional - see Documentation Setup Guide)</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>packages/example_package/examples<span class="w">                   </span>
+
+<span class="c1"># Tests directory</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>packages/example_package/tests
+
+<span class="c1"># Documentation directory created automatically by docs system as:</span>
+<span class="c1">#   packages/example_package/docs/</span>
+</pre></div>
+</div>
+</section>
+<section id="create-the-implementation">
+<h4>2. Create the Implementation<a class="headerlink" href="#create-the-implementation" title="Link to this heading"></a></h4>
+<p>Add your implementation in the <code class="docutils literal notranslate"><span class="pre">packages/example_package/accvlab/example_package</span></code> folder (including the
+package’s Python code and native extensions using the <code class="docutils literal notranslate"><span class="pre">CppExtension</span></code> and <code class="docutils literal notranslate"><span class="pre">CUDAExtension</span></code> approach if
+applicable).</p>
+<p>For CMake-based native implementations, use an SKBuild package instead. The supported pattern is documented in
+<a class="reference internal" href="#cmake-based-packages-with-skbuild">CMake-Based Packages with SKBuild</a> and demonstrated by
+<code class="docutils literal notranslate"><span class="pre">packages/example_skbuild_package</span></code>.</p>
+</section>
+<section id="create-setup-py">
+<h4>3. Create <code class="docutils literal notranslate"><span class="pre">setup.py</span></code><a class="headerlink" href="#create-setup-py" title="Link to this heading"></a></h4>
+<p>Create the setup configuration file that defines how to compile PyTorch C++/CUDA extensions. See
+<code class="docutils literal notranslate"><span class="pre">packages/example_package/setup.py</span></code> for a complete working example. Do not hardcode <code class="docutils literal notranslate"><span class="pre">version=</span></code> in <code class="docutils literal notranslate"><span class="pre">setup()</span></code>;
+ACCV-Lab packages derive the package version from SCM metadata, with <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> configuring
+<code class="docutils literal notranslate"><span class="pre">setuptools-scm</span></code> (see below).</p>
+<p>The setuptools/PyTorch-extension pattern imports the shared build helpers, loads the build configuration, and
+passes the generated compile flags into <code class="docutils literal notranslate"><span class="pre">CppExtension</span></code> and <code class="docutils literal notranslate"><span class="pre">CUDAExtension</span></code> definitions.</p>
+</section>
+<section id="create-pyproject-toml">
+<h4>4. Create <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code><a class="headerlink" href="#create-pyproject-toml" title="Link to this heading"></a></h4>
+<p>Create the Python project configuration. This file also defines the package’s runtime and optional dependencies.
+See <code class="docutils literal notranslate"><span class="pre">packages/example_package/pyproject.toml</span></code> for a complete working example.</p>
+<p>Add your package metadata and dependencies to <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code>. For example, the
+<code class="docutils literal notranslate"><span class="pre">packages/example_package/pyproject.toml</span></code> file contains:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[build-system]</span>
+<span class="n">requires</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;setuptools&gt;=64&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;wheel&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;torch&gt;=2.0.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;pybind11&gt;=2.10.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;setuptools-scm&gt;=8&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;accvlab-build-config @ file:../../build_config&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+<span class="n">build-backend</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;setuptools.build_meta&quot;</span>
+
+<span class="k">[project]</span>
+<span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;accvlab.example_package&quot;</span>
+<span class="n">dynamic</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;version&quot;</span><span class="p">]</span>
+<span class="n">description</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;ACCV-Lab Example Package&quot;</span>
+<span class="n">requires-python</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&gt;=3.8&quot;</span>
+<span class="n">dependencies</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;torch&gt;=2.0.0&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;numpy&gt;=1.22.2&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="k">[project.optional-dependencies]</span>
+<span class="n">optional</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;matplotlib&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;pytest&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="k">[tool.setuptools.packages.find]</span>
+<span class="n">where</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;.&quot;</span><span class="p">]</span>
+<span class="n">include</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;accvlab.example_package*&quot;</span><span class="p">]</span>
+
+<span class="k">[tool.setuptools_scm]</span>
+<span class="n">version_scheme</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;no-guess-dev&quot;</span>
+<span class="n">fallback_version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;0.0.0&quot;</span>
+<span class="n">root</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;../..&quot;</span>
+</pre></div>
+</div>
+<p>Use this pattern for your own namespace package, adapting the dependency names as needed.</p>
+<p>Use <code class="docutils literal notranslate"><span class="pre">[project.optional-dependencies].optional</span></code> for dependencies needed by tests, examples, or package-local
+documentation asset hooks, but not by the core package at runtime. For example, if a docs hook generates plots
+from committed data, put the plotting library in the package’s optional dependencies rather than in the base
+<code class="docutils literal notranslate"><span class="pre">[project].dependencies</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>The <code class="docutils literal notranslate"><span class="pre">accvlab-build-config</span> <span class="pre">&#64;</span> <span class="pre">file:../../build_config</span></code> build dependency is intentionally a
+local path reference. From a package under <code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/</span></code>, it resolves to the repository’s <code class="docutils literal notranslate"><span class="pre">build_config/</span></code> package
+so isolated pip builds use the local helper package. See
+<a class="reference internal" href="INSTALLATION_GUIDE.html#installing-with-build-isolation"><span class="std std-ref">Installing with Build Isolation</span></a> for the related precautions.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>ACCV-Lab packages use <code class="docutils literal notranslate"><span class="pre">setuptools-scm</span></code> for versioning. The package version is derived from SCM
+metadata, while <code class="docutils literal notranslate"><span class="pre">[project]</span></code> marks it as dynamic and <code class="docutils literal notranslate"><span class="pre">[tool.setuptools_scm]</span></code> configures how it is resolved,
+instead of hardcoding it in <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> or <code class="docutils literal notranslate"><span class="pre">[project].version</span></code>. The top-level package <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> should also
+expose <code class="docutils literal notranslate"><span class="pre">__version__</span></code> using distribution metadata rather than a hardcoded string. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.metadata</span><span class="w"> </span><span class="kn">import</span> <span class="n">PackageNotFoundError</span><span class="p">,</span> <span class="n">version</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">__version__</span> <span class="o">=</span> <span class="n">version</span><span class="p">(</span><span class="s2">&quot;accvlab.example_package&quot;</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">PackageNotFoundError</span><span class="p">:</span>
+    <span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.0.0&quot;</span>
+</pre></div>
+</div>
+<p>This keeps <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">accvlab.&lt;package_name&gt;;</span> <span class="pre">print(accvlab.&lt;package_name&gt;.__version__)</span></code> working for installed
+packages. If the module defines <code class="docutils literal notranslate"><span class="pre">__all__</span></code>, include <code class="docutils literal notranslate"><span class="pre">&quot;__version__&quot;</span></code> there as well.</p>
+</div>
+</section>
+<section id="add-to-namespace-packages-list">
+<h4>5. Add to NAMESPACE_PACKAGES List<a class="headerlink" href="#add-to-namespace-packages-list" title="Link to this heading"></a></h4>
+<p>This ensures that your package is included in various places, e.g.</p>
+<ul class="simple">
+<li><p>in the installation by the <code class="docutils literal notranslate"><span class="pre">package_manager.sh</span></code> script</p></li>
+<li><p>in the documentation</p></li>
+<li><p>in the code formatting by the <code class="docutils literal notranslate"><span class="pre">format.sh</span></code> script</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># In namespace_packages_config.py</span>
+<span class="n">NAMESPACE_PACKAGES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;accvlab.on_demand_video_decoder&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;accvlab.batching_helpers&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;accvlab.multi_tensor_copier&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;accvlab.dali_pipeline_framework&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;accvlab.lane_helpers&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;accvlab.draw_heatmap&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;accvlab.optim_test_tools&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;accvlab.example_package&#39;</span><span class="p">,</span>  <span class="c1"># Add your new namespace package here</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="create-tests">
+<h4>6. Create Tests<a class="headerlink" href="#create-tests" title="Link to this heading"></a></h4>
+<p>Create test files for your namespace package. See <code class="docutils literal notranslate"><span class="pre">packages/example_package/tests/</span></code> for examples.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>This covers Python-based tests. For native C++/CUDA tests in SKBuild-based packages, see
+<a class="reference internal" href="#native-tests">Native Tests</a>.</p>
+</div>
+</section>
+<section id="set-up-documentation">
+<h4>7. Set Up Documentation<a class="headerlink" href="#set-up-documentation" title="Link to this heading"></a></h4>
+<p>The documentation system will automatically create the structure when you add the namespace package and build
+the documentation (see the <a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html"><span class="std std-doc">Documentation Setup Guide</span></a> for more details).</p>
+<p>Alternatively, you can generate the documentation structure manually using the following commands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Generate documentation structure for the new namespace package</span>
+<span class="nb">cd</span><span class="w"> </span>docs<span class="w"> </span><span class="c1"># ← Assuming you are in the main docs directory (not the package&#39;s docs directory)</span>
+python3<span class="w"> </span>generate_new_namespace_package_docs.py
+python3<span class="w"> </span>update_docs_index.py
+</pre></div>
+</div>
+<p>This creates:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">packages/example_package/docs/index.rst</span></code> - Table of contents (needs to be present; can be edited if needed)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">packages/example_package/docs/intro.rst</span></code> - Manual introduction (customize this!)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">packages/example_package/docs/api.rst</span></code> - Auto-generated API reference (can be edited if needed)</p></li>
+</ul>
+<p><strong>Customize the introduction:</strong>
+Edit <code class="docutils literal notranslate"><span class="pre">packages/example_package/docs/intro.rst</span></code> to add</p>
+<ul class="simple">
+<li><p>Package overview and purpose</p></li>
+<li><p>Basic usage examples</p></li>
+<li><p>Performance characteristics</p></li>
+<li><p>Integration notes</p></li>
+</ul>
+<p>Note that you are mostly free to modify, add, or remove the files &amp; their contents of the documentation.
+However, <code class="docutils literal notranslate"><span class="pre">index.rst</span></code> serves as the “entry point” for the documentation and needs to be present.</p>
+<p>Most of the contained packages extend this basic structure considerably to provide more detailed
+documentation. Please see the <a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html"><span class="std std-doc">Documentation Setup Guide</span></a> for more details on
+the documentation system and how to set it up.</p>
+<p>If your package needs generated docs assets, add <code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/docs/_on_doc_generation.py</span></code>. The
+documentation build creates <code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/docs/_generated/</span></code>, keeps it untracked, and passes that
+directory to the hook. Keep user-facing <code class="docutils literal notranslate"><span class="pre">.rst</span></code>/<code class="docutils literal notranslate"><span class="pre">.md</span></code> files static and reference generated assets with relative
+paths such as <code class="docutils literal notranslate"><span class="pre">_generated/&lt;asset_name&gt;.png</span></code>. The hook should generate those assets from committed inputs and
+fail clearly if required inputs are missing. Store committed plot or evaluation inputs outside the package
+<code class="docutils literal notranslate"><span class="pre">docs/</span></code> folder, for example under <code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/evaluation_results/</span></code>, so Sphinx does not discover
+data tables as standalone documentation pages.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>Documentation asset hooks must not run evaluations, benchmarks, or other measurement
+workflows. They should only regenerate documentation assets, such as plots, from data that is already
+available in the repository.</p>
+</div>
+</section>
+<section id="test-your-package">
+<h4>8. Test Your Package<a class="headerlink" href="#test-your-package" title="Link to this heading"></a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># 1. Install the package with your new namespace package</span>
+<span class="nb">cd</span><span class="w"> </span>packages/example_package
+<span class="c1"># IMPORTANT: Do not use  editable installation (`-e`) for SKBuild-based packages (e.g.</span>
+<span class="c1"># `on_demand_video_decoder` or `dali_pipeline_framework`), as it would lead to missing binaries and import</span>
+<span class="c1"># errors.</span>
+<span class="c1"># It is ok to use `-e` for other packages. However, keep in mind that for any changes in C++ code to take</span>
+<span class="c1"># effect, the package needs to be re-installed regardless of whether it is installed in editable mode or not.</span>
+pip<span class="w"> </span>install<span class="w"> </span>.<span class="w"> </span>--no-build-isolation
+
+<span class="c1"># 2. Run tests</span>
+pytest<span class="w"> </span>tests/<span class="w"> </span>-v
+</pre></div>
+</div>
+</section>
+<section id="build-the-documentation">
+<h4>9. Build the Documentation<a class="headerlink" href="#build-the-documentation" title="Link to this heading"></a></h4>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>Ensure all configured namespace packages are installed before building the docs.
+For detailed instructions (commands and development targets), see the
+<a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html#building-documentation-locally"><span class="std std-ref">Documentation Setup Guide</span></a>.</p>
+</div>
+</section>
+</section>
+<section id="summary-checklist">
+<h3>Summary Checklist<a class="headerlink" href="#summary-checklist" title="Link to this heading"></a></h3>
+<p>When adding a new namespace package, ensure you have:</p>
+<ul class="contains-task-list simple">
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Implementation</strong>: <code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/accvlab/&lt;package_name&gt;/</span></code> with <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> and source
+code</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Setup</strong>: <code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/setup.py</span></code> with build configuration</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Project Config</strong>: <code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/pyproject.toml</span></code> with project metadata</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Configuration</strong>: Added to <code class="docutils literal notranslate"><span class="pre">namespace_packages_config.py</span></code></p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Tests</strong>: <code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/tests/</span></code> with test files</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Documentation</strong>: Generated with docs scripts and customized intro</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Documentation include list (optional)</strong>: <code class="docutils literal notranslate"><span class="pre">docu_referenced_dirs.txt</span></code> created and populated if extra
+folders (e.g. <code class="docutils literal notranslate"><span class="pre">examples/</span></code>) are referenced and are needed to build the documentation</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Documentation asset hook (optional)</strong>: <code class="docutils literal notranslate"><span class="pre">_on_doc_generation.py</span></code> added if the package needs generated
+documentation assets</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Evaluation results (optional)</strong>: <code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/evaluation_results/</span></code> contains committed
+inputs for generated docs assets if needed</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Examples (optional)</strong>: <code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/examples/</span></code> created and referenced from docs if used</p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Dependencies</strong>: Declared runtime and optional dependencies in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code></p></li>
+<li class="task-list-item"><p><input class="task-list-item-checkbox" disabled="disabled" type="checkbox"> <strong>Verification</strong>: Package installs, tests pass, docs build</p></li>
+</ul>
+</section>
+</section>
+<section id="cmake-based-packages-with-skbuild">
+<h2>CMake-Based Packages with SKBuild<a class="headerlink" href="#cmake-based-packages-with-skbuild" title="Link to this heading"></a></h2>
+<p>Use <strong>SKBuild</strong> (<code class="docutils literal notranslate"><span class="pre">scikit-build</span></code>) for namespace packages whose native implementation is built with CMake. The
+canonical example is <code class="docutils literal notranslate"><span class="pre">packages/example_skbuild_package/</span></code>.</p>
+<p>SKBuild packages cannot combine CMake targets with PyTorch’s <code class="docutils literal notranslate"><span class="pre">CppExtension</span></code> or <code class="docutils literal notranslate"><span class="pre">CUDAExtension</span></code> declarations in
+<code class="docutils literal notranslate"><span class="pre">setup.py</span></code>. If a CMake package needs PyTorch integration, define those targets in <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> instead.</p>
+<p>SKBuild packages:</p>
+<ul class="simple">
+<li><p>Use CMake for building C++/CUDA extensions</p></li>
+<li><p>Install built extension modules through CMake install targets</p></li>
+<li><p>In <code class="docutils literal notranslate"><span class="pre">setup.py</span></code></p>
+<ul>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">skbuild</span> <span class="pre">import</span> <span class="pre">setup</span></code> instead of <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">setuptools</span> <span class="pre">import</span> <span class="pre">setup</span></code></p></li>
+<li><p>Include <code class="docutils literal notranslate"><span class="pre">cmake_source_dir</span></code> and <code class="docutils literal notranslate"><span class="pre">cmake_install_dir</span></code> parameters</p></li>
+</ul>
+</li>
+</ul>
+<section id="skbuild-package-structure">
+<h3>SKBuild Package Structure<a class="headerlink" href="#skbuild-package-structure" title="Link to this heading"></a></h3>
+<p>An SKBuild-based package follows this structure:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>packages/example_skbuild_package/
+├── ...
+├── cpp_unit_tests.yaml             # Optional: repository native-test runner configuration
+├── setup.py
+├── pyproject.toml
+└── ext_impl/
+    ├── CMakeLists.txt
+    ├── external/                   # Optional third-party dependencies, often added as git submodules
+    │   └── googletest/             # Native-test dependency used by this example
+    ├── src/
+    │   ├── external_cuda_ops.cpp
+    │   └── external_cuda_ops.cu
+    ├── include/
+    │   └── external_cuda_ops.h
+    └── utest/                      # Optional: native C++/CUDA tests
+        └── ...
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>The <code class="docutils literal notranslate"><span class="pre">utest/</span></code> directory is optional and only needed if native C++/CUDA tests are implemented. See
+<a class="reference internal" href="#native-tests">Native Tests</a> for more details.</p>
+</div>
+</section>
+<section id="skbuild-setup-configuration">
+<h3>SKBuild Setup Configuration<a class="headerlink" href="#skbuild-setup-configuration" title="Link to this heading"></a></h3>
+<section id="setting-up-setup-py-with-skbuild">
+<h4>1. Setting up <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> with SKBuild<a class="headerlink" href="#setting-up-setup-py-with-skbuild" title="Link to this heading"></a></h4>
+<p>See <code class="docutils literal notranslate"><span class="pre">packages/example_skbuild_package/setup.py</span></code> for a complete working example.</p>
+<p>The SKBuild setup:</p>
+<ul class="simple">
+<li><p>Uses <code class="docutils literal notranslate"><span class="pre">cmake_source_dir</span></code> and <code class="docutils literal notranslate"><span class="pre">cmake_install_dir</span></code> parameters in <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>. Please see the
+<a class="reference internal" href="#important-note-for-cmake-install-configuration">important note for cmake install configuration</a>
+section below for details on how these parameters need to be configured.</p></li>
+<li><p>Cannot be used in combination with PyTorch’s <code class="docutils literal notranslate"><span class="pre">CppExtension</span></code> and <code class="docutils literal notranslate"><span class="pre">CUDAExtension</span></code> in <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>. The
+extensions must be set up as targets in the <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code>.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>The shared ACCV-Lab build configuration can be forwarded to SKBuild-based CMake builds. In this case, <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>
+typically calls <code class="docutils literal notranslate"><span class="pre">build_cmake_args(cuda_arch_strategy=...)</span></code> and passes the result to <code class="docutils literal notranslate"><span class="pre">setup()</span></code> via the
+<code class="docutils literal notranslate"><span class="pre">cmake_args</span></code> parameter. See the
+<a class="reference internal" href="#the-build-configuration-system">Build Configuration System</a> section below for details.</p>
+</div>
+<p>SKBuild-based packages can also define opt-in native C++/CUDA test targets in their CMake project. These tests can e.g. be used
+for implementation details which are not exposed by the Python API and therefore cannot be tested from Python. See
+<a class="reference internal" href="#native-tests">Native Tests</a> for the repository runner and the example in <code class="docutils literal notranslate"><span class="pre">packages/example_skbuild_package/ext_impl/utest</span></code>.</p>
+</section>
+<section id="cmakelists-txt-configuration">
+<h4>2. CMakeLists.txt Configuration<a class="headerlink" href="#cmakelists-txt-configuration" title="Link to this heading"></a></h4>
+<p>See <code class="docutils literal notranslate"><span class="pre">packages/example_skbuild_package/ext_impl/CMakeLists.txt</span></code> for a complete working example.</p>
+<p>The CMake project needs an install target that places the built extension under the package directory. See the
+<a class="reference internal" href="#important-note-for-cmake-install-configuration">important note for CMake install configuration</a>.</p>
+</section>
+<section id="setting-up-pyproject-toml-with-skbuild">
+<h4>3. Setting up <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> with SKBuild<a class="headerlink" href="#setting-up-pyproject-toml-with-skbuild" title="Link to this heading"></a></h4>
+<p>See <code class="docutils literal notranslate"><span class="pre">packages/example_skbuild_package/pyproject.toml</span></code> for a complete working example.</p>
+<p>SKBuild packages include <code class="docutils literal notranslate"><span class="pre">scikit-build</span></code> and <code class="docutils literal notranslate"><span class="pre">pybind11</span></code> as additional build requirements.</p>
+</section>
+<section id="python-package-structure">
+<h4>4. Python Package Structure<a class="headerlink" href="#python-package-structure" title="Link to this heading"></a></h4>
+<p>See <code class="docutils literal notranslate"><span class="pre">packages/example_skbuild_package/accvlab/example_skbuild_package/__init__.py</span></code> and
+<code class="docutils literal notranslate"><span class="pre">packages/example_skbuild_package/accvlab/example_skbuild_package/functions/functions.py</span></code> for complete working
+examples.</p>
+<p>The built extension module is installed into the final Python package, where it can be imported by Python
+wrappers and expose functionality defined in the C++ implementation using <code class="docutils literal notranslate"><span class="pre">pybind11</span></code>.</p>
+</section>
+</section>
+<section id="skbuild-best-practices">
+<h3>SKBuild Best Practices<a class="headerlink" href="#skbuild-best-practices" title="Link to this heading"></a></h3>
+<p>The CMake snippets in this section are adapted from
+<code class="docutils literal notranslate"><span class="pre">packages/example_skbuild_package/ext_impl/CMakeLists.txt</span></code>, which is the complete reference implementation for
+the example SKBuild package.</p>
+<section id="package-discovery-configuration-cmake-install-configuration">
+<h4>1. Package Discovery Configuration &amp; CMake Install Configuration<a class="headerlink" href="#package-discovery-configuration-cmake-install-configuration" title="Link to this heading"></a></h4>
+</section>
+<section id="package-discovery-configuration">
+<h4>Package Discovery Configuration<a class="headerlink" href="#package-discovery-configuration" title="Link to this heading"></a></h4>
+<p>SKBuild requires careful configuration to ensure extensions are placed correctly in the final package:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># In setup.py</span>
+<span class="n">setup</span><span class="p">(</span>
+    <span class="c1"># ... other configuration ...</span>
+    <span class="n">cmake_install_dir</span><span class="o">=</span><span class="s2">&quot;accvlab/example_skbuild_package&quot;</span><span class="p">,</span>  <span class="c1"># Must match package structure</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<section id="cmake-install-configuration">
+<h5>CMake Install Configuration<a class="headerlink" href="#cmake-install-configuration" title="Link to this heading"></a></h5>
+<p>The CMake install target must match the <code class="docutils literal notranslate"><span class="pre">cmake_install_dir</span></code>. Note that this directory is the working directory as used
+when setting up the <code class="docutils literal notranslate"><span class="pre">install</span></code> target in the <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code>, so that the path needs to be set to <code class="docutils literal notranslate"><span class="pre">.</span></code>:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="c"># Install target - destination must be relative to cmake_install_dir</span>
+<span class="nb">install</span><span class="p">(</span><span class="s">TARGETS</span><span class="w"> </span><span class="s">accvlab_example_skbuild_package_ext</span>
+<span class="w">    </span><span class="s">LIBRARY</span><span class="w"> </span><span class="s">DESTINATION</span><span class="w"> </span><span class="s">.</span><span class="w">  </span><span class="c"># Installs to cmake_install_dir</span>
+<span class="w">    </span><span class="s">RUNTIME</span><span class="w"> </span><span class="s">DESTINATION</span><span class="w"> </span><span class="s">.</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="important-note-for-cmake-install-configuration">
+<h5>Important Note for CMake Install Configuration<a class="headerlink" href="#important-note-for-cmake-install-configuration" title="Link to this heading"></a></h5>
+<p>Note that the <code class="docutils literal notranslate"><span class="pre">cmake_install_dir</span></code> (set to <code class="docutils literal notranslate"><span class="pre">accvlab/example_skbuild_package</span></code>) in <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> and the CMake
+installation directory (set to <code class="docutils literal notranslate"><span class="pre">.</span></code>) in <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> must point to the same directory in order for the
+binary to be included in the wheel in the correct way (i.e. not as <code class="docutils literal notranslate"><span class="pre">data</span></code>). If this is not the case, it cannot
+be imported from the installed package.</p>
+<p>However, the paths in <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> and <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> both use relative paths, but relative to different base
+locations. While the <code class="docutils literal notranslate"><span class="pre">cmake_install_dir</span></code> in <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> relative to that <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>, the CMake install
+configuration is relative to the package root. The package root is located at
+<code class="docutils literal notranslate"><span class="pre">accvlab/example_skbuild_package</span></code> (relative to the <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>) in this case (and in general at
+<code class="docutils literal notranslate"><span class="pre">accvlab/&lt;package_name&gt;</span></code> for the setup used in this repo). Therefore, the general guideline is:</p>
+<ul class="simple">
+<li><p>In <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>, set <code class="docutils literal notranslate"><span class="pre">cmake_install_dir</span></code> to the root of the package (i.e. <code class="docutils literal notranslate"><span class="pre">accvlab/&lt;package_name&gt;</span></code>)</p></li>
+<li><p>In the <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code>, set the installation directory to <code class="docutils literal notranslate"><span class="pre">.</span></code>.</p></li>
+</ul>
+</section>
+</section>
+<section id="extension-module-naming">
+<h4>2. Extension Module Naming<a class="headerlink" href="#extension-module-naming" title="Link to this heading"></a></h4>
+<p>Ensure the extension module name matches Python import expectations:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="c"># Set output name to match Python import</span>
+<span class="nb">set_target_properties</span><span class="p">(</span><span class="s">accvlab_example_skbuild_package_ext</span><span class="w"> </span><span class="s">PROPERTIES</span>
+<span class="w">    </span><span class="s">OUTPUT_NAME</span><span class="w"> </span><span class="s2">&quot;_ext&quot;</span><span class="w">  </span><span class="c"># Results in _ext.so</span>
+<span class="w">    </span><span class="s">PREFIX</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w">           </span><span class="c"># No lib prefix</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="pytorch-integration">
+<h4>3. PyTorch Integration<a class="headerlink" href="#pytorch-integration" title="Link to this heading"></a></h4>
+<p>For CMake-built PyTorch extensions, the CMake project needs three pieces of PyTorch-specific configuration.</p>
+<p>First, point CMake at the PyTorch CMake files installed inside the active Python environment, then call
+<code class="docutils literal notranslate"><span class="pre">find_package(Torch</span> <span class="pre">REQUIRED)</span></code>. PyTorch wheels usually install their CMake package under
+<code class="docutils literal notranslate"><span class="pre">torch/share/cmake</span></code>, which is not always on <code class="docutils literal notranslate"><span class="pre">CMAKE_PREFIX_PATH</span></code> by default:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="c"># Find PyTorch CMake files</span>
+<span class="nb">find_package</span><span class="p">(</span><span class="s">Python3</span><span class="w"> </span><span class="s">COMPONENTS</span><span class="w"> </span><span class="s">Interpreter</span><span class="w"> </span><span class="s">Development</span><span class="w"> </span><span class="s">REQUIRED</span><span class="p">)</span>
+<span class="nb">execute_process</span><span class="p">(</span>
+<span class="w">    </span><span class="s">COMMAND</span><span class="w"> </span><span class="s2">&quot;${Python3_EXECUTABLE}&quot;</span><span class="w"> </span><span class="s">-c</span>
+<span class="w">            </span><span class="s2">&quot;import os; import torch; print(os.path.join(os.path.dirname(torch.__file__), &#39;share&#39;, &#39;cmake&#39;))&quot;</span>
+<span class="w">    </span><span class="s">OUTPUT_VARIABLE</span><span class="w"> </span><span class="s">TORCH_CMAKE_PATH</span>
+<span class="w">    </span><span class="s">OUTPUT_STRIP_TRAILING_WHITESPACE</span>
+<span class="w">    </span><span class="s">COMMAND_ERROR_IS_FATAL</span><span class="w"> </span><span class="s">ANY</span>
+<span class="p">)</span>
+<span class="nb">list</span><span class="p">(</span><span class="s">APPEND</span><span class="w"> </span><span class="s">CMAKE_PREFIX_PATH</span><span class="w"> </span><span class="s2">&quot;${TORCH_CMAKE_PATH}&quot;</span><span class="p">)</span>
+<span class="nb">find_package</span><span class="p">(</span><span class="s">Torch</span><span class="w"> </span><span class="s">REQUIRED</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Second, apply the compile flags exported by Torch to every target that includes or links against Torch. Parse
+the string with <code class="docutils literal notranslate"><span class="pre">separate_arguments()</span></code> so CMake passes each option as a separate compiler argument:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">separate_arguments</span><span class="p">(</span><span class="s">TORCH_CXX_FLAGS_LIST</span><span class="w"> </span><span class="s">NATIVE_COMMAND</span><span class="w"> </span><span class="s2">&quot;${TORCH_CXX_FLAGS}&quot;</span><span class="p">)</span>
+<span class="nb">target_compile_options</span><span class="p">(</span><span class="s">accvlab_example_skbuild_package_ext</span><span class="w"> </span><span class="s">PRIVATE</span><span class="w"> </span><span class="o">${</span><span class="nv">TORCH_CXX_FLAGS_LIST</span><span class="o">}</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This includes settings such as PyTorch’s C++ ABI selection. Omitting these flags can produce build or runtime
+incompatibilities even when <code class="docutils literal notranslate"><span class="pre">target_link_libraries(...</span> <span class="pre">${TORCH_LIBRARIES})</span></code> succeeds. Apply the same pattern to
+native test and benchmark executables that consume Torch. Dependencies compiled as part of the same CMake
+project must also use the matching ABI when they exchange C++ standard-library types with those targets.</p>
+<p>Third, define the extension module name expected by the C++ binding code:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="c"># The CMake target name can be descriptive; OUTPUT_NAME controls the Python module filename.</span>
+<span class="nb">set_target_properties</span><span class="p">(</span><span class="s">accvlab_example_skbuild_package_ext</span><span class="w"> </span><span class="s">PROPERTIES</span>
+<span class="w">    </span><span class="s">OUTPUT_NAME</span><span class="w"> </span><span class="s2">&quot;_ext&quot;</span>
+<span class="w">    </span><span class="s">PREFIX</span><span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="p">)</span>
+
+<span class="c"># Add PyTorch extension definitions</span>
+<span class="nb">target_compile_definitions</span><span class="p">(</span><span class="s">accvlab_example_skbuild_package_ext</span><span class="w"> </span><span class="s">PRIVATE</span>
+<span class="w">    </span><span class="s">TORCH_EXTENSION_NAME=_ext</span>
+<span class="w">    </span><span class="s">TORCH_API_INCLUDE_EXTENSION_H</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">TORCH_EXTENSION_NAME=_ext</span></code> must match the installed module name because the binding source uses
+<code class="docutils literal notranslate"><span class="pre">PYBIND11_MODULE(TORCH_EXTENSION_NAME,</span> <span class="pre">m)</span></code>. In the example package this expands to <code class="docutils literal notranslate"><span class="pre">PYBIND11_MODULE(_ext,</span> <span class="pre">m)</span></code>,
+matching the <code class="docutils literal notranslate"><span class="pre">_ext</span></code> module imported by the Python package. <code class="docutils literal notranslate"><span class="pre">TORCH_API_INCLUDE_EXTENSION_H</span></code> enables the Torch
+extension API declarations expected by PyTorch/pybind11 extension builds.</p>
+</section>
+</section>
+</section>
+<section id="the-build-configuration-system">
+<h2>The Build Configuration System<a class="headerlink" href="#the-build-configuration-system" title="Link to this heading"></a></h2>
+<p>ACCV-Lab uses a centralized build configuration provided by the <code class="docutils literal notranslate"><span class="pre">accvlab_build_config</span></code> package to ensure
+consistency across packages and simplify adding new ones.</p>
+<section id="installation">
+<h3>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">build_config</span></code> package is a build dependency of the contained namespace packages. It is installed as part
+of the ACCV-Lab installation using the unified installer script. However, it can also be built and installed
+manually as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>build_config
+<span class="c1"># Inside the build_config directory, call:</span>
+pip<span class="w"> </span>install<span class="w"> </span>.<span class="w"> </span>--no-build-isolation
+</pre></div>
+</div>
+</section>
+<section id="purpose-and-benefits">
+<h3>Purpose and Benefits<a class="headerlink" href="#purpose-and-benefits" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">build_config/</span></code> package serves several key purposes:</p>
+<ol class="arabic simple">
+<li><p><strong>Shared Build Utilities</strong>: Provides common functions for C++/CUDA extension building, dependency
+management, and configuration handling</p></li>
+<li><p><strong>Consistency</strong>: Ensures all namespace packages use the same build logic, compiler flags, and configuration
+patterns</p></li>
+<li><p><strong>Maintainability</strong>: Centralizes build logic so bug fixes and improvements benefit all packages</p></li>
+<li><p><strong>Simplicity</strong>: Reduces amount of boilerplate code needed in the <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> files of individual packages</p></li>
+</ol>
+</section>
+<section id="shared-build-configuration-utilities">
+<h3>Shared Build &amp; Configuration Utilities<a class="headerlink" href="#shared-build-configuration-utilities" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">accvlab_build_config</span></code> package provides the following shared build &amp; configuration utilities:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">load_config()</span></code> - Loads build configuration from environment variables (shared across all build types). Please see the
+<a class="reference internal" href="INSTALLATION_GUIDE.html#available-build-variables"><span class="std std-ref">Available Build Variables</span></a> section of the
+<a class="reference internal" href="INSTALLATION_GUIDE.html"><span class="std std-doc">Installation Guide</span></a> for the list of the supported variables.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">detect_cuda_info()</span></code> - Detects CUDA availability and GPU architectures. Missing PyTorch or CPU-only PyTorch raises a
+build configuration error.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_compile_flags()</span></code> - Generates compiler flags for PyTorch extensions; based on the variable values obtained from
+<code class="docutils literal notranslate"><span class="pre">load_config()</span></code>. The generated flags can then be passed to the PyTorch extensions (see example below).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">build_cmake_args(cuda_arch_strategy)</span></code> - Produces the full CMake <code class="docutils literal notranslate"><span class="pre">-D</span></code> argument list for CMake-based builds.
+Each CMake-based package must pass <code class="docutils literal notranslate"><span class="pre">CUDA_ARCH_STRATEGY_CMAKE</span></code> or
+<code class="docutils literal notranslate"><span class="pre">CUDA_ARCH_STRATEGY_TORCH</span></code> depending on whether its <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> uses native CMake CUDA targets or
+<code class="docutils literal notranslate"><span class="pre">find_package(Torch)</span></code>. It contains two parts:</p>
+<ul>
+<li><p><strong>Environment-derived build settings</strong>: Converts ACCV-Lab build variables into CMake cache entries:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">DEBUG_BUILD</span></code> → <code class="docutils literal notranslate"><span class="pre">CMAKE_BUILD_TYPE</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CPP_STANDARD</span></code> → <code class="docutils literal notranslate"><span class="pre">CMAKE_CXX_STANDARD</span></code>, <code class="docutils literal notranslate"><span class="pre">CMAKE_CUDA_STANDARD</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">CUSTOM_CUDA_ARCHS</span></code> → <code class="docutils literal notranslate"><span class="pre">CMAKE_CUDA_ARCHITECTURES</span></code> when using <code class="docutils literal notranslate"><span class="pre">CUDA_ARCH_STRATEGY_CMAKE</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">-DACCVLAB_TORCH_CUDA_ARCH_LIST=...</span></code> when using <code class="docutils literal notranslate"><span class="pre">CUDA_ARCH_STRATEGY_TORCH</span></code>. Torch CMake projects must
+set <code class="docutils literal notranslate"><span class="pre">TORCH_CUDA_ARCH_LIST</span></code> from that cache variable before <code class="docutils literal notranslate"><span class="pre">find_package(Torch)</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">VERBOSE_BUILD</span></code> → <code class="docutils literal notranslate"><span class="pre">CMAKE_VERBOSE_MAKEFILE</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OPTIMIZE_LEVEL</span></code>, <code class="docutils literal notranslate"><span class="pre">USE_FAST_MATH</span></code>, <code class="docutils literal notranslate"><span class="pre">ENABLE_PROFILING</span></code> → appended to <code class="docutils literal notranslate"><span class="pre">CMAKE_CXX_FLAGS</span></code>, <code class="docutils literal notranslate"><span class="pre">CMAKE_CUDA_FLAGS</span></code></p></li>
+<li><p>Always sets <code class="docutils literal notranslate"><span class="pre">-DCMAKE_EXPORT_COMPILE_COMMANDS=ON</span></code></p></li>
+</ul>
+</li>
+<li><p><strong>Repository-aligned version info</strong>: Adds
+<code class="docutils literal notranslate"><span class="pre">-DACCVLAB_PACKAGE_CMAKE_VERSION=&lt;major&gt;.&lt;minor&gt;.&lt;patch&gt;</span></code> (digits only, e.g. <code class="docutils literal notranslate"><span class="pre">0.1.0</span></code>), as derived from the version obtained
+using <code class="docutils literal notranslate"><span class="pre">setuptools-scm</span></code>. CMake projects may read this variable if they need a repo-aligned numeric version; others can ignore
+it.</p></li>
+</ul>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>The authoritative list of supported build variables, defaults, and CUDA
+architecture handling is in the
+<a class="reference internal" href="INSTALLATION_GUIDE.html#available-build-variables"><span class="std std-ref">Available Build Variables</span></a> section of the
+<a class="reference internal" href="INSTALLATION_GUIDE.html"><span class="std std-doc">Installation Guide</span></a>.</p>
+</div>
+</section>
+<section id="usage-in-namespace-packages">
+<h3>Usage in Namespace Packages<a class="headerlink" href="#usage-in-namespace-packages" title="Link to this heading"></a></h3>
+<p>Each namespace package’s <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> imports and uses these shared utilities, for example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">torch.utils.cpp_extension</span><span class="w"> </span><span class="kn">import</span> <span class="n">BuildExtension</span><span class="p">,</span> <span class="n">CppExtension</span><span class="p">,</span> <span class="n">CUDAExtension</span>
+
+<span class="c1"># The real setup.py files wrap this import in a guarded block with a prominent</span>
+<span class="c1"># missing-dependency message. The message body is omitted here for brevity.</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">accvlab_build_config</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">load_config</span><span class="p">,</span>
+    <span class="n">detect_cuda_info</span><span class="p">,</span>
+    <span class="n">get_abs_setup_dir</span><span class="p">,</span>
+    <span class="n">get_compile_flags</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Load config and generate flags</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()</span>
+<span class="n">cuda_info</span> <span class="o">=</span> <span class="n">detect_cuda_info</span><span class="p">()</span>
+<span class="n">compile_flags</span> <span class="o">=</span> <span class="n">get_compile_flags</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">cuda_info</span><span class="p">)</span>
+<span class="n">source_dir</span> <span class="o">=</span> <span class="s2">&quot;accvlab/&lt;pkg&gt;&quot;</span>
+<span class="n">include_dirs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">get_abs_setup_dir</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span> <span class="o">/</span> <span class="n">source_dir</span> <span class="o">/</span> <span class="s2">&quot;include&quot;</span><span class="p">)]</span>
+
+<span class="c1"># Example: wire flags into extensions</span>
+<span class="n">ext_modules</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">CppExtension</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;accvlab.&lt;pkg&gt;._cpp&quot;</span><span class="p">,</span>
+        <span class="n">sources</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;accvlab/&lt;pkg&gt;/csrc/cpp_functions.cpp&quot;</span><span class="p">],</span>
+        <span class="n">include_dirs</span><span class="o">=</span><span class="n">include_dirs</span><span class="p">,</span>
+        <span class="n">extra_compile_args</span><span class="o">=</span><span class="n">compile_flags</span><span class="p">[</span><span class="s1">&#39;cxx&#39;</span><span class="p">],</span>
+        <span class="n">language</span><span class="o">=</span><span class="s2">&quot;c++&quot;</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;VERBOSE_BUILD&quot;</span><span class="p">],</span>
+    <span class="p">),</span>
+    <span class="n">CUDAExtension</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;accvlab.&lt;pkg&gt;._cuda&quot;</span><span class="p">,</span>
+        <span class="n">sources</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;accvlab/&lt;pkg&gt;/csrc/cuda_functions.cu&quot;</span><span class="p">],</span>
+        <span class="n">include_dirs</span><span class="o">=</span><span class="n">include_dirs</span><span class="p">,</span>
+        <span class="n">extra_compile_args</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;cxx&quot;</span><span class="p">:</span> <span class="n">compile_flags</span><span class="p">[</span><span class="s2">&quot;cxx&quot;</span><span class="p">],</span> <span class="s2">&quot;nvcc&quot;</span><span class="p">:</span> <span class="n">compile_flags</span><span class="p">[</span><span class="s2">&quot;nvcc&quot;</span><span class="p">]},</span>
+        <span class="n">language</span><span class="o">=</span><span class="s2">&quot;c++&quot;</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;VERBOSE_BUILD&quot;</span><span class="p">],</span>
+    <span class="p">),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>This approach ensures that:</p>
+<ul class="simple">
+<li><p>All packages use the same build logic</p></li>
+<li><p>Configuration is consistent across packages</p></li>
+<li><p>Build improvements benefit all packages automatically</p></li>
+<li><p>Individual package <a class="reference external" href="http://setup.py">setup.py</a> files remain simple and focused</p></li>
+</ul>
+<p>Please see the <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> files of the example packages (e.g. <code class="docutils literal notranslate"><span class="pre">packages/example_package/setup.py</span></code> and
+<code class="docutils literal notranslate"><span class="pre">packages/example_skbuild_package/setup.py</span></code>) for complete working examples for different package types.</p>
+</section>
+<section id="how-build-variables-are-picked-up">
+<h3>How Build Variables Are Picked Up<a class="headerlink" href="#how-build-variables-are-picked-up" title="Link to this heading"></a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>The authoritative list of supported build variables, defaults, and CUDA
+architecture handling is in the
+<a class="reference internal" href="INSTALLATION_GUIDE.html#available-build-variables"><span class="std std-ref">Available Build Variables</span></a> section of the
+<a class="reference internal" href="INSTALLATION_GUIDE.html"><span class="std std-doc">Installation Guide</span></a>. The
+<a class="reference internal" href="#shared-build-configuration-utilities">Shared Build &amp; Configuration Utilities</a> section explains how the
+shared helper utilities consume those variables.</p>
+</div>
+<p>Depending on the package type, build variables are consumed as follows:</p>
+<ul>
+<li><p>Setuptools (PyTorch extensions):</p>
+<ul class="simple">
+<li><p>In <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>, call <code class="docutils literal notranslate"><span class="pre">config</span> <span class="pre">=</span> <span class="pre">load_config()</span></code> and <code class="docutils literal notranslate"><span class="pre">cuda_info</span> <span class="pre">=</span> <span class="pre">detect_cuda_info()</span></code>, then pass
+<code class="docutils literal notranslate"><span class="pre">compile_flags</span> <span class="pre">=</span> <span class="pre">get_compile_flags(config,</span> <span class="pre">cuda_info)</span></code> to <code class="docutils literal notranslate"><span class="pre">CppExtension</span></code>/<code class="docutils literal notranslate"><span class="pre">CUDAExtension</span></code>:</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="n">load_config</span><span class="p">()</span>
+<span class="n">cuda_info</span> <span class="o">=</span> <span class="n">detect_cuda_info</span><span class="p">()</span>
+<span class="n">compile_flags</span> <span class="o">=</span> <span class="n">get_compile_flags</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">cuda_info</span><span class="p">)</span>
+<span class="n">ext</span> <span class="o">=</span> <span class="n">CUDAExtension</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;accvlab.&lt;pkg&gt;._ext&#39;</span><span class="p">,</span>
+    <span class="n">sources</span><span class="o">=</span><span class="p">[</span><span class="o">...</span><span class="p">],</span>
+    <span class="n">extra_compile_args</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;cxx&#39;</span><span class="p">:</span> <span class="n">compile_flags</span><span class="p">[</span><span class="s1">&#39;cxx&#39;</span><span class="p">],</span> <span class="s1">&#39;nvcc&#39;</span><span class="p">:</span> <span class="n">compile_flags</span><span class="p">[</span><span class="s1">&#39;nvcc&#39;</span><span class="p">]},</span>
+    <span class="n">language</span><span class="o">=</span><span class="s1">&#39;c++&#39;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;VERBOSE_BUILD&#39;</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>This forwards <code class="docutils literal notranslate"><span class="pre">DEBUG_BUILD</span></code>, <code class="docutils literal notranslate"><span class="pre">OPTIMIZE_LEVEL</span></code>, <code class="docutils literal notranslate"><span class="pre">CPP_STANDARD</span></code>, <code class="docutils literal notranslate"><span class="pre">VERBOSE_BUILD</span></code>, <code class="docutils literal notranslate"><span class="pre">CUSTOM_CUDA_ARCHS</span></code>,
+<code class="docutils literal notranslate"><span class="pre">USE_FAST_MATH</span></code>, and <code class="docutils literal notranslate"><span class="pre">ENABLE_PROFILING</span></code> to host and device compilers.</p></li>
+</ul>
+</li>
+<li><p>Scikit-build packages:</p>
+<ul class="simple">
+<li><p>In <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>, pass CMake arguments from the helper. Use <code class="docutils literal notranslate"><span class="pre">CUDA_ARCH_STRATEGY_CMAKE</span></code> for native CMake CUDA
+targets, or <code class="docutils literal notranslate"><span class="pre">CUDA_ARCH_STRATEGY_TORCH</span></code> when <code class="docutils literal notranslate"><span class="pre">ext_impl/CMakeLists.txt</span></code> calls <code class="docutils literal notranslate"><span class="pre">find_package(Torch)</span></code>:</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># The real setup.py files wrap this import in a guarded block with a prominent</span>
+<span class="c1"># missing-dependency message. The message body is omitted here for brevity.</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">accvlab_build_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">build_cmake_args</span><span class="p">,</span> <span class="n">CUDA_ARCH_STRATEGY_CMAKE</span>
+
+<span class="n">_cmake_args</span> <span class="o">=</span> <span class="n">build_cmake_args</span><span class="p">(</span><span class="n">cuda_arch_strategy</span><span class="o">=</span><span class="n">CUDA_ARCH_STRATEGY_CMAKE</span><span class="p">)</span>
+<span class="n">setup</span><span class="p">(</span>
+    <span class="o">...</span><span class="p">,</span>
+    <span class="n">cmake_source_dir</span><span class="o">=</span><span class="s2">&quot;ext_impl&quot;</span><span class="p">,</span>
+    <span class="n">cmake_install_dir</span><span class="o">=</span><span class="s2">&quot;accvlab/&lt;pkg&gt;&quot;</span><span class="p">,</span>
+    <span class="n">cmake_args</span><span class="o">=</span><span class="n">_cmake_args</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>For Torch CMake projects, replace <code class="docutils literal notranslate"><span class="pre">CUDA_ARCH_STRATEGY_CMAKE</span></code> in the import and call with
+<code class="docutils literal notranslate"><span class="pre">CUDA_ARCH_STRATEGY_TORCH</span></code>.</p></li>
+<li><p>In <code class="docutils literal notranslate"><span class="pre">ext_impl/CMakeLists.txt</span></code>, guard defaults:</p></li>
+</ul>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">if</span><span class="p">(</span><span class="s">NOT</span><span class="w"> </span><span class="s">DEFINED</span><span class="w"> </span><span class="s">CMAKE_CXX_STANDARD</span><span class="p">)</span>
+<span class="w">  </span><span class="nb">set</span><span class="p">(</span><span class="s">CMAKE_CXX_STANDARD</span><span class="w"> </span><span class="s">17</span><span class="p">)</span>
+<span class="nb">endif</span><span class="p">()</span>
+<span class="nb">if</span><span class="p">(</span><span class="s">NOT</span><span class="w"> </span><span class="s">DEFINED</span><span class="w"> </span><span class="s">CMAKE_CUDA_ARCHITECTURES</span><span class="p">)</span>
+<span class="w">  </span><span class="nb">set</span><span class="p">(</span><span class="s">CMAKE_CUDA_ARCHITECTURES</span><span class="w"> </span><span class="s">native</span><span class="p">)</span>
+<span class="nb">endif</span><span class="p">()</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>If the CMake project calls <code class="docutils literal notranslate"><span class="pre">find_package(Torch)</span></code>, set the Torch architecture list before that call:</p></li>
+</ul>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">if</span><span class="p">(</span><span class="s">DEFINED</span><span class="w"> </span><span class="s">ACCVLAB_TORCH_CUDA_ARCH_LIST</span><span class="p">)</span>
+<span class="w">  </span><span class="nb">set</span><span class="p">(</span><span class="s">TORCH_CUDA_ARCH_LIST</span><span class="w"> </span><span class="s2">&quot;${ACCVLAB_TORCH_CUDA_ARCH_LIST}&quot;</span><span class="p">)</span>
+<span class="nb">endif</span><span class="p">()</span>
+<span class="nb">find_package</span><span class="p">(</span><span class="s">Torch</span><span class="w"> </span><span class="s">REQUIRED</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="configuration-options">
+<h3>Configuration Options<a class="headerlink" href="#configuration-options" title="Link to this heading"></a></h3>
+<p>For the list of supported environment variables, their defaults, and descriptions, see the
+<a class="reference internal" href="INSTALLATION_GUIDE.html#available-build-variables"><span class="std std-ref">Available Build Variables</span></a> in the installation guide.
+These variables can be set per-package during installation or globally for all packages.</p>
+</section>
+</section>
+<section id="development-workflow">
+<h2>Development Workflow<a class="headerlink" href="#development-workflow" title="Link to this heading"></a></h2>
+<section id="testing-during-development">
+<h3>Testing During Development<a class="headerlink" href="#testing-during-development" title="Link to this heading"></a></h3>
+<section id="running-tests">
+<h4>Running Tests<a class="headerlink" href="#running-tests" title="Link to this heading"></a></h4>
+<p>Tests of a package can be performed with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>packages/&lt;package_name&gt;/tests
+pytest<span class="w"> </span>.
+</pre></div>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>Note that the tests do not necessarily need to be run from within the <code class="docutils literal notranslate"><span class="pre">tests</span></code> directory.
+However, it is advised to not run tests from the root directory of a namespace package (i.e.
+not from <code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;</span></code>), as in this way, importing the package is ambiguous.
+For example, the import <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">accvlab.&lt;package_name&gt;</span></code> could mean either refer to the installed package,
+or to the original source files inside the current directory.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>See the section <a class="reference internal" href="#repository-test-runner-scripts-run-tests-sh">Repository test runner</a> for how to run
+tests across all packages in the repository.</p>
+</div>
+</section>
+<section id="native-tests">
+<h4>Native Tests<a class="headerlink" href="#native-tests" title="Link to this heading"></a></h4>
+<p>Native C++/CUDA tests are CMake/CTest targets for implementation details that are not naturally covered by the
+Python test suite. They are opt-in and are not part of a normal <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> package build. They can e.g. be used to test
+implementation details which are not exposed by the Python API.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>The <code class="docutils literal notranslate"><span class="pre">packages/example_skbuild_package</span></code> package provides a complete example of how to implement
+native tests. Useful reference files are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">packages/example_skbuild_package/cpp_unit_tests.yaml</span></code>: repository runner configuration.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">packages/example_skbuild_package/ext_impl/CMakeLists.txt</span></code>: package-level CMake option and <code class="docutils literal notranslate"><span class="pre">utest/</span></code>
+subdirectory wiring.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">packages/example_skbuild_package/ext_impl/utest/CMakeLists.txt</span></code>: GoogleTest setup, CTest registration,
+and aggregate test target.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">packages/example_skbuild_package/ext_impl/utest/dummy_native_test.cpp</span></code>: minimal native test executable.</p></li>
+</ul>
+<p>The production <code class="docutils literal notranslate"><span class="pre">lane_helpers</span></code> package demonstrates a component-level layout under
+<code class="docutils literal notranslate"><span class="pre">packages/lane_helpers/ext_impl/polyline/utest/</span></code>.</p>
+</div>
+<p>The following conventions are recommended when adding native tests:</p>
+<ul class="simple">
+<li><p>Put native tests under an opt-in CMake subdirectory. Common locations are <code class="docutils literal notranslate"><span class="pre">ext_impl/utest/</span></code> for a
+package-level test suite or <code class="docutils literal notranslate"><span class="pre">ext_impl/&lt;component&gt;/utest/</span></code> for a component-level test suite.</p></li>
+<li><p>Gate the test subdirectory with a package-specific CMake option, such as
+<code class="docutils literal notranslate"><span class="pre">ACCVLAB_EXAMPLE_SKBUILD_PACKAGE_BUILD_CPP_TESTS</span></code>.</p></li>
+<li><p>Call <code class="docutils literal notranslate"><span class="pre">enable_testing()</span></code> in the root <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code>, for example in
+<code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/ext_impl/CMakeLists.txt</span></code>, when the native test option is enabled. This creates the top-level
+CTest metadata used by the runner.</p></li>
+<li><p>Define test executables with <code class="docutils literal notranslate"><span class="pre">EXCLUDE_FROM_ALL</span></code> so they are not built with the package target.</p></li>
+<li><p>Register each executable with CTest using <code class="docutils literal notranslate"><span class="pre">add_test(...)</span></code>.</p></li>
+<li><p>Add an explicit aggregate target, such as <code class="docutils literal notranslate"><span class="pre">accvlab_example_skbuild_package_run_cpp_tests</span></code>, that depends on
+the test executables and runs <code class="docutils literal notranslate"><span class="pre">ctest</span> <span class="pre">--output-on-failure</span></code>.</p></li>
+</ul>
+<p>To run native tests with the repository runner:</p>
+<ul class="simple">
+<li><p>A <code class="docutils literal notranslate"><span class="pre">cpp_unit_tests.yaml</span></code> config must be present for the package. See below for the expected fields.</p></li>
+<li><p>A single aggregate CMake target must build the native test executables and run CTest; this is the target
+referenced by the YAML config.</p></li>
+<li><p>The configured test target must return a nonzero exit code when tests fail.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>Native tests typically use GoogleTest, added as a git submodule under the package’s
+<code class="docutils literal notranslate"><span class="pre">ext_impl/external/</span></code> directory and included from CMake with <code class="docutils literal notranslate"><span class="pre">add_subdirectory(...)</span></code>. The example package uses
+this pattern at <code class="docutils literal notranslate"><span class="pre">packages/example_skbuild_package/ext_impl/external/googletest</span></code>. GoogleTest is not strictly
+required: any native executable can be registered with CTest as long as it returns a nonzero exit code on
+failure.</p>
+</div>
+<p>When the package calls <code class="docutils literal notranslate"><span class="pre">find_package(Torch)</span></code>, compile both the native test executables and GoogleTest with
+<code class="docutils literal notranslate"><span class="pre">TORCH_CXX_FLAGS_LIST</span></code>. PyTorch binaries can use either libstdc++ ABI, depending on the release and wheel
+variant. Applying Torch’s exported flags to every target on the GoogleTest boundary keeps <code class="docutils literal notranslate"><span class="pre">std::string</span></code> and
+other standard-library types ABI-compatible:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">separate_arguments</span><span class="p">(</span><span class="s">TORCH_CXX_FLAGS_LIST</span><span class="w"> </span><span class="s">NATIVE_COMMAND</span><span class="w"> </span><span class="s2">&quot;${TORCH_CXX_FLAGS}&quot;</span><span class="p">)</span>
+
+<span class="nb">add_subdirectory</span><span class="p">(</span>
+<span class="w">    </span><span class="s2">&quot;${ACCVLAB_GTEST_SOURCE_DIR}&quot;</span>
+<span class="w">    </span><span class="s2">&quot;${CMAKE_CURRENT_BINARY_DIR}/googletest&quot;</span>
+<span class="w">    </span><span class="s">EXCLUDE_FROM_ALL</span>
+<span class="p">)</span>
+
+<span class="nb">foreach</span><span class="p">(</span><span class="s">gtest_target</span><span class="w"> </span><span class="s">IN</span><span class="w"> </span><span class="s">ITEMS</span><span class="w"> </span><span class="s">gtest</span><span class="w"> </span><span class="s">gtest_main</span><span class="w"> </span><span class="s">gmock</span><span class="w"> </span><span class="s">gmock_main</span><span class="p">)</span>
+<span class="w">    </span><span class="nb">if</span><span class="p">(</span><span class="s">TARGET</span><span class="w"> </span><span class="o">${</span><span class="nv">gtest_target</span><span class="o">}</span><span class="p">)</span>
+<span class="w">        </span><span class="nb">target_compile_options</span><span class="p">(</span><span class="o">${</span><span class="nv">gtest_target</span><span class="o">}</span><span class="w"> </span><span class="s">PRIVATE</span><span class="w"> </span><span class="o">${</span><span class="nv">TORCH_CXX_FLAGS_LIST</span><span class="o">}</span><span class="p">)</span>
+<span class="w">    </span><span class="nb">endif</span><span class="p">()</span>
+<span class="nb">endforeach</span><span class="p">()</span>
+
+<span class="nb">target_compile_options</span><span class="p">(</span><span class="s">my_native_test</span><span class="w"> </span><span class="s">PRIVATE</span><span class="w"> </span><span class="o">${</span><span class="nv">TORCH_CXX_FLAGS_LIST</span><span class="o">}</span><span class="p">)</span>
+<span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">my_native_test</span><span class="w"> </span><span class="s">PRIVATE</span><span class="w"> </span><span class="s">GTest::gtest_main</span><span class="w"> </span><span class="o">${</span><span class="nv">TORCH_LIBRARIES</span><span class="o">}</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The runner reads <code class="docutils literal notranslate"><span class="pre">namespace_packages_config.py</span></code> and checks only those configured packages for package-local
+native test configuration files named <code class="docutils literal notranslate"><span class="pre">cpp_unit_tests.yaml</span></code> in the package root directory. Packages not listed there must
+be supplied explicitly with <code class="docutils literal notranslate"><span class="pre">--config</span> <span class="pre">packages/&lt;package_name&gt;/cpp_unit_tests.yaml</span></code>. For example, the SKBuild
+example package is not configured by default, and its config lives at
+<code class="docutils literal notranslate"><span class="pre">packages/example_skbuild_package/cpp_unit_tests.yaml</span></code>. The config looks like this:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">cmake_source_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ext_impl</span>
+<span class="nt">cuda_arch_strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">torch</span>
+<span class="nt">test_option</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ACCVLAB_EXAMPLE_SKBUILD_PACKAGE_BUILD_CPP_TESTS</span>
+<span class="nt">test_target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">accvlab_example_skbuild_package_run_cpp_tests</span>
+</pre></div>
+</div>
+<p>The fields have the following meaning:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cmake_source_dir</span></code>: CMake project to configure, relative to the package root. For SKBuild packages, this is
+usually <code class="docutils literal notranslate"><span class="pre">ext_impl</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cuda_arch_strategy</span></code>: Required CUDA architecture strategy for the CMake project. Use <code class="docutils literal notranslate"><span class="pre">torch</span></code> when the
+project calls <code class="docutils literal notranslate"><span class="pre">find_package(Torch)</span></code>, or <code class="docutils literal notranslate"><span class="pre">cmake</span></code> for native CMake CUDA targets.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test_option</span></code>: Package-specific CMake option that enables the otherwise opt-in native test subdirectory. The
+runner automatically forwards it as <code class="docutils literal notranslate"><span class="pre">-D&lt;test_option&gt;=ON</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test_target</span></code>: Explicit aggregate target that builds the native test executables and runs CTest.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cmake_args</span></code>: Optional additional CMake arguments for package-specific needs.</p></li>
+</ul>
+<section id="cuda-architecture-strategy">
+<span id="native-test-cuda-architecture-strategy"></span><h5>CUDA Architecture Strategy<a class="headerlink" href="#cuda-architecture-strategy" title="Link to this heading"></a></h5>
+<p>The runner passes <code class="docutils literal notranslate"><span class="pre">cuda_arch_strategy</span></code> to <code class="docutils literal notranslate"><span class="pre">build_cmake_args(...)</span></code>, so the value controls how the shared
+<code class="docutils literal notranslate"><span class="pre">CUSTOM_CUDA_ARCHS</span></code> setting reaches the package’s CMake project:</p>
+<ul class="simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">torch</span></code> when the package CMake project calls <code class="docutils literal notranslate"><span class="pre">find_package(Torch)</span></code>. The shared helper then provides
+<code class="docutils literal notranslate"><span class="pre">ACCVLAB_TORCH_CUDA_ARCH_LIST</span></code>, which the project must assign to <code class="docutils literal notranslate"><span class="pre">TORCH_CUDA_ARCH_LIST</span></code> before finding Torch.</p></li>
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">cmake</span></code> for CMake projects that compile native CUDA targets without Torch architecture handling. The
+shared helper then sets <code class="docutils literal notranslate"><span class="pre">CMAKE_CUDA_ARCHITECTURES</span></code>.</p></li>
+</ul>
+<p>Select the strategy for the package’s root CMake project, even when an individual test target contains only
+C++. The value in <code class="docutils literal notranslate"><span class="pre">cpp_unit_tests.yaml</span></code> must match the strategy passed by the package’s <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>.</p>
+<p>Choose a <code class="docutils literal notranslate"><span class="pre">test_option</span></code> name that includes the package name to avoid collisions when several package CMake
+projects are configured by the same repository tooling. A good pattern is
+<code class="docutils literal notranslate"><span class="pre">ACCVLAB_&lt;PACKAGE_NAME&gt;_BUILD_CPP_TESTS</span></code>, for example
+<code class="docutils literal notranslate"><span class="pre">ACCVLAB_EXAMPLE_SKBUILD_PACKAGE_BUILD_CPP_TESTS</span></code>.</p>
+<p>The package name and build directory are derived by the runner from the config location. For the example above,
+the package name becomes <code class="docutils literal notranslate"><span class="pre">example_skbuild_package</span></code> and the build directory becomes
+<code class="docutils literal notranslate"><span class="pre">build/cpp_unit_tests/example_skbuild_package</span></code>.</p>
+<p>The example package is not enabled in <code class="docutils literal notranslate"><span class="pre">namespace_packages_config.py</span></code> by default, so it is not picked up by
+<code class="docutils literal notranslate"><span class="pre">all</span></code>. To run the example directly, pass its config explicitly:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./scripts/run_cpp_unit_tests.sh<span class="w"> </span>--config<span class="w"> </span>packages/example_skbuild_package/cpp_unit_tests.yaml<span class="w"> </span>example_skbuild_package
+</pre></div>
+</div>
+<p>Or enable the package in <code class="docutils literal notranslate"><span class="pre">namespace_packages_config.py</span></code> and run it as:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./scripts/run_cpp_unit_tests.sh<span class="w"> </span>example_skbuild_package
+</pre></div>
+</div>
+<p>The runner also forwards the shared ACCV-Lab CMake build arguments before package-specific arguments.
+That means the native test targets use the same build variables as package builds, including build type,
+compiler flags, CUDA architecture selection, verbosity, and the configured C++/CUDA standard. See
+<a class="reference internal" href="#shared-build-configuration-utilities">Shared Build &amp; Configuration Utilities</a> for how the arguments are
+created and <a class="reference internal" href="INSTALLATION_GUIDE.html#available-build-variables"><span class="std std-ref">Available Build Variables</span></a> for the supported
+environment variables. The test option from the YAML config is added automatically after those shared
+arguments. Test targets should avoid overriding these settings unless they have a specific reason to do so.</p>
+<p>The runner requires the <code class="docutils literal notranslate"><span class="pre">accvlab-build-config</span></code> package in the active environment. It is installed by the
+repository package manager, or can be installed directly with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">build_config/</span></code>.</p>
+<p>Use the repository-level runner for native tests, e.g.:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># List native test packages discovered from namespace_packages_config.py.</span>
+./scripts/run_cpp_unit_tests.sh<span class="w"> </span>--list
+
+<span class="c1"># Run native tests for one configured package.</span>
+./scripts/run_cpp_unit_tests.sh<span class="w"> </span>lane_helpers
+
+<span class="c1"># Run native tests for all configured packages with native test configs.</span>
+./scripts/run_cpp_unit_tests.sh<span class="w"> </span>all
+
+<span class="c1"># Configure one package without building or running its tests.</span>
+./scripts/run_cpp_unit_tests.sh<span class="w"> </span>--configure-only<span class="w"> </span>lane_helpers
+</pre></div>
+</div>
+<p>When adding native tests to another configured SKBuild package, follow the same structure and add a
+package-local <code class="docutils literal notranslate"><span class="pre">cpp_unit_tests.yaml</span></code>.</p>
+</section>
+</section>
+<section id="install-in-development-mode">
+<h4>Install in Development Mode<a class="headerlink" href="#install-in-development-mode" title="Link to this heading"></a></h4>
+<p>This can be done with</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="w"> </span>--no-build-isolation
+</pre></div>
+</div>
+<p>Note that</p>
+<ul class="simple">
+<li><p>The editable mode refers to the Python code. For any changes in C++ code to take effect, the package
+needs to be re-installed regardless of whether it is installed in editable mode or not.</p></li>
+<li><p>SKBuild does not support editable installs. SKBuild-based packages need to always be installed without the <code class="docutils literal notranslate"><span class="pre">-e</span></code> flag.</p></li>
+</ul>
+</section>
+</section>
+<section id="documentation-development">
+<h3>Documentation Development<a class="headerlink" href="#documentation-development" title="Link to this heading"></a></h3>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>Ensure all configured namespace packages are installed before building the docs.
+For detailed instructions (commands and development targets), see the
+<a class="reference internal" href="DOCUMENTATION_SETUP_GUIDE.html#building-documentation-locally"><span class="std std-ref">Documentation Setup Guide</span></a>.</p>
+</div>
+</section>
+</section>
+<section id="code-formatting">
+<h2>Code Formatting<a class="headerlink" href="#code-formatting" title="Link to this heading"></a></h2>
+<p>The ACCV-Lab project uses automated code formatting to maintain consistent code style across common code and
+all namespace packages. Please see the <a class="reference internal" href="FORMATTING_GUIDE.html"><span class="std std-doc">Formatting Guide</span></a> for details.</p>
+<section id="script-features">
+<h3>Script Features<a class="headerlink" href="#script-features" title="Link to this heading"></a></h3>
+<p>As all scripts, the formatting script automatically discovers configured namespace packages from
+<code class="docutils literal notranslate"><span class="pre">namespace_packages_config.py</span></code>.</p>
+<p>Formatting for the whole repo can be run as:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bash<span class="w"> </span>scripts/format.sh
+</pre></div>
+</div>
+<p>It is also possible to run the formatting for individual namespace packages. To list available packages and
+format one of them:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># List available namespace packages</span>
+python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from namespace_packages_config import get_package_names; print(&#39;\n&#39;.join(get_package_names()))&quot;</span>
+
+<span class="c1"># Format a specific package (example)</span>
+./scripts/format.sh<span class="w"> </span>--package<span class="w"> </span>on_demand_video_decoder
+</pre></div>
+</div>
+<p>You can also format only a specific language:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Format Python code only (common + all packages)</span>
+./scripts/format.sh<span class="w"> </span>--python
+
+<span class="c1"># Format C++/CUDA code only (all packages)</span>
+./scripts/format.sh<span class="w"> </span>--cpp
+
+<span class="c1"># Combine with a package filter</span>
+./scripts/format.sh<span class="w"> </span>--python<span class="w"> </span>--package<span class="w"> </span>example_package
+./scripts/format.sh<span class="w"> </span>--cpp<span class="w"> </span>--package<span class="w"> </span>batching_helpers
+</pre></div>
+</div>
+</section>
+<section id="typical-workflows">
+<h3>Typical Workflows<a class="headerlink" href="#typical-workflows" title="Link to this heading"></a></h3>
+<section id="during-development">
+<h4>During Development<a class="headerlink" href="#during-development" title="Link to this heading"></a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Format the namespace package you&#39;re working on</span>
+./scripts/format.sh<span class="w"> </span>--package<span class="w"> </span>example_package
+</pre></div>
+</div>
+</section>
+<section id="before-committing">
+<h4>Before Committing<a class="headerlink" href="#before-committing" title="Link to this heading"></a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Format everything to ensure consistency</span>
+./scripts/format.sh
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="repository-test-runner-scripts-run-tests-sh">
+<h2>Repository Test Runner (<code class="docutils literal notranslate"><span class="pre">scripts/run_tests.sh</span></code>)<a class="headerlink" href="#repository-test-runner-scripts-run-tests-sh" title="Link to this heading"></a></h2>
+<p>The repository provides a convenience script to run pytest for all configured namespace packages:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./scripts/run_tests.sh<span class="w">              </span><span class="c1"># run all tests</span>
+./scripts/run_tests.sh<span class="w"> </span>--<span class="w"> </span>-k<span class="w"> </span>smoke<span class="w">  </span><span class="c1"># pass arguments after -- directly to pytest (`-k smoke` used as an example)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>This script only runs Python-based tests under <code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/tests</span></code>. For native
+C++/CUDA tests, use the native test runner described in <a class="reference internal" href="#native-tests">Native Tests</a>.</p>
+</div>
+<p>How it discovers and runs tests:</p>
+<ul class="simple">
+<li><p>Discovers package names from <code class="docutils literal notranslate"><span class="pre">namespace_packages_config.py</span></code> (function <code class="docutils literal notranslate"><span class="pre">get_package_names()</span></code>).</p></li>
+<li><p>For each package <code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code>, looks for <code class="docutils literal notranslate"><span class="pre">packages/&lt;name&gt;/tests</span></code>. If missing, it warns and skips.</p></li>
+<li><p>Executes <code class="docutils literal notranslate"><span class="pre">pytest</span></code> from inside each <code class="docutils literal notranslate"><span class="pre">packages/&lt;name&gt;/tests</span></code> directory to avoid importing local sources.</p></li>
+<li><p>Exits non-zero if any package test run fails.</p></li>
+</ul>
+<p>To ensure your tests are picked up:</p>
+<ul class="simple">
+<li><p>Place tests under <code class="docutils literal notranslate"><span class="pre">packages/&lt;package_name&gt;/tests</span></code>.</p></li>
+<li><p>Name files following pytest conventions (e.g., <code class="docutils literal notranslate"><span class="pre">test_*.py</span></code> or <code class="docutils literal notranslate"><span class="pre">*_test.py</span></code>).</p></li>
+<li><p>If you need custom pytest flags, pass them after <code class="docutils literal notranslate"><span class="pre">--</span></code>, e.g.
+<code class="docutils literal notranslate"><span class="pre">./scripts/run_tests.sh</span> <span class="pre">--</span> <span class="pre">-q</span> <span class="pre">-k</span> <span class="pre">&quot;gpu</span> <span class="pre">and</span> <span class="pre">not</span> <span class="pre">slow&quot;</span></code>.</p></li>
+</ul>
+<p>Additional notes:</p>
+<ul class="simple">
+<li><p>Inside your test scripts, import the installed package (e.g., <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">accvlab.&lt;package_name&gt;</span></code>), not local
+source paths.</p></li>
+<li><p>Ensure the package is installed in the current environment before running the script (editable or standard
+install). This can be done with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.[optional]</span> <span class="pre">--no-build-isolation</span></code> or
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">.[optional]</span> <span class="pre">--no-build-isolation</span></code> (see the Installation Guide for more details). Note that for
+SKBuild-based packages, the editable install is not supported and will result in missing binaries &amp; import
+errors.</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p><strong></strong>The tests often rely on optional dependencies. Therefore, it is recommended to install
+the package with optional dependencies, as described in the <a class="reference internal" href="INSTALLATION_GUIDE.html"><span class="std std-doc">Installation Guide</span></a>.</p>
+</div>
+</section>
+<section id="namespace-package-structure-and-configuration">
+<h2>Namespace Package Structure and Configuration<a class="headerlink" href="#namespace-package-structure-and-configuration" title="Link to this heading"></a></h2>
+<section id="understanding-the-package-structure">
+<h3>Understanding the Package Structure<a class="headerlink" href="#understanding-the-package-structure" title="Link to this heading"></a></h3>
+<p>ACCV-Lab uses implicit namespace packages where each package directory maps to a namespace under <code class="docutils literal notranslate"><span class="pre">accvlab</span></code>.
+For example:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">packages/example_package/accvlab/example_package/</span></code> → <code class="docutils literal notranslate"><span class="pre">accvlab.example_package</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">packages/batching_helpers/accvlab/batching_helpers/</span></code> → <code class="docutils literal notranslate"><span class="pre">accvlab.batching_helpers</span></code></p></li>
+</ul>
+<p>Note that e.g. the directory <code class="docutils literal notranslate"><span class="pre">packages/example_package/</span></code> is the root directory of the package, containing
+the <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> &amp; <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> files, native sources, documentation, and related package files. The
+remainder of the path (i.e. <code class="docutils literal notranslate"><span class="pre">[...]/accvlab/example_package/</span></code>) reflects the package
+name as installed (<code class="docutils literal notranslate"><span class="pre">accvlab.example_package</span></code> in this case) and contains the actual Python package
+implementation as will be included in the installation.</p>
+</section>
+<section id="id1">
+<h3>Package Discovery Configuration<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> configuration is crucial for proper package discovery:</p>
+<div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="k">[tool.setuptools.packages.find]</span>
+<span class="n">where</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;.&quot;</span><span class="p">]</span>
+<span class="n">include</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;accvlab.example_package*&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This configuration:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">where</span> <span class="pre">=</span> <span class="pre">[&quot;.&quot;]</span></code> - Searches in the current directory</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">include</span> <span class="pre">=</span> <span class="pre">[&quot;accvlab.example_package*&quot;]</span></code> - Includes all packages starting with <code class="docutils literal notranslate"><span class="pre">accvlab.example_package</span></code></p></li>
+</ul>
+</section>
+<section id="handling-subpackages">
+<h3>Handling Subpackages<a class="headerlink" href="#handling-subpackages" title="Link to this heading"></a></h3>
+<p>If your namespace package contains subpackages (like <code class="docutils literal notranslate"><span class="pre">accvlab.example_package.functions</span></code>), the
+<code class="docutils literal notranslate"><span class="pre">include</span> <span class="pre">=</span> <span class="pre">[&quot;accvlab.example_package*&quot;]</span></code> pattern will automatically discover and include all subpackages.</p>
+</section>
+<section id="notes">
+<h3>Notes<a class="headerlink" href="#notes" title="Link to this heading"></a></h3>
+<ol class="arabic">
+<li><p><strong>Namespace package structure</strong>: The directory structure must match the namespace structure:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>packages/example_package/
+├── accvlab/                    # ← Namespace root
+│   └── example_package/       # Maps to accvlab.example_package
+│       ├── __init__.py
+│       ├── functions/         # Maps to accvlab.example_package.functions
+│       │   └── __init__.py
+│       └── ...
+├── setup.py
+├── pyproject.toml
+└── ...
+</pre></div>
+</div>
+</li>
+<li><p>As usual for modules, <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code> files need to be present and otherwise, e.g. the automatic package
+discovery may fail.</p></li>
+<li><p><strong>Build artifacts</strong>: Always clean build artifacts (<code class="docutils literal notranslate"><span class="pre">build/</span></code>, <code class="docutils literal notranslate"><span class="pre">dist/</span></code>, <code class="docutils literal notranslate"><span class="pre">*.egg-info/</span></code>) when testing package
+installation to ensure that the installation can be performed from a clean state.</p></li>
+</ol>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="DOCKER_GUIDE.html" class="btn btn-neutral float-left" title="Docker Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="FORMATTING_GUIDE.html" class="btn btn-neutral float-right" title="Code Formatting Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

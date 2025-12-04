@@ -1,0 +1,219 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; ACCV-Lab 0.2.0.post1.dev45+g5418854af documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=268b1a7e"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Example" href="example.html" />
+    <link rel="prev" title="Introduction" href="introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../multi_tensor_copier/docs/index.html">Multi-Tensor Copier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Lane Helpers</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#module-accvlab.lane_helpers.polyline">polyline</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.lane_helpers.polyline.interpolate"><code class="docutils literal notranslate"><span class="pre">interpolate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.lane_helpers.polyline.interpolate_var_size_batch"><code class="docutils literal notranslate"><span class="pre">interpolate_var_size_batch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.lane_helpers.polyline.lengths"><code class="docutils literal notranslate"><span class="pre">lengths()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.lane_helpers.polyline.lengths_var_size_batch"><code class="docutils literal notranslate"><span class="pre">lengths_var_size_batch()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="example.html">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../release_notes_page.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Lane Helpers</a></li>
+      <li class="breadcrumb-item active">API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/contained_package_docs_mirror/lane_helpers/docs/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-accvlab.lane_helpers">
+<span id="api-reference"></span><h1>API Reference<a class="headerlink" href="#module-accvlab.lane_helpers" title="Link to this heading"></a></h1>
+<section id="module-accvlab.lane_helpers.polyline">
+<span id="polyline"></span><h2>polyline<a class="headerlink" href="#module-accvlab.lane_helpers.polyline" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.lane_helpers.polyline.interpolate">
+<span class="sig-prename descclassname"><span class="pre">accvlab.lane_helpers.polyline.</span></span><span class="sig-name descname"><span class="pre">interpolate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distances</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/lane_helpers/polyline/functions.html#interpolate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.lane_helpers.polyline.interpolate" title="Link to this definition"></a></dt>
+<dd><p>Interpolate batched polylines at requested distances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a></span>) – CPU or CUDA tensor with shape <code class="docutils literal notranslate"><span class="pre">(batch,</span> <span class="pre">num_points,</span> <span class="pre">num_dims)</span></code>.</p></li>
+<li><p><strong>distances</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a></span>) – Tensor with shape <code class="docutils literal notranslate"><span class="pre">(batch,</span> <span class="pre">num_distances)</span></code> on the same device as <code class="docutils literal notranslate"><span class="pre">points</span></code>.
+Distances below zero are clamped to the first point of the polyline. Distances beyond the
+total polyline length are clamped to the last point. When <code class="docutils literal notranslate"><span class="pre">relative=True</span></code>, this corresponds
+to clamping values below <code class="docutils literal notranslate"><span class="pre">0</span></code> and above <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
+<li><p><strong>relative</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">False</span></code>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, interpret <code class="docutils literal notranslate"><span class="pre">distances</span></code> as fractions of each polyline’s total length.
+If <code class="docutils literal notranslate"><span class="pre">False</span></code>, interpret them as absolute distances from the start of each polyline.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a></span> – Tensor with shape <code class="docutils literal notranslate"><span class="pre">(batch,</span> <span class="pre">num_distances,</span> <span class="pre">num_dims)</span></code> on the same device as <code class="docutils literal notranslate"><span class="pre">points</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.lane_helpers.polyline.interpolate_var_size_batch">
+<span class="sig-prename descclassname"><span class="pre">accvlab.lane_helpers.polyline.</span></span><span class="sig-name descname"><span class="pre">interpolate_var_size_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distances</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/lane_helpers/polyline/functions.html#interpolate_var_size_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.lane_helpers.polyline.interpolate_var_size_batch" title="Link to this definition"></a></dt>
+<dd><p>Interpolate variable-length batched polylines at requested distances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../batching_helpers/docs/api.html#accvlab.batching_helpers.RaggedBatch" title="accvlab.batching_helpers.data_format.ragged_batch.RaggedBatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code></a></span>) – RaggedBatch-like object with tensor data on CPU or CUDA and shape
+<code class="docutils literal notranslate"><span class="pre">(batch,</span> <span class="pre">max_num_points,</span> <span class="pre">num_dims)</span></code>.</p></li>
+<li><p><strong>distances</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../batching_helpers/docs/api.html#accvlab.batching_helpers.RaggedBatch" title="accvlab.batching_helpers.data_format.ragged_batch.RaggedBatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code></a></span>) – RaggedBatch-like object with shape <code class="docutils literal notranslate"><span class="pre">(batch,</span> <span class="pre">max_num_distances)</span></code> and tensor data
+on the same device as <code class="docutils literal notranslate"><span class="pre">points</span></code>. Distances below zero are clamped to the first point of the
+polyline. Distances beyond the total polyline length are clamped to the last point. When
+<code class="docutils literal notranslate"><span class="pre">relative=True</span></code>, this corresponds to clamping values below <code class="docutils literal notranslate"><span class="pre">0</span></code> and above <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
+<li><p><strong>relative</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">False</span></code>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, interpret <code class="docutils literal notranslate"><span class="pre">distances</span></code> as fractions of each polyline’s total length.
+If <code class="docutils literal notranslate"><span class="pre">False</span></code>, interpret them as absolute distances from the start of each polyline.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../batching_helpers/docs/api.html#accvlab.batching_helpers.RaggedBatch" title="accvlab.batching_helpers.data_format.ragged_batch.RaggedBatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code></a></span> – RaggedBatch-like object with shape <code class="docutils literal notranslate"><span class="pre">(batch,</span> <span class="pre">max_num_distances,</span> <span class="pre">num_dims)</span></code> and tensor data
+on the same device as <code class="docutils literal notranslate"><span class="pre">points</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.lane_helpers.polyline.lengths">
+<span class="sig-prename descclassname"><span class="pre">accvlab.lane_helpers.polyline.</span></span><span class="sig-name descname"><span class="pre">lengths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/lane_helpers/polyline/functions.html#lengths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.lane_helpers.polyline.lengths" title="Link to this definition"></a></dt>
+<dd><p>Compute the total length of each polyline in a fixed-size batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>points</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a></span>) – CPU or CUDA tensor with shape <code class="docutils literal notranslate"><span class="pre">(batch,</span> <span class="pre">num_points,</span> <span class="pre">num_dims)</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a></span> – Tensor with shape <code class="docutils literal notranslate"><span class="pre">(batch,)</span></code> on the same device as <code class="docutils literal notranslate"><span class="pre">points</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.lane_helpers.polyline.lengths_var_size_batch">
+<span class="sig-prename descclassname"><span class="pre">accvlab.lane_helpers.polyline.</span></span><span class="sig-name descname"><span class="pre">lengths_var_size_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/lane_helpers/polyline/functions.html#lengths_var_size_batch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.lane_helpers.polyline.lengths_var_size_batch" title="Link to this definition"></a></dt>
+<dd><p>Compute the total length of each polyline in a variable-size batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>points</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../batching_helpers/docs/api.html#accvlab.batching_helpers.RaggedBatch" title="accvlab.batching_helpers.data_format.ragged_batch.RaggedBatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code></a></span>) – RaggedBatch-like object with tensor data on CPU or CUDA and shape
+<code class="docutils literal notranslate"><span class="pre">(batch,</span> <span class="pre">max_num_points,</span> <span class="pre">num_dims)</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a></span> – Tensor with shape <code class="docutils literal notranslate"><span class="pre">(batch,)</span></code> on the same device as <code class="docutils literal notranslate"><span class="pre">points</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="example.html" class="btn btn-neutral float-right" title="Example" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

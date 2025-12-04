@@ -1,0 +1,795 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Pipeline (Introductory Example) &mdash; ACCV-Lab 0.2.0.post1.dev45+g5418854af documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../../_static/documentation_options.js?v=268b1a7e"></script>
+      <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+    <link rel="next" title="2D Object Detection Pipeline" href="../2d_object_detection/index.html" />
+    <link rel="prev" title="Examples" href="../../examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../multi_tensor_copier/docs/index.html">Multi-Tensor Copier</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">DALI Pipeline Framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../design.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/main_api.html">Main API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/additional_api.html">Additional API Reference</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../examples.html">Examples</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../../examples.html#pipeline-setup-examples">Pipeline Setup Examples</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Simple Pipeline (Introductory Example)</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#concepts-covered">Concepts Covered</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#data-provider">Data Provider</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#pipeline-setup">Pipeline Setup</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#entry-point">Entry Point</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#expected-output">Expected Output</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../2d_object_detection/index.html">2D Object Detection Pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stream_petr/index.html">StreamPETR Pipeline</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../flexible_step/index.html">Flexible Step Implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../examples.html#data-loaders-for-nuscenes">Data Loaders for NuScenes</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../lane_helpers/docs/index.html">Lane Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../release_notes_page.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">DALI Pipeline Framework</a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Examples</a></li>
+      <li class="breadcrumb-item active">Simple Pipeline (Introductory Example)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../../_sources/contained_package_docs_mirror/dali_pipeline_framework/docs/examples/simple_pipeline/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="simple-pipeline-introductory-example">
+<h1>Simple Pipeline (Introductory Example)<a class="headerlink" href="#simple-pipeline-introductory-example" title="Link to this heading"></a></h1>
+<p>This example demonstrates the basic building blocks of the DALI pipeline framework using
+<strong>synthetic data</strong> – no external datasets are required to run it. It is intended as a starting
+point for understanding the core design before diving into the more complex examples
+(<a class="reference internal" href="../2d_object_detection/index.html"><span class="doc">2D Object Detection Pipeline</span></a>, <a class="reference internal" href="../stream_petr/index.html"><span class="doc">StreamPETR Pipeline</span></a>).</p>
+<p>The use of synthetic data keeps the example self-contained while still demonstrating the important concepts. The included code
+snippets/files are best read in order: data provider, pipeline setup, and then entry point.</p>
+<section id="concepts-covered">
+<h2>Concepts Covered<a class="headerlink" href="#concepts-covered" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Sample data structure</strong>: Defining a hierarchical
+<a class="reference internal" href="../../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> blueprint representing the training data format. In this
+example the blueprint contains a <code class="docutils literal notranslate"><span class="pre">cameras</span></code> array with per-camera <code class="docutils literal notranslate"><span class="pre">image</span></code> and <code class="docutils literal notranslate"><span class="pre">annotation/label</span></code> fields, as well as
+sample-level <code class="docutils literal notranslate"><span class="pre">scene_label</span></code> and <code class="docutils literal notranslate"><span class="pre">scene_label_as_str</span></code> fields. For details on the blueprint concept and the
+<a class="reference internal" href="../../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.SampleDataGroup" title="accvlab.dali_pipeline_framework.pipeline.SampleDataGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampleDataGroup</span></code></a> class in general, please also see
+<a class="reference internal" href="../../design/sample_data_group.html"><span class="doc">Data Format: Sample Data Group</span></a>.</p></li>
+<li><p><strong>Data provider</strong>: Subclassing <a class="reference internal" href="../../api/inputs.html#accvlab.dali_pipeline_framework.inputs.DataProvider" title="accvlab.dali_pipeline_framework.inputs.DataProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataProvider</span></code></a> to provide the defined data
+structure blueprint as well as individual training samples matching this structure. In this example, those samples are generated
+synthetically.</p></li>
+<li><p><strong>Input callable</strong>: Wrapping the data provider with
+<a class="reference internal" href="../../api/inputs.html#accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable" title="accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable"><code class="xref py py-class docutils literal notranslate"><span class="pre">ShuffledShardedInputCallable</span></code></a> to provide shuffled samples to
+the pipeline.</p></li>
+<li><p><strong>Processing steps</strong>: Chaining built-in processing steps
+(<a class="reference internal" href="../../api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.PhotoMetricDistorter" title="accvlab.dali_pipeline_framework.processing_steps.PhotoMetricDistorter"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhotoMetricDistorter</span></code></a>,
+<a class="reference internal" href="../../api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.ImageRange01Normalizer" title="accvlab.dali_pipeline_framework.processing_steps.ImageRange01Normalizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageRange01Normalizer</span></code></a>,
+<a class="reference internal" href="../../api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.AnnotationElementConditionEval" title="accvlab.dali_pipeline_framework.processing_steps.AnnotationElementConditionEval"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnnotationElementConditionEval</span></code></a>) to define the processing pipeline.</p></li>
+<li><p><strong>Access modifier wrappers</strong>: Applying photometric augmentation <strong>independently per camera</strong> via
+<a class="reference internal" href="../../api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.DataGroupArrayInPathElementsAppliedStep" title="accvlab.dali_pipeline_framework.processing_steps.DataGroupArrayInPathElementsAppliedStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataGroupArrayInPathElementsAppliedStep</span></code></a>.</p></li>
+<li><p><strong>Pipeline assembly</strong>: Creating a <a class="reference internal" href="../../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.PipelineDefinition" title="accvlab.dali_pipeline_framework.pipeline.PipelineDefinition"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineDefinition</span></code></a>, building
+the DALI pipeline, and iterating batches through
+<a class="reference internal" href="../../api/pipeline.html#accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator" title="accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIStructuredOutputIterator</span></code></a> (which returns nested dicts).</p></li>
+<li><p><strong>Output handling</strong>: Obtaining the output (which is dumped using <a class="reference internal" href="../../../../optim_test_tools/docs/api.html#accvlab.optim_test_tools.TensorDumper" title="accvlab.optim_test_tools.TensorDumper"><code class="xref py py-class docutils literal notranslate"><span class="pre">TensorDumper</span></code></a> in this
+simple example and would be used for training in a real-world use-case).</p></li>
+</ul>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>You can run the example using the script
+<code class="docutils literal notranslate"><span class="pre">packages/dali_pipeline_framework/examples/simple_full_pipeline/run_example.py</span></code>.</p>
+<p>No dataset preparation is needed – all data is generated synthetically.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../design.html"><span class="doc">Introduction</span></a> for the overall pipeline framework design and a more detailed discussion on the individual concepts.</p></li>
+<li><p><a class="reference internal" href="../2d_object_detection/index.html"><span class="doc">2D Object Detection Pipeline</span></a> and <a class="reference internal" href="../stream_petr/index.html"><span class="doc">StreamPETR Pipeline</span></a> for full-scale pipeline
+examples using NuScenes data.</p></li>
+<li><p><a class="reference internal" href="../flexible_step/index.html"><span class="doc">Flexible Step Implementation</span></a> for a tutorial on implementing custom processing steps.</p></li>
+</ul>
+</div>
+</section>
+<section id="data-provider">
+<h2>Data Provider<a class="headerlink" href="#data-provider" title="Link to this heading"></a></h2>
+<p>The data provider is the boundary between use-case-specific data loading and the reusable pipeline framework.
+It defines the sample contract once as a <code class="docutils literal notranslate"><span class="pre">SampleDataGroup</span></code> blueprint, then returns samples that follow this
+contract. When designing a pipeline for a specific use-case, this is the place to decide the input data format
+and to implement the data loading logic.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The output data format for the overall pipeline is a consequence of the input data format and the
+processing steps applied to it, so that it does not need to be defined explicitly.</p>
+</div>
+<div class="literal-block-wrapper docutils container" id="simple-data-provider">
+<div class="code-block-caption"><span class="caption-text">packages/dali_pipeline_framework/examples/simple_full_pipeline/simple_data_provider.py</span><a class="headerlink" href="#simple-data-provider" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c1"># Copyright (c) 2026, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="linenos">  2</span><span class="c1">#</span>
+<span class="linenos">  3</span><span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="linenos">  4</span><span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="linenos">  5</span><span class="c1"># You may obtain a copy of the License at</span>
+<span class="linenos">  6</span><span class="c1">#</span>
+<span class="linenos">  7</span><span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="linenos">  8</span><span class="c1">#</span>
+<span class="linenos">  9</span><span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="linenos"> 10</span><span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="linenos"> 11</span><span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="linenos"> 12</span><span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="linenos"> 13</span><span class="c1"># limitations under the License.</span>
+<span class="linenos"> 14</span>
+<span class="linenos"> 15</span><span class="k">try</span><span class="p">:</span>
+<span class="linenos"> 16</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+<span class="linenos"> 17</span><span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+<span class="linenos"> 18</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+<span class="linenos"> 19</span>
+<span class="linenos"> 20</span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="linenos"> 21</span><span class="kn">import</span><span class="w"> </span><span class="nn">nvidia.dali.types</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">types</span>
+<span class="linenos"> 22</span>
+<span class="linenos"> 23</span><span class="kn">from</span><span class="w"> </span><span class="nn">accvlab.dali_pipeline_framework.inputs</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataProvider</span>
+<span class="linenos"> 24</span><span class="kn">from</span><span class="w"> </span><span class="nn">accvlab.dali_pipeline_framework.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleDataGroup</span>
+<span class="linenos"> 25</span>
+<span class="hll"><span class="linenos"> 26</span><span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 27</span><span class="c1"># These mappings demonstrate how a `SampleDataGroup` data field can accept human-readable strings while storing</span>
+</span><span class="hll"><span class="linenos"> 28</span><span class="c1"># numeric IDs in the DALI pipeline. When a mapped field is assigned a string key, the framework converts it to</span>
+</span><span class="hll"><span class="linenos"> 29</span><span class="c1"># the corresponding integer value. This is e.g. useful for class labels (e.g. &quot;vehicle&quot;, &quot;pedestrian&quot;, &quot;cyclist&quot;).</span>
+</span><span class="linenos"> 30</span><span class="n">CAMERA_LABEL_TO_ID</span> <span class="o">=</span> <span class="p">{</span>
+<span class="linenos"> 31</span>    <span class="s2">&quot;vehicle&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+<span class="linenos"> 32</span>    <span class="s2">&quot;pedestrian&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+<span class="linenos"> 33</span>    <span class="s2">&quot;cyclist&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+<span class="linenos"> 34</span>    <span class="s2">&quot;construction&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+<span class="linenos"> 35</span><span class="p">}</span>
+<span class="linenos"> 36</span><span class="n">SCENE_LABEL_TO_ID</span> <span class="o">=</span> <span class="p">{</span>
+<span class="linenos"> 37</span>    <span class="s2">&quot;indoor&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+<span class="linenos"> 38</span>    <span class="s2">&quot;urban&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+<span class="linenos"> 39</span>    <span class="s2">&quot;highway&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+<span class="linenos"> 40</span>    <span class="s2">&quot;tunnel&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+<span class="linenos"> 41</span><span class="p">}</span>
+<span class="linenos"> 42</span><span class="n">CAMERA_ID_TO_LABEL</span> <span class="o">=</span> <span class="p">{</span><span class="n">label_id</span><span class="p">:</span> <span class="n">label</span> <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">label_id</span> <span class="ow">in</span> <span class="n">CAMERA_LABEL_TO_ID</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<span class="linenos"> 43</span><span class="n">SCENE_ID_TO_LABEL</span> <span class="o">=</span> <span class="p">{</span><span class="n">label_id</span><span class="p">:</span> <span class="n">label</span> <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">label_id</span> <span class="ow">in</span> <span class="n">SCENE_LABEL_TO_ID</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<span class="linenos"> 44</span>
+<span class="linenos"> 45</span>
+<span class="hll"><span class="linenos"> 46</span><span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 47</span><span class="c1"># A data provider is responsible for two things:</span>
+</span><span class="hll"><span class="linenos"> 48</span><span class="c1">#   - describing the sample data structure via a `SampleDataGroup` blueprint</span>
+</span><span class="hll"><span class="linenos"> 49</span><span class="c1">#   - returning a filled sample for a requested sample index</span>
+</span><span class="linenos"> 50</span><span class="k">class</span><span class="w"> </span><span class="nc">ExampleDataProvider</span><span class="p">(</span><span class="n">DataProvider</span><span class="p">):</span>
+<span class="linenos"> 51</span><span class="w">    </span><span class="sd">&#39;&#39;&#39;Data provider that generates synthetic multi-camera data for demonstration purposes.</span>
+<span class="linenos"> 52</span>
+<span class="linenos"> 53</span><span class="sd">    Each sample consists of:</span>
+<span class="linenos"> 54</span><span class="sd">      - An array of cameras, each containing a synthetic image and an annotation</span>
+<span class="linenos"> 55</span><span class="sd">        with a string label that is mapped to an integer id by</span>
+<span class="linenos"> 56</span><span class="sd">        :class:`SampleDataGroup`.</span>
+<span class="linenos"> 57</span><span class="sd">      - A global scene label shared across all cameras in the sample, also</span>
+<span class="linenos"> 58</span><span class="sd">        provided as a string and converted via a user-defined mapping.</span>
+<span class="linenos"> 59</span>
+<span class="linenos"> 60</span><span class="sd">    Images are deterministic color gradients so that the output is reproducible</span>
+<span class="linenos"> 61</span><span class="sd">    and visually distinguishable across cameras and samples.</span>
+<span class="linenos"> 62</span><span class="sd">    &#39;&#39;&#39;</span>
+<span class="linenos"> 63</span>
+<span class="linenos"> 64</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="linenos"> 65</span>        <span class="bp">self</span><span class="p">,</span>
+<span class="linenos"> 66</span>        <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+<span class="linenos"> 67</span>        <span class="n">image_height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
+<span class="linenos"> 68</span>        <span class="n">image_width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
+<span class="linenos"> 69</span>        <span class="n">num_cameras</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+<span class="linenos"> 70</span>        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
+<span class="linenos"> 71</span>    <span class="p">):</span>
+<span class="linenos"> 72</span><span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="linenos"> 73</span>
+<span class="linenos"> 74</span><span class="sd">        Args:</span>
+<span class="linenos"> 75</span><span class="sd">            num_samples: Number of samples available in this provider.</span>
+<span class="linenos"> 76</span><span class="sd">            image_height: Height of the generated images in pixels.</span>
+<span class="linenos"> 77</span><span class="sd">            image_width: Width of the generated images in pixels.</span>
+<span class="linenos"> 78</span><span class="sd">            num_cameras: Number of cameras per sample.</span>
+<span class="linenos"> 79</span><span class="sd">            seed: Base seed used for deterministic data generation.</span>
+<span class="linenos"> 80</span><span class="sd">        &#39;&#39;&#39;</span>
+<span class="linenos"> 81</span>
+<span class="linenos"> 82</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_num_samples</span> <span class="o">=</span> <span class="n">num_samples</span>
+<span class="linenos"> 83</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_image_height</span> <span class="o">=</span> <span class="n">image_height</span>
+<span class="linenos"> 84</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_image_width</span> <span class="o">=</span> <span class="n">image_width</span>
+<span class="linenos"> 85</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_num_cameras</span> <span class="o">=</span> <span class="n">num_cameras</span>
+<span class="linenos"> 86</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">=</span> <span class="n">seed</span>
+<span class="linenos"> 87</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_camera_label_names</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">CAMERA_LABEL_TO_ID</span><span class="p">)</span>
+<span class="linenos"> 88</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_scene_label_names</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">SCENE_LABEL_TO_ID</span><span class="p">)</span>
+<span class="linenos"> 89</span>
+<span class="hll"><span class="linenos"> 90</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 91</span>        <span class="c1"># The blueprint contains the field names, nesting, and DALI data types, but no actual sample values.</span>
+</span><span class="hll"><span class="linenos"> 92</span>        <span class="c1"># It also carries the optional string-to-ID mappings used when values are assigned to mapped fields.</span>
+</span><span class="hll"><span class="linenos"> 93</span>        <span class="c1"># It is cached because it is reused both for reporting the input format and for creating empty samples</span>
+</span><span class="hll"><span class="linenos"> 94</span>        <span class="c1"># with the same format in `get_data()`.</span>
+</span><span class="linenos"> 95</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_blueprint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_blueprint</span><span class="p">(</span><span class="n">num_cameras</span><span class="p">)</span>
+<span class="linenos"> 96</span>
+<span class="linenos"> 97</span>    <span class="nd">@override</span>
+<span class="linenos"> 98</span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+<span class="hll"><span class="linenos"> 99</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">100</span>        <span class="c1"># `DataProvider.get_data()` is called by the input callable to obtain one sample by index. The returned</span>
+</span><span class="hll"><span class="linenos">101</span>        <span class="c1"># `SampleDataGroup` must match `sample_data_structure` and contain the actual values for that sample.</span>
+</span><span class="linenos">102</span>
+<span class="hll"><span class="linenos">103</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">104</span>        <span class="c1"># Start each sample from an empty copy of the blueprint. This keeps the data format fixed while</span>
+</span><span class="hll"><span class="linenos">105</span>        <span class="c1"># allowing the actual values to be filled independently for each requested sample.</span>
+</span><span class="linenos">106</span>        <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blueprint</span><span class="o">.</span><span class="n">get_empty_like_self</span><span class="p">()</span>
+<span class="linenos">107</span>        <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">+</span> <span class="n">sample_index</span><span class="p">)</span>
+<span class="linenos">108</span>
+<span class="hll"><span class="linenos">109</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">110</span>        <span class="c1"># The synthetic images are deterministic for a given sample index. This makes the example easy to</span>
+</span><span class="hll"><span class="linenos">111</span>        <span class="c1"># inspect while still providing different values across samples.</span>
+</span><span class="linenos">112</span>        <span class="n">base_color</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">80</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="linenos">113</span>
+<span class="hll"><span class="linenos">114</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">115</span>        <span class="c1"># Fill the array field &quot;cameras&quot;. Each camera entry is a data group with an image and an annotation</span>
+</span><span class="hll"><span class="linenos">116</span>        <span class="c1"># subgroup. Here, the label field is mapped to an integer ID on assignment. String fields can also be</span>
+</span><span class="hll"><span class="linenos">117</span>        <span class="c1"># passed through directly, as shown below with `scene_label_as_str`.</span>
+</span><span class="linenos">118</span>        <span class="k">for</span> <span class="n">cam_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_num_cameras</span><span class="p">):</span>
+<span class="linenos">119</span>            <span class="n">image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_image</span><span class="p">(</span><span class="n">base_color</span><span class="p">,</span> <span class="n">cam_idx</span><span class="p">)</span>
+<span class="linenos">120</span>            <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;cameras&quot;</span><span class="p">][</span><span class="n">cam_idx</span><span class="p">][</span><span class="s2">&quot;image&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">image</span>
+<span class="linenos">121</span>            <span class="n">label_name_as_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camera_label_names</span><span class="p">[</span><span class="n">rng</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_camera_label_names</span><span class="p">))]</span>
+<span class="linenos">122</span>            <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;cameras&quot;</span><span class="p">][</span><span class="n">cam_idx</span><span class="p">][</span><span class="s2">&quot;annotation&quot;</span><span class="p">][</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">label_name_as_str</span>
+<span class="linenos">123</span>
+<span class="hll"><span class="linenos">124</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">125</span>        <span class="c1"># The same scene label is stored twice to show the difference between a mapped integer field and a raw</span>
+</span><span class="hll"><span class="linenos">126</span>        <span class="c1"># string field. `scene_label` is converted via `SCENE_LABEL_TO_ID`, while `scene_label_as_str` is passed</span>
+</span><span class="hll"><span class="linenos">127</span>        <span class="c1"># through as string data.</span>
+</span><span class="linenos">128</span>        <span class="n">scene_label_name_as_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scene_label_names</span><span class="p">[</span><span class="n">rng</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_scene_label_names</span><span class="p">))]</span>
+<span class="linenos">129</span>        <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;scene_label&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scene_label_name_as_str</span>
+<span class="linenos">130</span>        <span class="n">sample</span><span class="p">[</span><span class="s2">&quot;scene_label_as_str&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scene_label_name_as_str</span>
+<span class="linenos">131</span>
+<span class="linenos">132</span>        <span class="k">return</span> <span class="n">sample</span>
+<span class="linenos">133</span>
+<span class="linenos">134</span>    <span class="nd">@override</span>
+<span class="linenos">135</span>    <span class="k">def</span><span class="w"> </span><span class="nf">get_number_of_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="hll"><span class="linenos">136</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">137</span>        <span class="c1"># `DataProvider.get_number_of_samples()` tells the input callable how many samples are available for</span>
+</span><span class="hll"><span class="linenos">138</span>        <span class="c1"># indexing, shuffling, and epoch-length computation.</span>
+</span><span class="linenos">139</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_samples</span>
+<span class="linenos">140</span>
+<span class="linenos">141</span>    <span class="nd">@property</span>
+<span class="linenos">142</span>    <span class="nd">@override</span>
+<span class="linenos">143</span>    <span class="k">def</span><span class="w"> </span><span class="nf">sample_data_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+<span class="hll"><span class="linenos">144</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">145</span>        <span class="c1"># `DataProvider.sample_data_structure` is the provider&#39;s format contract. The pipeline asks for this</span>
+</span><span class="hll"><span class="linenos">146</span>        <span class="c1"># blueprint before execution to infer the input and output formats. Return an (empty) copy so callers</span>
+</span><span class="hll"><span class="linenos">147</span>        <span class="c1"># cannot accidentally fill or mutate the cached blueprint.</span>
+</span><span class="linenos">148</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blueprint</span><span class="o">.</span><span class="n">get_empty_like_self</span><span class="p">()</span>
+<span class="linenos">149</span>
+<span class="linenos">150</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_color</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">cam_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="linenos">151</span><span class="w">        </span><span class="sd">&#39;&#39;&#39;Create a synthetic HxWx3 uint8 image.</span>
+<span class="linenos">152</span>
+<span class="linenos">153</span><span class="sd">        Both cameras in a sample share the same ``base_color`` but use</span>
+<span class="linenos">154</span><span class="sd">        different gradient directions (horizontal for camera 0, vertical for</span>
+<span class="linenos">155</span><span class="sd">        camera 1).  This makes the effect of independent per-camera photometric</span>
+<span class="linenos">156</span><span class="sd">        augmentation clearly visible in the output.</span>
+<span class="linenos">157</span><span class="sd">        &#39;&#39;&#39;</span>
+<span class="linenos">158</span>        <span class="n">h</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image_height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image_width</span>
+<span class="linenos">159</span>
+<span class="hll"><span class="linenos">160</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">161</span>        <span class="c1"># Use different gradient directions for neighboring cameras so that the images are visually distinguishable.</span>
+</span><span class="linenos">162</span>        <span class="k">if</span> <span class="n">cam_idx</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">163</span>            <span class="n">gradient</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="linenos">164</span>            <span class="n">gradient</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">gradient</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:],</span> <span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+<span class="linenos">165</span>        <span class="k">else</span><span class="p">:</span>
+<span class="linenos">166</span>            <span class="n">gradient</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="linenos">167</span>            <span class="n">gradient</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">gradient</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">],</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">w</span><span class="p">))</span>
+<span class="linenos">168</span>
+<span class="linenos">169</span>        <span class="n">image</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+<span class="linenos">170</span>            <span class="p">[</span>
+<span class="linenos">171</span>                <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">gradient</span> <span class="o">*</span> <span class="n">base_color</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+<span class="linenos">172</span>                <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">gradient</span> <span class="o">*</span> <span class="n">base_color</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+<span class="linenos">173</span>                <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">gradient</span> <span class="o">*</span> <span class="n">base_color</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+<span class="linenos">174</span>            <span class="p">],</span>
+<span class="linenos">175</span>            <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+<span class="linenos">176</span>        <span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="linenos">177</span>
+<span class="linenos">178</span>        <span class="k">return</span> <span class="n">image</span>
+<span class="linenos">179</span>
+<span class="linenos">180</span>    <span class="nd">@staticmethod</span>
+<span class="linenos">181</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_build_blueprint</span><span class="p">(</span><span class="n">num_cameras</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+<span class="linenos">182</span><span class="w">        </span><span class="sd">&#39;&#39;&#39;Construct the hierarchical SampleDataGroup blueprint.</span>
+<span class="linenos">183</span>
+<span class="linenos">184</span><span class="sd">        Structure::</span>
+<span class="linenos">185</span>
+<span class="linenos">186</span><span class="sd">            root</span>
+<span class="linenos">187</span><span class="sd">            +-- cameras (array of ``num_cameras`` data group fields)</span>
+<span class="linenos">188</span><span class="sd">            |   +-- 0</span>
+<span class="linenos">189</span><span class="sd">            |   |   +-- image: UINT8</span>
+<span class="linenos">190</span><span class="sd">            |   |   +-- annotation</span>
+<span class="linenos">191</span><span class="sd">            |   |       +-- label: INT32, with string-to-id mapping</span>
+<span class="linenos">192</span><span class="sd">            |   +-- 1</span>
+<span class="linenos">193</span><span class="sd">            |       +-- ...</span>
+<span class="linenos">194</span><span class="sd">            +-- scene_label: INT32, with string-to-id mapping</span>
+<span class="linenos">195</span><span class="sd">            +-- scene_label_as_str: STRING</span>
+<span class="linenos">196</span><span class="sd">        &#39;&#39;&#39;</span>
+<span class="hll"><span class="linenos">197</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">198</span>        <span class="c1"># Build the annotation subgroup first. The `label` field is stored as INT32, but the mapping allows the</span>
+</span><span class="hll"><span class="linenos">199</span>        <span class="c1"># provider to assign strings such as &quot;vehicle&quot; or &quot;pedestrian&quot; when filling samples.</span>
+</span><span class="linenos">200</span>        <span class="n">annotation</span> <span class="o">=</span> <span class="n">SampleDataGroup</span><span class="p">()</span>
+<span class="linenos">201</span>        <span class="n">annotation</span><span class="o">.</span><span class="n">add_data_field</span><span class="p">(</span>
+<span class="linenos">202</span>            <span class="s2">&quot;label&quot;</span><span class="p">,</span>
+<span class="linenos">203</span>            <span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">INT32</span><span class="p">,</span>
+<span class="linenos">204</span>            <span class="n">mapping</span><span class="o">=</span><span class="n">CAMERA_LABEL_TO_ID</span><span class="p">,</span>
+<span class="linenos">205</span>        <span class="p">)</span>
+<span class="linenos">206</span>
+<span class="hll"><span class="linenos">207</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">208</span>        <span class="c1"># A camera is represented as a data group containing the image and the nested annotation group. The</span>
+</span><span class="hll"><span class="linenos">209</span>        <span class="c1"># group is later reused as the template for every element of the &quot;cameras&quot; array field.</span>
+</span><span class="linenos">210</span>        <span class="n">cam</span> <span class="o">=</span> <span class="n">SampleDataGroup</span><span class="p">()</span>
+<span class="linenos">211</span>        <span class="n">cam</span><span class="o">.</span><span class="n">add_data_field</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">UINT8</span><span class="p">)</span>
+<span class="linenos">212</span>        <span class="n">cam</span><span class="o">.</span><span class="n">add_data_group_field</span><span class="p">(</span><span class="s2">&quot;annotation&quot;</span><span class="p">,</span> <span class="n">annotation</span><span class="p">)</span>
+<span class="linenos">213</span>
+<span class="hll"><span class="linenos">214</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">215</span>        <span class="c1"># The root sample contains the multi-camera array and two sample-level scene labels. `scene_label` is a</span>
+</span><span class="hll"><span class="linenos">216</span>        <span class="c1"># mapped INT32 field; `scene_label_as_str` is a STRING field that shows how string data can pass through</span>
+</span><span class="hll"><span class="linenos">217</span>        <span class="c1"># the pipeline directly.</span>
+</span><span class="linenos">218</span>        <span class="n">root</span> <span class="o">=</span> <span class="n">SampleDataGroup</span><span class="p">()</span>
+<span class="linenos">219</span>        <span class="n">root</span><span class="o">.</span><span class="n">add_data_group_field_array</span><span class="p">(</span><span class="s2">&quot;cameras&quot;</span><span class="p">,</span> <span class="n">cam</span><span class="p">,</span> <span class="n">num_cameras</span><span class="p">)</span>
+<span class="linenos">220</span>        <span class="n">root</span><span class="o">.</span><span class="n">add_data_field</span><span class="p">(</span>
+<span class="linenos">221</span>            <span class="s2">&quot;scene_label&quot;</span><span class="p">,</span>
+<span class="linenos">222</span>            <span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">INT32</span><span class="p">,</span>
+<span class="linenos">223</span>            <span class="n">mapping</span><span class="o">=</span><span class="n">SCENE_LABEL_TO_ID</span><span class="p">,</span>
+<span class="linenos">224</span>        <span class="p">)</span>
+<span class="linenos">225</span>        <span class="n">root</span><span class="o">.</span><span class="n">add_data_field</span><span class="p">(</span>
+<span class="linenos">226</span>            <span class="s2">&quot;scene_label_as_str&quot;</span><span class="p">,</span>
+<span class="linenos">227</span>            <span class="n">types</span><span class="o">.</span><span class="n">DALIDataType</span><span class="o">.</span><span class="n">STRING</span><span class="p">,</span>
+<span class="linenos">228</span>        <span class="p">)</span>
+<span class="linenos">229</span>
+<span class="linenos">230</span>        <span class="k">return</span> <span class="n">root</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="pipeline-setup">
+<h2>Pipeline Setup<a class="headerlink" href="#pipeline-setup" title="Link to this heading"></a></h2>
+<p>The pipeline setup connects the data provider to the pipeline, composes the processing steps for the pipeline,
+and wraps the resulting DALI pipeline as a structured iterator. In this example, it also demonstrates how an
+access modifier wrapper is used to apply photometric augmentation independently to each camera while allowing
+the other processing steps to operate on the full sample.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The use of per-camera photometric augmentation illustrates the distinction between consistent and independent processing:
+related fields can be grouped and transformed consistently within a selected sub-tree of the input data structure, while
+different selected sub-trees can receive independent randomization. See <a class="reference internal" href="../../design/pipeline_processing_steps.html"><span class="doc">Pipeline &amp; Processing Steps</span></a> and the
+API documentation of <a class="reference internal" href="../../api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase" title="accvlab.dali_pipeline_framework.processing_steps.PipelineStepBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PipelineStepBase</span></code></a> and
+<a class="reference internal" href="../../api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.GroupToApplyToSelectedStepBase" title="accvlab.dali_pipeline_framework.processing_steps.GroupToApplyToSelectedStepBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">GroupToApplyToSelectedStepBase</span></code></a> for a more
+detailed discussion of this approach.</p>
+</div>
+<div class="literal-block-wrapper docutils container" id="simple-pipeline-setup">
+<div class="code-block-caption"><span class="caption-text">packages/dali_pipeline_framework/examples/simple_full_pipeline/simple_pipeline_setup.py</span><a class="headerlink" href="#simple-pipeline-setup" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c1"># Copyright (c) 2026, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="linenos">  2</span><span class="c1">#</span>
+<span class="linenos">  3</span><span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="linenos">  4</span><span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="linenos">  5</span><span class="c1"># You may obtain a copy of the License at</span>
+<span class="linenos">  6</span><span class="c1">#</span>
+<span class="linenos">  7</span><span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="linenos">  8</span><span class="c1">#</span>
+<span class="linenos">  9</span><span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="linenos"> 10</span><span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="linenos"> 11</span><span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="linenos"> 12</span><span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="linenos"> 13</span><span class="c1"># limitations under the License.</span>
+<span class="linenos"> 14</span>
+<span class="linenos"> 15</span><span class="kn">from</span><span class="w"> </span><span class="nn">accvlab.dali_pipeline_framework.inputs</span><span class="w"> </span><span class="kn">import</span> <span class="n">ShuffledShardedInputCallable</span>
+<span class="linenos"> 16</span><span class="kn">from</span><span class="w"> </span><span class="nn">accvlab.dali_pipeline_framework.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">PipelineDefinition</span><span class="p">,</span> <span class="n">DALIStructuredOutputIterator</span>
+<span class="linenos"> 17</span><span class="kn">from</span><span class="w"> </span><span class="nn">accvlab.dali_pipeline_framework.processing_steps</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+<span class="linenos"> 18</span>    <span class="n">PhotoMetricDistorter</span><span class="p">,</span>
+<span class="linenos"> 19</span>    <span class="n">DataGroupArrayInPathElementsAppliedStep</span><span class="p">,</span>
+<span class="linenos"> 20</span>    <span class="n">ImageRange01Normalizer</span><span class="p">,</span>
+<span class="linenos"> 21</span>    <span class="n">AnnotationElementConditionEval</span><span class="p">,</span>
+<span class="linenos"> 22</span><span class="p">)</span>
+<span class="linenos"> 23</span>
+<span class="linenos"> 24</span><span class="kn">from</span><span class="w"> </span><span class="nn">simple_data_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">ExampleDataProvider</span>
+<span class="linenos"> 25</span>
+<span class="linenos"> 26</span>
+<span class="linenos"> 27</span><span class="k">def</span><span class="w"> </span><span class="nf">setup_simple_pipeline</span><span class="p">(</span>
+<span class="linenos"> 28</span>    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+<span class="linenos"> 29</span>    <span class="n">num_samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+<span class="linenos"> 30</span>    <span class="n">num_cameras</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+<span class="linenos"> 31</span>    <span class="n">image_height</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
+<span class="linenos"> 32</span>    <span class="n">image_width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span>
+<span class="linenos"> 33</span>    <span class="n">device_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<span class="linenos"> 34</span>    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
+<span class="linenos"> 35</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DALIStructuredOutputIterator</span><span class="p">:</span>
+<span class="linenos"> 36</span><span class="w">    </span><span class="sd">&#39;&#39;&#39;Build and return a ready-to-iterate DALI pipeline for the simple example.</span>
+<span class="linenos"> 37</span>
+<span class="linenos"> 38</span><span class="sd">    Args:</span>
+<span class="linenos"> 39</span><span class="sd">        batch_size: Number of samples per batch.</span>
+<span class="linenos"> 40</span><span class="sd">        num_samples: Total number of samples available.</span>
+<span class="linenos"> 41</span><span class="sd">        num_cameras: Number of cameras per sample.</span>
+<span class="linenos"> 42</span><span class="sd">        image_height: Height of the generated images in pixels.</span>
+<span class="linenos"> 43</span><span class="sd">        image_width: Width of the generated images in pixels.</span>
+<span class="linenos"> 44</span><span class="sd">        device_id: GPU device id.</span>
+<span class="linenos"> 45</span><span class="sd">        seed: Random seed for augmentation reproducibility.</span>
+<span class="linenos"> 46</span>
+<span class="linenos"> 47</span><span class="sd">    Returns:</span>
+<span class="linenos"> 48</span><span class="sd">        An iterator (drop-in replacement for a PyTorch DataLoader) that yields</span>
+<span class="linenos"> 49</span><span class="sd">        nested dicts with the processed data.</span>
+<span class="linenos"> 50</span><span class="sd">    &#39;&#39;&#39;</span>
+<span class="linenos"> 51</span>
+<span class="linenos"> 52</span>    <span class="c1"># ===== Input data handling =====</span>
+<span class="linenos"> 53</span>
+<span class="hll"><span class="linenos"> 54</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 55</span>    <span class="c1"># Goal: Create an input callable which provides one sample at a time to DALI&#39;s external source. The</span>
+</span><span class="hll"><span class="linenos"> 56</span>    <span class="c1"># provider defines the sample structure and fills that structure with data on request. This example uses a</span>
+</span><span class="hll"><span class="linenos"> 57</span>    <span class="c1"># provider that generates synthetic samples so it can run without dataset preparation; in a real use case,</span>
+</span><span class="hll"><span class="linenos"> 58</span>    <span class="c1"># the same setup pattern can be used with a provider that loads the actual training data.</span>
+</span><span class="linenos"> 59</span>    <span class="n">data_provider</span> <span class="o">=</span> <span class="n">ExampleDataProvider</span><span class="p">(</span>
+<span class="linenos"> 60</span>        <span class="n">num_samples</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span>
+<span class="linenos"> 61</span>        <span class="n">image_height</span><span class="o">=</span><span class="n">image_height</span><span class="p">,</span>
+<span class="linenos"> 62</span>        <span class="n">image_width</span><span class="o">=</span><span class="n">image_width</span><span class="p">,</span>
+<span class="linenos"> 63</span>        <span class="n">num_cameras</span><span class="o">=</span><span class="n">num_cameras</span><span class="p">,</span>
+<span class="linenos"> 64</span>        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+<span class="linenos"> 65</span>    <span class="p">)</span>
+<span class="linenos"> 66</span>
+<span class="hll"><span class="linenos"> 67</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 68</span>    <span class="c1"># The general `ShuffledShardedInputCallable` wraps the provider and adds common input behavior: batching,</span>
+</span><span class="hll"><span class="linenos"> 69</span>    <span class="c1"># shuffling, and optional sharding for multi-GPU setups. This keeps the provider focused on describing and</span>
+</span><span class="hll"><span class="linenos"> 70</span>    <span class="c1"># returning individual samples.</span>
+</span><span class="linenos"> 71</span>    <span class="n">input_callable</span> <span class="o">=</span> <span class="n">ShuffledShardedInputCallable</span><span class="p">(</span>
+<span class="linenos"> 72</span>        <span class="n">data_provider</span><span class="p">,</span>
+<span class="linenos"> 73</span>        <span class="n">batch_size</span><span class="p">,</span>
+<span class="linenos"> 74</span>        <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="linenos"> 75</span>        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+<span class="linenos"> 76</span>    <span class="p">)</span>
+<span class="linenos"> 77</span>
+<span class="linenos"> 78</span>    <span class="c1"># ===== Define processing steps =====</span>
+<span class="linenos"> 79</span>
+<span class="hll"><span class="linenos"> 80</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 81</span>    <span class="c1"># The processing steps are defined as separate objects and then composed into a pipeline. This mirrors the</span>
+</span><span class="hll"><span class="linenos"> 82</span>    <span class="c1"># larger examples, but uses only a small set of steps to avoid bloating the example with unnecessary complexity.</span>
+</span><span class="linenos"> 83</span>
+<span class="hll"><span class="linenos"> 84</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 85</span>    <span class="c1"># Step 1 -- Photometric augmentation for images. `PhotoMetricDistorter` searches for image fields with the</span>
+</span><span class="hll"><span class="linenos"> 86</span>    <span class="c1"># configured name and applies random brightness, contrast, saturation, and hue changes.</span>
+</span><span class="hll"><span class="linenos"> 87</span>    <span class="c1">#</span>
+</span><span class="hll"><span class="linenos"> 88</span>    <span class="c1"># When used directly on the full sample, the same random decisions would be shared across matching fields (i.e. the images of</span>
+</span><span class="hll"><span class="linenos"> 89</span>    <span class="c1"># all cameras in the sample). In the next step, we wrap it with an access modifier wrapper to apply it independently per</span>
+</span><span class="hll"><span class="linenos"> 90</span>    <span class="c1"># camera.</span>
+</span><span class="linenos"> 91</span>    <span class="n">photometric_step</span> <span class="o">=</span> <span class="n">PhotoMetricDistorter</span><span class="p">(</span>
+<span class="linenos"> 92</span>        <span class="n">image_name</span><span class="o">=</span><span class="s2">&quot;image&quot;</span><span class="p">,</span>
+<span class="linenos"> 93</span>        <span class="n">min_max_brightness</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">32.0</span><span class="p">,</span> <span class="mf">32.0</span><span class="p">],</span>
+<span class="linenos"> 94</span>        <span class="n">min_max_contrast</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">],</span>
+<span class="linenos"> 95</span>        <span class="n">min_max_saturation</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">],</span>
+<span class="linenos"> 96</span>        <span class="n">min_max_hue</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mf">18.0</span><span class="p">,</span> <span class="mf">18.0</span><span class="p">],</span>
+<span class="linenos"> 97</span>        <span class="n">prob_brightness_aug</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="linenos"> 98</span>        <span class="n">prob_contrast_aug</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="linenos"> 99</span>        <span class="n">prob_saturation_aug</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="linenos">100</span>        <span class="n">prob_hue_aug</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="linenos">101</span>        <span class="n">prob_swap_channels</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<span class="linenos">102</span>        <span class="n">enforce_process_on_gpu</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="linenos">103</span>    <span class="p">)</span>
+<span class="linenos">104</span>
+<span class="hll"><span class="linenos">105</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">106</span>    <span class="c1"># The access modifier wrapper applies the wrapped step separately to each element of the &quot;cameras&quot; array.</span>
+</span><span class="hll"><span class="linenos">107</span>    <span class="c1"># Each camera therefore receives its own random augmentation.</span>
+</span><span class="hll"><span class="linenos">108</span>    <span class="c1">#</span>
+</span><span class="hll"><span class="linenos">109</span>    <span class="c1"># More generally, access modifiers are useful whenever related fields form a sub-tree that should be</span>
+</span><span class="hll"><span class="linenos">110</span>    <span class="c1"># processed consistently, while other such sub-trees should be randomized independently. For example, a</span>
+</span><span class="hll"><span class="linenos">111</span>    <span class="c1"># spatial image transform may need to update an image, its segmentation mask, projected points or bounding</span>
+</span><span class="hll"><span class="linenos">112</span>    <span class="c1"># boxes, and the corresponding projection matrix with the same sampled transformation. Grouping all fields</span>
+</span><span class="hll"><span class="linenos">113</span>    <span class="c1"># for one camera into one selected sub-tree keeps these correspondences consistent, while still allowing a</span>
+</span><span class="hll"><span class="linenos">114</span>    <span class="c1"># different random transformation for each camera. Please see the API documentation for the available access modifier</span>
+</span><span class="hll"><span class="linenos">115</span>    <span class="c1"># wrappers.</span>
+</span><span class="linenos">116</span>    <span class="n">independent_photometric_per_camera</span> <span class="o">=</span> <span class="n">DataGroupArrayInPathElementsAppliedStep</span><span class="p">(</span>
+<span class="linenos">117</span>        <span class="n">photometric_step</span><span class="p">,</span>
+<span class="linenos">118</span>        <span class="n">path_to_array_to_apply_to</span><span class="o">=</span><span class="s2">&quot;cameras&quot;</span><span class="p">,</span>
+<span class="linenos">119</span>    <span class="p">)</span>
+<span class="linenos">120</span>
+<span class="hll"><span class="linenos">121</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">122</span>    <span class="c1"># Step 2 -- Normalize all images (i.e. all fields named &quot;image&quot; in the data structure) to the [0, 1] float range.</span>
+</span><span class="linenos">123</span>    <span class="n">image_normalizer</span> <span class="o">=</span> <span class="n">ImageRange01Normalizer</span><span class="p">(</span><span class="s2">&quot;image&quot;</span><span class="p">)</span>
+<span class="linenos">124</span>
+<span class="hll"><span class="linenos">125</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">126</span>    <span class="c1"># Step 3 -- Evaluate a condition on the per-camera annotations. For each &quot;annotation&quot; data group, the</span>
+</span><span class="hll"><span class="linenos">127</span>    <span class="c1"># expression creates a new &quot;is_active&quot; field alongside &quot;label&quot;. Keeping `label` in the output makes it easy</span>
+</span><span class="hll"><span class="linenos">128</span>    <span class="c1"># to compare the original mapped label with the derived flag when inspecting the result.</span>
+</span><span class="linenos">129</span>    <span class="n">condition_eval</span> <span class="o">=</span> <span class="n">AnnotationElementConditionEval</span><span class="p">(</span>
+<span class="linenos">130</span>        <span class="n">annotation_field_name</span><span class="o">=</span><span class="s2">&quot;annotation&quot;</span><span class="p">,</span>
+<span class="linenos">131</span>        <span class="n">condition</span><span class="o">=</span><span class="s2">&quot;is_active = label &gt;= 3 and label &lt; 8&quot;</span><span class="p">,</span>
+<span class="linenos">132</span>        <span class="n">remove_data_fields_used_in_condition</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="linenos">133</span>    <span class="p">)</span>
+<span class="linenos">134</span>
+<span class="hll"><span class="linenos">135</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">136</span>    <span class="c1"># Store the processing steps in execution order. This list defines the steps which are performed in the</span>
+</span><span class="hll"><span class="linenos">137</span>    <span class="c1"># pipeline and their order.</span>
+</span><span class="linenos">138</span>    <span class="n">processing_steps</span> <span class="o">=</span> <span class="p">[</span>
+<span class="linenos">139</span>        <span class="n">independent_photometric_per_camera</span><span class="p">,</span>
+<span class="linenos">140</span>        <span class="n">image_normalizer</span><span class="p">,</span>
+<span class="linenos">141</span>        <span class="n">condition_eval</span><span class="p">,</span>
+<span class="linenos">142</span>    <span class="p">]</span>
+<span class="linenos">143</span>
+<span class="linenos">144</span>    <span class="c1"># ===== Pipeline definition =====</span>
+<span class="linenos">145</span>
+<span class="hll"><span class="linenos">146</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">147</span>    <span class="c1"># Define the pipeline from the input callable and the processing steps.</span>
+</span><span class="hll"><span class="linenos">148</span>    <span class="c1">#</span>
+</span><span class="hll"><span class="linenos">149</span>    <span class="c1"># `check_data_format` controls type/format checks inside the DALI pipeline. It is useful to enable during</span>
+</span><span class="hll"><span class="linenos">150</span>    <span class="c1"># development, when adding custom steps, or when changing the input data structure, as it catches mistakes</span>
+</span><span class="hll"><span class="linenos">151</span>    <span class="c1"># such as assigning a field with the wrong DALI type. After the pipeline and data format have been</span>
+</span><span class="hll"><span class="linenos">152</span>    <span class="c1"># validated, it is usually disabled in production to avoid the related overhead.</span>
+</span><span class="linenos">153</span>    <span class="n">pipeline_def</span> <span class="o">=</span> <span class="n">PipelineDefinition</span><span class="p">(</span>
+<span class="linenos">154</span>        <span class="n">input_callable</span><span class="p">,</span>
+<span class="linenos">155</span>        <span class="n">preprocess_functors</span><span class="o">=</span><span class="n">processing_steps</span><span class="p">,</span>
+<span class="linenos">156</span>        <span class="n">check_data_format</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># Enable during development/debugging, disable in production.</span>
+<span class="linenos">157</span>        <span class="n">print_sample_data_group_format</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># This is useful to inspect the data format after each step (for debugging).</span>
+<span class="linenos">158</span>        <span class="c1"># Disable the DALI external-source pass-through issue copy workaround: callable inputs with</span>
+<span class="linenos">159</span>        <span class="c1"># batch_size &gt; 1 are outside the affected case. See the API docs for this constructor argument for</span>
+<span class="linenos">160</span>        <span class="c1"># details about the underlying issue and when a copy is needed.</span>
+<span class="linenos">161</span>        <span class="n">copy_external_source_passthrough_outputs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="linenos">162</span>    <span class="p">)</span>
+<span class="linenos">163</span>
+<span class="hll"><span class="linenos">164</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">165</span>    <span class="c1"># Infer the output data format blueprint. The resulting `SampleDataGroup` blueprint has the same structure and field types as</span>
+</span><span class="hll"><span class="linenos">166</span>    <span class="c1"># the pipeline output and is (further down in the code) used to reconstruct nested dictionaries from DALI&#39;s flat output</span>
+</span><span class="hll"><span class="linenos">167</span>    <span class="c1"># sequence.</span>
+</span><span class="linenos">168</span>    <span class="n">output_data_structure</span> <span class="o">=</span> <span class="n">pipeline_def</span><span class="o">.</span><span class="n">check_and_get_output_data_structure</span><span class="p">()</span>
+<span class="linenos">169</span>
+<span class="hll"><span class="linenos">170</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">171</span>    <span class="c1"># Create the underlying DALI `Pipeline` object.</span>
+</span><span class="linenos">172</span>    <span class="n">pipe</span> <span class="o">=</span> <span class="n">pipeline_def</span><span class="o">.</span><span class="n">get_dali_pipeline</span><span class="p">(</span>
+<span class="linenos">173</span>        <span class="n">enable_conditionals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># &lt;- this needs to be enabled for the pipelines build with this framework.</span>
+<span class="linenos">174</span>        <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+<span class="linenos">175</span>        <span class="n">num_threads</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<span class="linenos">176</span>        <span class="n">device_id</span><span class="o">=</span><span class="n">device_id</span><span class="p">,</span>
+<span class="linenos">177</span>        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+<span class="linenos">178</span>        <span class="n">py_num_workers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<span class="linenos">179</span>        <span class="n">py_start_method</span><span class="o">=</span><span class="s2">&quot;spawn&quot;</span><span class="p">,</span>
+<span class="linenos">180</span>    <span class="p">)</span>
+<span class="linenos">181</span>
+<span class="hll"><span class="linenos">182</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">183</span>    <span class="c1"># Build the DALI pipeline.</span>
+</span><span class="linenos">184</span>    <span class="n">pipe</span><span class="o">.</span><span class="n">build</span><span class="p">()</span>
+<span class="linenos">185</span>
+<span class="linenos">186</span>    <span class="c1"># ===== Wrap as iterator =====</span>
+<span class="linenos">187</span>
+<span class="hll"><span class="linenos">188</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">189</span>    <span class="c1"># Wrap the DALI pipeline so consumers receive nested dictionaries matching the `SampleDataGroup` structure</span>
+</span><span class="hll"><span class="linenos">190</span>    <span class="c1"># instead of the flat tuple returned by the raw DALI pipeline. The wrapper can be used as a drop-in</span>
+</span><span class="hll"><span class="linenos">191</span>    <span class="c1"># replacement for a PyTorch DataLoader in training code.</span>
+</span><span class="linenos">192</span>    <span class="n">num_batches</span> <span class="o">=</span> <span class="n">input_callable</span><span class="o">.</span><span class="n">length</span>
+<span class="linenos">193</span>    <span class="n">result_iterator</span> <span class="o">=</span> <span class="n">DALIStructuredOutputIterator</span><span class="o">.</span><span class="n">CreateAsDataLoaderObject</span><span class="p">(</span>
+<span class="linenos">194</span>        <span class="n">num_batches</span><span class="p">,</span> <span class="n">pipe</span><span class="p">,</span> <span class="n">output_data_structure</span>
+<span class="linenos">195</span>    <span class="p">)</span>
+<span class="linenos">196</span>
+<span class="linenos">197</span>    <span class="k">return</span> <span class="n">result_iterator</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="entry-point">
+<h2>Entry Point<a class="headerlink" href="#entry-point" title="Link to this heading"></a></h2>
+<p>The entry point shows how the configured pipeline is used from an application script. It iterates over a few
+batches, prints the nested output structure, and dumps the processed results for inspection.</p>
+<div class="literal-block-wrapper docutils container" id="run-example">
+<div class="code-block-caption"><span class="caption-text">packages/dali_pipeline_framework/examples/simple_full_pipeline/run_example.py</span><a class="headerlink" href="#run-example" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="c1"># Copyright (c) 2026, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="linenos">  2</span><span class="c1">#</span>
+<span class="linenos">  3</span><span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="linenos">  4</span><span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="linenos">  5</span><span class="c1"># You may obtain a copy of the License at</span>
+<span class="linenos">  6</span><span class="c1">#</span>
+<span class="linenos">  7</span><span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="linenos">  8</span><span class="c1">#</span>
+<span class="linenos">  9</span><span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="linenos"> 10</span><span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="linenos"> 11</span><span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="linenos"> 12</span><span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="linenos"> 13</span><span class="c1"># limitations under the License.</span>
+<span class="linenos"> 14</span>
+<span class="linenos"> 15</span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="linenos"> 16</span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="linenos"> 17</span>
+<span class="linenos"> 18</span><span class="k">try</span><span class="p">:</span>
+<span class="linenos"> 19</span>    <span class="kn">from</span><span class="w"> </span><span class="nn">accvlab.optim_test_tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">TensorDumper</span>
+<span class="linenos"> 20</span><span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+<span class="linenos"> 21</span>    <span class="nb">print</span><span class="p">(</span>
+<span class="linenos"> 22</span>        <span class="s2">&quot;ERROR: Could not import `accvlab.optim_test_tools`, which provides helper utilities used by this &quot;</span>
+<span class="linenos"> 23</span>        <span class="s2">&quot;example (for example, dumping pipeline outputs for inspection). The `optim_test_tools` package is &quot;</span>
+<span class="linenos"> 24</span>        <span class="s2">&quot;part of this ACCV-Lab repository, so this usually means not all packages of this project are &quot;</span>
+<span class="linenos"> 25</span>        <span class="s2">&quot;installed. Please see `docs/guides/INSTALLATION_GUIDE.md` or the HTML documentation for installation &quot;</span>
+<span class="linenos"> 26</span>        <span class="s2">&quot;details.&quot;</span><span class="p">,</span>
+<span class="linenos"> 27</span>        <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+<span class="linenos"> 28</span>    <span class="p">)</span>
+<span class="linenos"> 29</span>    <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+<span class="linenos"> 30</span>
+<span class="linenos"> 31</span><span class="kn">from</span><span class="w"> </span><span class="nn">simple_pipeline_setup</span><span class="w"> </span><span class="kn">import</span> <span class="n">setup_simple_pipeline</span>
+<span class="linenos"> 32</span>
+<span class="linenos"> 33</span><span class="n">_current_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+<span class="linenos"> 34</span>
+<span class="hll"><span class="linenos"> 35</span><span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 36</span><span class="c1"># Set up `TensorDumper` before running the pipeline. The dumper is not required for training; it is used here</span>
+</span><span class="hll"><span class="linenos"> 37</span><span class="c1"># so the tutorial output can be inspected visually and structurally after the example has run.</span>
+</span><span class="linenos"> 38</span><span class="n">dump_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_current_dir</span><span class="p">,</span> <span class="s2">&quot;dump_simple_pipeline&quot;</span><span class="p">)</span>
+<span class="linenos"> 39</span><span class="n">dumper</span> <span class="o">=</span> <span class="n">TensorDumper</span><span class="p">()</span>
+<span class="linenos"> 40</span><span class="n">dumper</span><span class="o">.</span><span class="n">enable</span><span class="p">(</span><span class="n">dump_dir</span><span class="p">)</span>
+<span class="linenos"> 41</span>
+<span class="linenos"> 42</span>
+<span class="linenos"> 43</span><span class="k">def</span><span class="w"> </span><span class="nf">_print_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">batch_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="linenos"> 44</span><span class="w">    </span><span class="sd">&#39;&#39;&#39;Print a human-readable summary of one batch (nested dict of tensors).&#39;&#39;&#39;</span>
+<span class="linenos"> 45</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">===== Batch </span><span class="si">{</span><span class="n">batch_idx</span><span class="si">}</span><span class="s2"> =====&quot;</span><span class="p">)</span>
+<span class="linenos"> 46</span>
+<span class="hll"><span class="linenos"> 47</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 48</span>    <span class="c1"># The `DALIStructuredOutputIterator` reconstructs the nested sample structure from the flat DALI output.</span>
+</span><span class="hll"><span class="linenos"> 49</span>    <span class="c1"># The batch can therefore be accessed like the original `SampleDataGroup` hierarchy: cameras -&gt; annotation</span>
+</span><span class="hll"><span class="linenos"> 50</span>    <span class="c1"># -&gt; label/is_active, plus sample-level scene label fields.</span>
+</span><span class="linenos"> 51</span>    <span class="n">cameras</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;cameras&quot;</span><span class="p">]</span>
+<span class="linenos"> 52</span>    <span class="n">num_cameras</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cameras</span><span class="p">)</span>
+<span class="linenos"> 53</span>    <span class="k">for</span> <span class="n">cam_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_cameras</span><span class="p">):</span>
+<span class="linenos"> 54</span>        <span class="n">cam</span> <span class="o">=</span> <span class="n">cameras</span><span class="p">[</span><span class="n">cam_idx</span><span class="p">]</span>
+<span class="linenos"> 55</span>        <span class="n">img</span> <span class="o">=</span> <span class="n">cam</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span>
+<span class="linenos"> 56</span>        <span class="n">annotation</span> <span class="o">=</span> <span class="n">cam</span><span class="p">[</span><span class="s2">&quot;annotation&quot;</span><span class="p">]</span>
+<span class="linenos"> 57</span>        <span class="n">label</span> <span class="o">=</span> <span class="n">annotation</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span>
+<span class="linenos"> 58</span>        <span class="n">is_active</span> <span class="o">=</span> <span class="n">annotation</span><span class="p">[</span><span class="s2">&quot;is_active&quot;</span><span class="p">]</span>
+<span class="linenos"> 59</span>
+<span class="linenos"> 60</span>        <span class="nb">print</span><span class="p">(</span>
+<span class="linenos"> 61</span>            <span class="sa">f</span><span class="s2">&quot;  Camera </span><span class="si">{</span><span class="n">cam_idx</span><span class="si">}</span><span class="s2">:&quot;</span>
+<span class="linenos"> 62</span>            <span class="sa">f</span><span class="s2">&quot;  image shape=</span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="si">}</span><span class="s2">  dtype=</span><span class="si">{</span><span class="n">img</span><span class="o">.</span><span class="n">dtype</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="linenos"> 63</span>            <span class="sa">f</span><span class="s2">&quot;  |  label=</span><span class="si">{</span><span class="n">label</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="linenos"> 64</span>            <span class="sa">f</span><span class="s2">&quot;  is_active=</span><span class="si">{</span><span class="n">is_active</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="linenos"> 65</span>        <span class="p">)</span>
+<span class="linenos"> 66</span>
+<span class="linenos"> 67</span>    <span class="n">scene_label</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;scene_label&quot;</span><span class="p">]</span>
+<span class="linenos"> 68</span>    <span class="n">scene_label_as_str</span> <span class="o">=</span> <span class="n">batch</span><span class="p">[</span><span class="s2">&quot;scene_label_as_str&quot;</span><span class="p">]</span>
+<span class="linenos"> 69</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  Scene label:&quot;</span> <span class="sa">f</span><span class="s2">&quot;  mapped=</span><span class="si">{</span><span class="n">scene_label</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span> <span class="sa">f</span><span class="s2">&quot;  original=</span><span class="si">{</span><span class="n">scene_label_as_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos"> 70</span>
+<span class="linenos"> 71</span>
+<span class="linenos"> 72</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos"> 73</span>    <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="linenos"> 74</span>    <span class="n">num_iterations</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="linenos"> 75</span>
+<span class="linenos"> 76</span>    <span class="c1"># ===== Set up the pipeline =====</span>
+<span class="hll"><span class="linenos"> 77</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 78</span>    <span class="c1"># `setup_simple_pipeline()` performs all framework-specific setup: provider creation, input callable</span>
+</span><span class="hll"><span class="linenos"> 79</span>    <span class="c1"># wrapping, processing-step composition, DALI pipeline build, and output iterator wrapping.</span>
+</span><span class="linenos"> 80</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Setting up the simple pipeline...&quot;</span><span class="p">)</span>
+<span class="linenos"> 81</span>    <span class="n">data_loader</span> <span class="o">=</span> <span class="n">setup_simple_pipeline</span><span class="p">(</span><span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">)</span>
+<span class="linenos"> 82</span>    <span class="n">data_iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">data_loader</span><span class="p">)</span>
+<span class="linenos"> 83</span>
+<span class="linenos"> 84</span>    <span class="c1"># ===== Iterate over batches =====</span>
+<span class="hll"><span class="linenos"> 85</span>    <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos"> 86</span>    <span class="c1"># Iterate like a regular PyTorch DataLoader. The example resets the iterator on `StopIteration` so it can</span>
+</span><span class="hll"><span class="linenos"> 87</span>    <span class="c1"># run for a fixed number of demonstration iterations even if the small synthetic dataset is exhausted.</span>
+</span><span class="linenos"> 88</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_iterations</span><span class="p">):</span>
+<span class="linenos"> 89</span>        <span class="k">try</span><span class="p">:</span>
+<span class="linenos"> 90</span>            <span class="n">batch</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">data_iter</span><span class="p">)</span>
+<span class="linenos"> 91</span>        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+<span class="linenos"> 92</span>            <span class="n">data_iter</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+<span class="linenos"> 93</span>            <span class="n">batch</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">data_iter</span><span class="p">)</span>
+<span class="linenos"> 94</span>
+<span class="linenos"> 95</span>        <span class="n">_print_batch</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+<span class="linenos"> 96</span>
+<span class="linenos"> 97</span>        <span class="c1"># ===== Dump using TensorDumper (for illustration purposes) =====</span>
+<span class="linenos"> 98</span>
+<span class="hll"><span class="linenos"> 99</span>        <span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">100</span>        <span class="c1"># Dump the structured batch. Images are overridden to be written as RGB image files, while the scalar</span>
+</span><span class="hll"><span class="linenos">101</span>        <span class="c1"># labels and nested metadata are dumped as JSON-compatible values.</span>
+</span><span class="linenos">102</span>        <span class="n">dumper</span><span class="o">.</span><span class="n">add_tensor_data</span><span class="p">(</span>
+<span class="linenos">103</span>            <span class="s2">&quot;output&quot;</span><span class="p">,</span>
+<span class="linenos">104</span>            <span class="n">batch</span><span class="p">,</span>
+<span class="linenos">105</span>            <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">JSON</span><span class="p">,</span>
+<span class="linenos">106</span>            <span class="n">dump_type_override</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;image&quot;</span><span class="p">:</span> <span class="n">TensorDumper</span><span class="o">.</span><span class="n">Type</span><span class="o">.</span><span class="n">IMAGE_RGB</span><span class="p">},</span>
+<span class="linenos">107</span>        <span class="p">)</span>
+<span class="linenos">108</span>        <span class="n">dumper</span><span class="o">.</span><span class="n">dump</span><span class="p">()</span>
+<span class="linenos">109</span>
+<span class="linenos">110</span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Dumped to: </span><span class="si">{</span><span class="n">dump_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="expected-output">
+<h2>Expected Output<a class="headerlink" href="#expected-output" title="Link to this heading"></a></h2>
+<p>Running the example prints a short summary for each processed batch, including per-camera image shapes, mapped
+annotation labels, derived <code class="docutils literal notranslate"><span class="pre">is_active</span></code> flags, and the sample-level scene labels. For each iteration, it also
+writes TensorDumper output at
+<code class="docutils literal notranslate"><span class="pre">packages/dali_pipeline_framework/examples/simple_full_pipeline/dump_simple_pipeline</span></code>. Image fields are dumped
+as RGB image files, while the remaining JSON-compatible values and metadata are stored in the dump for
+inspection.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../../examples.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../2d_object_detection/index.html" class="btn btn-neutral float-right" title="2D Object Detection Pipeline" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

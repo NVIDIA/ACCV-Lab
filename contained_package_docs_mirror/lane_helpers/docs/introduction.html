@@ -1,0 +1,237 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Introduction &mdash; ACCV-Lab 0.2.0.post1.dev45+g5418854af documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=268b1a7e"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="API Reference" href="api.html" />
+    <link rel="prev" title="Lane Helpers" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../multi_tensor_copier/docs/index.html">Multi-Tensor Copier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Lane Helpers</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#polyline-sampling">Polyline Sampling</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#functionality">Functionality</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#runtime-evaluation">Runtime Evaluation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example.html">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../release_notes_page.html">Release Notes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Lane Helpers</a></li>
+      <li class="breadcrumb-item active">Introduction</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/contained_package_docs_mirror/lane_helpers/docs/introduction.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading"></a></h1>
+<section id="polyline-sampling">
+<h2>Polyline Sampling<a class="headerlink" href="#polyline-sampling" title="Link to this heading"></a></h2>
+<section id="functionality">
+<h3>Functionality<a class="headerlink" href="#functionality" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">lane_helpers</span></code> package provides utilities for lane-processing workloads.</p>
+<p>The main functionality is batched polyline interpolation. A polyline is a sequence of points in the
+space <span class="math notranslate nohighlight">\(\mathbb{R}^D\)</span>, written as <span class="math notranslate nohighlight">\(\mathbf{p}_i\)</span>, where each pair of consecutive points defines
+one line segment.</p>
+<p>Given sampling distances <span class="math notranslate nohighlight">\(d_j\)</span> measured from the first point <span class="math notranslate nohighlight">\(\mathbf{p}_0\)</span> along the
+polyline, the sampling function <a class="reference internal" href="api.html#accvlab.lane_helpers.polyline.interpolate" title="accvlab.lane_helpers.polyline.interpolate"><code class="xref py py-func docutils literal notranslate"><span class="pre">interpolate()</span></code></a> returns the
+corresponding sampled points <span class="math notranslate nohighlight">\(\mathbf{q}_j\)</span>.</p>
+<figure class="align-center" id="id1">
+<a class="reference internal image-reference" href="../../../_images/polyline_sampling_illustration.png"><img alt="Illustration of polyline sampling" src="../../../_images/polyline_sampling_illustration.png" style="width: 460.8px; height: 212.85px;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Two-segment polyline sampled at two distances. The input points are shown as green circles, and the
+sampled points are shown as red circles.</span><a class="headerlink" href="#id1" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>Sampling distances do not need to be sorted. Distances can be provided either as absolute distances along
+the polyline or as fractions of each polyline’s total length.</p>
+<p>Point coordinates are not limited to 2D. The coordinate dimension is the last tensor dimension, and 2D,
+3D, and higher-dimensional coordinates are supported.</p>
+<p>For batches with variable numbers of points or distances, use
+<a class="reference internal" href="api.html#accvlab.lane_helpers.polyline.interpolate_var_size_batch" title="accvlab.lane_helpers.polyline.interpolate_var_size_batch"><code class="xref py py-func docutils literal notranslate"><span class="pre">interpolate_var_size_batch()</span></code></a> with
+<a class="reference internal" href="../../batching_helpers/docs/api.html#accvlab.batching_helpers.RaggedBatch" title="accvlab.batching_helpers.RaggedBatch"><code class="xref py py-class docutils literal notranslate"><span class="pre">RaggedBatch</span></code></a> inputs.</p>
+<p>Functionality to compute the total length of each polyline is also provided (through
+<a class="reference internal" href="api.html#accvlab.lane_helpers.polyline.lengths" title="accvlab.lane_helpers.polyline.lengths"><code class="xref py py-func docutils literal notranslate"><span class="pre">lengths()</span></code></a> and <a class="reference internal" href="api.html#accvlab.lane_helpers.polyline.lengths_var_size_batch" title="accvlab.lane_helpers.polyline.lengths_var_size_batch"><code class="xref py py-func docutils literal notranslate"><span class="pre">lengths_var_size_batch()</span></code></a>).</p>
+</section>
+<section id="runtime-evaluation">
+<h3>Runtime Evaluation<a class="headerlink" href="#runtime-evaluation" title="Link to this heading"></a></h3>
+<p>The runtime evaluation compares batched interpolation for both CPU and CUDA against a Shapely LineString
+reference over a grid of point counts, numbers of sampled distances, and batch sizes. Runtime plots report
+milliseconds per interpolation call, while speedup plots report the x-fold improvement over the Shapely
+reference.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The evaluation script is available at <code class="docutils literal notranslate"><span class="pre">packages/lane_helpers/evaluation/shapely_evaluation.py</span></code>. It can be
+used to run the benchmark sweep for different problem sizes on your target system.</p>
+</div>
+<p>Performance depends on the batch size for both CPU and CUDA execution. CUDA parallelism scales with the number
+of polylines in the batch, so very small batch sizes may not fully utilize the GPU.</p>
+<p>For practical problem sizes, it is recommended to choose the implementation based primarily on where the
+tensors already live: CPU inputs should generally stay on CPU, and CUDA inputs should generally stay on CUDA.
+Moving tensors only to use a different implementation can dominate the interpolation cost.</p>
+<p>The plots below focus on batch sizes 1 and 64 as examples. The evaluation script runs for more batch sizes by
+default, and other batch sizes can be easily added.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The following measurements are intended as directional guidance. Exact runtimes depend on the used system,
+with performance primarily influenced by the CPU and GPU.</p>
+<p>The plots shown here were generated on a system with an <code class="docutils literal notranslate"><span class="pre">NVIDIA</span> <span class="pre">RTX</span> <span class="pre">5000</span> <span class="pre">Ada</span> <span class="pre">Generation</span></code> GPU and an
+<code class="docutils literal notranslate"><span class="pre">AMD</span> <span class="pre">Ryzen</span> <span class="pre">9</span> <span class="pre">7950X</span></code> 16-Core Processor.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In the following runtime plots, markers highlight the smallest measured problem size, the largest measured
+problem size, and the 100-point/100-distance cell.</p>
+<p>In the speedup plots, markers highlight the smallest measured problem size and the largest speedup. If speedup is not
+above 1x everywhere, they also mark representative cells near the first matching point-count and distance-count
+configuration where speedup exceeds 1x.</p>
+</div>
+<p>Batch size 1 shows behavior for the smallest batch configuration in the benchmark:</p>
+<figure class="align-center" id="id2">
+<a class="reference internal image-reference" href="../../../_images/batch_1_runtime_comparison.png"><img alt="Runtime comparison heatmaps for batch size 1" src="../../../_images/batch_1_runtime_comparison.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Runtime comparison for batch size 1. Rows vary the number of polyline points, and columns vary the number
+of sampled distances.</span><a class="headerlink" href="#id2" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id3">
+<a class="reference internal image-reference" href="../../../_images/batch_1_speedup_comparison.png"><img alt="Speedup comparison heatmaps for batch size 1" src="../../../_images/batch_1_speedup_comparison.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Speedup comparison for batch size 1.</span><a class="headerlink" href="#id3" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<p>For larger batch sizes, CUDA can expose more parallel work and its speedup over the other methods typically
+becomes more pronounced. Batch size 64 shows this behavior:</p>
+<figure class="align-center" id="id4">
+<a class="reference internal image-reference" href="../../../_images/batch_64_runtime_comparison.png"><img alt="Runtime comparison heatmaps for batch size 64" src="../../../_images/batch_64_runtime_comparison.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Runtime comparison for batch size 64.</span><a class="headerlink" href="#id4" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+<figure class="align-center" id="id5">
+<a class="reference internal image-reference" href="../../../_images/batch_64_speedup_comparison.png"><img alt="Speedup comparison heatmaps for batch size 64" src="../../../_images/batch_64_speedup_comparison.png" style="width: 100%;" />
+</a>
+<figcaption>
+<p><span class="caption-text">Speedup comparison for batch size 64.</span><a class="headerlink" href="#id5" title="Link to this image"></a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Lane Helpers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,305 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.dali_pipeline_framework.inputs.sequence_sampler &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.dali_pipeline_framework.inputs.sequence_sampler</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.dali_pipeline_framework.inputs.sequence_sampler</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.sampler_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SamplerBase</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+
+
+<div class="viewcode-block" id="SequenceSampler">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/inputs.html#accvlab.dali_pipeline_framework.inputs.SequenceSampler">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SequenceSampler</span><span class="p">(</span><span class="n">SamplerBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Sampler used to get consecutive samples from sequences contained in the dataset.</span>
+
+<span class="sd">    For subsequent batches :math:`B_t` and :math:`B_{t+1}`, the individual samples in the batches with the</span>
+<span class="sd">    same index :math:`i`, i.e. :math:`B_t[i]` and :math:`B_{t+1}[i]`, are subsequent samples inside a sequence</span>
+<span class="sd">    :math:`S_j`, i.e. :math:`B_t[i] = S_j[k]` and :math:`B_{t+1}[i] = S_j[k+1]` (where :math:`j` is the index</span>
+<span class="sd">    of the sequence in the dataset and :math:`k` is the index</span>
+<span class="sd">    of the sample in the sequence :math:`S_j`), except when one sequence ends and another one begins.</span>
+
+<span class="sd">    .. image:: ../images/sequence_sampling.png</span>
+<span class="sd">        :align: center</span>
+<span class="sd">        :alt: Sequence sampling illustration</span>
+<span class="sd">        :width: 550px</span>
+
+<span class="sd">    The sampling is performed by assigning for each &quot;sample index slot&quot; :math:`i` a set of sequences and then</span>
+<span class="sd">    iterating through the sequences and outputting one sample at a time at the position :math:`i`.</span>
+<span class="sd">    For this, the sequences are shuffled (represented by :math:`R_c` in the illustration) whenever a new cycle</span>
+<span class="sd">    :math:`c` is started for one of the slots (:math:`R_0` and :math:`R_1` in the illustration correspond to</span>
+<span class="sd">    the first two cycles).</span>
+
+<span class="sd">    Note that each slot may reach a new cycle at different iterations :math:`t` as the total number of samples</span>
+<span class="sd">    may vary for the individual slots. However, for each cycle :math:`c`, consistent shuffled lists</span>
+<span class="sd">    :math:`R_c` are used for all slots (using consistent seeds for the shuffling).</span>
+
+<span class="sd">    As the individual slots :math:`B_t[i]` may be in different cycles for a given iteration :math:`t`:</span>
+
+<span class="sd">      - The cycles do not exactly correspond to epochs (as the cycle border is different for each slot).</span>
+<span class="sd">        Therefore, this sampler is not epoch-based.</span>
+<span class="sd">      - Although consistent shuffling is used to obtain :math:`R_c` across slots, the same sequence may still</span>
+<span class="sd">        appear in multiple slots at the same time if the slots are in different cycles for a given iteration</span>
+<span class="sd">        :math:`t` due to variable sequence length.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total_batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">sequence_lenghts</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">randomize</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            total_batch_size: Total batch size (i.e. the combined batch size over all shards if sharding is</span>
+<span class="sd">                used).</span>
+<span class="sd">            sequence_lenghts: The lengths of the individual sequences. Note that the indices of the samples in</span>
+<span class="sd">                the dataset must match the order of sequence lengths given, i.e. if the sequence lengths</span>
+<span class="sd">                ``[10, 12]`` are given, then it is understood that the dataset contains 2 sequences,</span>
+<span class="sd">                with the first containing the samples with indices in the range :math:`[0; 9]` and the</span>
+<span class="sd">                second containing the samples with indices in the range :math:`[10; 21]`.</span>
+<span class="sd">            seed: Random seed for shuffling sequences.</span>
+<span class="sd">            randomize: Whether to shuffle sequences. If ``False``, sequences are used in order.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">sequence_lenghts</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">total_batch_size</span>
+        <span class="p">),</span> <span class="s2">&quot;The number of sequences must be at least the total batch size.&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_total_batch_size</span> <span class="o">=</span> <span class="n">total_batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sequence_lengths</span> <span class="o">=</span> <span class="n">sequence_lenghts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sequence_to_global_index_mapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_sequence_to_global_index_mapping</span><span class="p">(</span><span class="n">sequence_lenghts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_randomize</span> <span class="o">=</span> <span class="n">randomize</span>
+
+        <span class="c1"># Do not create the generators on creation to allow for pickling the object before</span>
+        <span class="c1"># `get_next_batch_indices()` is called for the first time. This is important as this happens when the</span>
+        <span class="c1"># worker processes which use this implementation are started.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_per_sample_slot_generators</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">total_batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_generators_set</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Length (size of a single epoch) is not defined as there are no clear epoch boundaries.</span>
+
+<span class="sd">        Indicate this by returning ``None``.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ``None``</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="SequenceSampler.get_next_batch_indices">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/inputs.html#accvlab.dali_pipeline_framework.inputs.SequenceSampler.get_next_batch_indices">[docs]</a>
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_next_batch_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Get the indices for the next batch of samples.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List of sample indices for the next batch.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generators_set</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_total_batch_size</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_per_sample_slot_generators</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_for_sample_slot</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_generators_set</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="nb">next</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span> <span class="k">for</span> <span class="n">gen</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_per_sample_slot_generators</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_epoch_based</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Indicate that the sampler is not epoch-based by returning ``False``.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ``False``</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="SequenceSampler.reset">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/inputs.html#accvlab.dali_pipeline_framework.inputs.SequenceSampler.reset">[docs]</a>
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Reset the sampler.</span>
+
+<span class="sd">        Note that this method is not supported as the sampler is not epoch-based. Calling it will raise an</span>
+<span class="sd">        error.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            RuntimeError: Will be raised if the method is called as the sampler is not epoch-based.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;SequencesSampler is not epoch-based. the method `reset()` should not be called.&quot;</span><span class="p">)</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_sequence_to_global_index_mapping</span><span class="p">(</span><span class="n">sequence_lengths</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">num_sequences</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequence_lengths</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_sequences</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_sequences</span><span class="p">):</span>
+            <span class="n">sl</span> <span class="o">=</span> <span class="n">sequence_lengths</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+            <span class="n">res</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">c</span> <span class="o">+</span> <span class="n">sl</span><span class="p">))</span>
+            <span class="n">c</span> <span class="o">+=</span> <span class="n">sl</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_generate_for_sample_slot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_slot_idx</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Generate sample indices for a specific sample slot.</span>
+
+<span class="sd">        Each slot is assigned a subset of sequences and cycles through them.</span>
+<span class="sd">        When all sequences are exhausted for one slot, a new cycle begins with a new</span>
+<span class="sd">        shuffled assignment of sequences. Note that the cycles are consistent for each slot.</span>
+<span class="sd">        This means that while new cycles are started at different points in time for</span>
+<span class="sd">        different slots, there is a fixed distribution of sequences across the slots for</span>
+<span class="sd">        each cycle.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sample_slot_idx: Index of the sample slot (0 to total_batch_size-1).</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            Sample indices for this slot.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">rand</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_seed</span><span class="p">)</span>
+        <span class="n">num_sequences</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sequence_lengths</span><span class="p">)</span>
+
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_randomize</span><span class="p">:</span>
+                <span class="n">seq_of_seq</span> <span class="o">=</span> <span class="n">rand</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">num_sequences</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">seq_of_seq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_sequences</span><span class="p">))</span>
+            <span class="n">seq_of_seq_to_use</span> <span class="o">=</span> <span class="n">seq_of_seq</span><span class="p">[</span><span class="n">sample_slot_idx</span> <span class="p">::</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_batch_size</span><span class="p">]</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">seq_of_seq_to_use</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The number of sequences to use is 0 for sample &quot;</span> <span class="sa">f</span><span class="s2">&quot;slot </span><span class="si">{</span><span class="n">sample_slot_idx</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">seq_id</span> <span class="ow">in</span> <span class="n">seq_of_seq_to_use</span><span class="p">:</span>
+                <span class="n">indices_global_to_use</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequence_to_global_index_mapping</span><span class="p">[</span><span class="n">seq_id</span><span class="p">]</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices_global_to_use</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;The number of indices to use is 0 for sample &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;slot </span><span class="si">{</span><span class="n">sample_slot_idx</span><span class="si">}</span><span class="s2"> and sequence </span><span class="si">{</span><span class="n">seq_id</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">indices_global_to_use</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">idx</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

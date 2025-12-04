@@ -1,0 +1,252 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.dali_pipeline_framework.processing_steps.conditional_element_removal &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.dali_pipeline_framework.processing_steps.conditional_element_removal</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.dali_pipeline_framework.processing_steps.conditional_element_removal</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="c1"># Used to enable type hints using a class type inside the implementation of that class itself.</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..operators_impl</span><span class="w"> </span><span class="kn">import</span> <span class="n">numba_operators</span> <span class="k">as</span> <span class="n">numba_op</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..pipeline.sample_data_group</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleDataGroup</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.pipeline_step_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">PipelineStepBase</span>
+
+
+<div class="viewcode-block" id="ConditionalElementRemover">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/processing_steps.html#accvlab.dali_pipeline_framework.processing_steps.ConditionalElementRemover">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConditionalElementRemover</span><span class="p">(</span><span class="n">PipelineStepBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Remove elements from arrays (e.g., per‑object data) based on a boolean mask.</span>
+
+<span class="sd">    Arrays are stored as (multi-dimensional) tensors; for each array a dimension index indicates the element</span>
+<span class="sd">    axis (the axis along which the elements to be removed/retained are enumerated). Elements with mask</span>
+<span class="sd">    value ``False`` are removed along the configured dimension for each target field.</span>
+
+<span class="sd">    See also:</span>
+<span class="sd">        Multiple classes are available which evaluate conditions of some kind and store the results as</span>
+<span class="sd">        boolean masks. These masks can be used in this class:</span>
+
+<span class="sd">          - :class:`AnnotationElementConditionEval`</span>
+<span class="sd">          - :class:`VisibleBboxSelector`</span>
+<span class="sd">          - :class:`PointsInRangeCheck`</span>
+<span class="sd">          - :class:`BoundingBoxToHeatmapConverter`</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">annotation_field_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+        <span class="n">mask_field_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+        <span class="n">field_names_to_process</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+        <span class="n">field_dims_to_process</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">fields_to_process_num_dims</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">remove_mask_field</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            annotation_field_name: Name of the annotation data group field to process. Each annotation field</span>
+<span class="sd">                is processed independently.</span>
+<span class="sd">            mask_field_name: Name of the boolean mask indicating which elements to keep (``True``) or</span>
+<span class="sd">                remove (``False``). Must be a child of each annotation field.</span>
+<span class="sd">            field_names_to_process: Names of fields to process. The fields must be present in each annotation</span>
+<span class="sd">                field.</span>
+<span class="sd">            field_dims_to_process: For each field name, the dimension index along which elements are to be</span>
+<span class="sd">                removed.</span>
+<span class="sd">            fields_to_process_num_dims: For each field name, the number of dimensions in the tensor.</span>
+<span class="sd">            remove_mask_field: Whether to remove the mask field after applying this step.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_names_to_process</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="n">field_dims_to_process</span>
+        <span class="p">),</span> <span class="s2">&quot;Number of elements in `field_names_to_process` and `field_dims_to_process` do not match.&quot;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_names_to_process</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="n">fields_to_process_num_dims</span>
+        <span class="p">),</span> <span class="s2">&quot;Number of elements in `field_names_to_process` and `fields_to_process_num_dims` do not match.&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_annotation_field_name</span> <span class="o">=</span> <span class="n">annotation_field_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mask_field_name</span> <span class="o">=</span> <span class="n">mask_field_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_field_names_to_process</span> <span class="o">=</span> <span class="n">field_names_to_process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_field_dims_to_process</span> <span class="o">=</span> <span class="n">field_dims_to_process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fields_to_process_num_dims</span> <span class="o">=</span> <span class="n">fields_to_process_num_dims</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_do_remove_mask_field</span> <span class="o">=</span> <span class="n">remove_mask_field</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+        <span class="c1"># Make sure annotations have all needed fields and set output fields</span>
+        <span class="n">annotation_paths</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">find_all_occurrences</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_annotation_field_name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ap</span> <span class="ow">in</span> <span class="n">annotation_paths</span><span class="p">:</span>
+            <span class="n">annotations</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_item_in_path</span><span class="p">(</span><span class="n">ap</span><span class="p">)</span>
+            <span class="n">is_active</span> <span class="o">=</span> <span class="n">annotations</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_mask_field_name</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">num_dims</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_field_names_to_process</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_dims_to_process</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fields_to_process_num_dims</span>
+            <span class="p">):</span>
+                <span class="n">curr_data</span> <span class="o">=</span> <span class="n">annotations</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                <span class="n">curr_data_type</span> <span class="o">=</span> <span class="n">annotations</span><span class="o">.</span><span class="n">get_type_of_field</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">curr_res</span> <span class="o">=</span> <span class="n">numba_op</span><span class="o">.</span><span class="n">remove_inactive</span><span class="p">(</span><span class="n">curr_data</span><span class="p">,</span> <span class="n">is_active</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">num_dims</span><span class="p">,</span> <span class="n">curr_data_type</span><span class="p">)</span>
+                <span class="n">annotations</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">curr_res</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_remove_mask_field</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_mask</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_and_adjust_data_format_input_to_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_empty</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+
+        <span class="n">annotation_paths</span> <span class="o">=</span> <span class="n">data_empty</span><span class="o">.</span><span class="n">find_all_occurrences</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_annotation_field_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotation_paths</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">annotation_paths</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No occurrences of annotations found. Annotation data group fields are expected to have the name &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_annotation_field_name</span><span class="si">}</span><span class="s2">&#39;, as specified in the constructor.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">for</span> <span class="n">ap</span> <span class="ow">in</span> <span class="n">annotation_paths</span><span class="p">:</span>
+            <span class="n">annotation</span> <span class="o">=</span> <span class="n">data_empty</span><span class="o">.</span><span class="n">get_item_in_path</span><span class="p">(</span><span class="n">ap</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_names_to_process</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">annotation</span><span class="o">.</span><span class="n">contained_top_level_field_names</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No field to process &#39;</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2">&#39; in annotation at path &#39;</span><span class="si">{</span><span class="n">ap</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask_field_name</span> <span class="ow">in</span> <span class="n">annotation</span><span class="o">.</span><span class="n">contained_top_level_field_names</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No mask field &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_mask_field_name</span><span class="si">}</span><span class="s2">&#39; in annotation at path `</span><span class="si">{</span><span class="n">ap</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_do_remove_mask_field</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_mask</span><span class="p">(</span><span class="n">data_empty</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data_empty</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_remove_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_inout</span><span class="p">:</span> <span class="n">SampleDataGroup</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Remove the mask field from the annotation data group.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_inout: Data to be processed by the step.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">annotation_paths</span> <span class="o">=</span> <span class="n">data_inout</span><span class="o">.</span><span class="n">find_all_occurrences</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_annotation_field_name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ap</span> <span class="ow">in</span> <span class="n">annotation_paths</span><span class="p">:</span>
+            <span class="n">annotation</span> <span class="o">=</span> <span class="n">data_inout</span><span class="o">.</span><span class="n">get_item_in_path</span><span class="p">(</span><span class="n">ap</span><span class="p">)</span>
+            <span class="n">annotation</span><span class="o">.</span><span class="n">remove_field</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mask_field_name</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

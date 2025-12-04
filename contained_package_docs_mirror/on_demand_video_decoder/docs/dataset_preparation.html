@@ -1,0 +1,264 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dataset Preparation &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="API Reference" href="api.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">On Demand Video Decoder</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Dataset Preparation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dataset-overview">Dataset Overview</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#download-dataset">Download Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#convert-images-to-video">Convert Images to Video</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#step-1-convert-sample-sweep-images-to-video-format">Step 1: Convert sample &amp; sweep images to video format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#step-2-adjust-camera-sample-metadata">Step 2: Adjust camera sample metadata</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sample.html">Sample Code Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pytorch_integration_examples/index.html">PyTorch Integration Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">On Demand Video Decoder</a></li>
+      <li class="breadcrumb-item active">Dataset Preparation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/contained_package_docs_mirror/on_demand_video_decoder/docs/dataset_preparation.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="dataset-preparation">
+<h1>Dataset Preparation<a class="headerlink" href="#dataset-preparation" title="Link to this heading"></a></h1>
+<p>This section describes how to set up the NuScenes Mini dataset for testing and profiling the video decoder,
+as well as for potential training purposes.</p>
+<section id="dataset-overview">
+<h2>Dataset Overview<a class="headerlink" href="#dataset-overview" title="Link to this heading"></a></h2>
+<p>We use <strong>NuScenes Mini</strong> as the test dataset. NuScenes is a large-scale autonomous driving dataset that
+provides multi-modal sensor data including camera images, LiDAR, and radar. The mini version contains a subset
+of the full dataset, making it ideal for testing and development.</p>
+<ul class="simple">
+<li><p><strong>Dataset Source</strong>: <a class="reference external" href="https://www.nuscenes.org/nuscenes">NuScenes Official Website</a></p></li>
+<li><p><strong>Mini Dataset</strong>: <a class="reference external" href="https://www.kaggle.com/datasets/aadimator/nuscenes-mini/data">Kaggle NuScenes Mini</a></p></li>
+</ul>
+</section>
+<section id="download-dataset">
+<h2>Download Dataset<a class="headerlink" href="#download-dataset" title="Link to this heading"></a></h2>
+<p>Download the dataset, e.g. using the Kaggle tool:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">kagglehub</span>
+
+<span class="c1"># Download latest version</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">kagglehub</span><span class="o">.</span><span class="n">dataset_download</span><span class="p">(</span><span class="s2">&quot;aadimator/nuscenes-mini&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Path to dataset files:&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+<span class="c1"># Default download path: ~/.cache/kagglehub/datasets/aadimator/nuscenes-mini/</span>
+</pre></div>
+</div>
+</section>
+<section id="convert-images-to-video">
+<h2>Convert Images to Video<a class="headerlink" href="#convert-images-to-video" title="Link to this heading"></a></h2>
+<p>The NuScenes dataset contains individual JPEG images that need to be converted to a video format for
+use in the video decoder.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>The converter scripts are designed to be run in an environment where a fully-functional
+<code class="docutils literal notranslate"><span class="pre">FFmpeg</span></code> binary is available. This is not the case in our default docker image, where only a minimal
+version of <code class="docutils literal notranslate"><span class="pre">FFmpeg</span></code> is set up. Please use an environment with a fully-functional <code class="docutils literal notranslate"><span class="pre">FFmpeg</span></code> binary to run
+the converter scripts.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong></strong>The examples below assume that the working directory is the root directory of the accvlab
+package. For other working directories, you need to adjust the paths accordingly. The scripts are located at
+<code class="docutils literal notranslate"><span class="pre">packages/on_demand_video_decoder/scripts/</span></code> in the accvlab package.</p>
+</div>
+<p>We provide scripts that will combine and convert the images from both the samples &amp; sweeps to the video
+format, and modify the sample data metadata to point to the correct video filename &amp; frame ID corresponding to
+the image originally used in the sample.</p>
+<p>This conversion can be performed in two steps:</p>
+<section id="step-1-convert-sample-sweep-images-to-video-format">
+<h3>Step 1: Convert sample &amp; sweep images to video format<a class="headerlink" href="#step-1-convert-sample-sweep-images-to-video-format" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>packages/on_demand_video_decoder/scripts/generate_nuscenes_video_with_sweeps.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--nuscenes_root<span class="w"> </span>/path/to/your/nuscenes/dataset/<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--fps<span class="w"> </span><span class="m">12</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--gop_size<span class="w"> </span><span class="m">30</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--interpolation_num_frames<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--video_sub_dir<span class="w"> </span>path_to_subdirectory_for_generated_videos
+</pre></div>
+</div>
+<p>Note that:</p>
+<ul class="simple">
+<li><p>The parameter <code class="docutils literal notranslate"><span class="pre">--fps</span></code> sets the FPS information in the metadata for the generated videos (and has no other
+effect).</p></li>
+<li><p>The parameter <code class="docutils literal notranslate"><span class="pre">--gop_size</span></code> sets the GOP size for the generated videos.</p></li>
+<li><p>The parameter <code class="docutils literal notranslate"><span class="pre">--interpolation_num_frames</span></code> sets the number of additional frames to add between existing
+frames. A simple linear interpolation is used in this case. The default value is 0, which means no
+interpolation is performed.</p></li>
+<li><p>The version of the NuScenes dataset does not need to be specified. The script does not access the metadata.
+Instead, it automatically processes all available samples and sweeps, using information contained in the
+file paths (including filenames &amp; timestamps) as a basis for grouping the images into videos. This means
+that if the full NuScenes dataset is present, the script will process all available samples and sweeps.
+For development, it is recommended to use the script in a dataset containing only data from the mini
+version.</p></li>
+</ul>
+<p>You can call the script with <code class="docutils literal notranslate"><span class="pre">-h</span></code> to see all available options.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The example scripts provided for the On-Demand Video Decoder package (see
+<a class="reference internal" href="sample.html"><span class="doc std std-doc">Sample Code Documentation</span></a> and
+<a class="reference internal" href="pytorch_integration_examples/index.html"><span class="doc std std-doc">PyTorch Integration Examples</span></a>) assume that:</p>
+<ul class="simple">
+<li><p>The path to the NuScenes dataset is <code class="docutils literal notranslate"><span class="pre">/data/nuscenes</span></code></p></li>
+<li><p>The path to the output directory is <code class="docutils literal notranslate"><span class="pre">/data/nuscenes/video_samples</span></code> (set <code class="docutils literal notranslate"><span class="pre">--video_sub_dir</span> <span class="pre">video_samples</span></code>
+when running this script to place the generated videos there)</p></li>
+</ul>
+</div>
+<p>Output layout for generated videos:</p>
+<ul class="simple">
+<li><p>Per-sequence folders, e.g.:
+<code class="docutils literal notranslate"><span class="pre">&lt;path_to_nuscenes_dataset&gt;/video_samples/n008-2018-08-30-15-16-55-0400/CAM_FRONT.mp4</span></code></p></li>
+<li><p>Inside each sequence folder, files are named by camera only (<code class="docutils literal notranslate"><span class="pre">CAM_FRONT.mp4</span></code>, <code class="docutils literal notranslate"><span class="pre">CAM_BACK.mp4</span></code>, etc.).</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The data is arranged into sequences based on the descriptor in the filename such as e.g.
+<code class="docutils literal notranslate"><span class="pre">n008-2018-08-30-15-16-55-0400</span></code> in <code class="docutils literal notranslate"><span class="pre">n008-2018-08-30-15-16-55-0400__CAM_FRONT.jpg</span></code>. However, in some cases,
+multiple sequences use the same descriptor. In this case, the data is split into the individual sequences
+based on large gaps in the timestamp. In this cases, the sequence folder is named with a <code class="docutils literal notranslate"><span class="pre">__partN</span></code> suffix,
+e.g. <code class="docutils literal notranslate"><span class="pre">n015-2018-11-21-19-38-26+0800__part0</span></code>, <code class="docutils literal notranslate"><span class="pre">n015-2018-11-21-19-38-26+0800__part1</span></code>, etc.</p>
+</div>
+<p>Apart from the generated videos, the script will also create a json file mapping the original image
+paths &amp; filenames to the generated video paths (relative to the video file output directory,
+default is <code class="docutils literal notranslate"><span class="pre">video_samples</span></code>) and frame IDs. This mapping is used in the next step to adjust the metadata for
+the camera samples.</p>
+</section>
+<section id="step-2-adjust-camera-sample-metadata">
+<h3>Step 2: Adjust camera sample metadata<a class="headerlink" href="#step-2-adjust-camera-sample-metadata" title="Link to this heading"></a></h3>
+<p>This step updates the sample metadata to point to the correct frame IDs in the correct generated video for
+each camera sample.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>packages/on_demand_video_decoder/scripts/add_nuscenes_video_meta_from_json.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--nuscenes_root<span class="w"> </span>/path/to/your/nuscenes/dataset/<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--nuscenes_version<span class="w"> </span>v1.0-mini<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--video_sub_dir<span class="w"> </span>path_to_subdirectory_for_generated_videos
+</pre></div>
+</div>
+<p>You can call the script with <code class="docutils literal notranslate"><span class="pre">-h</span></code> to see all available options.</p>
+<p>This script will create an updated <code class="docutils literal notranslate"><span class="pre">sample_data_video.json</span></code> file in the same directory as the original
+<code class="docutils literal notranslate"><span class="pre">sample_data.json</span></code> file. To use the updated metadata, you can rename it to <code class="docutils literal notranslate"><span class="pre">sample_data.json</span></code> and replace the
+original file. This will make the video-related metadata available in the sample data for cameras. The new
+fields added to the metadata for camera sample data are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">video_filename</span></code>: The filename of the video containing the image used in the sample (relative to the dataset
+root directory)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">video_frame</span></code>: The frame index of the video containing the image used in the sample
+Note that the original <code class="docutils literal notranslate"><span class="pre">filename</span></code> field is not modified and still points to the original image file.</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,300 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.dali_pipeline_framework.inputs.sfuffled_sharded_input_callable &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.dali_pipeline_framework.inputs.sfuffled_sharded_input_callable</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.dali_pipeline_framework.inputs.sfuffled_sharded_input_callable</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">nvidia.dali</span><span class="w"> </span><span class="kn">import</span> <span class="n">types</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">SampleDataGroup</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.callable_base</span><span class="w"> </span><span class="kn">import</span> <span class="n">CallableBase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.data_provider</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataProvider</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
+
+
+<div class="viewcode-block" id="ShuffledShardedInputCallable">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/inputs.html#accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ShuffledShardedInputCallable</span><span class="p">(</span><span class="n">CallableBase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Input callable supporting shuffling and sharding.</span>
+
+<span class="sd">    This class implements data randomization by shuffling, as well as distributing the data into multiple</span>
+<span class="sd">    shards. The shuffling and sharding is done following the general approach outlined in [1].</span>
+
+<span class="sd">    The randomization can be disabled, in which case the data is read in sequential order.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        If the data set is not divisible by the batch size (in case of sharding, the total batch size over all</span>
+<span class="sd">        shards), the incomplete batch at the end of each epoch will be dropped.</span>
+
+<span class="sd">    [1] https://docs.nvidia.com/deeplearning/dali/user-guide/docs/examples/general/data_loading/parallel_external_source.html#Shuffling-and-sharding</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">data_provider</span><span class="p">:</span> <span class="n">DataProvider</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">shard_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">num_shards</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">shuffle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">21</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_provider: Data provider (following the interface defined in :class:`DataProvider`) used to obtain the samples and additional data.</span>
+<span class="sd">            batch_size: Batch size</span>
+<span class="sd">            shard_id: Shard ID. Needs to be set if sharding is used.</span>
+<span class="sd">            num_shards: Total number of shards. Needs to be set if sharding is used</span>
+<span class="sd">            shuffle: Whether to shuffle the data</span>
+<span class="sd">            seed: Seed used for the shuffling. If sharding is used, the input callables for all shards need to use the same seed.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_provider</span> <span class="o">=</span> <span class="n">data_provider</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shard_id</span> <span class="o">=</span> <span class="n">shard_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_num_shards</span> <span class="o">=</span> <span class="n">num_shards</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shuffle</span> <span class="o">=</span> <span class="n">shuffle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">=</span> <span class="n">seed</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_provider</span><span class="o">.</span><span class="n">get_number_of_samples</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shard_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_len</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">_num_shards</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shard_offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shard_size</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shard_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_full_iterations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shard_size</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">_batch_size</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_permutation</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_seen_epoch</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">used_sample_data_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleDataGroup</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Get the data format blueprint used for the individual samples&#39;&#39;&#39;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_provider</span><span class="o">.</span><span class="n">sample_data_structure</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">set_apply_mapping</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_info</span><span class="p">:</span> <span class="n">types</span><span class="o">.</span><span class="n">SampleInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">sample_info</span><span class="o">.</span><span class="n">idx_in_epoch</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shard_size</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
+
+        <span class="c1"># If this is a new epoch ...</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_seen_epoch</span> <span class="o">!=</span> <span class="n">sample_info</span><span class="o">.</span><span class="n">epoch_idx</span><span class="p">:</span>
+            <span class="c1"># ... set up a new permutation</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_permutation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_permutation</span><span class="p">(</span><span class="n">sample_info</span><span class="o">.</span><span class="n">epoch_idx</span><span class="p">)</span>
+            <span class="c1"># and indcate that this is not a new epoch enymore, preventing a new permutation</span>
+            <span class="c1"># to be generated at the next call to this function</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_seen_epoch</span> <span class="o">=</span> <span class="n">sample_info</span><span class="o">.</span><span class="n">epoch_idx</span>
+
+        <span class="n">index_in_shard</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shard_offset</span> <span class="o">+</span> <span class="n">sample_info</span><span class="o">.</span><span class="n">idx_in_epoch</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shard_size</span>
+        <span class="n">index_to_use</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_permutation</span><span class="p">[</span><span class="n">index_in_shard</span><span class="p">]</span>
+
+        <span class="c1"># Note: Next line can be used to always load the same sample (e.g. for debugging)</span>
+        <span class="c1"># index_to_use = 10</span>
+
+        <span class="n">sample_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_provider</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="n">index_to_use</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sample_data</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@override</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Number of full iterations (complete batches) in the epoch.</span>
+
+<span class="sd">        If the underlying sampler is not epoch-based, ``None`` is returned.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_full_iterations</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_setup_permutation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Set up the permutation for shuffling samples in a given epoch.</span>
+
+<span class="sd">        Creates a permutation array that determines the order of samples for</span>
+<span class="sd">        the specified epoch. If shuffling is disabled, returns a sequential</span>
+<span class="sd">        permutation (0, 1, 2, ...).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epoch_idx: The epoch index to generate the permutation for.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A numpy array containing the permutation indices for the epoch.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Define shuffling order if needed.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shuffle</span><span class="p">:</span>
+            <span class="c1"># Note that the seed will be the same for multiple instances (for multi-GPU training) if self._seed is the same.</span>
+            <span class="c1"># This has to be the case to prevent different sharding splits in different instances, which would lead to reuse of some samples and skipping of others.</span>
+            <span class="n">perm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_seed</span> <span class="o">+</span> <span class="n">epoch_idx</span><span class="p">)</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_len</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">perm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_len</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">perm</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tps</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">cv2</span>
+
+    <span class="n">base_dir</span> <span class="o">=</span> <span class="s1">&#39;/home/rschaffert/Work/datasets/nuscenes/mini/&#39;</span>
+    <span class="n">nuscenes_version</span> <span class="o">=</span> <span class="s1">&#39;v1.0-mini&#39;</span>
+
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">NuScenesReader</span><span class="p">(</span><span class="n">base_dir</span><span class="p">,</span> <span class="n">nuscenes_version</span><span class="p">)</span>
+
+    <span class="nb">callable</span> <span class="o">=</span> <span class="n">NuScenesInputCallable</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">use_single_images</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="n">sample_info</span> <span class="o">=</span> <span class="n">tps</span><span class="o">.</span><span class="n">SimpleNamespace</span><span class="p">()</span>
+
+    <span class="n">sample_info</span><span class="o">.</span><span class="n">epoch_idx</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">sample_info</span><span class="o">.</span><span class="n">idx_in_epoch</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">raw_data</span> <span class="o">=</span> <span class="nb">callable</span><span class="p">(</span><span class="n">sample_info</span><span class="p">)</span>
+    <span class="n">sample_data</span> <span class="o">=</span> <span class="nb">callable</span><span class="o">.</span><span class="n">used_sample_data_structure</span><span class="o">.</span><span class="n">with_data_set</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">sample_data</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
+        <span class="n">cv2</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;temp_out/image_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">,</span> <span class="n">sample_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s2">&quot;image&quot;</span><span class="p">])</span>
+
+        <span class="n">bbox_image</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">sample_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;image&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">bboxes</span> <span class="o">=</span> <span class="n">sample_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;annotation&quot;</span><span class="p">][</span><span class="s2">&quot;bboxes&quot;</span><span class="p">]</span>
+        <span class="n">categories</span> <span class="o">=</span> <span class="n">sample_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;annotation&quot;</span><span class="p">][</span><span class="s2">&quot;categories&quot;</span><span class="p">]</span>
+        <span class="n">num_bboxes</span> <span class="o">=</span> <span class="n">bboxes</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_bboxes</span><span class="p">):</span>
+            <span class="n">bbox_image</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">rectangle</span><span class="p">(</span>
+                <span class="n">bbox_image</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">bboxes</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
+                <span class="p">(</span><span class="n">bboxes</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="mi">2</span><span class="p">:])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">155</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="n">cv2</span><span class="o">.</span><span class="n">imwrite</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;temp_out/bbox_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">,</span> <span class="n">bbox_image</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,679 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Operators Impl Submodule &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Examples" href="../examples.html" />
+    <link rel="prev" title="Internal Helpers Submodule" href="internal_helpers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">DALI Pipeline Framework</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../design.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main_api.html">Main API Reference</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="additional_api.html">Additional API Reference</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="internal_helpers.html">Internal Helpers Submodule</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Operators Impl Submodule</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#module-accvlab.dali_pipeline_framework.operators_impl">Package Module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-accvlab.dali_pipeline_framework.operators_impl.numba_operators">Numba Operators</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.pad_to_size"><code class="docutils literal notranslate"><span class="pre">pad_to_size()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.remove_inactive"><code class="docutils literal notranslate"><span class="pre">remove_inactive()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.ensure_range"><code class="docutils literal notranslate"><span class="pre">ensure_range()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.replace_nans"><code class="docutils literal notranslate"><span class="pre">replace_nans()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.check_bbox_visibiity"><code class="docutils literal notranslate"><span class="pre">check_bbox_visibiity()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.check_minimum_bbox_size"><code class="docutils literal notranslate"><span class="pre">check_minimum_bbox_size()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.check_points_in_box"><code class="docutils literal notranslate"><span class="pre">check_points_in_box()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.crop_coordinates"><code class="docutils literal notranslate"><span class="pre">crop_coordinates()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.get_rot_mat_from_rot_vector"><code class="docutils literal notranslate"><span class="pre">get_rot_mat_from_rot_vector()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.get_translation_mat_from_vector"><code class="docutils literal notranslate"><span class="pre">get_translation_mat_from_vector()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.get_scaling_mat_from_vector"><code class="docutils literal notranslate"><span class="pre">get_scaling_mat_from_vector()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.apply_matrix"><code class="docutils literal notranslate"><span class="pre">apply_matrix()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.get_center_from_bboxes"><code class="docutils literal notranslate"><span class="pre">get_center_from_bboxes()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.get_radii_from_bboxes"><code class="docutils literal notranslate"><span class="pre">get_radii_from_bboxes()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#module-accvlab.dali_pipeline_framework.operators_impl.python_operator_functions">Python Operator Functions</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.apply_transform_to_points"><code class="docutils literal notranslate"><span class="pre">apply_transform_to_points()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.add_post_transform_to_projection_matrix"><code class="docutils literal notranslate"><span class="pre">add_post_transform_to_projection_matrix()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.apply_clipping_and_get_with_clipping_info"><code class="docutils literal notranslate"><span class="pre">apply_clipping_and_get_with_clipping_info()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.get_is_active"><code class="docutils literal notranslate"><span class="pre">get_is_active()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="#accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.pad_to_common_size"><code class="docutils literal notranslate"><span class="pre">pad_to_common_size()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html">Examples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">DALI Pipeline Framework</a></li>
+          <li class="breadcrumb-item"><a href="additional_api.html">Additional API Reference</a></li>
+      <li class="breadcrumb-item active">Operators Impl Submodule</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/contained_package_docs_mirror/dali_pipeline_framework/docs/api/operators_impl.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="operators-impl-submodule">
+<h1>Operators Impl Submodule<a class="headerlink" href="#operators-impl-submodule" title="Link to this heading"></a></h1>
+<section id="module-accvlab.dali_pipeline_framework.operators_impl">
+<span id="package-module"></span><h2>Package Module<a class="headerlink" href="#module-accvlab.dali_pipeline_framework.operators_impl" title="Link to this heading"></a></h2>
+<p>Operators and utilities for use inside DALI pipelines.</p>
+<dl class="simple">
+<dt>This module contains:</dt><dd><ul class="simple">
+<li><p>Functions to be used inside Python operators</p></li>
+<li><p>Numba operators which can be used directly (including the needed Numba functions and the wrapping as a Numba operator)</p></li>
+</ul>
+</dd>
+</dl>
+</section>
+<section id="module-accvlab.dali_pipeline_framework.operators_impl.numba_operators">
+<span id="numba-operators"></span><h2>Numba Operators<a class="headerlink" href="#module-accvlab.dali_pipeline_framework.operators_impl.numba_operators" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.numba_operators.pad_to_size">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.numba_operators.</span></span><span class="sig-name descname"><span class="pre">pad_to_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dims</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/numba_operators/numba_operators.html#pad_to_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.pad_to_size" title="Link to this definition"></a></dt>
+<dd><div class="device-note docutils container">
+<p>This function expects input data to be on the <strong>CPU</strong>.</p>
+</div>
+<p>Pad input data to a specified size along the first dimension (i.e. <code class="docutils literal notranslate"><span class="pre">dim==0</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – Data to pad.</p></li>
+<li><p><strong>num_dims</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Number of dimensions in the data.</p></li>
+<li><p><strong>data_type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/data_types.html#nvidia.dali.types.DALIDataType" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIDataType</span></code></a></span>) – Data type of the input data.</p></li>
+<li><p><strong>size</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Target size to pad the first dimension (i.e. <code class="docutils literal notranslate"><span class="pre">dim==0</span></code>) to.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span> – Padded data with the specified size.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.numba_operators.remove_inactive">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.numba_operators.</span></span><span class="sig-name descname"><span class="pre">remove_inactive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">masked_dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dims</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/numba_operators/numba_operators.html#remove_inactive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.remove_inactive" title="Link to this definition"></a></dt>
+<dd><div class="device-note docutils container">
+<p>This function expects input data to be on the <strong>CPU</strong>.</p>
+</div>
+<p>Remove inactive elements in the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – Data to process.</p></li>
+<li><p><strong>active_mask</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – Boolean mask indicating which elements are active.</p></li>
+<li><p><strong>masked_dimension</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The dimension of the data along which the elements are located, i.e. where each
+index indicates another element. The mask will be applied in this dimension and its size must
+match the mask size.</p></li>
+<li><p><strong>num_dims</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The overall number of dimensions in <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p></li>
+<li><p><strong>data_type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/data_types.html#nvidia.dali.types.DALIDataType" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIDataType</span></code></a></span>) – Data type of the data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span> – Resulting data without inactive elements.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.numba_operators.ensure_range">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.numba_operators.</span></span><span class="sig-name descname"><span class="pre">ensure_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dims</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/numba_operators/numba_operators.html#ensure_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.ensure_range" title="Link to this definition"></a></dt>
+<dd><div class="device-note docutils container">
+<p>This function expects input data to be on the <strong>CPU</strong>.</p>
+</div>
+<p>Ensure that the data (containing values from a periodic range) is in a given range (which may be
+larger than one period).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – Data to process.</p></li>
+<li><p><strong>min_value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Minimum border of the range to bring values into.</p></li>
+<li><p><strong>max_value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Maximum border of the range to bring values into.</p></li>
+<li><p><strong>period</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Period of the data values one or multiple periods are added or subtracted from the values to
+bring them into the desired range.</p></li>
+<li><p><strong>num_dims</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Number of dimensions in the data. For scalar data, set to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p></li>
+<li><p><strong>data_type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/data_types.html#nvidia.dali.types.DALIDataType" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIDataType</span></code></a></span>) – Data type of <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span> – Resulting data where the elements are in the range.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.numba_operators.replace_nans">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.numba_operators.</span></span><span class="sig-name descname"><span class="pre">replace_nans</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">replacement_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_dims</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_type=&lt;DALIDataType.FLOAT:</span> <span class="pre">9&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/numba_operators/numba_operators.html#replace_nans"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.replace_nans" title="Link to this definition"></a></dt>
+<dd><div class="device-note docutils container">
+<p>This function expects input data to be on the <strong>CPU</strong>.</p>
+</div>
+<p>Replace <code class="docutils literal notranslate"><span class="pre">nan</span></code> values in data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – Data to apply to.</p></li>
+<li><p><strong>replacement_value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Value to replace <code class="docutils literal notranslate"><span class="pre">nan</span></code> values with.</p></li>
+<li><p><strong>num_dims</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Number of dimensions in the data.</p></li>
+<li><p><strong>data_type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/data_types.html#nvidia.dali.types.DALIDataType" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIDataType</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">&lt;DALIDataType.FLOAT:</span> <span class="pre">9&gt;</span></code>) – Data type of <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span> – Data with <code class="docutils literal notranslate"><span class="pre">nans</span></code> replaced by <code class="docutils literal notranslate"><span class="pre">replacement_value</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.numba_operators.check_bbox_visibiity">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.numba_operators.</span></span><span class="sig-name descname"><span class="pre">check_bbox_visibiity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bboxes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_hw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shrink_bbox_to_obtain_int_coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/numba_operators/numba_operators.html#check_bbox_visibiity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.check_bbox_visibiity" title="Link to this definition"></a></dt>
+<dd><div class="device-note docutils container">
+<p>This function expects input data to be on the <strong>CPU</strong>.</p>
+</div>
+<p>Check visibility of bounding boxes.</p>
+<p>A bounding box is considered visible if it is not completely occluded by other bounding boxes with
+smaller depth (i.e. fully covered by other boxes).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bboxes</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – Bounding boxes to process. Data elements are expected to be of type
+<code class="xref py py-class docutils literal notranslate"><span class="pre">nvidia.dali.types.DALIDataType.FLOAT</span></code>. Expected to be a matrix with each row containing
+one bounding box, i.e. first the upper left and then the lower right corner in the format
+<code class="docutils literal notranslate"><span class="pre">[x1,</span> <span class="pre">y1,</span> <span class="pre">x2,</span> <span class="pre">y2]</span></code>.</p></li>
+<li><p><strong>depths</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – Depths of the individual bounding boxes. Data elements are expected to be of type
+<code class="xref py py-class docutils literal notranslate"><span class="pre">nvidia.dali.types.DALIDataType.FLOAT</span></code>.</p></li>
+<li><p><strong>image_hw</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – The height and width of the image in which the bounding boxes are used. Data elements are
+expected to be of type <code class="xref py py-class docutils literal notranslate"><span class="pre">nvidia.dali.types.DALIDataType.INT32</span></code>.</p></li>
+<li><p><strong>shrink_bbox_to_obtain_int_coords</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">False</span></code>) – Whether to shrink the bounding box to obtain integer coordinates.
+If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the bounding box is shrunk to the nearest integer coordinates. If <code class="docutils literal notranslate"><span class="pre">False</span></code>, the bounding box
+is expanded instead.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span> – Boolean mask indicating for each bounding box whether it is visible.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.numba_operators.check_minimum_bbox_size">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.numba_operators.</span></span><span class="sig-name descname"><span class="pre">check_minimum_bbox_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bboxes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_hw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/numba_operators/numba_operators.html#check_minimum_bbox_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.check_minimum_bbox_size" title="Link to this definition"></a></dt>
+<dd><div class="device-note docutils container">
+<p>This function expects input data to be on the <strong>CPU</strong>.</p>
+</div>
+<p>Check whether a bounding box has a minimum size in both dimensions.</p>
+<p>The bounding box is clipped to the image size before the check is performed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bboxes</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – Bounding boxes to process. Data elements are expected to be of type
+<code class="xref py py-class docutils literal notranslate"><span class="pre">nvidia.dali.types.DALIDataType.FLOAT</span></code>. Expected to be a matrix with each row containing
+one bounding box, i.e. first the upper left and then the lower right corner.</p></li>
+<li><p><strong>min_size</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Minimum size of the bounding box in both dimensions (height, width).</p></li>
+<li><p><strong>image_hw</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – The height and width of the image in which the bounding boxes are used. Data elements are
+expected to be of type <code class="xref py py-class docutils literal notranslate"><span class="pre">nvidia.dali.types.DALIDataType.INT32</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span> – Boolean mask indicating for each bounding box whether it has a minimum size in both dimensions.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.numba_operators.check_points_in_box">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.numba_operators.</span></span><span class="sig-name descname"><span class="pre">check_points_in_box</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_point</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/numba_operators/numba_operators.html#check_points_in_box"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.check_points_in_box" title="Link to this definition"></a></dt>
+<dd><div class="device-note docutils container">
+<p>This function expects input data to be on the <strong>CPU</strong>.</p>
+</div>
+<p>Check whether points are inside an axis-aligned box.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – Points to check. Each row corresponds to one point. Data elements are expected to be of type
+<code class="xref py py-class docutils literal notranslate"><span class="pre">nvidia.dali.types.DALIDataType.FLOAT</span></code>.</p></li>
+<li><p><strong>min_point</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]</span>) – Minimum corner (in all dimensions) of the box.</p></li>
+<li><p><strong>max_point</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>]</span>) – Maximum corner (in all dimensions) of the box.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span> – Boolean mask indicating which points are inside the box.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.numba_operators.crop_coordinates">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.numba_operators.</span></span><span class="sig-name descname"><span class="pre">crop_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_point_np</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_point_np</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/numba_operators/numba_operators.html#crop_coordinates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.crop_coordinates" title="Link to this definition"></a></dt>
+<dd><div class="device-note docutils container">
+<p>This function expects input data to be on the <strong>CPU</strong>.</p>
+</div>
+<p>Crop coordinates to a given range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – Points to check. Each row corresponds to one point. Data type is expected to be
+<code class="xref py py-class docutils literal notranslate"><span class="pre">nvidia.dali.types.DALIDataType.FLOAT</span></code>.
+Note that the point may have any number of dimensions (i.e. any number of columns in the input data).
+This can e.g. be used to express bounding boxes as points, where two diagonally opposite points
+are given for each entry, and the two points are combined as <code class="docutils literal notranslate"><span class="pre">[min_x,</span> <span class="pre">min_y,</span> <span class="pre">max_x,</span> <span class="pre">max_y]</span></code>.</p></li>
+<li><p><strong>min_point</strong> – Minimum corner (in all dimensions) of the box.</p></li>
+<li><p><strong>max_point</strong> – Maximum corner (in all dimensions) of the box.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span> – Points with coordinates cropped to the given range.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.numba_operators.get_rot_mat_from_rot_vector">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.numba_operators.</span></span><span class="sig-name descname"><span class="pre">get_rot_mat_from_rot_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rot_vector</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_homog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-07</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/numba_operators/numba_operators.html#get_rot_mat_from_rot_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.get_rot_mat_from_rot_vector" title="Link to this definition"></a></dt>
+<dd><div class="device-note docutils container">
+<p>This function expects input data to be on the <strong>CPU</strong>.</p>
+</div>
+<p>Get a rotation matrix from a Rodrigues rotation vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rot_vector</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – Rodrigues rotation vector. Data elements are expected to be of type
+<code class="xref py py-class docutils literal notranslate"><span class="pre">nvidia.dali.types.DALIDataType.FLOAT</span></code>.</p></li>
+<li><p><strong>as_homog</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">False</span></code>) – Whether to return a homogeneous transformation matrix.</p></li>
+<li><p><strong>eps</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">1e-07</span></code>) – Small value to avoid division by zero. Vectors with length below
+this value are considered to be zero.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span> – Rotation matrix. If <code class="docutils literal notranslate"><span class="pre">as_homog</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, the matrix is a homogeneous transformation matrix.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.numba_operators.get_translation_mat_from_vector">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.numba_operators.</span></span><span class="sig-name descname"><span class="pre">get_translation_mat_from_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">translation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/numba_operators/numba_operators.html#get_translation_mat_from_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.get_translation_mat_from_vector" title="Link to this definition"></a></dt>
+<dd><div class="device-note docutils container">
+<p>This function expects input data to be on the <strong>CPU</strong>.</p>
+</div>
+<p>Get a translation matrix from a translation vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>translation</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – Translation vector. Data elements are expected to be of type
+<code class="xref py py-class docutils literal notranslate"><span class="pre">nvidia.dali.types.DALIDataType.FLOAT</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span> – Translation matrix (homogeneous transformation matrix).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.numba_operators.get_scaling_mat_from_vector">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.numba_operators.</span></span><span class="sig-name descname"><span class="pre">get_scaling_mat_from_vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaling</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">as_homog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/numba_operators/numba_operators.html#get_scaling_mat_from_vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.get_scaling_mat_from_vector" title="Link to this definition"></a></dt>
+<dd><div class="device-note docutils container">
+<p>This function expects input data to be on the <strong>CPU</strong>.</p>
+</div>
+<p>Get a scaling matrix from a scaling vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scaling</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – Vector containing the scaling factors for each dimension. Data elements are expected to be
+of type <code class="xref py py-class docutils literal notranslate"><span class="pre">nvidia.dali.types.DALIDataType.FLOAT</span></code>.</p></li>
+<li><p><strong>as_homog</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">False</span></code>) – Whether to return a homogeneous transformation matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span> – Scaling matrix. If <code class="docutils literal notranslate"><span class="pre">as_homog</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, the matrix is a homogeneous transformation matrix.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.numba_operators.apply_matrix">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.numba_operators.</span></span><span class="sig-name descname"><span class="pre">apply_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">to_apply_to</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">make_apply_to_homog</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_apply_to_is_transposed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matrix_is_transposed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matrix_is_inverted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiply_matrix_from_right</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/numba_operators/numba_operators.html#apply_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.apply_matrix" title="Link to this definition"></a></dt>
+<dd><div class="device-note docutils container">
+<p>This function expects input data to be on the <strong>CPU</strong>.</p>
+</div>
+<p>Apply a matrix to data (vector or matrix).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>to_apply_to</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – Data node to apply the matrix to. Data elements are expected to be of type
+<code class="xref py py-class docutils literal notranslate"><span class="pre">nvidia.dali.types.DALIDataType.FLOAT</span></code>.</p></li>
+<li><p><strong>matrix</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – Matrix to apply. Data elements are expected to be of type
+<code class="xref py py-class docutils literal notranslate"><span class="pre">nvidia.dali.types.DALIDataType.FLOAT</span></code>.</p></li>
+<li><p><strong>make_apply_to_homog</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether to make the input homogeneous before applying the matrix.
+The result will be converted back to Euclidean space after applying the matrix.</p></li>
+<li><p><strong>to_apply_to_is_transposed</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether the input is transposed.
+If set, the input will be transposed before applying the matrix, and transposed back afterwards.</p></li>
+<li><p><strong>matrix_is_transposed</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether the matrix is transposed.
+If set, the matrix will be transposed before applying it.</p></li>
+<li><p><strong>matrix_is_inverted</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether the matrix is inverted.
+If set, the matrix will be inverted before applying it.</p></li>
+<li><p><strong>multiply_matrix_from_right</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether to multiply the matrix from the right.
+If set, the matrix will be multiplied from the right (otherwise from the left).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span> – Data with the matrix applied.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.numba_operators.get_center_from_bboxes">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.numba_operators.</span></span><span class="sig-name descname"><span class="pre">get_center_from_bboxes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bboxes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_in=&lt;DALIDataType.FLOAT:</span> <span class="pre">9&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/numba_operators/numba_operators.html#get_center_from_bboxes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.get_center_from_bboxes" title="Link to this definition"></a></dt>
+<dd><div class="device-note docutils container">
+<p>This function expects input data to be on the <strong>CPU</strong>.</p>
+</div>
+<p>Get the center of bounding boxes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bboxes</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – Bounding boxes. The first dimension (<code class="docutils literal notranslate"><span class="pre">dim==0</span></code>) iterates over the bounding boxes.
+Each bounding box is expected to be in the format <code class="docutils literal notranslate"><span class="pre">[x1,</span> <span class="pre">y1,</span> <span class="pre">x2,</span> <span class="pre">y2]</span></code>, where <code class="docutils literal notranslate"><span class="pre">(x1,</span> <span class="pre">y1)</span></code> and
+<code class="docutils literal notranslate"><span class="pre">(x2,</span> <span class="pre">y2)</span></code> are the coordinates of the two diagonally opposite corners of the bounding box.</p></li>
+<li><p><strong>dtype_in</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/data_types.html#nvidia.dali.types.DALIDataType" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIDataType</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">&lt;DALIDataType.FLOAT:</span> <span class="pre">9&gt;</span></code>) – Data type of the bounding boxes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span> – The center of the bounding boxes. The data type of the output is
+<code class="xref py py-class docutils literal notranslate"><span class="pre">nvidia.dali.types.DALIDataType.FLOAT</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.numba_operators.get_radii_from_bboxes">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.numba_operators.</span></span><span class="sig-name descname"><span class="pre">get_radii_from_bboxes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bboxes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_bboxes=&lt;DALIDataType.FLOAT:</span> <span class="pre">9&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_factor=0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype_center=&lt;DALIDataType.FLOAT:</span> <span class="pre">9&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/numba_operators/numba_operators.html#get_radii_from_bboxes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.numba_operators.get_radii_from_bboxes" title="Link to this definition"></a></dt>
+<dd><div class="device-note docutils container">
+<p>This function expects input data to be on the <strong>CPU</strong>.</p>
+</div>
+<p>Compute radii from bounding boxes and a scaling factor.</p>
+<p>The radius is the minimum distance from the bounding box center to its border scaled by the scaling
+factor. The center to use can be provided as an input (may not correspond to the geometrical center of
+the bounding box), or computed from the bounding boxes.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The bounding boxes are expected to be in the format <code class="docutils literal notranslate"><span class="pre">[x1,</span> <span class="pre">y1,</span> <span class="pre">x2,</span> <span class="pre">y2]</span></code>, where <code class="docutils literal notranslate"><span class="pre">(x1,</span> <span class="pre">y1)</span></code> and
+<code class="docutils literal notranslate"><span class="pre">(x2,</span> <span class="pre">y2)</span></code> are the coordinates of the two diagonally opposite corners of the bounding box. No
+assumption is made on the order of the points or on which diagonal the points are on.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bboxes</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span>) – Bounding boxes.</p></li>
+<li><p><strong>dtype_bboxes</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/data_types.html#nvidia.dali.types.DALIDataType" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIDataType</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">&lt;DALIDataType.FLOAT:</span> <span class="pre">9&gt;</span></code>) – Data type of the bounding boxes.</p></li>
+<li><p><strong>scaling_factor</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">0.8</span></code>) – Scaling factor for the radii.</p></li>
+<li><p><strong>centers</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a>]</span>, default: <code class="docutils literal notranslate"><span class="pre">None</span></code>) – Centers of the bounding boxes.</p></li>
+<li><p><strong>dtype_center</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/data_types.html#nvidia.dali.types.DALIDataType" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DALIDataType</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">&lt;DALIDataType.FLOAT:</span> <span class="pre">9&gt;</span></code>) – Data type of the center.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.nvidia.com/deeplearning/dali/user-guide/docs/pipeline.html#nvidia.dali.pipeline.DataNode" title="(in NVIDIA DALI v1.53.0-55113c6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataNode</span></code></a></span> – Radii. The data type of the output is <code class="xref py py-class docutils literal notranslate"><span class="pre">nvidia.dali.types.DALIDataType.FLOAT</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-accvlab.dali_pipeline_framework.operators_impl.python_operator_functions">
+<span id="python-operator-functions"></span><h2>Python Operator Functions<a class="headerlink" href="#module-accvlab.dali_pipeline_framework.operators_impl.python_operator_functions" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.apply_transform_to_points">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.</span></span><span class="sig-name descname"><span class="pre">apply_transform_to_points</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/python_operator_functions/python_operator_functions.html#apply_transform_to_points"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.apply_transform_to_points" title="Link to this definition"></a></dt>
+<dd><p>Apply an affine transformation to a set of points.</p>
+<p>Note that the transformation is applied in homogeneous coordinates.
+This is handled by the function and the input points are not expected to be in
+homogeneous coordinates. Similarly, the output points are not in homogeneous coordinates.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This function can handle concatenated points, i.e. multiple points per row, i.e.
+<code class="docutils literal notranslate"><span class="pre">[x1,</span> <span class="pre">y1,</span> <span class="pre">x2,</span> <span class="pre">y2,</span> <span class="pre">...]</span></code>.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>A similar function is available in the <a class="reference internal" href="#module-accvlab.dali_pipeline_framework.operators_impl.numba_operators" title="accvlab.dali_pipeline_framework.operators_impl.numba_operators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.numba_operators</span></code></a>
+module. That function is faster and supports different variations of matrix multiplication (e.g.
+including use of transposed input and matrices, use of the inverse matrix, etc.),
+but it does not support concatenated points.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span>) – A 2D array of shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">num_points_per_row)</span></code> containing the coordinates
+of the points.</p></li>
+<li><p><strong>transform</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span>) – A 2D array of shape <code class="docutils literal notranslate"><span class="pre">(3,</span> <span class="pre">3)</span></code> containing the affine transformation matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span> – A 2D array of shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">num_points_per_row)</span></code> containing the coordinates of the transformed
+points.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.add_post_transform_to_projection_matrix">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.</span></span><span class="sig-name descname"><span class="pre">add_post_transform_to_projection_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proj_mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/python_operator_functions/python_operator_functions.html#add_post_transform_to_projection_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.add_post_transform_to_projection_matrix" title="Link to this definition"></a></dt>
+<dd><p>Add a post-transform to a projection matrix.</p>
+<p>This can e.g. be used to include 2D transformations of the image to a projection matrix, e.g.
+when performing augmentations on the image.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In case of a decomposed projection matrix (i.e. an intrinsic camera matrix and a extrinsic camera
+pose matrix), the post-transform should be only applied to the intrinsic camera matrix.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>proj_mat</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span>) – A 2D array of shape (3, 4) containing the projection matrix.</p></li>
+<li><p><strong>transform</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span>) – A 2D array of shape (3, 3) containing the affine transformation matrix.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span> – A 2D array of shape (3, 4) containing the projection matrix with the post-transform applied.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.apply_clipping_and_get_with_clipping_info">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.</span></span><span class="sig-name descname"><span class="pre">apply_clipping_and_get_with_clipping_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rects</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">centers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_trafo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">image_hw</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/python_operator_functions/python_operator_functions.html#apply_clipping_and_get_with_clipping_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.apply_clipping_and_get_with_clipping_info" title="Link to this definition"></a></dt>
+<dd><p>Apply clipping to a set of rectangles and get the size, area fraction and center of the clipped rectangles.</p>
+<p>Note that a scaling transformation can be defined and will be applied before the clipping. This
+is e.g. useful when the bounding boxes are defined for the original image size, but need to be used
+for a down-sampled image (e.g. a heatmap as used for object detection).</p>
+<p>The scaling transformation is defined as a 3x3 matrix in homogeneous coordinates, and is applied to the
+rectangles before the clipping.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Note that while any affine transformation can be input to this function, the function assumes
+that the input rectangles are defined by their upper left and lower right corners as provided in the input
+and transformed by the scaling transformation. Some transformations (e.g. rotations) may not preserve
+this property, resulting in incorrect rectangles in the output.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rects</strong> – A 2D array of shape (N, 4) containing the coordinates of the rectangles.</p></li>
+<li><p><strong>centers</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span>) – A 2D array of shape (N, 2) containing the centers of the rectangles.</p></li>
+<li><p><strong>scaling_trafo</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span>) – A 2D array of shape (3, 3) containing the affine transformation matrix.</p></li>
+<li><p><strong>image_hw</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span>) – A tuple of two integers containing the height and width of the image.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>A 2D array of shape (N, 4) containing the coordinates of the clipped rectangles.</p></li>
+<li><p>A 2D array of shape (N, 2) containing the height and width of the clipped rectangles.</p></li>
+<li><p>A 2D array of shape (N, 1) containing the area fraction of the clipped rectangles
+(compared to the full, non-clipped area).</p></li>
+<li><p>A 2D array of shape (N, 2) containing the centers of the clipped rectangles.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A tuple containing</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.get_is_active">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.</span></span><span class="sig-name descname"><span class="pre">get_is_active</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction_areas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_object_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_class_min_object_sizes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_fraction_area_thresh</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/python_operator_functions/python_operator_functions.html#get_is_active"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.get_is_active" title="Link to this definition"></a></dt>
+<dd><p>Get the indices of the active detections.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This function supports using or not using class labels. If class labels are used,
+per-class size thresholds can be provided. Note that this means that some of the inputs
+can be None (in case they are not used). When used in a DALI
+python operator, <code class="docutils literal notranslate"><span class="pre">None</span></code> cannot be directly passed. Therefore, unused inputs need to
+be removed from the function signature. This can be achieved by wrapping this function in a lambda
+function, and expose only the used inputs to the caller, while setting the unused inputs to <code class="docutils literal notranslate"><span class="pre">None</span></code>
+inside the lambda function.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>hw</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span>) – A 2D array of shape (N, 2) containing the height and width of the detections.</p></li>
+<li><p><strong>classes</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>]</span>) – A 1D array of shape (N,) containing the classes of the detections.</p></li>
+<li><p><strong>fraction_areas</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span>) – A 1D array of shape (N,) containing the area fraction of the detections.</p></li>
+<li><p><strong>min_object_size</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>]</span>) – A 1D array of shape (2,) containing the minimum object size thresholds.
+Must be set to <code class="docutils literal notranslate"><span class="pre">None</span></code> if <code class="docutils literal notranslate"><span class="pre">per_class_min_object_sizes</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>. If both are <code class="docutils literal notranslate"><span class="pre">None</span></code>,
+no checks for minimum object size are performed.</p></li>
+<li><p><strong>per_class_min_object_sizes</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>]</span>) – A 2D array of shape (num_classes, 2) containing the minimum object size
+thresholds per class. Must be set to <code class="docutils literal notranslate"><span class="pre">None</span></code> if <code class="docutils literal notranslate"><span class="pre">min_object_size</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code>. If both
+are <code class="docutils literal notranslate"><span class="pre">None</span></code>, no checks for minimum object size are performed.</p></li>
+<li><p><strong>num_classes</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – An integer containing the number of classes.
+If <code class="docutils literal notranslate"><span class="pre">classes</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, this is ignored.</p></li>
+<li><p><strong>min_fraction_area_thresh</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – A float containing the minimum fraction of the area of the detection that
+needs to be present in the image.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span> – A 1D array of shape (N,) containing the indices of the active detections.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.pad_to_common_size">
+<span class="sig-prename descclassname"><span class="pre">accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.</span></span><span class="sig-name descname"><span class="pre">pad_to_common_size</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/accvlab/dali_pipeline_framework/operators_impl/python_operator_functions/python_operator_functions.html#pad_to_common_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.dali_pipeline_framework.operators_impl.python_operator_functions.pad_to_common_size" title="Link to this definition"></a></dt>
+<dd><p>Pad a set of inputs to the common size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputs</strong> – A tuple of input arrays.</p></li>
+<li><p><strong>fill_value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – A float containing the value to fill the padded areas with.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</span> – A tuple of padded arrays.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="internal_helpers.html" class="btn btn-neutral float-left" title="Internal Helpers Submodule" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../examples.html" class="btn btn-neutral float-right" title="Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

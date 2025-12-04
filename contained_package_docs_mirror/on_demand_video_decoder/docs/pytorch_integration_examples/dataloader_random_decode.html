@@ -1,0 +1,646 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DataLoader Random Decode Example &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="DataLoader Stream Decode Example" href="dataloader_stream_decode.html" />
+    <link rel="prev" title="PyTorch Integration Examples" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">On Demand Video Decoder</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dataset_preparation.html">Dataset Preparation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sample.html">Sample Code Documentation</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">PyTorch Integration Examples</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">DataLoader Random Decode Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#key-features">Key Features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#index-data-format">Index Data Format</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data-loading-structure">Data Loading Structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#usage">Usage</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#basic-usage">Basic Usage</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#distributed-training">Distributed Training</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#command-line-arguments">Command Line Arguments</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#architecture">Architecture</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#videoclipdataset">VideoClipDataset</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#videoclipsampler">VideoClipSampler</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#example-training-loop">Example Training Loop</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="#performance">Performance</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#test-environment">Test Environment</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#performance-metrics-frames-sec">Performance Metrics (frames/sec)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#performance-optimization-tips">Performance Optimization Tips</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#performance-profiling">Performance Profiling</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="dataloader_stream_decode.html">DataLoader Stream Decode Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataloader_separation_decode.html">DataLoader Separation Decode Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataloader_demuxer_free_decode.html">DataLoader Demuxer-Free Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">On Demand Video Decoder</a></li>
+          <li class="breadcrumb-item"><a href="index.html">PyTorch Integration Examples</a></li>
+      <li class="breadcrumb-item active">DataLoader Random Decode Example</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/contained_package_docs_mirror/on_demand_video_decoder/docs/pytorch_integration_examples/dataloader_random_decode.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dataloader-random-decode-example">
+<h1>DataLoader Random Decode Example<a class="headerlink" href="#dataloader-random-decode-example" title="Link to this heading"></a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>This example demonstrates how to use NVIDIA’s accvlab.on_demand_video_decoder library with PyTorch DataLoader for efficient random frame extraction from random videos in batch form, ideal for training scenarios that require diverse sampling patterns.</p>
+<p>The specific code implementation can be found in <code class="docutils literal notranslate"><span class="pre">packages/on_demand_video_decoder/examples/dataloader_random_decode</span></code>.</p>
+<img alt="RandomAccess Optimazation Overview" src="../../../../_images/random_access.png" />
+</section>
+<section id="key-features">
+<h2>Key Features<a class="headerlink" href="#key-features" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Custom PyTorch Dataset</strong>: Implements lazy initialization of the GOP decoder to support multiple processes</p></li>
+<li><p><strong>Custom Sampler</strong>: Organizes random video clips into batches for efficient processing with distributed training support</p></li>
+<li><p><strong>Multi-camera Support</strong>: Handles synchronized frames from multiple cameras with random access</p></li>
+<li><p><strong>Distributed Training</strong>: Compatible with PyTorch’s distributed training framework</p></li>
+<li><p><strong>Performance Profiling</strong>: Includes NVTX markers for performance analysis</p></li>
+<li><p><strong>Error Handling</strong>: Comprehensive error handling and validation</p></li>
+<li><p><strong>Random Access Decoding</strong>: GOP-based random frame extraction optimized for training diversity</p></li>
+</ul>
+</section>
+<section id="index-data-format">
+<h2>Index Data Format<a class="headerlink" href="#index-data-format" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The JSON file and the selection of frames to access are used here for demonstration purposes. In a
+real-world scenario, the file names and indices would be obtained from the dataset metadata.</p>
+</div>
+<p>The example expects a JSON file with the following structure:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>{
+    &quot;video_dir1&quot;: {
+        &quot;clip0id&quot;: frame_count,
+        &quot;clip1id&quot;: frame_count,
+        ...
+    },
+    &quot;video_dir2&quot;: {
+        &quot;clip0id&quot;: frame_count,
+        &quot;clip1id&quot;: frame_count,
+        ...
+    }
+}
+</pre></div>
+</div>
+<p>Each video directory should contain subdirectories for each clip, and each clip directory should contain MP4 files for different cameras.</p>
+</section>
+<section id="data-loading-structure">
+<h2>Data Loading Structure<a class="headerlink" href="#data-loading-structure" title="Link to this heading"></a></h2>
+<p>The data loading process follows a hierarchical structure optimized for <strong>random access and maximum diversity</strong>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Random Sampling Dimension
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         RANDOM DECODING PIPELINE                            │
+│                    (GOP-based Random Frame Access)                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Batch Dimension (group_num clips per batch, fixed) - Random Sampling
+├── Batch 0 (e.g., 4 clips)
+│   ├─→ Random Clip A (from video_dir3/clip7)
+│   │   └─→ Random Frame 8  → [cam0_f8,  cam1_f8,  cam2_f8,  cam3_f8,  cam4_f8,  cam5_f8 ]
+│   │
+│   ├─→ Random Clip B (from video_dir1/clip2)
+│   │   └─→ Random Frame 5  → [cam0_f5,  cam1_f5,  cam2_f5,  cam3_f5,  cam4_f5,  cam5_f5 ]
+│   │
+│   ├─→ Random Clip C (from video_dir7/clip4)
+│   │   └─→ Random Frame 12 → [cam0_f12, cam1_f12, cam2_f12, cam3_f12, cam4_f12, cam5_f12]
+│   │
+│   └─→ Random Clip D (from video_dir2/clip9)
+│       └─→ Random Frame 61 → [cam0_f61, cam1_f61, cam2_f61, cam3_f61, cam4_f61, cam5_f61]
+│
+├── Batch 1 (e.g., 4 clips)
+│   ├─→ Random Clip E (from video_dir5/clip1)
+│   │   └─→ Random Frame 47 → [cam0_f47, cam1_f47, cam2_f47, cam3_f47, cam4_f47, cam5_f47]
+│   │
+│   ├─→ Random Clip F (from video_dir4/clip6)
+│   │   └─→ Random Frame 55 → [cam0_f55, cam1_f55, cam2_f55, cam3_f55, cam4_f55, cam5_f55]
+│   │
+│   ├─→ Random Clip G (from video_dir8/clip3)
+│   │   └─→ Random Frame 31 → [cam0_f31, cam1_f31, cam2_f31, cam3_f31, cam4_f31, cam5_f31]
+│   │
+│   └─→ Random Clip H (from video_dir6/clip5)
+│       └─→ Random Frame 3  → [cam0_f3,  cam1_f3,  cam2_f3,  cam3_f3,  cam4_f3,  cam5_f3 ]
+│
+└── ... (continues with random sampling)
+
+Data Flow with Random Access:
+Random Selection → Batch → Random Clip → Random Frame_ID → Synchronized Multi-camera frames
+       ↓             ↓          ↓              ↓                        ↓
+  Shuffled      group_num   Different     Non-sequential    [cam0, cam1, cam2, ...] (fixed num)
+   clips      (fixed size)  video dirs      frame IDs        all at same frame_id
+</pre></div>
+</div>
+<p><strong>Random Access Dimension Details:</strong></p>
+<ul class="simple">
+<li><p><strong>Random Selection</strong>: Clips are randomly sampled from the entire dataset (no temporal ordering)</p></li>
+<li><p><strong>Batch</strong>: Contains <code class="docutils literal notranslate"><span class="pre">group_num</span></code> randomly selected clips (batch size is <strong>fixed</strong>)</p></li>
+<li><p><strong>Random Clip</strong>: Each clip is independently sampled from potentially different video directories</p></li>
+<li><p><strong>Random Frame_ID</strong>: Frame indices within each clip are accessed randomly (non-sequential across calls)</p></li>
+<li><p><strong>Multi-camera</strong>: <strong>Fixed number</strong> of synchronized cameras, all accessing the <strong>same frame index</strong> simultaneously</p>
+<ul>
+<li><p>Example: If frame_id=15 is requested, all cameras (cam0, cam1, cam2, …, cam5) decode frame 15</p></li>
+<li><p>Camera count remains constant across all clips and batches</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>Random Access Benefits:</strong></p>
+<ul class="simple">
+<li><p><strong>Training Diversity</strong>: Maximizes data variety by sampling from different videos and frames</p></li>
+<li><p><strong>Better Generalization</strong>: Prevents temporal bias by breaking sequential patterns</p></li>
+<li><p><strong>Efficient GOP Decoding</strong>: Leverages GOP structure for fast random frame access</p></li>
+<li><p><strong>Flexible Sampling</strong>: Supports various sampling strategies (uniform, weighted, etc.)</p></li>
+<li><p><strong>Reduced Overfitting</strong>: Random access patterns improve model robustness</p></li>
+</ul>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h2>
+<section id="basic-usage">
+<h3>Basic Usage<a class="headerlink" href="#basic-usage" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>main.py<span class="w"> </span>--index_file<span class="w"> </span>/path/to/index_frame.json<span class="w"> </span>--group_num<span class="w"> </span><span class="m">4</span><span class="w"> </span>--num_workers<span class="w"> </span><span class="m">2</span>
+</pre></div>
+</div>
+</section>
+<section id="distributed-training">
+<h3>Distributed Training<a class="headerlink" href="#distributed-training" title="Link to this heading"></a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>torch.distributed.run<span class="w"> </span>--nproc_per_node<span class="o">=</span><span class="m">2</span><span class="w"> </span>main.py<span class="w"> </span>--index_file<span class="w"> </span>/path/to/index_frame.json<span class="w"> </span>--group_num<span class="w"> </span><span class="m">4</span><span class="w"> </span>--num_workers<span class="w"> </span><span class="m">2</span>
+</pre></div>
+</div>
+</section>
+<section id="command-line-arguments">
+<h3>Command Line Arguments<a class="headerlink" href="#command-line-arguments" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--index_file</span></code>: Path to the JSON file containing frame index information (default: <code class="docutils literal notranslate"><span class="pre">example/index_frame.json</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--group_num</span></code>: Number of clips to process in each batch (default: 4)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--num_workers</span></code>: Number of worker processes for data loading (default: 2)</p></li>
+</ul>
+</section>
+</section>
+<section id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h2>
+<section id="videoclipdataset">
+<h3>VideoClipDataset<a class="headerlink" href="#videoclipdataset" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">VideoClipDataset</span></code> class extends PyTorch’s <code class="docutils literal notranslate"><span class="pre">Dataset</span></code> and provides:</p>
+<ul class="simple">
+<li><p>Lazy initialization of the NVIDIA GOP decoder</p></li>
+<li><p>GPU-accelerated random frame decoding</p></li>
+<li><p>Multi-camera frame synchronization with random access</p></li>
+<li><p>Error handling and validation</p></li>
+<li><p><strong>Random Decoder Configuration</strong> (<code class="docutils literal notranslate"><span class="pre">nvc.CreateGopDecoder</span></code>):</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">maxfiles</span></code>: Maximum number of video files to keep open simultaneously</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">iGpu</span></code>: GPU device ID for decoding</p></li>
+</ul>
+</li>
+</ul>
+<p><strong>Implementation:</strong></p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">examples/dataloader_random_decode/main.py</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">136</span><span class="c1"># .. doc-marker-begin: dataset-random</span>
+<span class="linenos">137</span><span class="k">class</span><span class="w"> </span><span class="nc">VideoClipDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+<span class="linenos">138</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">139</span><span class="sd">    PyTorch Dataset for video clip decoding using ``accvlab.on_demand_video_decoder``.</span>
+<span class="linenos">140</span>
+<span class="linenos">141</span><span class="sd">    This dataset provides GPU-accelerated video decoding capabilities with lazy</span>
+<span class="linenos">142</span><span class="sd">    initialization of the decoder to optimize memory usage. It supports multi-camera</span>
+<span class="linenos">143</span><span class="sd">    video clips and is designed for distributed training scenarios.</span>
+<span class="linenos">144</span>
+<span class="linenos">145</span><span class="sd">    This implementation uses CreateGopDecoder for random access.</span>
+<span class="linenos">146</span>
+<span class="linenos">147</span><span class="sd">    Attributes:</span>
+<span class="linenos">148</span><span class="sd">        device_id: GPU device ID for decoder initialization</span>
+<span class="linenos">149</span><span class="sd">        index_frame: Frame index information loaded from JSON</span>
+<span class="linenos">150</span><span class="sd">        num_cameras: Number of cameras per clip</span>
+<span class="linenos">151</span><span class="sd">        group_num: Number of clips to process in each batch</span>
+<span class="linenos">152</span><span class="sd">        use_fast_init: Whether to use fast initialization with GetFastInitInfo</span>
+<span class="linenos">153</span><span class="sd">        _is_initialized: Flag indicating if decoder has been initialized</span>
+<span class="linenos">154</span><span class="sd">        _nvc_decoder: NVIDIA video decoder instance (CreateGopDecoder)</span>
+<span class="linenos">155</span><span class="sd">        fast_stream_infos: Fast initialization info for decoder</span>
+<span class="linenos">156</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos">157</span>
+<span class="linenos">158</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<span class="linenos">159</span>        <span class="bp">self</span><span class="p">,</span>
+<span class="linenos">160</span>        <span class="n">index_frame</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
+<span class="linenos">161</span>        <span class="n">group_num</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="linenos">162</span>        <span class="n">device_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="linenos">163</span>        <span class="n">num_cameras</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">NUM_CAMERAS</span><span class="p">,</span>
+<span class="linenos">164</span>        <span class="n">use_fast_init</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="linenos">165</span>    <span class="p">):</span>
+<span class="linenos">166</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">167</span><span class="sd">        Initialize the VideoClipDataset for random access.</span>
+<span class="linenos">168</span>
+<span class="linenos">169</span><span class="sd">        Args:</span>
+<span class="linenos">170</span><span class="sd">            index_frame: Frame index information from JSON file</span>
+<span class="linenos">171</span><span class="sd">            group_num: Number of clips to process in each batch</span>
+<span class="linenos">172</span><span class="sd">            device_id: GPU device ID for decoder initialization</span>
+<span class="linenos">173</span><span class="sd">            num_cameras: Number of cameras per clip (default: 6)</span>
+<span class="linenos">174</span><span class="sd">            use_fast_init: Whether to use fast initialization (default: False)</span>
+<span class="linenos">175</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos">176</span>        <span class="bp">self</span><span class="o">.</span><span class="n">device_id</span> <span class="o">=</span> <span class="n">device_id</span>
+<span class="linenos">177</span>        <span class="bp">self</span><span class="o">.</span><span class="n">index_frame</span> <span class="o">=</span> <span class="n">index_frame</span>
+<span class="linenos">178</span>        <span class="bp">self</span><span class="o">.</span><span class="n">num_cameras</span> <span class="o">=</span> <span class="n">num_cameras</span>
+<span class="linenos">179</span>        <span class="bp">self</span><span class="o">.</span><span class="n">group_num</span> <span class="o">=</span> <span class="n">group_num</span>
+<span class="linenos">180</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_is_initialized</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="linenos">181</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_nvc_decoder</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos">182</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_use_fast_init</span> <span class="o">=</span> <span class="n">use_fast_init</span>
+<span class="linenos">183</span>        <span class="bp">self</span><span class="o">.</span><span class="n">fast_stream_infos</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos">184</span>
+<span class="linenos">185</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="linenos">186</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">187</span><span class="sd">        Get the total number of batches in the dataset.</span>
+<span class="linenos">188</span>
+<span class="linenos">189</span><span class="sd">        Returns:</span>
+<span class="linenos">190</span><span class="sd">            Total number of batches (total frames // group_num)</span>
+<span class="linenos">191</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos">192</span>        <span class="n">total_frames</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="linenos">193</span>        <span class="k">for</span> <span class="n">video_dir</span><span class="p">,</span> <span class="n">clip_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index_frame</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="linenos">194</span>            <span class="k">for</span> <span class="n">clip_id</span><span class="p">,</span> <span class="n">frame_count</span> <span class="ow">in</span> <span class="n">clip_info</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="linenos">195</span>                <span class="n">total_frames</span> <span class="o">+=</span> <span class="n">frame_count</span>
+<span class="linenos">196</span>
+<span class="linenos">197</span>        <span class="k">return</span> <span class="n">total_frames</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_num</span>
+<span class="linenos">198</span>
+<span class="linenos">199</span>    <span class="k">def</span><span class="w"> </span><span class="nf">_lazy_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">200</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">201</span><span class="sd">        Lazy initialize the NVIDIA video decoder (CreateGopDecoder).</span>
+<span class="linenos">202</span>
+<span class="linenos">203</span><span class="sd">        This method initializes the decoder only when first needed, which helps</span>
+<span class="linenos">204</span><span class="sd">        optimize memory usage and startup time.</span>
+<span class="linenos">205</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos">206</span>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_initialized</span><span class="p">:</span>
+<span class="linenos">207</span>            <span class="k">return</span>
+<span class="linenos">208</span>
+<span class="linenos">209</span>        <span class="k">try</span><span class="p">:</span>
+<span class="linenos">210</span>            <span class="bp">self</span><span class="o">.</span><span class="n">_nvc_decoder</span> <span class="o">=</span> <span class="n">nvc</span><span class="o">.</span><span class="n">CreateGopDecoder</span><span class="p">(</span>
+<span class="linenos">211</span>                <span class="n">maxfiles</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_cameras</span><span class="p">,</span>  <span class="c1"># Maximum number of files to use</span>
+<span class="linenos">212</span>                <span class="n">iGpu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">device_id</span><span class="p">,</span>  <span class="c1"># GPU ID</span>
+<span class="linenos">213</span>            <span class="p">)</span>
+<span class="linenos">214</span>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_fast_init</span><span class="p">:</span>
+<span class="linenos">215</span>                <span class="n">file_lists</span> <span class="o">=</span> <span class="p">[</span>
+<span class="linenos">216</span>                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.mp4&#39;</span><span class="p">)</span>
+<span class="linenos">217</span>                <span class="p">]</span>
+<span class="linenos">218</span>                <span class="bp">self</span><span class="o">.</span><span class="n">fast_stream_infos</span> <span class="o">=</span> <span class="n">nvc</span><span class="o">.</span><span class="n">GetFastInitInfo</span><span class="p">(</span><span class="n">file_lists</span><span class="p">)</span>
+<span class="linenos">219</span>
+<span class="linenos">220</span>            <span class="bp">self</span><span class="o">.</span><span class="n">_is_initialized</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos">221</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Random video decoder (CreateGopDecoder) initialized on GPU </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">device_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">222</span>        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<span class="linenos">223</span>            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to initialize random video decoder on GPU </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">device_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">224</span>
+<span class="linenos">225</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]]:</span>
+<span class="linenos">226</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="linenos">227</span><span class="sd">        Get a batch of video frames for the given index.</span>
+<span class="linenos">228</span>
+<span class="linenos">229</span><span class="sd">        Args:</span>
+<span class="linenos">230</span><span class="sd">            index: List of tuples containing (clip_path, frame_idx) pairs</span>
+<span class="linenos">231</span>
+<span class="linenos">232</span><span class="sd">        Returns:</span>
+<span class="linenos">233</span><span class="sd">            List of lists of decoded video frames as PyTorch tensors</span>
+<span class="linenos">234</span>
+<span class="linenos">235</span><span class="sd">        Raises:</span>
+<span class="linenos">236</span><span class="sd">            RuntimeError: If decoder initialization fails</span>
+<span class="linenos">237</span><span class="sd">            ValueError: If input index format is invalid</span>
+<span class="linenos">238</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos">239</span>        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+<span class="linenos">240</span>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected list of tuples, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">241</span>
+<span class="linenos">242</span>        <span class="bp">self</span><span class="o">.</span><span class="n">_lazy_init</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+<span class="linenos">243</span>        <span class="n">decoded_batch</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">244</span>
+<span class="linenos">245</span>        <span class="k">for</span> <span class="n">clip_path</span><span class="p">,</span> <span class="n">frame_idx</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">index</span><span class="p">:</span>
+<span class="linenos">246</span>            <span class="k">try</span><span class="p">:</span>
+<span class="linenos">247</span>                <span class="c1"># Find all MP4 files in the clip directory</span>
+<span class="linenos">248</span>                <span class="n">video_paths</span> <span class="o">=</span> <span class="p">[</span>
+<span class="linenos">249</span>                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">clip_path</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">clip_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.mp4&#39;</span><span class="p">)</span>
+<span class="linenos">250</span>                <span class="p">]</span>
+<span class="linenos">251</span>
+<span class="linenos">252</span>                <span class="k">if</span> <span class="ow">not</span> <span class="n">video_paths</span><span class="p">:</span>
+<span class="linenos">253</span>                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No MP4 files found in </span><span class="si">{</span><span class="n">clip_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">254</span>
+<span class="linenos">255</span>                <span class="c1"># Create frame index list for all videos (same frame for synchronized cameras)</span>
+<span class="linenos">256</span>                <span class="n">frame_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">frame_idx</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">video_paths</span><span class="p">)</span>
+<span class="linenos">257</span>
+<span class="linenos">258</span>                <span class="c1"># Decode frames from all cameras using CreateGopDecoder</span>
+<span class="linenos">259</span>                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_use_fast_init</span><span class="p">:</span>
+<span class="linenos">260</span>                    <span class="n">decoded_frames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nvc_decoder</span><span class="o">.</span><span class="n">DecodeN12ToRGB</span><span class="p">(</span>
+<span class="linenos">261</span>                        <span class="n">video_paths</span><span class="p">,</span> <span class="n">frame_indices</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fast_stream_infos</span>
+<span class="linenos">262</span>                    <span class="p">)</span>
+<span class="linenos">263</span>                <span class="k">else</span><span class="p">:</span>
+<span class="linenos">264</span>                    <span class="n">decoded_frames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nvc_decoder</span><span class="o">.</span><span class="n">DecodeN12ToRGB</span><span class="p">(</span><span class="n">video_paths</span><span class="p">,</span> <span class="n">frame_indices</span><span class="p">)</span>
+<span class="linenos">265</span>
+<span class="linenos">266</span>                <span class="c1"># Convert to PyTorch tensors and add batch dimension</span>
+<span class="linenos">267</span>                <span class="n">frame_tensors</span> <span class="o">=</span> <span class="p">[</span>
+<span class="linenos">268</span>                    <span class="n">torch</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">as_tensor</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;cuda:</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">device_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+<span class="linenos">269</span>                    <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">decoded_frames</span>
+<span class="linenos">270</span>                <span class="p">]</span>
+<span class="linenos">271</span>
+<span class="linenos">272</span>                <span class="n">decoded_batch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frame_tensors</span><span class="p">)</span>
+<span class="linenos">273</span>
+<span class="linenos">274</span>            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<span class="linenos">275</span>                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to decode frames from </span><span class="si">{</span><span class="n">clip_path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">276</span>
+<span class="linenos">277</span>        <span class="k">return</span> <span class="n">decoded_batch</span>
+<span class="linenos">278</span>
+<span class="linenos">279</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="videoclipsampler">
+<h3>VideoClipSampler<a class="headerlink" href="#videoclipsampler" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">VideoClipSampler</span></code> class extends PyTorch’s <code class="docutils literal notranslate"><span class="pre">Sampler</span></code> and provides:</p>
+<ul class="simple">
+<li><p>Random clip selection across the entire dataset</p></li>
+<li><p>Efficient batch organization with diversity</p></li>
+<li><p>Distributed training support with proper sharding</p></li>
+<li><p>Shuffling support for each epoch</p></li>
+</ul>
+</section>
+<section id="example-training-loop">
+<h3>Example Training Loop<a class="headerlink" href="#example-training-loop" title="Link to this heading"></a></h3>
+<p>The following code shows the complete setup for training with random frame access:</p>
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">examples/dataloader_random_decode/main.py</span><a class="headerlink" href="#id2" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">323</span>    <span class="c1"># .. doc-marker-begin: training-setup-random</span>
+<span class="linenos">324</span>    <span class="c1"># Load frame index information</span>
+<span class="linenos">325</span>    <span class="n">index_frame</span> <span class="o">=</span> <span class="n">load_index_frame</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">index_file</span><span class="p">)</span>
+<span class="linenos">326</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loaded index frame with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">index_frame</span><span class="p">)</span><span class="si">}</span><span class="s2"> video directories&quot;</span><span class="p">)</span>
+<span class="linenos">327</span>
+<span class="linenos">328</span>    <span class="c1"># Create dataset and dataloader for random access</span>
+<span class="linenos">329</span>    <span class="n">dataset</span> <span class="o">=</span> <span class="n">VideoClipDataset</span><span class="p">(</span>
+<span class="linenos">330</span>        <span class="n">index_frame</span><span class="o">=</span><span class="n">index_frame</span><span class="p">,</span>
+<span class="linenos">331</span>        <span class="n">group_num</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">group_num</span><span class="p">,</span>
+<span class="linenos">332</span>        <span class="n">device_id</span><span class="o">=</span><span class="n">local_rank</span><span class="p">,</span>
+<span class="linenos">333</span>        <span class="n">use_fast_init</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">use_fast_init</span><span class="p">,</span>
+<span class="linenos">334</span>    <span class="p">)</span>
+<span class="linenos">335</span>
+<span class="linenos">336</span>    <span class="c1"># Use random sampler for random access</span>
+<span class="linenos">337</span>    <span class="n">sampler</span> <span class="o">=</span> <span class="n">video_clip_sampler</span><span class="o">.</span><span class="n">VideoClipSamplerRandom</span><span class="p">(</span>
+<span class="linenos">338</span>        <span class="n">index_frame</span><span class="o">=</span><span class="n">index_frame</span><span class="p">,</span> <span class="n">group_num</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">group_num</span><span class="p">,</span> <span class="n">rank</span><span class="o">=</span><span class="n">local_rank</span><span class="p">,</span> <span class="n">world_size</span><span class="o">=</span><span class="n">local_world_size</span>
+<span class="linenos">339</span>    <span class="p">)</span>
+<span class="linenos">340</span>
+<span class="linenos">341</span>    <span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
+<span class="linenos">342</span>        <span class="n">dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sampler</span><span class="o">=</span><span class="n">sampler</span><span class="p">,</span> <span class="n">num_workers</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">num_workers</span><span class="p">,</span> <span class="n">pin_memory</span><span class="o">=</span><span class="kc">False</span>
+<span class="linenos">343</span>    <span class="p">)</span>
+<span class="linenos">344</span>
+<span class="linenos">345</span>    <span class="n">loader_iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">)</span>
+<span class="linenos">346</span>
+<span class="linenos">347</span>    <span class="c1"># Warmup phase</span>
+<span class="linenos">348</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Starting warmup phase (</span><span class="si">{</span><span class="n">WARMUP_ITERATIONS</span><span class="si">}</span><span class="s2"> iterations)...&quot;</span><span class="p">)</span>
+<span class="linenos">349</span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">WARMUP_ITERATIONS</span><span class="p">):</span>
+<span class="linenos">350</span>        <span class="n">nvtx</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;warmup_batch_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">351</span>
+<span class="linenos">352</span>        <span class="n">nvtx</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;next_batch&quot;</span><span class="p">)</span>
+<span class="linenos">353</span>        <span class="n">batch</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">loader_iter</span><span class="p">)</span>
+<span class="linenos">354</span>        <span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>  <span class="c1"># next_batch</span>
+<span class="linenos">355</span>
+<span class="linenos">356</span>        <span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>  <span class="c1"># warmup_batch_{i}</span>
+<span class="linenos">357</span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warmup </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">WARMUP_ITERATIONS</span><span class="si">}</span><span class="s2"> completed&quot;</span><span class="p">)</span>
+<span class="linenos">358</span>
+<span class="linenos">359</span>    <span class="c1"># Performance benchmark phase</span>
+<span class="linenos">360</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Starting performance benchmark...&quot;</span><span class="p">)</span>
+<span class="linenos">361</span>    <span class="n">started_at</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="linenos">362</span>    <span class="n">current_time</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="linenos">363</span>    <span class="n">frame_loaded</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="linenos">364</span>    <span class="n">samples_loaded</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="linenos">365</span>    <span class="n">batches_loaded</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="linenos">366</span>    <span class="n">load_gaps</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="linenos">367</span>    <span class="n">load_started_at</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="linenos">368</span>
+<span class="linenos">369</span>    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="linenos">370</span>    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+<span class="linenos">371</span>        <span class="n">nvtx</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;batch_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">372</span>
+<span class="linenos">373</span>        <span class="n">nvtx</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;next_batch&quot;</span><span class="p">)</span>
+<span class="linenos">374</span>        <span class="k">try</span><span class="p">:</span>
+<span class="linenos">375</span>            <span class="n">batch</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">loader_iter</span><span class="p">)</span>
+<span class="linenos">376</span>        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+<span class="linenos">377</span>            <span class="k">break</span>
+<span class="linenos">378</span>        <span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>  <span class="c1"># next_batch</span>
+<span class="linenos">379</span>
+<span class="linenos">380</span>        <span class="c1"># Process batch (example: print shape of first frame)</span>
+<span class="linenos">381</span>        <span class="c1"># print(f&quot;Batch {i}: Frame shape {batch[0][0].shape}&quot;)</span>
+<span class="linenos">382</span>
+<span class="linenos">383</span>        <span class="n">nvtx</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="s2">&quot;load_batch&quot;</span><span class="p">)</span>
+<span class="linenos">384</span>        <span class="n">load_ended_at</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="linenos">385</span>        <span class="n">load_gaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">load_ended_at</span> <span class="o">-</span> <span class="n">load_started_at</span><span class="p">)</span>
+<span class="linenos">386</span>        <span class="n">load_started_at</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="linenos">387</span>
+<span class="linenos">388</span>        <span class="n">batches_loaded</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="linenos">389</span>        <span class="n">samples_loaded</span> <span class="o">+=</span> <span class="n">args</span><span class="o">.</span><span class="n">group_num</span>
+<span class="linenos">390</span>        <span class="n">frame_loaded</span> <span class="o">+=</span> <span class="n">NUM_CAMERAS</span> <span class="o">*</span> <span class="n">args</span><span class="o">.</span><span class="n">group_num</span>
+<span class="linenos">391</span>
+<span class="linenos">392</span>        <span class="n">current_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
+<span class="linenos">393</span>
+<span class="linenos">394</span>        <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="n">PROGRESS_REPORT_INTERVAL</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<span class="linenos">395</span>            <span class="n">elapsed_time</span> <span class="o">=</span> <span class="n">current_time</span> <span class="o">-</span> <span class="n">started_at</span>
+<span class="linenos">396</span>            <span class="n">throughput_fps</span> <span class="o">=</span> <span class="n">frame_loaded</span> <span class="o">/</span> <span class="n">elapsed_time</span> <span class="k">if</span> <span class="n">elapsed_time</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+<span class="linenos">397</span>            <span class="n">throughput_samples</span> <span class="o">=</span> <span class="n">samples_loaded</span> <span class="o">/</span> <span class="n">elapsed_time</span> <span class="k">if</span> <span class="n">elapsed_time</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+<span class="linenos">398</span>
+<span class="linenos">399</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Batch: </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span><span class="si">}</span><span class="s2"> frames in </span><span class="si">{</span><span class="n">load_gaps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+<span class="linenos">400</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Elapsed time: </span><span class="si">{</span><span class="n">elapsed_time</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">s&quot;</span><span class="p">)</span>
+<span class="linenos">401</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Samples loaded: </span><span class="si">{</span><span class="n">samples_loaded</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">402</span>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Throughput: </span><span class="si">{</span><span class="n">throughput_fps</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> frames/second, </span><span class="si">{</span><span class="n">throughput_samples</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> samples/second&quot;</span><span class="p">)</span>
+<span class="linenos">403</span>
+<span class="linenos">404</span>        <span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>  <span class="c1"># load_batch</span>
+<span class="linenos">405</span>        <span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>  <span class="c1"># batch_{i}</span>
+<span class="linenos">406</span>
+<span class="linenos">407</span>        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="linenos">408</span>
+<span class="linenos">409</span>    <span class="c1"># Final performance report</span>
+<span class="linenos">410</span>    <span class="c1"># ended_at = time.perf_counter()</span>
+<span class="linenos">411</span>    <span class="n">ended_at</span> <span class="o">=</span> <span class="n">current_time</span>
+<span class="linenos">412</span>    <span class="n">total_time</span> <span class="o">=</span> <span class="n">ended_at</span> <span class="o">-</span> <span class="n">started_at</span>
+<span class="linenos">413</span>
+<span class="linenos">414</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=== Performance Summary ===&quot;</span><span class="p">)</span>
+<span class="linenos">415</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Frames loaded: </span><span class="si">{</span><span class="n">frame_loaded</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">416</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Time taken: </span><span class="si">{</span><span class="n">total_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+<span class="linenos">417</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Throughput: </span><span class="si">{</span><span class="n">frame_loaded</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">total_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> frames per second&quot;</span><span class="p">)</span>
+<span class="linenos">418</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Throughput: </span><span class="si">{</span><span class="n">samples_loaded</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">total_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> samples per second&quot;</span><span class="p">)</span>
+<span class="linenos">419</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Throughput: </span><span class="si">{</span><span class="n">batches_loaded</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">total_time</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> batches per second&quot;</span><span class="p">)</span>
+<span class="linenos">420</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of workers: </span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">num_workers</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">421</span>
+<span class="linenos">422</span>    <span class="k">if</span> <span class="n">load_gaps</span><span class="p">:</span>
+<span class="linenos">423</span>        <span class="n">avg_load_time</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">load_gaps</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">load_gaps</span><span class="p">)</span>
+<span class="linenos">424</span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Average batch load time: </span><span class="si">{</span><span class="n">avg_load_time</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="performance">
+<h2>Performance<a class="headerlink" href="#performance" title="Link to this heading"></a></h2>
+<section id="test-environment">
+<h3>Test Environment<a class="headerlink" href="#test-environment" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>GPU</strong>: NVIDIA A100-SXM4-80GB</p></li>
+<li><p><strong>CPU</strong>: AMD EPYC 7J13 64-Core Processor</p></li>
+<li><p><strong>Storage</strong>: NFS</p></li>
+<li><p><strong>DataSet</strong>: NuScenes-mini, 10 clips, 6 cameras, H.265, 1600x900, GOP_SIZE=30, non-bframe</p></li>
+</ul>
+</section>
+<section id="performance-metrics-frames-sec">
+<h3>Performance Metrics (frames/sec)<a class="headerlink" href="#performance-metrics-frames-sec" title="Link to this heading"></a></h3>
+<p>Using the Random Access API, measure the throughput (frames per second) when accessing random frames and streaming frames.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>configuration</p></th>
+<th class="head"><p>random frames</p></th>
+<th class="head"><p>stream frames</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1 GPU</p></td>
+<td><p>381.1</p></td>
+<td><p>389.89</p></td>
+</tr>
+<tr class="row-odd"><td><p>2 GPU</p></td>
+<td><p>754.34</p></td>
+<td><p>772.42</p></td>
+</tr>
+<tr class="row-even"><td><p>4 GPU</p></td>
+<td><p>1518.15</p></td>
+<td><p>1544.81</p></td>
+</tr>
+<tr class="row-odd"><td><p>8 GPU</p></td>
+<td><p>3065.5</p></td>
+<td><p>3094.21</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="performance-optimization-tips">
+<h3>Performance Optimization Tips<a class="headerlink" href="#performance-optimization-tips" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><strong>Spawn Mode</strong>: PyTorch must be set to spawn mode when using GPU (NvCodec) within the DataLoader</p></li>
+<li><p><strong>GPU Memory</strong>: Each worker maintains its own CUDA context, which can lead to increased GPU memory usage</p></li>
+<li><p><strong>Batch Size</strong>: Adjust <code class="docutils literal notranslate"><span class="pre">group_num</span></code> based on available GPU memory</p></li>
+<li><p><strong>Worker Processes</strong>: Adjust <code class="docutils literal notranslate"><span class="pre">num_workers</span></code> based on CPU cores and I/O requirements</p></li>
+<li><p><strong>Random Access Overhead</strong>: Random frame access may be slower than sequential access due to GOP seeking</p></li>
+<li><p><strong>GOP Size Impact</strong>: Smaller and fixed GOP sizes enable finer random access but may reduce compression efficiency</p></li>
+<li><p><strong>File Handle Management</strong>: The <code class="docutils literal notranslate"><span class="pre">maxfiles</span></code> parameter controls how many video files stay open; tune based on dataset size</p></li>
+<li><p><strong>Cache Locality</strong>: Random access patterns may have lower cache hit rates compared to sequential access</p></li>
+</ul>
+</section>
+<section id="performance-profiling">
+<h3>Performance Profiling<a class="headerlink" href="#performance-profiling" title="Link to this heading"></a></h3>
+<p>Use NVIDIA Nsight Systems for detailed performance analysis:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>nsys<span class="w"> </span>profile<span class="w"> </span>--trace-fork-before-exec<span class="w"> </span><span class="nb">true</span><span class="w"> </span>-w<span class="w"> </span><span class="nb">true</span><span class="w"> </span>-f<span class="w"> </span><span class="nb">true</span><span class="w"> </span>-t<span class="w"> </span>cuda,nvtx,osrt,cudnn,cublas,nvvideo<span class="w"> </span>--gpu-video-device<span class="w"> </span>all<span class="w"> </span>-x<span class="w"> </span><span class="nb">true</span><span class="w"> </span>-o<span class="w"> </span>dataloader_random_decode<span class="w"> </span>python<span class="w"> </span>main.py<span class="w"> </span>--index_file<span class="w"> </span>/path/to/index_frame.json
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="PyTorch Integration Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dataloader_stream_decode.html" class="btn btn-neutral float-right" title="DataLoader Stream Decode Example" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,229 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>accvlab.dali_pipeline_framework.inputs.sampler_base &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../contained_package_docs_mirror/optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">accvlab.dali_pipeline_framework.inputs.sampler_base</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for accvlab.dali_pipeline_framework.inputs.sampler_base</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2025, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+
+<div class="viewcode-block" id="SamplerBase">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/inputs.html#accvlab.dali_pipeline_framework.inputs.SamplerBase">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SamplerBase</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Abstract base class for samplers that provide indices for data loading.</span>
+
+<span class="sd">    A sampler is responsible for determining which samples from a dataset should be</span>
+<span class="sd">    included in each batch during training. It can be epoch-based (where epochs have</span>
+<span class="sd">    clear boundaries) or continuous (where sampling continues indefinitely).</span>
+
+<span class="sd">    A sampler can be used with either :class:`SamplerInputIterable` or :class:`SamplerInputCallable`.</span>
+<span class="sd">    Please also see the documentation of these classes.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        Samplers can be used for complex sampling strategies, e.g. for sampling of sequences. For this,</span>
+<span class="sd">        a :class:`SequenceSampler` class is provided, which can be used to sample consecutive samples</span>
+<span class="sd">        (for each sample index ``i`` in consecutive batches) from a set of sequences. See the documentation of</span>
+<span class="sd">        the sequence sampler for more details.</span>
+
+<span class="sd">        For simple use-cases, a sampler may not be required.</span>
+<span class="sd">        A :class:`ShuffledShardedInputCallable` class is provided, which can be used for random</span>
+<span class="sd">        sampling without the need for a sampler implementation.</span>
+
+<span class="sd">        Before implementing a custom sampler, consider whether the available ready-to-use solutions can be</span>
+<span class="sd">        used.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        To be used with :class:`SamplerInputIterable`, the sampler needs to be serializable (see the</span>
+<span class="sd">        corresponding note in the documentation of :class:`IterableBase`). If the sampler contains any</span>
+<span class="sd">        objects that cannot be serialized (e.g. generators), these objects should not be created in the</span>
+<span class="sd">        constructor, but rather created when the :meth:`get_next_batch_indices` method is called for the</span>
+<span class="sd">        first time. At this point, the iterable is already in the worker process, and therefore, the sampler</span>
+<span class="sd">        does not need to be serializable anymore.</span>
+
+<span class="sd">        Note that the :class:`SamplerInputCallable` does not require the sampler to be serializable as</span>
+<span class="sd">        it is only used to generate the look-up table in advance. However, it is advisable to keep sampler</span>
+<span class="sd">        objects compatible with both :class:`SamplerInputIterable` and :class:`SamplerInputCallable`, and</span>
+<span class="sd">        therefore, to not create non-serializable objects before the first call to</span>
+<span class="sd">        :meth:`get_next_batch_indices`.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="SamplerBase.get_next_batch_indices">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/inputs.html#accvlab.dali_pipeline_framework.inputs.SamplerBase.get_next_batch_indices">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_next_batch_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Get the indices for the samples in the next batch.</span>
+
+<span class="sd">        If the sampler is epoch-based and the next batch is not inside the current epoch,</span>
+<span class="sd">        :exc:`StopIteration` shall be raised instead of returning data.</span>
+<span class="sd">        In this case, a call to :meth:`reset` indicates the start of the next epoch. After :meth:`reset`</span>
+<span class="sd">        is called, :meth:`get_next_batch_indices` shall continue with returning the indices for</span>
+<span class="sd">        the newly started epoch.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List of sample indices for the next batch.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            StopIteration: If the sampler is epoch-based and the current epoch has ended. Note that this</span>
+<span class="sd">                is part of the normal behavior once the epoch is exhausted and is expected by the external</span>
+<span class="sd">                source, and is not an error.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_epoch_based</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Indicate whether the sampling is epoch-based.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ``True`` if the sampler is epoch-based, ``False`` otherwise.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="SamplerBase.reset">
+<a class="viewcode-back" href="../../../../contained_package_docs_mirror/dali_pipeline_framework/docs/api/inputs.html#accvlab.dali_pipeline_framework.inputs.SamplerBase.reset">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Start a new epoch.</span>
+
+<span class="sd">        This method should be called to reset the sampler state and begin a new epoch.</span>
+<span class="sd">        Only applicable for epoch-based samplers.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Length of one epoch.</span>
+
+<span class="sd">        Providing the length is optional. If it is not implemented, this method still needs to be</span>
+<span class="sd">        overridden. In this case, it has to indicate that the length is not available (by returning</span>
+<span class="sd">        ``None``).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The number of samples in the epoch, or ``None`` if not available.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">pass</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

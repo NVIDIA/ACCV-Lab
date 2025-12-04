@@ -1,0 +1,267 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Example" href="example.html" />
+    <link rel="prev" title="Introduction" href="intro.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Multi-Tensor Copier</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#accvlab.multi_tensor_copier.AsyncCopyHandle"><code class="docutils literal notranslate"><span class="pre">AsyncCopyHandle</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.multi_tensor_copier.AsyncCopyHandle.ready"><code class="docutils literal notranslate"><span class="pre">AsyncCopyHandle.ready()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#accvlab.multi_tensor_copier.AsyncCopyHandle.get"><code class="docutils literal notranslate"><span class="pre">AsyncCopyHandle.get()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#accvlab.multi_tensor_copier.start_copy"><code class="docutils literal notranslate"><span class="pre">start_copy()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="example.html">Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="evaluation.html">Evaluation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../optim_test_tools/docs/index.html">Optimization Testing Tools</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Multi-Tensor Copier</a></li>
+      <li class="breadcrumb-item active">API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/contained_package_docs_mirror/multi_tensor_copier/docs/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-accvlab.multi_tensor_copier">
+<span id="api-reference"></span><h1>API Reference<a class="headerlink" href="#module-accvlab.multi_tensor_copier" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="accvlab.multi_tensor_copier.AsyncCopyHandle">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">accvlab.multi_tensor_copier.</span></span><span class="sig-name descname"><span class="pre">AsyncCopyHandle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_h</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/multi_tensor_copier/async_copy.html#AsyncCopyHandle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.multi_tensor_copier.AsyncCopyHandle" title="Link to this definition"></a></dt>
+<dd><p>Handle to an in-progress asynchronous copy started by <a class="reference internal" href="#accvlab.multi_tensor_copier.start_copy" title="accvlab.multi_tensor_copier.start_copy"><code class="xref py py-func docutils literal notranslate"><span class="pre">start_copy()</span></code></a>.</p>
+<p>Use <a class="reference internal" href="#accvlab.multi_tensor_copier.AsyncCopyHandle.ready" title="accvlab.multi_tensor_copier.AsyncCopyHandle.ready"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ready()</span></code></a> to poll for completion without blocking, or <a class="reference internal" href="#accvlab.multi_tensor_copier.AsyncCopyHandle.get" title="accvlab.multi_tensor_copier.AsyncCopyHandle.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> to block until
+the result is available. The handle must be kept alive until the copy is consumed or goes
+out of scope; dropping it early triggers a synchronous wait in the destructor to ensure
+staging buffers are not freed while transfers are in flight.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.multi_tensor_copier.AsyncCopyHandle.ready">
+<span class="sig-name descname"><span class="pre">ready</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/multi_tensor_copier/async_copy.html#AsyncCopyHandle.ready"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.multi_tensor_copier.AsyncCopyHandle.ready" title="Link to this definition"></a></dt>
+<dd><p>Return whether the copy has completed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span> – <code class="docutils literal notranslate"><span class="pre">True</span></code> if the copy has completed, <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="accvlab.multi_tensor_copier.AsyncCopyHandle.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/multi_tensor_copier/async_copy.html#AsyncCopyHandle.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.multi_tensor_copier.AsyncCopyHandle.get" title="Link to this definition"></a></dt>
+<dd><p>Block until the copy is done and return the result.</p>
+<p>The returned structure mirrors the input to <a class="reference internal" href="#accvlab.multi_tensor_copier.start_copy" title="accvlab.multi_tensor_copier.start_copy"><code class="xref py py-func docutils literal notranslate"><span class="pre">start_copy()</span></code></a>, with all tensors
+copied to the target device.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a></span> – The structure with the contained tensors copied to the target device (and numpy arrays replaced by
+PyTorch tensors).</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If the copy fails</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="accvlab.multi_tensor_copier.start_copy">
+<span class="sig-prename descclassname"><span class="pre">accvlab.multi_tensor_copier.</span></span><span class="sig-name descname"><span class="pre">start_copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_pinned_staging</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pack_cpu_tensors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_packed_alignment_bytes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_packed_chunk_bytes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">33554432</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_background_thread</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/accvlab/multi_tensor_copier/async_copy.html#start_copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#accvlab.multi_tensor_copier.start_copy" title="Link to this definition"></a></dt>
+<dd><p>Asynchronously copy tensors in a nested structure to <code class="docutils literal notranslate"><span class="pre">device</span></code>.</p>
+<p>Traverses an arbitrarily nested combination of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>, and <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>
+containers, copies every <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code></a> and <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a> (automatically converted to
+PyTorch tensors) leaf to <code class="docutils literal notranslate"><span class="pre">device</span></code>, and returns an <a class="reference internal" href="#accvlab.multi_tensor_copier.AsyncCopyHandle" title="accvlab.multi_tensor_copier.AsyncCopyHandle"><code class="xref py py-class docutils literal notranslate"><span class="pre">AsyncCopyHandle</span></code></a> whose
+<a class="reference internal" href="#accvlab.multi_tensor_copier.AsyncCopyHandle.get" title="accvlab.multi_tensor_copier.AsyncCopyHandle.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> method yields the copied structure. The output preserves container types and
+passes through non-tensor, non-container leaves (e.g. strings) unchanged.</p>
+<p>The primary optimization target is <strong>CPU → GPU</strong> transfers of many small tensors in non-pinned
+memory. Other copy directions (GPU → CPU, GPU → GPU, CPU → CPU) are supported and benefit from
+some optimizations (e.g. background-thread scheduling for all directions, parallel pinned staging for
+D2H), but are not the main focus.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The input tensors do not need to all be on the same device, copying tensors from different devices is
+supported. If some tensors are already on the target device, they will be re-used as is.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Packing of small tensors (see <code class="docutils literal notranslate"><span class="pre">pack_cpu_tensors</span></code> parameter below) is a major contribution to the
+overall performance optimization vs. using standard PyTorch <code class="docutils literal notranslate"><span class="pre">.to()</span></code> calls on the individual tensors.
+For this optimization to be applied, the input CPU tensors must be contiguous.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The caller must not <strong>free</strong> or <strong>modify in-place</strong> any input tensors until the copy has completed
+(i.e. until <a class="reference internal" href="#accvlab.multi_tensor_copier.AsyncCopyHandle.get" title="accvlab.multi_tensor_copier.AsyncCopyHandle.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> returns or <a class="reference internal" href="#accvlab.multi_tensor_copier.AsyncCopyHandle.ready" title="accvlab.multi_tensor_copier.AsyncCopyHandle.ready"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ready()</span></code></a> returns <code class="docutils literal notranslate"><span class="pre">True</span></code>).
+Because copies are submitted asynchronously — potentially on a background thread — input tensor memory
+may still be read by the GPU after this function returns. Violating this contract leads to undefined
+behavior (silent data corruption, stale reads, or CUDA errors).</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Only <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>, and <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> are recognized as container types.
+Other container-like objects (e.g. custom classes, named tuples) are treated as opaque
+leaves and returned unchanged; any tensors nested inside them will <strong>not</strong> be copied.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></a> | <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></a></span>) – The structure to copy. May be a single <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code></a> or
+<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a>, or a nested <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>/<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>/<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a> objects containing
+tensor/numpy arrays.</p></li>
+<li><p><strong>device</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch.device" title="(in PyTorch v2.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">device</span></code></a></span>) – Target PyTorch device (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;cuda:0&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;cpu&quot;</span></code>).</p></li>
+<li><p><strong>use_pinned_staging</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">True</span></code>) – When <code class="docutils literal notranslate"><span class="pre">True</span></code>, allocate pinned (page-locked) host buffers as
+intermediate staging for CPU → CUDA and CUDA → CPU transfers. For H2D this enables
+<code class="docutils literal notranslate"><span class="pre">non_blocking</span></code> copies; for D2H the pinned buffer <strong>is</strong> the returned output tensor.
+Has no effect on CPU → CPU or GPU → GPU copies.</p></li>
+<li><p><strong>pack_cpu_tensors</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">True</span></code>) – When <code class="docutils literal notranslate"><span class="pre">True</span></code>, pack multiple small contiguous CPU tensors (≤ 256 KB
+each, mixed dtypes supported) into one or more staging buffers (each at most
+<code class="docutils literal notranslate"><span class="pre">max_packed_chunk_bytes</span></code>) and issue one H2D transfer per chunk instead of per tensor.
+Only applies to CPU → CUDA copies.</p></li>
+<li><p><strong>min_packed_alignment_bytes</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">16</span></code>) – Minimum byte-alignment of each tensor’s start offset within
+the packed buffer. The effective alignment for each tensor which participates in the packing is
+<code class="docutils literal notranslate"><span class="pre">max(min_packed_alignment_bytes,</span> <span class="pre">tensor.element_size())</span></code>.</p></li>
+<li><p><strong>max_packed_chunk_bytes</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">33554432</span></code>) – Maximum payload size in bytes of each packed staging chunk (tensor
+data plus inter-tensor alignment padding; the actual allocation may be slightly larger to
+satisfy buffer-start alignment).  When the total packed data exceeds this limit, multiple
+packed chunks are allocated and transferred.  Defaults to 32 MB.</p></li>
+<li><p><strong>use_background_thread</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>, default: <code class="docutils literal notranslate"><span class="pre">True</span></code>) – When <code class="docutils literal notranslate"><span class="pre">True</span></code>, the copy orchestration (buffer allocation, staging,
+and CUDA copy submission) runs on a C++ background thread (from a shared pool) so that this
+function returns before the copies complete. Note that CPU staging is done parallelly regardless
+of this setting. Benefits all copy directions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#accvlab.multi_tensor_copier.AsyncCopyHandle" title="accvlab.multi_tensor_copier.async_copy.AsyncCopyHandle"><code class="xref py py-class docutils literal notranslate"><span class="pre">AsyncCopyHandle</span></code></a></span> – Handle to the in-progress copy. Call <a class="reference internal" href="#accvlab.multi_tensor_copier.AsyncCopyHandle.get" title="accvlab.multi_tensor_copier.AsyncCopyHandle.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> to block until completion
+and retrieve the result, or <a class="reference internal" href="#accvlab.multi_tensor_copier.AsyncCopyHandle.ready" title="accvlab.multi_tensor_copier.AsyncCopyHandle.ready"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ready()</span></code></a> to poll without blocking.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If the copy fails (propagated on <a class="reference internal" href="#accvlab.multi_tensor_copier.AsyncCopyHandle.get" title="accvlab.multi_tensor_copier.AsyncCopyHandle.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>).</p>
+</dd>
+</dl>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<p>Copy a nested structure of tensors to the GPU:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">])]</span>
+<span class="n">handle</span> <span class="o">=</span> <span class="n">start_copy</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;cuda:0&quot;</span><span class="p">)</span>
+<span class="c1"># ... do other work ...</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>  <span class="c1"># [tensor([1,2,3], device=&#39;cuda:0&#39;), ...]</span>
+</pre></div>
+</div>
+<p>Convert numpy arrays to CPU tensors (makes use of the fact that numpy arrays can be used as inputs and
+benefits from background-thread scheduling):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">])]</span>
+<span class="n">handle</span> <span class="o">=</span> <span class="n">start_copy</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">handle</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>  <span class="c1"># [tensor([1, 2, 3]), tensor([4, 5, 6])]</span>
+</pre></div>
+</div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="intro.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="example.html" class="btn btn-neutral float-right" title="Example" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,214 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NVTX Ranges in Numba Code Example &mdash; ACCV-Lab 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css?v=9282052d" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="prev" title="Tensor Dumper – Extended Dumping Example" href="tensor_dumper_dumping.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            ACCV-Lab
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Info</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../project_overview/README.html">ACCV-Lab Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guides_index.html">Guides</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contained Packages</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../on_demand_video_decoder/docs/index.html">On Demand Video Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../batching_helpers/docs/index.html">Batching Helpers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../multi_tensor_copier/docs/index.html">Multi-Tensor Copier</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dali_pipeline_framework/docs/index.html">DALI Pipeline Framework</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../draw_heatmap/docs/index.html">Draw Heatmap</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Optimization Testing Tools</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html">API Reference</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../examples.html">Examples</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="stopwatch.html">Stopwatch Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="nvtx_range_wrapper.html">NVTX Range Wrapper Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tensor_dumper_comparison.html">Tensor Dumper – Comparison Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tensor_dumper_dumping.html">Tensor Dumper – Extended Dumping Example</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">NVTX Ranges in Numba Code Example</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">ACCV-Lab</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Optimization Testing Tools</a></li>
+          <li class="breadcrumb-item"><a href="../examples.html">Examples</a></li>
+      <li class="breadcrumb-item active">NVTX Ranges in Numba Code Example</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../../_sources/contained_package_docs_mirror/optim_test_tools/docs/examples/numba_nvtx.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="nvtx-ranges-in-numba-code-example">
+<h1>NVTX Ranges in Numba Code Example<a class="headerlink" href="#nvtx-ranges-in-numba-code-example" title="Link to this heading"></a></h1>
+<p>This example shows how to annotate Numba JIT-compiled code with NVTX ranges using the
+<code class="docutils literal notranslate"><span class="pre">accvlab.optim_test_tools.numba_nvtx</span></code> module.
+Numba-compiled functions run as native code; this module allows you to push and pop NVTX
+ranges inside such functions.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The code of this example can be found in the repository under
+<code class="docutils literal notranslate"><span class="pre">packages/optim_test_tools/examples/numba_nvtx_example.py</span></code>.</p>
+</div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The functionality described here is specifically aimed at adding NVTX ranges to Numba-compiled code,
+where alternative solutions, e.g. the Python <code class="docutils literal notranslate"><span class="pre">nvtx</span></code> module or <code class="docutils literal notranslate"><span class="pre">torch.cuda.nvtx</span></code>, cannot be used.
+While <code class="docutils literal notranslate"><span class="pre">accvlab.optim_test_tools.numba_nvtx</span></code> also works for plain Python code, it is not intended for
+that use-case and does not provide benefits over using available alternatives in this case.</p>
+<p>For profiling Python code, please also see the <a class="reference internal" href="nvtx_range_wrapper.html"><span class="doc">NVTX Range Wrapper Example</span></a> example.</p>
+</div>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Import <code class="docutils literal notranslate"><span class="pre">accvlab.optim_test_tools.numba_nvtx</span></code> (e.g. as <code class="docutils literal notranslate"><span class="pre">nvtx</span></code>).</p></li>
+<li><p>Register range names with <code class="docutils literal notranslate"><span class="pre">register_string(&quot;...&quot;)</span></code> to obtain integer handles; this must be done outside
+the JIT function, before compilation.</p></li>
+<li><p>Inside an <code class="docutils literal notranslate"><span class="pre">&#64;numba.njit</span></code> function, call <code class="docutils literal notranslate"><span class="pre">nvtx.range_push(handle)</span></code> and <code class="docutils literal notranslate"><span class="pre">nvtx.range_pop()</span></code> around
+the region to profile.</p></li>
+</ul>
+</section>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h2>
+<p>Please see the notes in the code for more details.</p>
+<div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">packages/optim_test_tools/examples/numba_nvtx_example.py</span><a class="headerlink" href="#id1" title="Link to this code"></a></div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># Copyright (c) 2026, NVIDIA CORPORATION &amp; AFFILIATES. All rights reserved.</span>
+<span class="linenos"> 2</span><span class="c1">#</span>
+<span class="linenos"> 3</span><span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="linenos"> 4</span><span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="linenos"> 5</span><span class="c1"># You may obtain a copy of the License at</span>
+<span class="linenos"> 6</span><span class="c1">#</span>
+<span class="linenos"> 7</span><span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="linenos"> 8</span><span class="c1">#</span>
+<span class="linenos"> 9</span><span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="linenos">10</span><span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="linenos">11</span><span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="linenos">12</span><span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="linenos">13</span><span class="c1"># limitations under the License.</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="kn">import</span><span class="w"> </span><span class="nn">accvlab.optim_test_tools.numba_nvtx</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nvtx</span>
+<span class="linenos">16</span><span class="kn">from</span><span class="w"> </span><span class="nn">numba</span><span class="w"> </span><span class="kn">import</span> <span class="n">njit</span>
+<span class="linenos">17</span>
+<span class="hll"><span class="linenos">18</span><span class="c1"># @NOTE</span>
+</span><span class="hll"><span class="linenos">19</span><span class="c1"># Register range names outside the JIT function to obtain integer handles.</span>
+</span><span class="hll"><span class="linenos">20</span><span class="c1"># Handles must be created before compilation because Numba compiles the function</span>
+</span><span class="hll"><span class="linenos">21</span><span class="c1"># and the handle value is baked into the compiled code.</span>
+</span><span class="linenos">22</span><span class="n">h_example_range</span> <span class="o">=</span> <span class="n">nvtx</span><span class="o">.</span><span class="n">register_string</span><span class="p">(</span><span class="s2">&quot;example_range&quot;</span><span class="p">)</span>
+<span class="linenos">23</span><span class="n">h_example_range_inner</span> <span class="o">=</span> <span class="n">nvtx</span><span class="o">.</span><span class="n">register_string</span><span class="p">(</span><span class="s2">&quot;example_range_inner&quot;</span><span class="p">)</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span>
+<span class="linenos">26</span><span class="nd">@njit</span>
+<span class="linenos">27</span><span class="k">def</span><span class="w"> </span><span class="nf">compute</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="hll"><span class="linenos">28</span>    <span class="c1"># @NOTE: Push the range using the handle created above.</span>
+</span><span class="linenos">29</span>    <span class="n">nvtx</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="n">h_example_range</span><span class="p">)</span>
+<span class="linenos">30</span>    <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="mi">1</span>
+<span class="hll"><span class="linenos">31</span>    <span class="c1"># @NOTE: Push the inner range.</span>
+</span><span class="linenos">32</span>    <span class="n">nvtx</span><span class="o">.</span><span class="n">range_push</span><span class="p">(</span><span class="n">h_example_range_inner</span><span class="p">)</span>
+<span class="linenos">33</span>    <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span>
+<span class="hll"><span class="linenos">34</span>    <span class="c1"># @NOTE: Pop both ranges.</span>
+</span><span class="linenos">35</span>    <span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">36</span>    <span class="n">nvtx</span><span class="o">.</span><span class="n">range_pop</span><span class="p">()</span>
+<span class="linenos">37</span>    <span class="k">return</span> <span class="n">y</span>
+<span class="linenos">38</span>
+<span class="linenos">39</span>
+<span class="linenos">40</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">41</span>    <span class="n">result</span> <span class="o">=</span> <span class="n">compute</span><span class="p">(</span><span class="mi">41</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tensor_dumper_dumping.html" class="btn btn-neutral float-left" title="Tensor Dumper – Extended Dumping Example" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, NVIDIA Corporation.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

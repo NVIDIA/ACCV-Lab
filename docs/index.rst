@@ -9,16 +9,15 @@ Accelerated Computer Vision Lab (ACCV-Lab) is a systematic collection of package
 facilitate end-to-end efficient training in the ADAS domain, each package offering tools & best practices for 
 a specific aspect/task in this domain.
 
-Please see :doc:`project_overview/README` for an overview of the project.
-
-Project Overview
-----------------
-
-This section contains the overview of the project as well as the guides for the installation and the 
-development of ACCV-Lab.
+Please see :doc:`project_overview/README` for an overview of the project, including a short overview of the
+contained packages and a :ref:`Quick Start <project_overview-quick-start>` section, as well as the more 
+detailed guides on how to use this project (:doc:`Installation Guide <guides/INSTALLATION_GUIDE>`,
+:doc:`Development Guide <guides/DEVELOPMENT_GUIDE>`, ...) and further information.
 
 .. toctree::
    :maxdepth: 2
+   :caption: General Info
+   :hidden:
    :includehidden:
 
    project_overview/README
@@ -27,7 +26,7 @@ development of ACCV-Lab.
 Namespace Packages
 ------------------
 
-Please see the documentation of each namespace package for usage instructions (see below).
+Please see the documentation of each namespace package for usage instructions (also listed below).
 
 .. The following defines the doctree header for the namespace packages section.
    You can edit it to change the caption of the namespace packages section, maxdepth etc.
@@ -81,4 +80,3 @@ Indices and Tables
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search` 

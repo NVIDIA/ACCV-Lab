@@ -17,15 +17,17 @@
 # Unified script to install or build wheels for all namespace packages
 # Usage: ./package_manager.sh {install|wheel} [OPTIONS]
 # 
-# Install mode: ./package_manager.sh install [-e] [--optional]
+# Install mode: ./package_manager.sh install [-e] [--optional] [--with-build-isolation]
 #   -e  Install in editable mode
 #   --optional  Install with optional dependencies
+#   --with-build-isolation  Enable pip build isolation so build-time dependencies can be installed automatically
 # 
-# Wheel mode: ./package_manager.sh wheel [-o OUTPUT_DIR] [--no-deps] [--no-index] [--optional]
+# Wheel mode: ./package_manager.sh wheel [-o OUTPUT_DIR] [--with-deps] [--no-index] [--optional] [--with-build-isolation]
 #   -o OUTPUT_DIR  Specify output directory for wheels (default: ./wheels)
-#   --no-deps  Skip dependency resolution (use current environment)
+#   --with-deps  (Compatibility alias) Explicitly request dependency resolution when building wheels (default behavior)
 #   --no-index  Don't use PyPI index (use current environment only)
 #   --optional  Build wheels with optional dependencies
+#   --with-build-isolation  Enable pip build isolation so build-time dependencies can be installed automatically
 
 # Get script directory and project root
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -36,32 +38,35 @@ show_usage() {
     echo "Usage: $0 {install|wheel} [OPTIONS]"
     echo ""
     echo "Install mode:"
-    echo "  $0 install [-e] [--optional]"
+    echo "  $0 install [-e] [--optional] [--with-build-isolation]"
     echo "    -e  Install in editable mode"
     echo "    --optional  Install with optional dependencies"
-    echo "    Default: Install in regular (non-editable) mode with basic dependencies"
+    echo "    --with-build-isolation  Enable pip build isolation"
+    echo "    Default: Install in regular (non-editable) mode and without build isolation '--no-build-isolation'"
     echo ""
     echo "Wheel mode:"
-    echo "  $0 wheel [-o OUTPUT_DIR] [--no-deps] [--no-index] [--optional]"
+    echo "  $0 wheel [-o OUTPUT_DIR] [--with-deps] [--no-index] [--optional] [--with-build-isolation]"
     echo "    -o OUTPUT_DIR  Specify output directory for wheels (default: ./wheels)"
-    echo "    --no-deps  Skip dependency resolution (use current environment)"
+    echo "    --with-deps  (Compatibility alias) Explicitly request dependency resolution when building wheels (default behavior)"
     echo "    --no-index  Don't use PyPI index (use current environment only)"
     echo "    --optional  Build wheels with optional dependencies"
-    echo "    Default: Build regular (non-editable) wheels with basic dependencies"
+    echo "    --with-build-isolation  Enable pip build isolation to allow installing build-time dependencies"
+    echo "    Default: Build wheels with '--no-build-isolation' and '--no-deps'"
     echo ""
     echo "This script manages all namespace packages defined in namespace_packages_config.py"
     echo ""
     echo "Examples:"
-    echo "  $0 install                    # Install all packages with basic dependencies"
-    echo "  $0 install -e                 # Install all packages in editable mode"
-    echo "  $0 install --optional         # Install all packages with optional dependencies"
-    echo "  $0 install -e --optional      # Install all packages in editable mode with optional dependencies"
-    echo "  $0 wheel                      # Build wheels for all packages"
-    echo "  $0 wheel -e                   # Build editable wheels"
-    echo "  $0 wheel --optional           # Build wheels with optional dependencies"
-    echo "  $0 wheel -o /tmp              # Build wheels in /tmp directory"
-    echo "  $0 wheel --no-deps            # Build wheels without downloading dependencies"
-    echo "  $0 wheel --no-index --no-deps # Build wheels using only current environment"
+    echo "  $0 install                                # Install all packages with basic dependencies"
+    echo "  $0 install -e                             # Install all packages in editable mode"
+    echo "  $0 install --optional                     # Install all packages with optional dependencies"
+    echo "  $0 install --with-build-isolation         # Install all packages with build isolation"
+    echo "  $0 install -e --optional                  # Install all packages in editable mode with optional dependencies"
+    echo "  $0 wheel                                  # Build wheels for all packages"
+    echo "  $0 wheel --with-deps                      # Build include the wheels of the dependencies (default git wheel behavior)"
+    echo "  $0 wheel --optional                       # Build wheels with optional dependencies"
+    echo "  $0 wheel -o /tmp                          # Build wheels in /tmp directory"
+    echo "  $0 wheel --no-index                       # Build wheels using only current environment"
+    echo "  $0 wheel --with-build-isolation           # Build wheels with build isolation"
 }
 
 # Check if mode is provided
@@ -84,9 +89,10 @@ fi
 # Parse command line arguments
 EDITABLE_MODE=false
 OUTPUT_DIR=""
-NO_DEPS=false
+WITH_DEPS=false
 NO_INDEX=false
 OPTIONAL_DEPS=false
+WITH_BUILD_ISOLATION=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -114,13 +120,13 @@ while [[ $# -gt 0 ]]; do
                 exit 1
             fi
             ;;
-        --no-deps)
+        --with-deps)
             if [[ "$MODE" != "wheel" ]]; then
-                echo "Error: --no-deps option is only valid for wheel mode"
+                echo "Error: --with-deps option is only valid for wheel mode"
                 show_usage
                 exit 1
             fi
-            NO_DEPS=true
+            WITH_DEPS=true
             shift
             ;;
         --no-index)
@@ -136,6 +142,10 @@ while [[ $# -gt 0 ]]; do
             OPTIONAL_DEPS=true
             shift
             ;;
+        --with-build-isolation)
+            WITH_BUILD_ISOLATION=true
+            shift
+            ;;
         -h|--help)
             show_usage
             exit 0
@@ -147,6 +157,13 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Determine build isolation behavior (default: disable build isolation via --no-build-isolation)
+if [[ "$WITH_BUILD_ISOLATION" == true ]]; then
+    BUILD_ISOLATION_FLAG=""
+else
+    BUILD_ISOLATION_FLAG="--no-build-isolation"
+fi
 
 # Set default output directory for wheel mode
 if [[ "$MODE" == "wheel" && -z "$OUTPUT_DIR" ]]; then
@@ -172,9 +189,6 @@ echo "Python version: $($PYTHON_EXECUTABLE --version)"
 
 if [[ "$MODE" == "wheel" ]]; then
     echo "Output directory: $OUTPUT_DIR"
-    if [[ "$NO_DEPS" == true ]]; then
-        echo "Dependency resolution: disabled (using current environment)"
-    fi
     if [[ "$NO_INDEX" == true ]]; then
         echo "PyPI index: disabled (using current environment only)"
     fi
@@ -204,10 +218,10 @@ if [ -f "$HELPER_DIR/setup.py" ]; then
     
     if [[ "$EDITABLE_MODE" == true ]]; then
         echo "  Installing helper in editable mode..."
-        $PIP_EXECUTABLE install -e . --no-build-isolation || { echo "  ✗ Failed to install helper package"; exit 1; }
+        $PIP_EXECUTABLE install -e . $BUILD_ISOLATION_FLAG || { echo "  ✗ Failed to install helper package"; exit 1; }
     else
         echo "  Installing helper in regular mode..."
-        $PIP_EXECUTABLE install . --no-build-isolation || { echo "  ✗ Failed to install helper package"; exit 1; }
+        $PIP_EXECUTABLE install . $BUILD_ISOLATION_FLAG || { echo "  ✗ Failed to install helper package"; exit 1; }
     fi
     
     cd - > /dev/null
@@ -221,18 +235,21 @@ fi
 build_pip_command() {
     local base_cmd="$PIP_EXECUTABLE"
     local wheel_flags=""
+    local deps_flag=""
     
     if [[ "$MODE" == "wheel" ]]; then
         wheel_flags="--wheel-dir \"$OUTPUT_DIR\""
-        if [[ "$NO_DEPS" == true ]]; then
-            wheel_flags="$wheel_flags --no-deps"
-        fi
         if [[ "$NO_INDEX" == true ]]; then
             wheel_flags="$wheel_flags --no-index"
         fi
+        # In wheel mode, control dependency resolution based on WITH_DEPS (analogous to WITH_BUILD_ISOLATION)
+        # Default behavior (WITH_DEPS=false) is to avoid resolving dependencies with '--no-deps'
+        if [[ "$WITH_DEPS" == false ]]; then
+            deps_flag="--no-deps"
+        fi
     fi
     
-    echo "$base_cmd $1 $wheel_flags --no-build-isolation"
+    echo "$base_cmd $1 $wheel_flags $deps_flag $BUILD_ISOLATION_FLAG"
 }
 
 # For wheel mode, also build the helper package wheel
@@ -300,18 +317,18 @@ for pkg in $NAMESPACE_PACKAGES; do
         if [[ "$EDITABLE_MODE" == true ]]; then
             if [[ "$OPTIONAL_DEPS" == true ]]; then
                 echo "  Installing in editable mode with optional dependencies..."
-                $PIP_EXECUTABLE install -e .[optional] --no-build-isolation
+                $PIP_EXECUTABLE install -e .[optional] $BUILD_ISOLATION_FLAG
             else
                 echo "  Installing in editable mode..."
-                $PIP_EXECUTABLE install -e . --no-build-isolation
+                $PIP_EXECUTABLE install -e . $BUILD_ISOLATION_FLAG
             fi
         else
             if [[ "$OPTIONAL_DEPS" == true ]]; then
                 echo "  Installing in regular mode with optional dependencies..."
-                $PIP_EXECUTABLE install .[optional] --no-build-isolation
+                $PIP_EXECUTABLE install .[optional] $BUILD_ISOLATION_FLAG
             else
                 echo "  Installing in regular mode..."
-                $PIP_EXECUTABLE install . --no-build-isolation
+                $PIP_EXECUTABLE install . $BUILD_ISOLATION_FLAG
             fi
         fi
     elif [[ "$MODE" == "wheel" ]]; then

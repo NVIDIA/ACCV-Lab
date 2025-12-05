@@ -53,19 +53,20 @@ dependencies (needed for some tests and examples), pass the `--optional` flag ex
 ./scripts/package_manager.sh install -e --optional
 ```
 
-> **⚠️ Important**: Installing with optional dependencies is required if you plan to run the repository
-> tests or examples, as they rely on optional dependencies such as `pytest`. It may be also required for 
-> examples, that use additional runtime libraries which are otherwise not used in the core library.
+> **⚠️ Important**: Installing with optional dependencies is required if you plan to run the contained
+> tests, as they rely on optional dependencies such as `pytest` (and possibly other dependencies). It may be 
+> also required for the contained examples, as they may use additional packages which are otherwise 
+> not used in the core library.
 
 The package manager script:
 - Automatically installs the required `accvlab_build_config` helper package (see the `build_config` directory
   in the repository root)
 - Installs all configured namespace packages from `namespace_packages_config.py` (see the 
   [development guide](DEVELOPMENT_GUIDE.md) for more details).
-- Installs the individual namespace packages with `pip install` and the `--no-build-isolation` flag.
+- Installs the individual namespace packages with `pip install` and the `--no-build-isolation` flag by 
+  default. You can pass `--with-build-isolation` to the script if you want pip to use build isolation.
 - Tests imports after installation
 - Provides detailed progress feedback
-- Uses the `--no-build-isolation` flag when calling `pip install` for the individual packages.
 
 
 ### 2. Installation Using the Convenience Wrapper Script
@@ -96,10 +97,6 @@ You can also build the wheels:
 
 # Build wheels in a specific directory
 ./scripts/package_manager.sh wheel -o /path/to/wheels
-
-# Build wheels without downloading dependencies (use only what is already installed in the current 
-# environment)
-./scripts/package_manager.sh wheel --no-deps
 ```
 
 The wheel building script:
@@ -107,8 +104,11 @@ The wheel building script:
 - Saves wheels to `./wheels/` directory by default
 - Includes the `build_config` helper package wheel
 - Supports various build configurations for different deployment scenarios
-- Uses `--no-build-isolation`. This means that the resulting wheel will be built in the current environment,
-  and will be specific to the current versions of dependencies (such as PyTorch).
+- Uses `--no-build-isolation` by default. This means that the resulting wheel will be built in the current 
+  environment. You can pass `--with-build-isolation` to the script if you want pip to use build isolation.
+- Uses `--no-deps` by default. This means that only a wheel for the package itself will be built, and no 
+  wheels for dependencies will be prepared. You can pass `--with-deps` to the script if you want to use the 
+  default `pip wheel` behavior instead (i.e. prepare wheels for all dependencies as well).
 
 #### Installing from Built Wheels
 
@@ -132,20 +132,15 @@ For development or when you only need specific packages, you can install them in
 
 > **ℹ️ Note**: `{-e}` means that the `-e` (editable) option is optional.
 
-> **ℹ️ Note**: The `-e` option is not supported for scikit-build based packages (e.g. `dali_pipeline`, 
-> `on_demand_video_decoder`).
+> **ℹ️ Note**: The `-e` option is not supported for scikit-build based packages (e.g. 
+> `dali_pipeline_framework`, `on_demand_video_decoder`).
 
 ```bash
 # Install individual packages
 cd packages/optim_test_tools && pip install {-e} . --no-build-isolation
 cd packages/batching_helpers && pip install {-e} . --no-build-isolation
-cd packages/dali_pipeline_framework && pip install {-e} . --no-build-isolation
+cd packages/dali_pipeline_framework && pip install . --no-build-isolation
 cd packages/on_demand_video_decoder && pip install . --no-build-isolation
-
-# Or install all packages at once
-for pkg in packages/*; do
-    cd "$pkg" && pip install {-e} . --no-build-isolation && cd ../..
-done
 ```
 
 #### Installing with Optional Dependencies
@@ -195,12 +190,15 @@ The repository provides a convenience script to run pytest for all configured na
 > **⚠️ Important**: If you want to run the tests, please make sure to install the packages with optional 
 > dependencies, as they may be required for the tests.
 
-> **⚠️ Important**: If you want to run the tests using this script inside a docker container, you need to 
-> install and use the Nvidia container runtime, or remove the On-demand Video Decoder package from the 
-> installation (by removing it from the list of namespace packages in the `namespace_packages_config.py` 
-> file).
+> **⚠️ Important**: If you want to run the tests inside a docker container, you need to 
+> install and use the Nvidia container runtime to ensure that the `on_demand_video_decoder` package can be 
+> used. 
 > Please see the [Docker Guide](DOCKER_GUIDE.md) for more details on how to set up and run with the Nvidia 
 > container runtime.
+>
+> Alternatively, you can also remove the `on_demand_video_decoder` package from the installation (by removing 
+> it from the list of namespace packages in the `namespace_packages_config.py` file, also see the 
+> [Development Guide](DEVELOPMENT_GUIDE.md)).
 
 ## Build Configuration
 
@@ -248,4 +246,3 @@ ENABLE_PROFILING=1 ./scripts/package_manager.sh install
 
 For information about extending ACCV-Lab or adding new namespace packages, see the 
 [development guide](DEVELOPMENT_GUIDE.md).
-

@@ -8,7 +8,7 @@ packages, and how to work with the build system.
 ## How It Works
 
 The project uses a shared configuration system where namespace packages are explicitly defined in 
-`namespace_packages_config.py`:
+`namespace_packages_config.py` (please also note the comments in the code snippet for more details):
 
 ```python
 # List of all ACCV-Lab namespace packages

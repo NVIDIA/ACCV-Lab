@@ -14,7 +14,7 @@ Batching Helpers, DALI Pipeline Framework).
 
 > **ℹ️ Note**: We are planning to add demos for packages contained in ACCV-Lab in the future. Apart from 
 > acting as tutorials show-casing real-world examples, they will include the implementation of the experiments 
-> which were used to obtain the evaluation results as shown in the documentation of the packages.
+> which were used to obtain the evaluation results as shown in the documentation of the contained packages.
 
 The contained packages are:
 - **On-Demand Video Decoder**: Designed for efficiently obtaining video frames from video files. Focused on 
@@ -35,8 +35,11 @@ The contained packages are:
 For more details on the packages (including performance evaluation results), please see the documentation for 
 each package in the `CONTAINED PACKAGES` section of the documentation.
 
-If you are reading this in the `README.md` file (and not in the HTML documentation), please also see 
-the following ``Quick Start`` section below for instructions on how to build the full documentation.
+> **⚠️ Important**: If you are reading this in the `README.md` file (and not in the HTML documentation), 
+> please note that there is a full documentation available, containing this page, the guides, and additional 
+> content (e.g. API reference, examples with detailed explanations, ...). You can view the documentation 
+> online at [NVIDIA.github.io/ACCV-Lab](https://NVIDIA.github.io/ACCV-Lab), or build a local copy as outlined 
+> in the `Quick Start` section below.
 
 ## Quick Start
 
@@ -93,6 +96,9 @@ documentation. The basic commands are:
 > of the API documentation relies on the package being available (i.e. it should be possible to import it 
 > during the generation). Note that installing the package also ensures that binaries of the used C++ 
 > extensions are available, so that any docstrings defined there can also be extracted. 
+
+> **ℹ️ Note**: Pre-built documentation is available online at 
+> [NVIDIA.github.io/ACCV-Lab](https://NVIDIA.github.io/ACCV-Lab).
 
 ## Project Structure
 
@@ -158,6 +164,11 @@ For development information, see the [Development Guide](docs/guides/DEVELOPMENT
    [Documentation Setup Guide](docs/guides/DOCUMENTATION_SETUP_GUIDE.md)
 
 Please also see the [Contribution Guide](docs/guides/CONTRIBUTION_GUIDE.md) for more a more detailed description
+
+## Useful Links
+
+- [Online Documentation](https://NVIDIA.github.io/ACCV-Lab)
+- [WeChat Discussion Group](https://github.com/NVIDIA/ACCV-Lab/issues/2): A real-time channel for ACCV-Lab Q&A and news.
 
 ## License
 

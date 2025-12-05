@@ -107,3 +107,53 @@ nav.contents ul ul ul ul {
     /* avoid aggressive breaks before hitting the cap */
     overflow-wrap: normal;
 }
+
+/* ===== Link colors ===== */
+/* Links in the main content area */
+.wy-nav-content a,
+.rst-content a {
+    color: #619a00;
+}
+
+.wy-nav-content a:hover,
+.wy-nav-content a:focus,
+.rst-content a:hover,
+.rst-content a:focus {
+    color: #76B900;
+}
+
+/* ===== Sidebar section headings (e.g., "CONTAINED PACKAGES") ===== */
+.wy-menu-vertical .caption,
+.wy-menu-vertical .caption span.caption-text {
+    color: #76B900;
+    font-weight: 600;
+}
+
+/* ===== Top sidebar header (home logo + project name) ===== */
+.wy-side-nav-search {
+    background-color: #76B900;
+}
+
+/* Sidebar link color only while the mouse button is pressed */
+.wy-menu-vertical a:active {
+    background-color: #76B900;
+}
+
+/* Function signature line: background + text color */
+.rst-content dl.py.function > dt,
+.rst-content dl.py.class > dt,
+.rst-content dl.py.data > dt {
+    background-color: #e8ffc9 !important;
+    border-top: 3px solid #76B900 !important;
+    color: #365500 !important;
+}
+
+/* Code/links inside the signature */
+.rst-content dl.py.function > dt code,
+.rst-content dl.py.class > dt code,
+.rst-content dl.py.data > dt code,
+.rst-content dl.py.function > dt a,
+.rst-content dl.py.class > dt a,
+.rst-content dl.py.data > dt a {
+    color: #26350f !important;
+}

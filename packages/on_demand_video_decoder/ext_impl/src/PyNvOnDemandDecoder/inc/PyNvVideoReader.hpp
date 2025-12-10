@@ -53,6 +53,20 @@ class PyNvVideoReader {
     ~PyNvVideoReader();
     void ReplaceWithFile(const std::string filename);
 
+    /**
+     * Release GPU device memory pool to free up GPU memory.
+     * 
+     * This method only releases the GPU memory pool, preserving decoder state
+     * (cur_frame_, packet_queue, etc.) for efficient forward decoding.
+     * 
+     * Behavior after calling this method:
+     * - Requesting frame_id > cur_frame_: efficient forward decode (no re-seek)
+     * - Requesting frame_id <= cur_frame_: triggers GOP re-seek and re-decode
+     * 
+     * The memory pool will be re-allocated automatically on the next decode.
+     */
+    void ReleaseMemPools();
+
     static Pixel_Format GetNativeFormat(const cudaVideoSurfaceFormat inputFormat);
 
     std::vector<DecodedFrameExt> run(const std::vector<int> frame_ids);

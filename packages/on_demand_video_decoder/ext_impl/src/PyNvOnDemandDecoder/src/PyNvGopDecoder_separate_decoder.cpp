@@ -343,6 +343,10 @@ void PyNvGopDecoder::decode_from_packet_list(std::vector<std::vector<int>> packe
 
     std::vector<int> dummp;
 
+    ensureCudaContextInitialized();
+    // ensureDemuxRunnersInitialized();
+    ensureDecodeRunnersInitialized();
+
     st = InitGpuMemPool(heights, widths, dummp, true);
     if (st != 0) {
         throw std::runtime_error("[ERROR] InitGpuMemPool failed.");

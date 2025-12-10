@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import pytest
+import sys
 
 import torch
 import random
@@ -347,4 +348,4 @@ def test_separate_access_gop_list_api():
 
 
 if __name__ == "__main__":
-    pytest.main([__file__])
+    sys.exit(pytest.main([__file__, "-v"]))

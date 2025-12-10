@@ -62,7 +62,6 @@ make install
 # The FFMPEG_DIR path is used by the On-demand Video Decoder Package to find the FFmpeg libraries during 
 # build time. 
 export FFMPEG_DIR=/PATH/TO/YOUR/FFMPEG
-export PATH=$PATH:/PATH/TO/YOUR/FFMPEG/bin
 ```
 
 ### Step 3: Build and Install

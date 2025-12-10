@@ -105,7 +105,7 @@ def SampleSeparationAccess():
     - first_frame_ids: Actual first frame IDs in the extracted GOPs
     - gop_lens: Length information for each GOP (Group of Pictures)
     '''
-    (packets, first_frame_ids, gop_lens) = nv_gop_dec1.GetGOP(file_path_list, [77] * len(file_path_list))
+    packets, first_frame_ids, gop_lens = nv_gop_dec1.GetGOP(file_path_list, [77] * len(file_path_list))
 
     # Perform multiple separation access decoding iterations
     num_iterations = 5

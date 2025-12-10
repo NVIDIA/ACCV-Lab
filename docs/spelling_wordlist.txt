@@ -43,12 +43,15 @@ JSON
 warmup
 codec
 codecs
+demux
 demuxer
 demuxers
 demuxing
+demuxes
 sharding
 gop
 GOP
+gops
 preprocessing
 numpy
 param
@@ -72,6 +75,8 @@ dtype
 uint
 functor
 prefetch
+prefetched
+prefetching
 numba
 subclass
 parallelized
@@ -172,3 +177,8 @@ hardcode
 hardcoded
 Nvidia
 Xeon
+dataloader
+args
+doesn
+literalinclude
+blockquote

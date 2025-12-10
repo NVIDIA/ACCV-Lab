@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.20)
+
+# NOTE: CMAKE_CUDA_ARCHITECTURES is inherited from parent ext_impl/CMakeLists.txt
+# To customize, set CUSTOM_CUDA_ARCHS environment variable before building.
 
 project(accvlab.on_demand_video_decoder)
 

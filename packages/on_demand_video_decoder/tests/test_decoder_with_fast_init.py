@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import pytest
+import sys
 
 import random
 
@@ -84,4 +85,4 @@ def test_separate_access_fast_init_single():
 
 
 if __name__ == "__main__":
-    pytest.main([__file__])
+    sys.exit(pytest.main([__file__, "-v"]))

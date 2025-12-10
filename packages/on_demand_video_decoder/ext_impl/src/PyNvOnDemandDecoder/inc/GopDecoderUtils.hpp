@@ -273,7 +273,7 @@ inline bool iskeyFrame(AVCodecID codec_id, const uint8_t* pVideo, int demux_flag
         uint8_t b = pVideo[2] == 1 ? pVideo[3] : pVideo[4];
         int nal_ref_idc = b >> 5;
         int nal_unit_type = b & 0x1f;
-        if (nal_unit_type == 6 || nal_unit_type == 7 || nal_unit_type == 8) {
+        if (nal_unit_type == 6 || nal_unit_type == 7 || nal_unit_type == 8 || nal_unit_type == 9) {
             bPS = true;
         }
     } else {
@@ -302,7 +302,7 @@ inline bool hasKeyFrameNalType(AVCodecID codec_id, const uint8_t* pVideo) {
     } else if (codec_id == AV_CODEC_ID_H264) {
         uint8_t b = pVideo[2] == 1 ? pVideo[3] : pVideo[4];
         int nal_unit_type = b & 0x1f;
-        return (nal_unit_type == 6 || nal_unit_type == 7 || nal_unit_type == 8);
+        return (nal_unit_type == 6 || nal_unit_type == 7 || nal_unit_type == 8 || nal_unit_type == 9);
     } else {
         throw std::domain_error("[ERROR] Unsupported video codec: " + std::to_string(codec_id));
     }

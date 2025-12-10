@@ -83,7 +83,7 @@ def gop_decode_bgr_with_fast_init(nv_gop_dec, file_path_list, frame_id_list, fas
 
 def gop_decode_bgr_ddseparate(nv_gop_dec1, nv_gop_dec2, file_path_list, frame_id_list):
     try:
-        (packets, first_frame_ids, gop_lens) = nv_gop_dec1.GetGOP(file_path_list, frame_id_list)
+        packets, first_frame_ids, gop_lens = nv_gop_dec1.GetGOP(file_path_list, frame_id_list)
         decoded_frames = nv_gop_dec2.DecodeFromGOPRGB(packets, file_path_list, frame_id_list, as_bgr=True)
         res = [torch.unsqueeze(torch.as_tensor(df), 0) for df in decoded_frames]
         return res
@@ -96,7 +96,7 @@ def gop_decode_bgr_ddseparate_with_fast_init(
     nv_gop_dec1, nv_gop_dec2, file_path_list, frame_id_list, fast_stream_infos
 ):
     try:
-        (packets, first_frame_ids, gop_lens) = nv_gop_dec1.GetGOP(
+        packets, first_frame_ids, gop_lens = nv_gop_dec1.GetGOP(
             file_path_list, frame_id_list, fastStreamInfos=fast_stream_infos
         )
         decoded_frames = nv_gop_dec2.DecodeFromGOPRGB(packets, file_path_list, frame_id_list, as_bgr=True)

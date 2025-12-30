@@ -537,6 +537,7 @@ void Init_PyNvGopDecoder(py::module& m) {
                 - list of GOP lengths for each GOP
             
             The numpy array contains a self-contained binary format with embedded frame offset table:
+
             - Header: total_frames (uint32_t) + frame_offsets array (size_t[total_frames])
             - Frame data blocks follow the header
             - Parse the header once to get direct access to any frame
@@ -614,6 +615,7 @@ void Init_PyNvGopDecoder(py::module& m) {
                 - list of GOP lengths for each GOP in that video
             
             Each numpy array contains a self-contained binary format with embedded frame offset table:
+
             - Header: total_frames (uint32_t) + frame_offsets array (size_t[total_frames])
             - Frame data blocks follow the header
             - Parse the header once to get direct access to any frame
@@ -971,6 +973,7 @@ void Init_PyNvGopDecoder(py::module& m) {
             and selective loading workflows.
             
             Key Differences from LoadGops:
+
             - LoadGops: Merges all files into ONE numpy array (for use with DecodeFromGOPRGB)
             - LoadGopList: Returns separate numpy arrays (for use with DecodeFromGOPListRGB)
             
@@ -1221,8 +1224,8 @@ void Init_PyNvGopDecoder(py::module& m) {
             R"pbdoc(
             Release all decoder instances to free up GPU memory.
             
-            This method clears all decoder instances, which releases:
-            - NvDecoder instances and their GPU frame buffers
+            This method clears all decoder instances, which releases 
+            NvDecoder instances and their GPU frame buffers
             
             This is useful for freeing GPU memory occupied by decoder instances.
             

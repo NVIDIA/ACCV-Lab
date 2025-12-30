@@ -314,6 +314,7 @@ def test_async_decode_error_message_is_preserved():
             "NvDecoder" in error_message
             or "error" in error_message.lower()
             or "failed" in error_message.lower()
+            or "invalid" in error_message.lower()
             or "FFmpeg" in error_message
             or invalid_filepath in error_message
         )

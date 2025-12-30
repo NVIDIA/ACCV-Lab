@@ -299,6 +299,7 @@ void Init_PyNvSampleReader(py::module& m) {
         video streams simultaneously.
         
         Key Features:
+        
         - GPU-accelerated decoding using NVIDIA hardware
         - Multiple video readers per file for parallel processing
         - Multi-file support with configurable reader pools

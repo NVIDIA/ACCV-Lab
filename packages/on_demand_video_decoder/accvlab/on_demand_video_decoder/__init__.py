@@ -75,7 +75,11 @@ class Codec(Enum):
     av1 = 11
 
 
+# Import Python utility functions
+from .utils import drop_videos_cache, DropCacheStatus
+
 __all__ = [
+    # C++ core interfaces
     'PyNvGopDecoder',
     'PyNvSampleReader',
     'FastStreamInfo',
@@ -86,4 +90,7 @@ __all__ = [
     'GetFastInitInfo',
     'SavePacketsToFile',
     'Codec',
+    # Python utility functions
+    'drop_videos_cache',
+    'DropCacheStatus',
 ]

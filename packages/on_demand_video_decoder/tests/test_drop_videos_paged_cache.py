@@ -20,13 +20,15 @@ the drop_videos_cache API. The function uses posix_fadvise with POSIX_FADV_DONTN
 to advise the kernel to release cached pages for specified video files.
 
 Status codes (DropCacheStatus enum):
-    - success: operation completed successfully
-    - platform_error: not Linux
-    - fadvise_failed: file not found, permission denied, etc.
+    - SUCCESS: operation completed successfully
+    - PLATFORM_ERROR: not Linux
+    - FILE_OPEN_FAILED: file not found, permission denied, etc.
+    - FADVISE_FAILED: posix_fadvise call failed
+    - UNKNOWN_ERROR: unexpected error occurred
 
 Note:
     - These tests are primarily designed for Linux systems.
-    - On non-Linux systems, the function returns DropCacheStatus.platform_error.
+    - On non-Linux systems, the function returns DropCacheStatus.PLATFORM_ERROR.
     - The function uses fail-fast mode: stops at first error.
 """
 
@@ -69,7 +71,7 @@ class TestDropVideosCacheAPI:
         """
         Test: Call drop_videos_cache with non-existent file paths.
 
-        On Linux: Should return status code 2 (fadvise failed) for first file.
+        On Linux: Should return status code 2 (file open failed) for first file.
         On non-Linux: Should return status code 1 (platform error).
         """
         print("\n=== Test: drop_videos_cache with non-existent files ===")
@@ -85,17 +87,17 @@ class TestDropVideosCacheAPI:
         print(f"drop_videos_cache returned: {result}")
 
         if sys.platform.startswith('linux'):
-            # On Linux, should fail with fadvise error for non-existent file
+            # On Linux, should fail with file open error for non-existent file
             assert (
-                result == DropCacheStatus.fadvise_failed
-            ), f"Expected {DropCacheStatus.fadvise_failed} for non-existent files, got {result}"
-            print("Test passed: Returned fadvise_failed for non-existent files")
+                result == DropCacheStatus.FILE_OPEN_FAILED
+            ), f"Expected {DropCacheStatus.FILE_OPEN_FAILED} for non-existent files, got {result}"
+            print("Test passed: Returned FILE_OPEN_FAILED for non-existent files")
         else:
             # On non-Linux systems, should return platform error
             assert (
-                result == DropCacheStatus.platform_error
-            ), f"Expected {DropCacheStatus.platform_error} on non-Linux system, got {result}"
-            print(f"Test passed: Returned platform_error on {sys.platform}")
+                result == DropCacheStatus.PLATFORM_ERROR
+            ), f"Expected {DropCacheStatus.PLATFORM_ERROR} on non-Linux system, got {result}"
+            print(f"Test passed: Returned PLATFORM_ERROR on {sys.platform}")
 
     def test_drop_videos_cache_with_empty_list(self):
         """
@@ -109,9 +111,11 @@ class TestDropVideosCacheAPI:
 
         print(f"drop_videos_cache returned: {result}")
 
-        assert result == DropCacheStatus.success, f"Expected {DropCacheStatus.success} for empty list, got {result}"
+        assert (
+            result == DropCacheStatus.SUCCESS
+        ), f"Expected {DropCacheStatus.SUCCESS} for empty list, got {result}"
 
-        print("Test passed: Returned success for empty list")
+        print("Test passed: Returned SUCCESS for empty list")
 
     @pytest.mark.parametrize("invalid_first", [False, True], ids=["valid_first", "invalid_first"])
     def test_drop_videos_cache_with_mixed_files(self, invalid_first):
@@ -123,8 +127,8 @@ class TestDropVideosCacheAPI:
         2. invalid_first=True: invalid file first, then valid files (tests immediate fail-fast)
 
         Due to fail-fast behavior:
-        - On Linux: Should return fadvise_failed on first invalid file encountered
-        - On non-Linux: Should return platform_error immediately
+        - On Linux: Should return FILE_OPEN_FAILED on first invalid file encountered
+        - On non-Linux: Should return PLATFORM_ERROR immediately
         """
         print(f"\n=== Test: drop_videos_cache with mixed files (invalid_first={invalid_first}) ===")
 
@@ -149,18 +153,18 @@ class TestDropVideosCacheAPI:
         if sys.platform.startswith('linux'):
             # On Linux, should fail on the first invalid file encountered
             assert (
-                result == DropCacheStatus.fadvise_failed
-            ), f"Expected {DropCacheStatus.fadvise_failed} (fail on invalid file), got {result}"
+                result == DropCacheStatus.FILE_OPEN_FAILED
+            ), f"Expected {DropCacheStatus.FILE_OPEN_FAILED} (fail on invalid file), got {result}"
             if invalid_first:
-                print("Test passed: Fail-fast returned fadvise_failed immediately on first invalid file")
+                print("Test passed: Fail-fast returned FILE_OPEN_FAILED immediately on first invalid file")
             else:
-                print("Test passed: Fail-fast returned fadvise_failed after processing valid files")
+                print("Test passed: Fail-fast returned FILE_OPEN_FAILED after processing valid files")
         else:
             # On non-Linux systems, should return platform error immediately
             assert (
-                result == DropCacheStatus.platform_error
-            ), f"Expected {DropCacheStatus.platform_error} on non-Linux system, got {result}"
-            print(f"Test passed: Returned platform_error on {sys.platform}")
+                result == DropCacheStatus.PLATFORM_ERROR
+            ), f"Expected {DropCacheStatus.PLATFORM_ERROR} on non-Linux system, got {result}"
+            print(f"Test passed: Returned PLATFORM_ERROR on {sys.platform}")
 
     def test_drop_videos_cache_after_decode(self):
         """
@@ -208,7 +212,7 @@ class TestDropVideosCacheAPI:
         result = nvc.drop_videos_cache(files)
         print(f"drop_videos_cache returned: {result}")
 
-        assert result == DropCacheStatus.success, f"Expected {DropCacheStatus.success}, got {result}"
+        assert result == DropCacheStatus.SUCCESS, f"Expected {DropCacheStatus.SUCCESS}, got {result}"
 
         print("Test passed: drop_videos_cache returned success after decode")
 

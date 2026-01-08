@@ -109,6 +109,10 @@ def SampleSeparationAccessGOPListAPI():
     Parameters:
     - filepaths: List of video file paths to process
     - frame_ids: List of target frame indices for GOP extraction
+    - useGOPCache: If True, enables GOP caching. When the same video file is requested
+                   with a frame_id that falls within a previously cached GOP range,
+                   the cached data is returned directly without re-demuxing.
+                   Default is False.
     
     Returns:
     - List of tuples, one per video: (gop_data, first_frame_ids, gop_lens)
@@ -116,8 +120,20 @@ def SampleSeparationAccessGOPListAPI():
     Key Difference from GetGOP:
     - GetGOP: Returns single merged bundle → (merged_data, merged_first_ids, merged_gop_lens)
     - GetGOPList: Returns list of separate bundles → [(data1, ids1, lens1), (data2, ids2, lens2), ...]
+    
+    Cache hit condition: first_frame_id <= frame_id < first_frame_id + gop_len
+    
+    Example with caching:
+        # First call - fetches GOP data from video files
+        gop_list = decoder.GetGOPList(files, [77, 77], useGOPCache=True)
+        # Second call with frame_id=80 in same GOP - returns from cache (no I/O)
+        gop_list = decoder.GetGOPList(files, [80, 80], useGOPCache=True)
     '''
-    gop_list = nv_gop_dec1.GetGOPList(file_path_list, [77] * len(file_path_list))
+    gop_list = nv_gop_dec1.GetGOPList(file_path_list, [77] * len(file_path_list), useGOPCache=True)
+
+    # Check cache status (first call should be all misses)
+    cache_hits = nv_gop_dec1.isCacheHit()
+    print(f"Cache status (first call): {cache_hits}")  # [False, False, False, False, False]
 
     print(f"✓ Successfully extracted GOP data for {len(gop_list)} videos")
     print("\nPer-Video GOP Data Summary:")
@@ -132,28 +148,19 @@ def SampleSeparationAccessGOPListAPI():
         print(f"    GOP lengths: {gop_lens}")
         print(f"    Frame range: [{first_frame_ids[0]}, {first_frame_ids[0] + gop_lens[0] - 1}]")
 
-    # DEMONSTRATE PER-VIDEO CACHING ADVANTAGE
+    # DEMONSTRATE BUILT-IN CACHING ADVANTAGE
     print("\n" + "=" * 80)
-    print("CACHING DEMONSTRATION: Per-Video Storage")
+    print("BUILT-IN CACHING DEMONSTRATION")
     print("=" * 80)
-    print("GetGOPList enables efficient per-video caching strategies:")
-    print("  • Each video's GOP data can be cached independently")
-    print("  • Selective loading: Load only required videos")
-    print("  • Distributed storage: Store in separate cache locations")
-    print("  • Memory optimization: Unload unused video GOP data")
-    print("\nSimulating cache storage (not actually writing to disk)...")
+    print("With useGOPCache=True, caching is handled automatically:")
+    print("  • Each video's GOP data is cached by the decoder")
+    print("  • Subsequent calls with frame_id in same GOP range return cached data")
+    print("  • Use isCacheHit() to check which videos hit the cache")
+    print("  • Use clear_cache() or remove_from_cache() to manage cache")
 
-    # Simulate per-video cache mapping
-    gop_cache = {}
-    for i, (gop_data, first_frame_ids, gop_lens) in enumerate(gop_list):
-        cache_key = f"video_{i}_{camera_names[i]}_frame_77"
-        gop_cache[cache_key] = {
-            'gop_data': gop_data,
-            'first_frame_ids': first_frame_ids,
-            'gop_lens': gop_lens,
-            'filepath': file_path_list[i],
-        }
-        print(f"  ✓ Cached: {cache_key} ({len(gop_data):,} bytes)")
+    # Show cache info
+    cache_info = nv_gop_dec1.get_cache_info()
+    print(f"\nCache Info: {cache_info['cached_files_count']} files cached")
 
     # STAGE 2: SELECTIVE VIDEO DECODING
     print("\n" + "=" * 80)
@@ -175,26 +182,26 @@ def SampleSeparationAccessGOPListAPI():
         print(f"🎯 Selectively decoding {num_videos_to_decode} out of {len(file_path_list)} videos")
         print(f"   Selected cameras: {[camera_names[i] for i in selected_indices]}")
 
-        # Load only selected videos' GOP data from cache
-        selected_gop_data_list = []
-        selected_filepaths = []
+        # Select filepaths for this iteration
+        selected_filepaths = [file_path_list[i] for i in selected_indices]
+
+        # Generate random frame IDs within GOP range (using info from first call)
         selected_frame_ids = []
-
         for idx in selected_indices:
-            cache_key = f"video_{idx}_{camera_names[idx]}_frame_77"
-            cached_item = gop_cache[cache_key]
-
-            # Generate random frame within GOP range
-            first_frame_id = cached_item['first_frame_ids'][0]
-            gop_len = cached_item['gop_lens'][0]
+            first_frame_id = gop_list[idx][1][0]  # first_frame_ids[0]
+            gop_len = gop_list[idx][2][0]  # gop_lens[0]
             random_frame = random.randint(first_frame_id, first_frame_id + gop_len - 1)
-
-            selected_gop_data_list.append(cached_item['gop_data'])
-            selected_filepaths.append(cached_item['filepath'])
             selected_frame_ids.append(random_frame)
 
         print(f"   Frame IDs to decode: {selected_frame_ids}")
-        print(f"   Loading GOP data from cache...")
+
+        # Use GetGOPList with caching - this will return cached data if in range
+        selected_gop_list = nv_gop_dec1.GetGOPList(selected_filepaths, selected_frame_ids, useGOPCache=True)
+        cache_hits = nv_gop_dec1.isCacheHit()
+        print(f"   Cache hits: {cache_hits}")
+
+        # Extract GOP data for decoding
+        selected_gop_data_list = [data for data, _, _ in selected_gop_list]
 
         try:
             '''

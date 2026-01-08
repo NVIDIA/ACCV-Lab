@@ -26,10 +26,12 @@ from typing import List
 
 class DropCacheStatus(Enum):
     """Status codes for drop_videos_cache operations."""
+
     SUCCESS = 0
     PLATFORM_ERROR = 1
-    FADVISE_FAILED = 2
-    UNKNOWN_ERROR = 3
+    FILE_OPEN_FAILED = 2
+    FADVISE_FAILED = 3
+    UNKNOWN_ERROR = 4
 
 
 def _drop_single_video_cache(filepath: str) -> DropCacheStatus:
@@ -43,7 +45,8 @@ def _drop_single_video_cache(filepath: str) -> DropCacheStatus:
         DropCacheStatus enum:
         - SUCCESS: cache dropped successfully
         - PLATFORM_ERROR: not Linux platform
-        - FADVISE_FAILED: posix_fadvise failed (file not found, permission denied, etc.)
+        - FILE_OPEN_FAILED: failed to open file (file not found, permission denied, etc.)
+        - FADVISE_FAILED: posix_fadvise call failed
         - UNKNOWN_ERROR: unexpected error occurred
     """
     # Only Linux supports posix_fadvise with POSIX_FADV_DONTNEED
@@ -52,17 +55,23 @@ def _drop_single_video_cache(filepath: str) -> DropCacheStatus:
 
     try:
         fd = os.open(filepath, os.O_RDONLY)
-        try:
-            file_size = os.fstat(fd).st_size
-            # POSIX_FADV_DONTNEED advises the kernel that these pages are no longer needed
-            os.posix_fadvise(fd, 0, file_size, os.POSIX_FADV_DONTNEED)
-            return DropCacheStatus.SUCCESS
-        finally:
-            os.close(fd)
+    except (OSError, IOError):
+        return DropCacheStatus.FILE_OPEN_FAILED
+    except Exception:
+        return DropCacheStatus.UNKNOWN_ERROR
+
+    try:
+        file_size = os.fstat(fd).st_size
+        # POSIX_FADV_DONTNEED advises the kernel that these pages are no longer needed
+        os.posix_fadvise(fd, 0, file_size, os.POSIX_FADV_DONTNEED)
+        return DropCacheStatus.SUCCESS
     except (OSError, IOError):
         return DropCacheStatus.FADVISE_FAILED
-    except Exception as e:
+    except Exception:
         return DropCacheStatus.UNKNOWN_ERROR
+    finally:
+        os.close(fd)
+
 
 def drop_videos_cache(filepaths: List[str]) -> DropCacheStatus:
     """
@@ -80,10 +89,12 @@ def drop_videos_cache(filepaths: List[str]) -> DropCacheStatus:
         filepaths: List of video file paths.
 
     Returns:
-        DropCacheStatus enum:
+        DropCacheStatus enum
+
         - SUCCESS: all files processed successfully
         - PLATFORM_ERROR: not Linux platform
-        - FADVISE_FAILED: posix_fadvise failed (file not found, permission denied, etc.)
+        - FILE_OPEN_FAILED: failed to open file (file not found, permission denied, etc.)
+        - FADVISE_FAILED: posix_fadvise call failed
         - UNKNOWN_ERROR: unexpected error occurred
 
     Note:
@@ -95,7 +106,7 @@ def drop_videos_cache(filepaths: List[str]) -> DropCacheStatus:
 
     Warning:
         The actual cache eviction behavior is influenced by system environment factors:
-        
+
         - System memory pressure and kernel memory management policies affect
           whether the advisory is honored.
         - On shared systems with many concurrent processes, cache state may change
@@ -103,20 +114,22 @@ def drop_videos_cache(filepaths: List[str]) -> DropCacheStatus:
 
     Example:
         >>> import accvlab.on_demand_video_decoder as nvc
-        >>> from accvlab.on_demand_video_decoder.utils import DropCacheStatus
+        >>> from accvlab.on_demand_video_decoder import DropCacheStatus
         >>> video_files = ["/path/to/video1.mp4", "/path/to/video2.mp4"]
         >>> status = nvc.drop_videos_cache(video_files)
         >>> if status == DropCacheStatus.SUCCESS:
         ...     print("Successfully dropped cache for all files")
         >>> elif status == DropCacheStatus.PLATFORM_ERROR:
         ...     print("Platform not supported (not Linux)")
+        >>> elif status == DropCacheStatus.FILE_OPEN_FAILED:
+        ...     print("Failed to open file (not found or permission denied)")
         >>> elif status == DropCacheStatus.FADVISE_FAILED:
-        ...     print("Failed to drop cache (file error)")
+        ...     print("posix_fadvise call failed")
         >>> elif status == DropCacheStatus.UNKNOWN_ERROR:
         ...     print("Unexpected error occurred")
     """
     for filepath in filepaths:
         status = _drop_single_video_cache(filepath)
         if status != DropCacheStatus.SUCCESS:
-            return status.value
+            return status
     return DropCacheStatus.SUCCESS

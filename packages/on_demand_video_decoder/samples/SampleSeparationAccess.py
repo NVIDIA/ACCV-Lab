@@ -99,13 +99,27 @@ def SampleSeparationAccess():
     Parameters:
     - filepaths: List of video file paths to process
     - frame_ids: List of target frame indices for packet extraction
+    - useGOPCache: If True, enables GOP caching. When the same video file is requested
+                   with a frame_id that falls within a previously cached GOP range,
+                   the cached data is returned directly without re-demuxing.
+                   Default is False.
     
     Returns:
     - packets: Compressed packet data for the specified frames
     - first_frame_ids: Actual first frame IDs in the extracted GOPs
     - gop_lens: Length information for each GOP (Group of Pictures)
+    
+    Cache hit condition: first_frame_id <= frame_id < first_frame_id + gop_len
+    
+    Example with caching:
+        # First call - fetches GOP data from video files
+        packets, first_ids, gop_lens = decoder.GetGOP(files, [77, 77], useGOPCache=True)
+        # Second call with frame_id=80 in same GOP - returns from cache (no I/O)
+        packets, first_ids, gop_lens = decoder.GetGOP(files, [80, 80], useGOPCache=True)
     '''
-    packets, first_frame_ids, gop_lens = nv_gop_dec1.GetGOP(file_path_list, [77] * len(file_path_list))
+    packets, first_frame_ids, gop_lens = nv_gop_dec1.GetGOP(
+        file_path_list, [77] * len(file_path_list), useGOPCache=True
+    )
 
     # Perform multiple separation access decoding iterations
     num_iterations = 5
@@ -133,14 +147,15 @@ def SampleSeparationAccess():
 
         try:
             '''
-            Check if the frame index is within the range of the GOP
+            With useGOPCache=True, we can re-call GetGOP for each iteration.
+            If the frame_id falls within the cached GOP range, it returns cached data.
+            If not, it fetches the new GOP and updates the cache automatically.
+
+            This eliminates the need for manual cache management by the user.
             '''
-            if frame_id_list[0] < first_frame_ids[0] or frame_id_list[0] >= first_frame_ids[0] + gop_lens[0]:
-                print(
-                    f"❌ Frame index {frame_id_list[0]} is out of range for GOP {first_frame_ids[0]} with length {gop_lens[0]}"
-                )
-                print(f"Continuing with next iteration...\n")
-                continue
+            packets, first_frame_ids, gop_lens = nv_gop_dec1.GetGOP(
+                file_path_list, frame_id_list, useGOPCache=True
+            )
 
             '''
             DecodeFromGOPRGB performs direct GOP-to-frame conversion

@@ -24,8 +24,6 @@ __email__ = "TODO"
 __status__ = "Production"
 
 
-from ast import Str
-import string
 import os
 import ctypes
 
@@ -54,10 +52,12 @@ try:
     try:
         _preload_local_ffmpeg()
         from ._PyNvOnDemandDecoder import *  # noqa
+
+        # Keep reference to original C++ CreateGopDecoder (used by _internal/decoder.py)
+        from ._PyNvOnDemandDecoder import CreateGopDecoder as _CreateGopDecoderCpp
     finally:
         if _prev_ld_library_path is not None:
             os.environ["LD_LIBRARY_PATH"] = _prev_ld_library_path
-    from enum import Enum
 except ImportError:
     import distutils.sysconfig
     from os.path import join, dirname
@@ -69,14 +69,14 @@ except ImportError:
     )
 
 
-class Codec(Enum):
-    h264 = 4
-    hevc = 8
-    av1 = 11
+# Python decoder with caching support
+from ._internal.decoder import CreateGopDecoder, CachedGopDecoder
 
+# Type definitions
+from ._internal.types import Codec
 
-# Import Python utility functions
-from .utils import drop_videos_cache, DropCacheStatus
+# Utility functions
+from ._internal.utils import drop_videos_cache, DropCacheStatus
 
 __all__ = [
     # C++ core interfaces
@@ -85,12 +85,15 @@ __all__ = [
     'FastStreamInfo',
     'DecodedFrameExt',
     'RGBFrame',
-    'CreateGopDecoder',
     'CreateSampleReader',
     'GetFastInitInfo',
     'SavePacketsToFile',
+    # Python decoder with caching
+    'CachedGopDecoder',
+    'CreateGopDecoder',
+    # Type definitions
     'Codec',
-    # Python utility functions
+    # Utility functions
     'drop_videos_cache',
     'DropCacheStatus',
 ]

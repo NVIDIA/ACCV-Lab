@@ -19,8 +19,8 @@ section helps you quickly locate the sample code that matches your requirements.
 | [SampleRandomAccess.py](../samples/SampleRandomAccess.py) | Random frame sampling for training | {py:func}`~accvlab.on_demand_video_decoder.CreateGopDecoder`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeN12ToRGB` |
 | [SampleRandomAccessWithFastInit.py](../samples/SampleRandomAccessWithFastInit.py) | Multi-clip batch processing with optimization | {py:func}`~accvlab.on_demand_video_decoder.GetFastInitInfo` |
 | [SampleStreamAccess.py](../samples/SampleStreamAccess.py) | Sequential frame decoding | {py:func}`~accvlab.on_demand_video_decoder.CreateSampleReader` |
-| [SampleSeparationAccess.py](../samples/SampleSeparationAccess.py) | Demuxer/decoder separation | {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.GetGOP`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOPRGB` |
-| [SampleSeparationAccessGOPListAPI.py](../samples/SampleSeparationAccessGOPListAPI.py) | Per-video GOP management | {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.GetGOPList`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOPListRGB` |
+| [SampleSeparationAccess.py](../samples/SampleSeparationAccess.py) | Demuxer/decoder separation with GOP caching | {py:meth}`~accvlab.on_demand_video_decoder.CachedGopDecoder.GetGOP`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOPRGB`, {py:meth}`~accvlab.on_demand_video_decoder.CachedGopDecoder.isCacheHit` |
+| [SampleSeparationAccessGOPListAPI.py](../samples/SampleSeparationAccessGOPListAPI.py) | Per-video GOP management with caching | {py:meth}`~accvlab.on_demand_video_decoder.CachedGopDecoder.GetGOPList`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOPListRGB`, {py:meth}`~accvlab.on_demand_video_decoder.CachedGopDecoder.isCacheHit` |
 | [SampleDecodeFromGopFiles.py](../samples/SampleDecodeFromGopFiles.py) | GOP data persistence to disk | {py:func}`~accvlab.on_demand_video_decoder.SavePacketsToFile`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.LoadGops` |
 | [SampleDecodeFromGopFilesToListAPI.py](../samples/SampleDecodeFromGopFilesToListAPI.py) | Selective GOP loading | {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.LoadGopsToList`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOPListRGB` |
 | [SampleDecodeFromGopList.py](../samples/SampleDecodeFromGopList.py) | Batch decode from multiple demux results (N demux → 1 decode) | {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOPListRGB` |
@@ -74,6 +74,8 @@ Before diving into the samples, understanding these concepts will be helpful:
   - **Demuxer-Free**: Decode directly from pre-extracted GOP data
 
 - **FastInit**: An optimization technique that caches stream metadata to accelerate decoder initialization for multiple clips with similar properties.
+
+- **GOP Caching**: A Python-side caching mechanism that stores extracted GOP data in memory. When the same video file is requested with a `frame_id` that falls within an already cached GOP range, the cached data is returned directly without re-demuxing from the video file.
 
 ## 2. Quick Start
 
@@ -784,6 +786,133 @@ decoded_frames = nv_gop_dec2.DecodeFromGOPListRGB(
 cd packages/on_demand_video_decoder/samples
 python SampleSeparationAccessGOPListAPI.py
 ```
+
+#### 3.3.5 GOP Caching Feature
+
+The GOP caching feature automatically stores extracted GOP data in Python memory, eliminating the need for 
+manual cache management by the user. When enabled, subsequent calls to {py:meth}`~accvlab.on_demand_video_decoder.CachedGopDecoder.GetGOP` or {py:meth}`~accvlab.on_demand_video_decoder.CachedGopDecoder.GetGOPList` with the same 
+video file and a `frame_id` within the cached GOP range will return cached data without re-demuxing.
+
+**Why Use GOP Caching?**
+
+In training scenarios, especially with video datasets:
+- The same video file may be accessed multiple times with different frame indices
+- Multiple frame indices often fall within the same GOP (Group of Pictures)
+- Re-demuxing for each access wastes I/O and CPU resources
+
+Without caching, users would need to manually track GOP ranges and manage cache dictionaries. With the 
+`useGOPCache` parameter, this is handled automatically.
+
+**Enabling GOP Caching**
+
+Set `useGOPCache=True` when calling {py:meth}`~accvlab.on_demand_video_decoder.CachedGopDecoder.GetGOP` or {py:meth}`~accvlab.on_demand_video_decoder.CachedGopDecoder.GetGOPList`:
+
+```python
+import accvlab.on_demand_video_decoder as nvc
+
+decoder = nvc.CreateGopDecoder(maxfiles=6, iGpu=0)
+
+# First call - fetches GOP data from video files
+packets, first_ids, gop_lens = decoder.GetGOP(
+    file_path_list, 
+    [77] * len(file_path_list), 
+    useGOPCache=True
+)
+
+# Second call with frame_id=80 (within the same GOP range) - returns from cache
+packets, first_ids, gop_lens = decoder.GetGOP(
+    file_path_list, 
+    [80] * len(file_path_list), 
+    useGOPCache=True
+)
+```
+
+**Cache Hit Condition**
+
+A cache hit occurs when:
+- The requested `filepath` matches a cached entry
+- The requested `frame_id` satisfies: `first_frame_id <= frame_id < first_frame_id + gop_len`
+
+If the `frame_id` is outside the cached GOP range, a new GOP is fetched and the cache is updated.
+
+**Checking Cache Hit Status**
+
+Use the {py:meth}`~accvlab.on_demand_video_decoder.CachedGopDecoder.isCacheHit` method to check whether the last {py:meth}`~accvlab.on_demand_video_decoder.CachedGopDecoder.GetGOP` or {py:meth}`~accvlab.on_demand_video_decoder.CachedGopDecoder.GetGOPList` call hit the cache:
+
+```python
+# Call GetGOP with caching
+packets, first_ids, gop_lens = decoder.GetGOP(file_path_list, frame_ids, useGOPCache=True)
+
+# Check cache hit status for each video
+cache_hits = decoder.isCacheHit()
+print(cache_hits)  # [True, False, True, True, False] - per-video cache hit status
+```
+
+The return value is a list of booleans, one for each video in the request, indicating whether the cached 
+data was used (`True`) or new data was fetched (`False`).
+
+**Cache Management Methods**
+
+The decoder provides methods to manage the cache:
+
+| Method | Description |
+|--------|-------------|
+| {py:meth}`~accvlab.on_demand_video_decoder.CachedGopDecoder.get_cache_info` | Returns a dictionary with cache statistics |
+| {py:meth}`~accvlab.on_demand_video_decoder.CachedGopDecoder.clear_cache` | Clears all cached GOP data |
+
+Example:
+
+```python
+# Get cache information
+cache_info = decoder.get_cache_info()
+print(f"Cached files: {cache_info['cached_files_count']}")
+print(f"File paths: {cache_info['cached_files']}")
+
+# Clear all cache when done
+decoder.clear_cache()
+```
+
+**GOP Caching with GetGOPList**
+
+The caching feature works identically with {py:meth}`~accvlab.on_demand_video_decoder.CachedGopDecoder.GetGOPList`:
+
+```python
+# First call - all videos are fetched
+gop_list = decoder.GetGOPList(file_path_list, [77, 77, 77], useGOPCache=True)
+print(decoder.isCacheHit())  # [False, False, False]
+
+# Second call with some frame_ids in range, some out of range
+gop_list = decoder.GetGOPList(file_path_list, [80, 80, 150], useGOPCache=True)
+print(decoder.isCacheHit())  # [True, True, False] - partial cache hit
+```
+
+**Shared Cache Between GetGOP and GetGOPList**
+
+The cache is shared between {py:meth}`~accvlab.on_demand_video_decoder.CachedGopDecoder.GetGOP` and {py:meth}`~accvlab.on_demand_video_decoder.CachedGopDecoder.GetGOPList` calls on the same decoder instance:
+
+```python
+# Cache populated via GetGOP
+packets, _, _ = decoder.GetGOP(["/path/to/video.mp4"], [50], useGOPCache=True)
+
+# Cache hit via GetGOPList (same file, frame_id in range)
+gop_list = decoder.GetGOPList(["/path/to/video.mp4"], [55], useGOPCache=True)
+print(decoder.isCacheHit())  # [True]
+```
+
+> **⚠️ Note**: The cache is stored in Python memory. Each video file caches only one GOP (the most 
+> recently accessed). For long-running processes with many different videos, use {py:meth}`~accvlab.on_demand_video_decoder.CachedGopDecoder.clear_cache` to 
+> release memory when needed.
+
+**When to Use GOP Caching**
+
+✓ Training loops with random frame sampling from the same video
+✓ Multi-camera setups where cameras are often accessed with similar frame indices
+✓ Scenarios where the same GOP is likely to be accessed multiple times
+✓ Reducing I/O overhead in data loading pipelines
+
+✗ One-time video processing (no repeated access)
+✗ Memory-constrained environments with large video collections
+✗ Scenarios where each frame access targets a different GOP
 
 ### 3.4 Demuxer-Free Decoding
 

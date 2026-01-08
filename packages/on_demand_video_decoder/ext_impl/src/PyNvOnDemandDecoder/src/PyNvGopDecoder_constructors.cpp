@@ -424,7 +424,7 @@ void Init_PyNvGopDecoder(py::module& m) {
                 frame_ids: List of frame IDs to decode. Each frame ID corresponds to
                            a specific frame in the video sequence.
                 fastStreamInfos: Optional list of FastStreamInfo objects containing
-                                pre-extracted stream information by `GetFastInitInfo`.
+                                pre-extracted stream information by :func:`GetFastInitInfo`.
                                 If provided, this can improve performance by avoiding 
                                 stream analysis.
             
@@ -468,7 +468,7 @@ void Init_PyNvGopDecoder(py::module& m) {
                 filepaths: List of video file paths to decode from
                 frame_ids: List of frame IDs to decode from the video files
                 as_bgr: Whether to output in BGR format (True) or RGB format (False). BGR is commonly used in OpenCV applications.
-                fastStreamInfos: Optional list of FastStreamInfo objects containing pre-extracted stream information by `GetFastInitInfo`. If provided, this can improve performance by avoiding stream analysis.
+                fastStreamInfos: Optional list of FastStreamInfo objects containing pre-extracted stream information by :func:`GetFastInitInfo`. If provided, this can improve performance by avoiding stream analysis.
             
             Returns:
                 List of RGBFrame objects containing the decoded and color-converted frame data.
@@ -522,16 +522,17 @@ void Init_PyNvGopDecoder(py::module& m) {
             
             This method extracts video GOP (Group of Pictures) data from the specified frames and returns
             them in a self-contained binary format. The GOP data can be decoded later
-            using `DecodeFromPacket` or `DecodeFromPacketRGB` methods, enabling separation 
+            using :meth:`DecodeFromPacketListRGB` method, enabling separation 
             of demuxing and decoding.
             
             Args:
                 filepaths: List of video file paths to extract GOP data from
                 frame_ids: List of frame IDs to extract GOP data for
-                fastStreamInfos: Optional list of FastStreamInfo objects containing pre-extracted stream information by `GetFastInitInfo`. If provided, this can improve performance by avoiding stream analysis.
+                fastStreamInfos: Optional list of FastStreamInfo objects containing pre-extracted stream information by :func:`GetFastInitInfo`. If provided, this can improve performance by avoiding stream analysis.
             
             Returns:
-                Tuple containing:
+                Tuple containing
+
                 - numpy array with serialized GOP data
                 - list of first frame IDs for each GOP
                 - list of GOP lengths for each GOP
@@ -597,7 +598,7 @@ void Init_PyNvGopDecoder(py::module& m) {
             R"pbdoc(
             Extracts video GOP data for multiple videos and returns them as separate bundles.
             
-            This method is similar to GetGOP but returns a separate bundle for each video file
+            This method is similar to :meth:`GetGOP` but returns a separate bundle for each video file
             instead of merging all data into one bundle. This is useful when you want to cache
             or process each video's data independently.
             
@@ -605,11 +606,12 @@ void Init_PyNvGopDecoder(py::module& m) {
                 filepaths: List of video file paths to extract GOP data from
                 frame_ids: List of frame IDs to extract GOP data for (one per video)
                 fastStreamInfos: Optional list of FastStreamInfo objects containing pre-extracted 
-                                stream information by `GetFastInitInfo`. If provided, this can 
+                                stream information by :func:`GetFastInitInfo`. If provided, this can 
                                 improve performance by avoiding stream analysis.
             
             Returns:
-                List of tuples, one per video file, each containing:
+                List of tuples, one per video file, each containing
+                
                 - numpy array with serialized GOP data for that video
                 - list of first frame IDs for each GOP in that video
                 - list of GOP lengths for each GOP in that video
@@ -669,7 +671,7 @@ void Init_PyNvGopDecoder(py::module& m) {
             decoding, or when you have pre-extracted GOP data.
             
             Args:
-                numpy_data: Numpy array containing serialized GOP data from `GetGOP`
+                numpy_data: Numpy array containing serialized GOP data from :meth:`GetGOP`
                 filepaths: List of video file paths (for metadata purposes)
                 frame_ids: List of frame IDs to decode from the GOP data
             
@@ -714,7 +716,7 @@ void Init_PyNvGopDecoder(py::module& m) {
             from decoding and need RGB output.
             
             Args:
-                numpy_data: Numpy array containing serialized GOP data from `GetGOP`
+                numpy_data: Numpy array containing serialized GOP data from :meth:`GetGOP`
                 filepaths: List of video file paths (for metadata purposes)
                 frame_ids: List of frame IDs to decode from the GOP data
                 as_bgr: Whether to output in BGR format (True) or RGB format (False)
@@ -855,7 +857,7 @@ void Init_PyNvGopDecoder(py::module& m) {
             via a unified pipeline. Useful for processing multiple GOP bundles simultaneously.
             
             Args:
-                numpy_datas: List of numpy arrays, each containing a SerializedPacketBundle from `GetGOP`
+                numpy_datas: List of numpy arrays, each containing a SerializedPacketBundle from :meth:`GetGOP`
                 filepaths: List of source file paths for each requested frame (aggregated)
                 frame_ids: List of target frame IDs (aggregated across all bundles)
                 as_bgr: Whether to output in BGR format (True) or RGB format (False)
@@ -968,14 +970,14 @@ void Init_PyNvGopDecoder(py::module& m) {
             Load GOP data from multiple binary files and return as a list of numpy arrays.
             
             This method loads serialized GOP bundles from binary files (previously saved
-            with SavePacketsToFile) and returns them as separate numpy arrays, one per file.
-            This is the companion function to GetGOPList, enabling distributed GOP caching
+            with :func:`SavePacketsToFile`) and returns them as separate numpy arrays, one per file.
+            This is the companion function to :meth:`GetGOPList`, enabling distributed GOP caching
             and selective loading workflows.
             
-            Key Differences from LoadGops:
+            Key Differences from :meth:`LoadGops`:
 
-            - LoadGops: Merges all files into ONE numpy array (for use with DecodeFromGOPRGB)
-            - LoadGopList: Returns separate numpy arrays (for use with DecodeFromGOPListRGB)
+            - :meth:`LoadGops`: Merges all files into ONE numpy array (for use with :meth:`DecodeFromGOPRGB`)
+            - :meth:`LoadGopsToList`: Returns separate numpy arrays (for use with :meth:`DecodeFromGOPListRGB`)
             
             Args:
                 file_paths: List of paths to GOP binary files to load
@@ -1043,10 +1045,10 @@ void Init_PyNvGopDecoder(py::module& m) {
             Initializes NvDecoder instances for video files.
             
             This method creates NvDecoder instances for each video file, preparing
-            them for efficient decoding operations. It is used before `DecodeFromPacketListRGB`.
+            them for efficient decoding operations. It is used before :meth:`DecodeFromPacketListRGB`.
             
             Args:
-                codec_ids: List of video codec IDs from `ParseSerializedPacketBundle`
+                codec_ids: List of video codec IDs from :meth:`ParseSerializedPacketBundle`
             
             Returns:
                 0 if initialization successful
@@ -1105,17 +1107,18 @@ void Init_PyNvGopDecoder(py::module& m) {
             },
             py::arg("numpy_data"),
             R"pbdoc(
-            Parses a SerializedPacketBundle and extracts parameters for DecodeFromPacketListRGB.
+            Parses a SerializedPacketBundle and extracts parameters for :meth:`DecodeFromPacketListRGB`.
             
             This method takes serialized packet data and extracts all the necessary parameters
-            required for the DecodeFromPacketListRGB interface, including creating numpy arrays
-            for the packet binary data. You can use this method to get the parameters from `GetGOP`.
+            required for the :meth:`DecodeFromPacketListRGB` interface, including creating numpy arrays
+            for the packet binary data. You can use this method to get the parameters from :meth:`GetGOP`.
             
             Args:
-                numpy_data: Numpy array containing serialized packet data from GetGOP
+                numpy_data: Numpy array containing serialized packet data from :meth:`GetGOP`
             
             Returns:
-                Tuple containing:
+                Tuple containing
+                
                 - color_ranges: List of color ranges for each frame
                 - codec_ids: List of codec IDs for each frame
                 - widths: List of frame widths for each frame

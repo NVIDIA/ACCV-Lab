@@ -531,7 +531,8 @@ void Init_PyNvGopDecoder(py::module& m) {
                 fastStreamInfos: Optional list of FastStreamInfo objects containing pre-extracted stream information by `GetFastInitInfo`. If provided, this can improve performance by avoiding stream analysis.
             
             Returns:
-                Tuple containing:
+                Tuple containing
+
                 - numpy array with serialized GOP data
                 - list of first frame IDs for each GOP
                 - list of GOP lengths for each GOP
@@ -609,7 +610,8 @@ void Init_PyNvGopDecoder(py::module& m) {
                                 improve performance by avoiding stream analysis.
             
             Returns:
-                List of tuples, one per video file, each containing:
+                List of tuples, one per video file, each containing
+                
                 - numpy array with serialized GOP data for that video
                 - list of first frame IDs for each GOP in that video
                 - list of GOP lengths for each GOP in that video
@@ -1115,7 +1117,8 @@ void Init_PyNvGopDecoder(py::module& m) {
                 numpy_data: Numpy array containing serialized packet data from GetGOP
             
             Returns:
-                Tuple containing:
+                Tuple containing
+                
                 - color_ranges: List of color ranges for each frame
                 - codec_ids: List of codec IDs for each frame
                 - widths: List of frame widths for each frame

@@ -209,6 +209,11 @@ bool PyNvGopDemuxer::Seek(uint8_t** ppVideo, int* pnVideoBytes, int frame_id_to_
         int nal_ref_idc = b >> 5;
         int nal_unit_type = b & 0x1f;
         std::cout << "H264 NAL Type" << nal_unit_type << std::endl;
+    } else if (*pnVideoBytes && demuxer->GetVideoCodec() == AV_CODEC_ID_AV1) {
+        // AV1 uses OBU (Open Bitstream Unit) format instead of NAL units
+        uint8_t obu_header = (*ppVideo)[0];
+        int obu_type = (obu_header >> 3) & 0x0F;
+        std::cout << "AV1 OBU_TYPE:" << obu_type << std::endl;
     } else {
         throw std::domain_error("[ERROR] Unsupported video codec: " +
                                 std::to_string(demuxer->GetVideoCodec()));
@@ -277,12 +282,12 @@ bool PyNvGopDemuxer::SeekGopFirstFrameNoMap(uint8_t** ppVideo, int* pnVideoBytes
         // std::cout << "SeekGopFirstFrameNoMap - Seeking output frame_id_out: " << frame_id_out
         //           << " timestamp_out: " << timestamp_out << std::endl;
 
-        // Verify the packet type for H.264 or HEVC
+        // Verify the packet type for H.264, HEVC, or AV1
         const uint8_t* pVideo = *ppVideo;
         if (pVideo == nullptr) {
             return false;
         }
-        // Use the utility function to check for key frame NAL unit type (without checking flags)
+        // Use the utility function to check for key frame NAL/OBU unit type (without checking flags)
         found_key_frame = hasKeyFrameNalType(demuxer->GetVideoCodec(), pVideo);
 
         if (found_key_frame) {

@@ -352,7 +352,35 @@ int NvDecoder::HandleVideoSequence(CUVIDEOFORMAT *pVideoFormat)
     // m_videoInfo << std::endl;
 
     CUDA_DRVAPI_CALL(cuCtxPushCurrent(m_cuContext));
-    NVDEC_API_CALL(m_api.cuvidCreateDecoder(&m_hDecoder, &videoDecodeCreateInfo));
+    
+    // Create decoder with enhanced error handling for unsupported codec/GPU combinations
+    CUresult createDecoderResult = m_api.cuvidCreateDecoder(&m_hDecoder, &videoDecodeCreateInfo);
+    if (createDecoderResult != CUDA_SUCCESS) {
+        CUDA_DRVAPI_CALL(cuCtxPopCurrent(NULL));
+        
+        std::ostringstream errorLog;
+        errorLog << "cuvidCreateDecoder failed with error " << createDecoderResult;
+        
+        // Provide user-friendly error message for CUDA_ERROR_NOT_SUPPORTED (801)
+        if (createDecoderResult == CUDA_ERROR_NOT_SUPPORTED) {
+            errorLog << "\n\n"
+                     << "========================================================================\n"
+                     << "GPU CODEC SUPPORT ERROR\n"
+                     << "========================================================================\n"
+                     << "Your GPU does not support hardware decoding for this video codec.\n\n"
+                     << "Codec requested: " << GetVideoCodecString(videoDecodeCreateInfo.CodecType) << "\n"
+                     << "Video resolution: " << videoDecodeCreateInfo.ulWidth << "x" << videoDecodeCreateInfo.ulHeight << "\n"
+                     << "Chroma format: " << GetVideoChromaFormatString(videoDecodeCreateInfo.ChromaFormat) << "\n\n"
+                     << "Common causes:\n"
+                     << "  - H100/A100/V100 GPUs do NOT support AV1 hardware decoding\n"
+                     << "For GPU codec support details, see:\n"
+                     << "  https://developer.nvidia.com/video-encode-decode-support-matrix\n"
+                     << "========================================================================\n";
+        }
+        
+        throw NVDECException::makeNVDECException(errorLog.str(), createDecoderResult, __FUNCTION__, __FILE__, __LINE__);
+    }
+    
     CUDA_DRVAPI_CALL(cuCtxPopCurrent(NULL));
     uint8_t* pFrame[8] = { NULL };
     if (m_bUseDeviceFrame)

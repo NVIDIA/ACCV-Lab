@@ -24,7 +24,6 @@ import numpy as np
 
 from .. import _CreateGopDecoderCpp, PyNvGopDecoder
 
-
 # Private key to prevent direct instantiation of CachedGopDecoder
 _CREATION_KEY = object()
 
@@ -75,8 +74,7 @@ class CachedGopDecoder:
         """
         if _key is not _CREATION_KEY:
             raise RuntimeError(
-                "CachedGopDecoder cannot be instantiated directly. "
-                "Use CreateGopDecoder() instead."
+                "CachedGopDecoder cannot be instantiated directly. " "Use CreateGopDecoder() instead."
             )
         self._decoder = decoder
         # Cache structure: {filepath: (packets_numpy, first_frame_id, gop_len)}

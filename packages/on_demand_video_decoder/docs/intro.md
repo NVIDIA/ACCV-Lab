@@ -50,7 +50,7 @@ help users quickly integrate the package and boost workload performance.
 ## Features
 
 ### Functional Features
-* **Codecs**: H.264, HEVC.
+* **Codecs**: H.264, HEVC, AV1.
 * **Surface formats**: NV12 (8 bit), YUV 4:2:0 (10 bit), YUV 4:4:4 (8 and 10 bit).
 * **[Video container formats](https://ffmpeg.org/ffmpeg-formats.html#Demuxers)**: MP4, MOV, FLV, etc.
 * DLPack support to facilitate data exchange with popular DL frameworks like PyTorch and TensorRT.

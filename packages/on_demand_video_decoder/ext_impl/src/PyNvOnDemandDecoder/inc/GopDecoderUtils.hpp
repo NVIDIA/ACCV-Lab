@@ -250,6 +250,58 @@ static void SavePacketBufferToFile(const uint8_t* packet_buffer, int nVideoBytes
 }
 
 /**
+ * @brief H.264/AVC NAL unit type enumeration
+ * Reference: ITU-T H.264 Table 7-1
+ */
+enum H264NalUnitType {
+    H264_NAL_SLICE = 1,           // Coded slice of a non-IDR picture
+    H264_NAL_DPA = 2,             // Coded slice data partition A
+    H264_NAL_DPB = 3,             // Coded slice data partition B
+    H264_NAL_DPC = 4,             // Coded slice data partition C
+    H264_NAL_IDR_SLICE = 5,       // Coded slice of an IDR picture
+    H264_NAL_SEI = 6,             // Supplemental enhancement information
+    H264_NAL_SPS = 7,             // Sequence parameter set
+    H264_NAL_PPS = 8,             // Picture parameter set
+    H264_NAL_AUD = 9,             // Access unit delimiter
+    H264_NAL_END_SEQUENCE = 10,   // End of sequence
+    H264_NAL_END_STREAM = 11,     // End of stream
+    H264_NAL_FILLER_DATA = 12,    // Filler data
+};
+
+/**
+ * @brief HEVC/H.265 NAL unit type enumeration
+ * Reference: ITU-T H.265 Table 7-1
+ */
+enum HevcNalUnitType {
+    HEVC_NAL_IDR_W_RADL = 19,     // IDR picture with RADL pictures
+    HEVC_NAL_IDR_N_LP = 20,       // IDR picture without leading pictures
+    HEVC_NAL_CRA_NUT = 21,        // Clean random access picture
+    HEVC_NAL_VPS = 32,            // Video parameter set
+    HEVC_NAL_SPS = 33,            // Sequence parameter set
+    HEVC_NAL_PPS = 34,            // Picture parameter set
+    HEVC_NAL_AUD = 35,            // Access unit delimiter
+    HEVC_NAL_PREFIX_SEI = 39,     // Prefix SEI message
+    HEVC_NAL_SUFFIX_SEI = 40,     // Suffix SEI message
+};
+
+/**
+ * @brief AV1 OBU (Open Bitstream Unit) type enumeration
+ * AV1 uses OBU format instead of NAL units used by H.264/HEVC
+ * Reference: AV1 Bitstream & Decoding Process Specification
+ */
+enum AV1ObuType {
+    OBU_SEQUENCE_HEADER = 1,        // Sequence header, appears at key frames
+    OBU_TEMPORAL_DELIMITER = 2,     // Temporal delimiter
+    OBU_FRAME_HEADER = 3,           // Frame header
+    OBU_TILE_GROUP = 4,             // Tile group
+    OBU_METADATA = 5,               // Metadata
+    OBU_FRAME = 6,                  // Frame (combined frame header and tile group)
+    OBU_REDUNDANT_FRAME_HEADER = 7, // Redundant frame header
+    OBU_TILE_LIST = 8,              // Tile list
+    OBU_PADDING = 15,               // Padding
+};
+
+/**
  * @brief Check if a video packet represents a key frame
  * @param codec_id FFmpeg codec ID (AVCodecID enum value)
  * @param pVideo Pointer to video packet data
@@ -265,15 +317,28 @@ inline bool iskeyFrame(AVCodecID codec_id, const uint8_t* pVideo, int demux_flag
     if (codec_id == AV_CODEC_ID_HEVC) {
         uint8_t b = pVideo[2] == 1 ? pVideo[3] : pVideo[4];
         int nal_unit_type = b >> 1;
-        if (nal_unit_type == 32 || nal_unit_type == 33 || nal_unit_type == 34 || nal_unit_type == 39 ||
-            nal_unit_type == 40) {
+        // Check for VPS, SPS, PPS, or SEI NAL units which indicate key frame start
+        if (nal_unit_type == HEVC_NAL_VPS || nal_unit_type == HEVC_NAL_SPS ||
+            nal_unit_type == HEVC_NAL_PPS || nal_unit_type == HEVC_NAL_PREFIX_SEI ||
+            nal_unit_type == HEVC_NAL_SUFFIX_SEI) {
             bPS = true;
         }
     } else if (codec_id == AV_CODEC_ID_H264) {
         uint8_t b = pVideo[2] == 1 ? pVideo[3] : pVideo[4];
         int nal_ref_idc = b >> 5;
         int nal_unit_type = b & 0x1f;
-        if (nal_unit_type == 6 || nal_unit_type == 7 || nal_unit_type == 8 || nal_unit_type == 9) {
+        // Check for SEI, SPS, PPS, or AUD NAL units which indicate key frame start
+        if (nal_unit_type == H264_NAL_SEI || nal_unit_type == H264_NAL_SPS ||
+            nal_unit_type == H264_NAL_PPS || nal_unit_type == H264_NAL_AUD) {
+            bPS = true;
+        }
+    } else if (codec_id == AV_CODEC_ID_AV1) {
+        // AV1 uses OBU (Open Bitstream Unit) format
+        // Parse OBU header to get obu_type (bits 3-6 of first byte)
+        uint8_t obu_header = pVideo[0];
+        int obu_type = (obu_header >> 3) & 0x0F;
+        // OBU_SEQUENCE_HEADER always appears at the start of a key frame sequence
+        if (obu_type == OBU_SEQUENCE_HEADER) {
             bPS = true;
         }
     } else {
@@ -284,10 +349,11 @@ inline bool iskeyFrame(AVCodecID codec_id, const uint8_t* pVideo, int demux_flag
 }
 
 /**
- * @brief Check if a video packet has key frame NAL unit type (without checking flags)
+ * @brief Check if a video packet has key frame NAL/OBU unit type (without checking flags)
  * @param codec_id FFmpeg codec ID (AVCodecID enum value)
  * @param pVideo Pointer to video packet data
- * @return true if the packet has key frame NAL unit type, false otherwise
+ * @return true if the packet has key frame NAL/OBU unit type, false otherwise
+ * @note For AV1, this checks for OBU_SEQUENCE_HEADER which indicates a key frame
  */
 inline bool hasKeyFrameNalType(AVCodecID codec_id, const uint8_t* pVideo) {
     if (!pVideo) {
@@ -297,12 +363,21 @@ inline bool hasKeyFrameNalType(AVCodecID codec_id, const uint8_t* pVideo) {
     if (codec_id == AV_CODEC_ID_HEVC) {
         uint8_t b = pVideo[2] == 1 ? pVideo[3] : pVideo[4];
         int nal_unit_type = b >> 1;
-        return (nal_unit_type == 32 || nal_unit_type == 33 || nal_unit_type == 34 || nal_unit_type == 39 ||
-                nal_unit_type == 40);
+        // Check for VPS, SPS, PPS, or SEI NAL units which indicate key frame start
+        return (nal_unit_type == HEVC_NAL_VPS || nal_unit_type == HEVC_NAL_SPS ||
+                nal_unit_type == HEVC_NAL_PPS || nal_unit_type == HEVC_NAL_PREFIX_SEI ||
+                nal_unit_type == HEVC_NAL_SUFFIX_SEI);
     } else if (codec_id == AV_CODEC_ID_H264) {
         uint8_t b = pVideo[2] == 1 ? pVideo[3] : pVideo[4];
         int nal_unit_type = b & 0x1f;
-        return (nal_unit_type == 6 || nal_unit_type == 7 || nal_unit_type == 8 || nal_unit_type == 9);
+        // Check for SEI, SPS, PPS, or AUD NAL units which indicate key frame start
+        return (nal_unit_type == H264_NAL_SEI || nal_unit_type == H264_NAL_SPS ||
+                nal_unit_type == H264_NAL_PPS || nal_unit_type == H264_NAL_AUD);
+    } else if (codec_id == AV_CODEC_ID_AV1) {
+        // AV1 uses OBU format - check for OBU_SEQUENCE_HEADER
+        uint8_t obu_header = pVideo[0];
+        int obu_type = (obu_header >> 3) & 0x0F;
+        return (obu_type == OBU_SEQUENCE_HEADER);
     } else {
         throw std::domain_error("[ERROR] Unsupported video codec: " + std::to_string(codec_id));
     }

@@ -19,10 +19,12 @@
 #include <condition_variable>
 #include <queue>
 #include <functional>
+#include <exception>
+#include <iostream>
 
 class ThreadRunner {
    public:
-    ThreadRunner() : stopFlag(false), busy(false), hasException(false) {
+    ThreadRunner() : stopFlag(false), busy(false), hasException(false), exceptionPtr(nullptr) {
         worker = std::thread([this]() { this->threadLoop(); });
     }
 
@@ -46,6 +48,7 @@ class ThreadRunner {
         stopFlag = other.stopFlag;
         busy = other.busy;
         hasException = other.hasException;
+        exceptionPtr = other.exceptionPtr;
         tasks = std::move(other.tasks);
     }
 
@@ -64,6 +67,7 @@ class ThreadRunner {
             stopFlag = other.stopFlag;
             busy = other.busy;
             hasException = other.hasException;
+            exceptionPtr = other.exceptionPtr;
             tasks = std::move(other.tasks);
         }
         return *this;
@@ -78,15 +82,32 @@ class ThreadRunner {
         cv.notify_one();
     }
 
+    /**
+     * @brief Wait for all tasks to complete and rethrow any captured exception.
+     * 
+     * If a task threw an exception, this method will rethrow the original exception
+     * with its full type and message information.
+     */
     void join() {
         std::unique_lock<std::mutex> lock(mtx);
         cvFinished.wait(lock, [this]() { return tasks.empty() && !busy; });
         if (hasException) {
             hasException = false;  // Reset for next use
-            throw std::runtime_error("Thread task failed with exception");
+            std::exception_ptr ptr = exceptionPtr;
+            exceptionPtr = nullptr;  // Reset for next use
+            if (ptr) {
+                std::rethrow_exception(ptr);  // Rethrow original exception with full info
+            }
+            throw std::runtime_error("Thread task failed with unknown exception");
         }
     }
 
+    /**
+     * @brief Force join by clearing pending tasks and waiting for current task.
+     * 
+     * This clears the task queue and waits for any running task to complete,
+     * then resets the exception state.
+     */
     void force_join() {
         std::unique_lock<std::mutex> lock(mtx);
         // Clear all pending tasks
@@ -97,6 +118,7 @@ class ThreadRunner {
         cvFinished.wait(lock, [this]() { return !busy; });
         // Reset exception state
         hasException = false;
+        exceptionPtr = nullptr;
     }
 
    private:
@@ -114,9 +136,15 @@ class ThreadRunner {
 
             try {
                 task();  // execute task
+            } catch (const std::exception& e) {
+                // Capture exception with full information for later rethrow
+                std::cerr << "[ThreadRunner] Exception caught: " << e.what() << std::endl;
+                exceptionPtr = std::current_exception();
+                hasException = true;
             } catch (...) {
-                // capture all exceptions, ensure status is reset correctly
-                // exceptions are silently handled to avoid thread crashes
+                // Capture unknown exception
+                std::cerr << "[ThreadRunner] Unknown exception caught" << std::endl;
+                exceptionPtr = std::current_exception();
                 hasException = true;
             }
 
@@ -136,4 +164,5 @@ class ThreadRunner {
     bool stopFlag;
     bool busy;
     bool hasException;
+    std::exception_ptr exceptionPtr;  // Store original exception for rethrow
 };

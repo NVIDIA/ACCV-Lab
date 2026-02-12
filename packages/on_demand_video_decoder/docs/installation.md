@@ -66,7 +66,7 @@ export FFMPEG_DIR=/PATH/TO/YOUR/FFMPEG
 
 ### Step 3: Build and Install
 ```bash
-cd packages/on_demand_video_decoder
+cd packages/on_demand_video_decoder  # ← Assuming you are in the root directory of the repository
 pip install . --no-build-isolation
 ```
 
@@ -112,3 +112,25 @@ nsys profile \
 - `--gpu-video-device all`: Profile all GPU video devices
 - `-x true`: Export results
 - `-o`: Output file prefix
+
+## Distributing
+
+To build a distributable wheel package, ensure you have completed **Step 1/2** first.
+
+### Build Wheel
+
+Set the target CUDA architectures for broader GPU compatibility:
+
+```bash
+export CUSTOM_CUDA_ARCHS="60,70,75,80,86,89"
+cd packages/on_demand_video_decoder  # ← Assuming you are in the root directory of the repository
+python3 -m pip wheel . -w ./ --no-build-isolation
+```
+
+### Alternative: Using uv
+
+If you prefer using [uv](https://github.com/astral-sh/uv) as your package manager:
+
+```bash
+uv build --no-build-isolation --out-dir ./
+```

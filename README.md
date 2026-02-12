@@ -4,6 +4,16 @@ Accelerated Computer Vision Lab (ACCV-Lab) is a systematic collection of package
 facilitate end-to-end efficient training in the ADAS domain, each package offering tools & best practices for 
 a specific aspect/task in this domain.
 
+## Resources
+
+The following resources provide an overview of the project and its capabilities:
+
+| Type | Title | Date | Link |
+|------|-------|------|------|
+| 📝 Blog | Accelerate Assisted Driving Training with NVIDIA ACCV-Lab Open-Source Toolkit | 2025-12 | [NVIDIA Tech Blog](https://developer.nvidia.cn/blog/accelerate-assisted-driving-training-with-nvidia-accv-lab-open-source-toolkit/) |
+| 🎬 Video | ADAS & Robotics - Overview of Data Loading and Model Training Acceleration Library 【CN】 | 2025-11-19 | [Bilibili](https://www.bilibili.com/video/BV14yyEB3E5B/) |
+| 🎬 Video | Video Training for ADAS and DALI-Based Image Preprocessing Pipeline 【EN】 | 2025-06-12 | [Bilibili](https://www.bilibili.com/video/BV1LMMwzNEnF/) |
+
 ## Contained Packages
 
 This section provides a brief overview of the contained packages & evaluations performed on them. Please also 

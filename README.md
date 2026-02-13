@@ -10,9 +10,10 @@ The following resources provide an overview of the project and its capabilities:
 
 | Type | Title | Date | Link |
 |------|-------|------|------|
-| 📝 Blog | Accelerate Assisted Driving Training with NVIDIA ACCV-Lab Open-Source Toolkit | 2025-12 | [NVIDIA Tech Blog](https://developer.nvidia.cn/blog/accelerate-assisted-driving-training-with-nvidia-accv-lab-open-source-toolkit/) |
-| 🎬 Video | ADAS & Robotics - Overview of Data Loading and Model Training Acceleration Library 【CN】 | 2025-11-19 | [Bilibili](https://www.bilibili.com/video/BV14yyEB3E5B/) |
-| 🎬 Video | Video Training for ADAS and DALI-Based Image Preprocessing Pipeline 【EN】 | 2025-06-12 | [Bilibili](https://www.bilibili.com/video/BV1LMMwzNEnF/) |
+| 📝 Blog | Accelerate Assisted Driving Training with NVIDIA ACCV-Lab Open-Source Toolkit 【CN】 | 2025-12-24 | [NVIDIA Tech Blog](https://developer.nvidia.cn/blog/accelerate-assisted-driving-training-with-nvidia-accv-lab-open-source-toolkit/) |
+| 🎬 Video | ADAS & Robotics - Overview of ACCV-Lab for Data Loading and Model Training Acceleration 【EN】 | 2025-11-19 | [Bilibili](https://www.bilibili.com/video/BV14yyEB3E5B/) |
+| 🎬 Video | Video Training for ADAS 【CN】 and DALI-Based Image Preprocessing Pipeline 【EN】 | 2025-06-12 | [Bilibili](https://www.bilibili.com/video/BV1LMMwzNEnF/) |
+| 🎬 Video | Batching Helpers: Optimizing Loss Computation 【EN】 | 2025-06-12 | [Bilibili](https://www.bilibili.com/video/BV1dKMwzvEQ5/) |
 
 ## Contained Packages
 

@@ -103,6 +103,7 @@ subtype
 iterables
 callables
 boolean
+booleans
 Gaussians
 resampling
 subclassing
@@ -182,3 +183,5 @@ args
 doesn
 literalinclude
 blockquote
+distributable
+posix

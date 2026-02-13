@@ -255,7 +255,7 @@ class CachedGopDecoder:
         """
         Extract per-video GOP data with optional caching support.
 
-        Unlike meth:`GetGOP` which returns merged data, this mehhod returns separate
+        Unlike meth:`GetGOP` which returns merged data, this method returns separate
         GOP data for each video, enabling more granular control and caching.
 
         When useGOPCache=True, this method:

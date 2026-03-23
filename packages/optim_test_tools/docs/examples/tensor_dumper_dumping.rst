@@ -2,8 +2,8 @@ Tensor Dumper – Extended Dumping Example
 ========================================
 
 This example demonstrates advanced features: custom converters, per‑tensor dump type/permute overrides, 
-:class:`RaggedBatch` handling, custom processing executed only when the dumper is enabled, and 
-early exit after a fixed number of dumps.
+:class:`~accvlab.batching_helpers.RaggedBatch` handling, custom processing executed only when the dumper is 
+enabled, and early exit after a fixed number of dumps.
 
 .. seealso::
 
@@ -21,19 +21,28 @@ Overview
 - Register custom converters for non‑tensor containers.
 - Use per‑tensor overrides (format, axis permutation, exclusion) within nested structures.
 - Dump gradients by registering tensors first and providing scalar losses to ``set_gradients([...])``.
-- RaggedBatch support: dump as per‑sample or as a structured :class:`RaggedBatch`.
+- RaggedBatch support: dump as per‑sample or as a structured :class:`~accvlab.batching_helpers.RaggedBatch`.
 - Run custom pre‑dump logic only when enabled via ``run_if_enabled``.
 
 Details
 -------
 
+.. important::
+
+   In this example, we do not divide the code into different parts which correspond to e.g. different source
+   files in the actual use case, to make the example more concise. However, as 
+   :class:`~accvlab.optim_test_tools.TensorDumper` is a singleton, this can be easily done in practice. 
+   Please see the :doc:`stopwatch` or the :doc:`nvtx_range_wrapper` for examples of how to do this. The same 
+   approach can be used with the :class:`~accvlab.optim_test_tools.TensorDumper`.
+
 Below, we walk through the example section by section. Notes in the code are highlighted.
 
-Create Synthetic Inputs Helpers
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Synthetic Inputs Generation Helpers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Here, we define a helper function to create some synthetic inputs to be dumped as well as a wrapper class for 
-demonstrating the custom converter functionality.
+First, helpers are defined to create dummy data which will be dumped in the example. Note that apart from 
+functions for image and bounding box data generation, a wrapper class is defined. That class is later used to
+showcase the custom converter functionality of the dumper.
 
 .. note-literalinclude:: ../../examples/tensor_dumper_dumping_example.py
    :language: python
@@ -46,7 +55,9 @@ demonstrating the custom converter functionality.
 Initialize and Configure the Dumper
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Here, we initialize and configure the dumper.
+Here, we initialize and configure the dumper. Note the use of 
+:meth:`~accvlab.optim_test_tools.TensorDumper.perform_after_dump_count` to exit the
+program after a fixed number of dumps. This can e.g. be useful during debugging to only dump a few iterations.
 
 .. note-literalinclude:: ../../examples/tensor_dumper_dumping_example.py
    :language: python
@@ -59,8 +70,11 @@ Here, we initialize and configure the dumper.
 Register Custom Converters
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Here, we register a custom converter for the ``TensorWrapper`` class (which is a simple wrapper used for 
-demonstrating the custom converter functionality).
+Here, we register a custom converter for the ``TensorWrapper`` class.
+
+The task of this converter is to convert the ``TensorWrapper`` object to a nested structure containing only
+values supported by the dumper (tensors, NumPy arrays, types for which other custom converters are 
+registered, or simple types which can written out as-is (e.g. strings)).
 
 .. note-literalinclude:: ../../examples/tensor_dumper_dumping_example.py
    :language: python
@@ -74,6 +88,7 @@ Main Loop
 ^^^^^^^^^
 
 Here, we loop over some iterations (e.g. training iterations) and dump the data (see following sections).
+Note that all the following sections are are inside the main loop.
 
 .. note-literalinclude:: ../../examples/tensor_dumper_dumping_example.py
    :language: python
@@ -86,7 +101,7 @@ Here, we loop over some iterations (e.g. training iterations) and dump the data 
 Create the Test Data
 ^^^^^^^^^^^^^^^^^^^^
 
-Here, we create some synthetic test data to be dumped.
+Generate some synthetic test data to be dumped.
 
 .. note-literalinclude:: ../../examples/tensor_dumper_dumping_example.py
    :language: python
@@ -99,7 +114,7 @@ Here, we create some synthetic test data to be dumped.
 Add Tensors
 ^^^^^^^^^^^
 
-Here, we add the tensors to be dumped.
+Add tensors to be dumped.
 
 .. note-literalinclude:: ../../examples/tensor_dumper_dumping_example.py
    :language: python
@@ -112,7 +127,8 @@ Here, we add the tensors to be dumped.
 Add Gradients
 ^^^^^^^^^^^^^
 
-Here, we add the gradients to be dumped.
+Gradients to be dumped. Note that here, tensors are added and the corresponding gradients are computed
+automatically based on output (loss) values later.
 
 .. note-literalinclude:: ../../examples/tensor_dumper_dumping_example.py
    :language: python
@@ -125,7 +141,8 @@ Here, we add the gradients to be dumped.
 Custom Processing Prior to Dumping
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Here, we run some custom processing prior to dumping to enable dumping of in a more accessible format.
+Run custom processing prior to dumping to enable dumping of in a more accessible format.
+Note that the processing is only executed if the dumper is enabled.
 
 .. note-literalinclude:: ../../examples/tensor_dumper_dumping_example.py
    :language: python
@@ -138,7 +155,7 @@ Here, we run some custom processing prior to dumping to enable dumping of in a m
 RaggedBatch Dumping
 ^^^^^^^^^^^^^^^^^^^
 
-Here, we dump the RaggedBatch data.
+Dump :class:`~accvlab.batching_helpers.RaggedBatch` data.
 
 .. note-literalinclude:: ../../examples/tensor_dumper_dumping_example.py
    :language: python
@@ -146,13 +163,38 @@ Here, we dump the RaggedBatch data.
    :linenos:
    :lineno-match:
    :start-at: # ---------------------------- RaggedBatch dumping ----------------------------
+   :end-before: # --------------------------------- Inner loop --------------------------------
+
+
+Use of Ranges for Disambiguation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Here, there is an inner loop where the same data is added to the dump in multiple iterations. To disambiguate
+the names of the data entries, ranges can be used to add context to the data entries path. In this example,
+a range containing the iteration index is used.
+
+.. note-literalinclude:: ../../examples/tensor_dumper_dumping_example.py
+   :language: python
+   :caption: packages/optim_test_tools/examples/tensor_dumper_dumping_example.py
+   :linenos:
+   :lineno-match:
+   :start-at: # --------------------------------- Inner loop --------------------------------
    :end-before: # ------------------- Placeholder for e.g. loss computation -------------------
 
-Placeholder for e.g. Loss Computation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Here, we place a placeholder for e.g. the loss computation to demonstrate how the gradients are computed
-automatically.
+Obtaining Gradients
+^^^^^^^^^^^^^^^^^^^
+
+Previously, we added tensors for which gradients are to be dumped (using 
+:meth:`~accvlab.optim_test_tools.TensorDumper.add_grad_data`).
+Here, we demonstrate how to obtain these gradients automatically based on output (e.g. loss) values.
+
+We use a placeholder for the loss computation (``summed_3`` and ``summed_5``).
+To obtain the gradients, the function :meth:`~accvlab.optim_test_tools.TensorDumper.set_gradients` is used. 
+This function takes a list of scalar (loss) tensors as input, and the gradients are computed from each of 
+these values and accumulated to obtain the final gradients. 
+Note that this computation is performed independently of the gradients computed elsewhere (e.g. in the 
+training loop). After calling this function, the gradients are ready to be dumped.
 
 .. note-literalinclude:: ../../examples/tensor_dumper_dumping_example.py
    :language: python
@@ -160,25 +202,12 @@ automatically.
    :linenos:
    :lineno-match:
    :start-at: # ------------------- Placeholder for e.g. loss computation -------------------
-   :end-before: # ----------------------------- Set the gradients -----------------------------
-
-Set the Gradients
-^^^^^^^^^^^^^^^^^
-
-Here, we set the gradients to be dumped.
-
-.. note-literalinclude:: ../../examples/tensor_dumper_dumping_example.py
-   :language: python
-   :caption: packages/optim_test_tools/examples/tensor_dumper_dumping_example.py
-   :linenos:
-   :lineno-match:
-   :start-at: # ----------------------------- Set the gradients -----------------------------
    :end-before: # ---------------------------------- Dump ----------------------------------
 
 Dump Data
 ^^^^^^^^^
 
-Finally, we dump the data. We invite the reader to run the example and inspect the dumped data.
+Finally, we dump the data.
 
 .. note-literalinclude:: ../../examples/tensor_dumper_dumping_example.py
    :language: python
@@ -186,6 +215,8 @@ Finally, we dump the data. We invite the reader to run the example and inspect t
    :linenos:
    :lineno-match:
    :start-at: # ---------------------------------- Dump ----------------------------------
+
+We invite the reader to run the example and inspect the dumped data.
 
 Related Examples
 ----------------

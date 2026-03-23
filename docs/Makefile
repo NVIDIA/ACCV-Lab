@@ -8,6 +8,13 @@ SPHINXBUILD  ?= sphinx-build
 SOURCEDIR     = .
 BUILDDIR      = _build
 
+MAKEFILE_DIR := $(patsubst %/,%,$(abspath $(dir $(lastword $(MAKEFILE_LIST)))))
+CURRENT_DIR  := $(patsubst %/,%,$(abspath $(CURDIR)))
+
+ifneq ($(CURRENT_DIR),$(MAKEFILE_DIR))
+$(error Please run make from $(MAKEFILE_DIR). Example: 'cd $(MAKEFILE_DIR) && make clean html' or 'make -C $(MAKEFILE_DIR) clean html')
+endif
+
 # Put it first so that "make" without argument is like "make help".
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
@@ -29,9 +36,10 @@ sync-readme:
 html: sync-readme generate
 	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-# Clean build directory and generated files
+# Clean build directory and generated files (full removal to avoid stale sidebar/toctree)
 clean:
 	@$(SPHINXBUILD) -M clean "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	rm -rf $(BUILDDIR)/
 	rm -rf api/generated/
 	rm -rf ../packages/*/docs/generated/
 

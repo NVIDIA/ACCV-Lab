@@ -2,6 +2,10 @@
 	path = packages/on_demand_video_decoder/ext_impl/external/NVTX
 	url = https://github.com/NVIDIA/NVTX.git
 
+[submodule "packages/optim_test_tools/ext_impl/external/NVTX"]
+	path = packages/optim_test_tools/ext_impl/external/NVTX
+	url = https://github.com/NVIDIA/NVTX.git
+
 [submodule "packages/on_demand_video_decoder/ext_impl/external/dlpack"]
 	path = packages/on_demand_video_decoder/ext_impl/external/dlpack
 	url = https://github.com/dmlc/dlpack.git

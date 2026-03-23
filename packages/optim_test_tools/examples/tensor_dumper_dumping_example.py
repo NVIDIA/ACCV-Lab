@@ -29,7 +29,12 @@ from accvlab.optim_test_tools import TensorDumper
 
 
 # ------------------------- Helper: Create synthetic inputs -------------------------
-# @NOTE: Create a test tensor representing an image with smooth gradients
+
+# @NOTE
+# Here, helper functions are defined to create dummy data which will be dumped. Additionally, a wrapper class
+# for demonstrating the custom converter functionality is defined.
+
+
 def create_simple_gradient_image(
     height: int = 256, width: int = 256, blue_channel_value: float = 0.5
 ) -> torch.Tensor:
@@ -50,6 +55,7 @@ def create_simple_gradient_image(
 
 
 def create_bboxes(num_bboxes: int, image_shape: tuple[int, int]) -> torch.Tensor:
+    """Create a tensor representing bounding boxes."""
     bboxes = []
     for _ in range(num_bboxes):
         x1 = torch.randint(0, image_shape[1], (1,))
@@ -69,17 +75,20 @@ class TensorWrapper:
 
 
 # ------------------- Initialize and configure the dumper -------------------
-# @NOTE: Get instance and enable the dumper. Configure early‑exit after a fixed number of dumps.
+# @NOTE: Get instance and enable the dumper.
 _current_dir = os.path.dirname(os.path.abspath(__file__))
 dumper = TensorDumper()
 dumper.enable(os.path.join(_current_dir, "test_dump"))
-# @NOTE: Exit the program after 3 dumps. Useful to capture only a few iterations without changing outer loops.
+# @NOTE: Configure early‑exit after 3 dumps. This can be useful to only dump a few iterations and exit,
+# without any code-changes for the exit functionality. Other functions can also be set up to be called after a
+# fixed number of dumps.
 dumper.perform_after_dump_count(3, exit)
 
 # ------------------------- Register custom converters -------------------------
 # @NOTE
 # Register a custom converter for `TensorWrapper`. Any tensors returned by the converter are treated
-# the same as tensors added directly via `add_tensor_data`.
+# the same as tensors added directly via `add_tensor_data`. Converters are applied recursively, i.e. if a
+# converter returns types for which other custom converters are registered, these are called in turn.
 dumper.register_custom_converter(
     TensorWrapper, lambda x: {"tensor": x.tensor, "some_addition_text": x.some_addition_text}
 )
@@ -141,9 +150,9 @@ for i in range(10):
     #    The custom handling is done by adding a custom extension to the dumper, which is then used to dump
     #    the object (the custom converter is registered above).
     # 3. `unneeded_data` is excluded from the dump.
-    #    This is useful to e.g. exclude data which is part of the structure, but either not needed in the dump,
-    #    or which will be added to the dump later via custom processing logic (see below for bounding box
-    #    images).
+    #    This is useful to e.g. exclude data which is part of the structure, but either not needed in the 
+    #    dump, or which will be added to the dump later via custom processing logic (see below for bounding 
+    #    box images).
     dumper.add_tensor_data(
         "images.other_images",
         {
@@ -232,21 +241,51 @@ for i in range(10):
     # @NOTE: Dump RaggedBatch structures both as per‑sample and as full RaggedBatch objects.
     ragged_batch_1 = RaggedBatch(torch.randn(3, 5), sample_sizes=torch.tensor([3, 5, 1]))
     ragged_batch_2 = RaggedBatch(torch.randn(3, 5), sample_sizes=torch.tensor([3, 5, 1]))
-    # @NOTE: Demonstrate toggling `as_per_sample` and prefer JSON for structured RaggedBatch content.
+    # @NOTE
+    # Toggling `as_per_sample` and dumping the data in the desired format (per-sample or as a RaggedBatch
+    # structure).
     dumper.enable_ragged_batch_dumping(as_per_sample=True)
     dumper.add_tensor_data("ragged_batches.batch_1", ragged_batch_1, TensorDumper.Type.JSON)
     dumper.enable_ragged_batch_dumping(as_per_sample=False)
     dumper.add_tensor_data("ragged_batches.batch_2", ragged_batch_2, TensorDumper.Type.JSON)
 
+    # --------------------------------- Inner loop --------------------------------
+    # @NOTE
+    # Here, the same data is added to the dump in multiple iterations. Care needs to be taked to disambiguate
+    # the names of the individual data entries. This can be conveniently done using ranges. Ranges will become
+    # part of the dump path, and the names of the data entries will be appended to the range name.
+    for inner_iteration in range(10):
+        # @NOTE
+        # The string formatting is performed inside a lambda function instead of passing the formatted string
+        # directly. `push_range` supports both strings and callables. If formatting is needed, a callable
+        # should be passed as it is called only if the dumper is enabled, avoiding unnecessary overhead for
+        # formatting if the dumper is not enabled.
+        dumper.push_range(lambda: f"inner_loop_{inner_iteration}")
+        dummy_tensor = torch.tensor(inner_iteration)
+        # @NOTE: While the path "dummy.tensor" remains the same, the range provides context and ensures
+        # that naming collisions are avoided. The range (or ranges) is added at the beginning of the path.
+        # For example, the json structure for `inner_iteration == 0` would be:
+        #   "inner_loop_0": {
+        #     "dummy": {
+        #       "tensor": 0
+        #   }
+        dumper.add_tensor_data("dummy.tensor", dummy_tensor, TensorDumper.Type.JSON)
+        dumper.pop_range()
+
     # ------------------- Placeholder for e.g. loss computation -------------------
-    # @NOTE: Dummy loss computation to demonstrate auto-computing & dumping of gradients.
+    # @NOTE
+    # Dummy loss computation to demonstrate auto-computing & dumping of gradients.
+    # In a real use case, a final loss value would be used instead of `summed_3` and `summer_5`.
+    # Although the final loss is one value, we use `summed_3` and `summed_5` to demonstrate that the
+    # gradients can also be computed for more than one output tensor.
     image_sin_3 = torch.sin(test_image_3 * 2.0 * np.pi * 3.0)
     image_sin_5 = torch.sin(test_image_5 * 2.0 * np.pi * 3.0)
     summed_3 = torch.sum(image_sin_3)
     summed_5 = torch.sum(image_sin_5)
 
     # ----------------------------- Set the gradients -----------------------------
-    # @NOTE: Provide scalar values from which gradients are computed for all tensors that require them.
+    # @NOTE
+    # Provide (scalar) loss tensors from which gradients are computed for all tensors that require them.
     dumper.set_gradients([summed_3, summed_5])
 
     # ---------------------------------- Dump ----------------------------------

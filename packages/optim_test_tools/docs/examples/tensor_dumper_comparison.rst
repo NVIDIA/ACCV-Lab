@@ -6,10 +6,6 @@ and compare a subsequent run against a stored reference. The :doc:`tensor_dumper
 more features (custom converters, per‑tensor overrides, RaggedBatch support, custom pre‑dump processing, 
 early exit).
 
-Note that the dumper is a singleton similar to the other tools (see :doc:`stopwatch` and 
-:doc:`nvtx_range_wrapper`). Therefore, it can be enabled once and used across multiple code parts.
-However, this is not the focus of this example.
-
 .. seealso::
     
     The code of this example can be found in the repository under 
@@ -21,10 +17,20 @@ Overview
 - Enable the dumper and choose dump location.
 - Dump data in one run; compare in a later run (or next loop iteration here for demonstration).
 - Override dump formats to JSON for comparison (comparison supports only JSON).
-- Gradients are auto-computed when you call ``set_gradients([...])`` with scalar losses.
+- Gradients are auto-computed when you call ``set_gradients([...])`` with scalar losses. These gradients are
+  only used for dumping/comparison and do not influence the gradients computed elsewhere (e.g. during 
+  training).
 
 Example
 -------
+
+.. important::
+
+   In this example, we do not divide the code into different parts which correspond to e.g. different source
+   files in the actual use case, to make the example more concise. However, as 
+   :class:`~accvlab.optim_test_tools.TensorDumper` is a singleton, this can be easily done in practice. 
+   Please see the :doc:`stopwatch` or the :doc:`nvtx_range_wrapper` for examples of how to do this. The same 
+   approach can be used with the :class:`~accvlab.optim_test_tools.TensorDumper`.
 
 Example Code
 ^^^^^^^^^^^^

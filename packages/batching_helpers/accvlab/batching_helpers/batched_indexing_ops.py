@@ -111,7 +111,7 @@ class BatchedInverseIndexingAccessNewTensor(torch.autograd.Function):
         if grad is None:
             return None, None, None, None, None
         else:
-            (output_indices, output_nums_indices) = ctx.saved_tensors
+            output_indices, output_nums_indices = ctx.saved_tensors
             grad = grad.contiguous()
             grad_input = batched_indexing_access_cuda.forward(grad, output_indices, output_nums_indices, 0.0)
             return grad_input, None, None, None, None
@@ -154,7 +154,7 @@ class BatchedInverseIndexingAccessInsert(torch.autograd.Function):
         if grad is None:
             return None, None, None, None
         else:
-            (output_indices, output_nums_indices) = ctx.saved_tensors
+            output_indices, output_nums_indices = ctx.saved_tensors
             grad = grad.contiguous()
             grad_for_to_insert = batched_indexing_access_cuda.forward(
                 grad, output_indices, output_nums_indices, 0.0

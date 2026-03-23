@@ -254,18 +254,18 @@ static void SavePacketBufferToFile(const uint8_t* packet_buffer, int nVideoBytes
  * Reference: ITU-T H.264 Table 7-1
  */
 enum H264NalUnitType {
-    H264_NAL_SLICE = 1,           // Coded slice of a non-IDR picture
-    H264_NAL_DPA = 2,             // Coded slice data partition A
-    H264_NAL_DPB = 3,             // Coded slice data partition B
-    H264_NAL_DPC = 4,             // Coded slice data partition C
-    H264_NAL_IDR_SLICE = 5,       // Coded slice of an IDR picture
-    H264_NAL_SEI = 6,             // Supplemental enhancement information
-    H264_NAL_SPS = 7,             // Sequence parameter set
-    H264_NAL_PPS = 8,             // Picture parameter set
-    H264_NAL_AUD = 9,             // Access unit delimiter
-    H264_NAL_END_SEQUENCE = 10,   // End of sequence
-    H264_NAL_END_STREAM = 11,     // End of stream
-    H264_NAL_FILLER_DATA = 12,    // Filler data
+    H264_NAL_SLICE = 1,          // Coded slice of a non-IDR picture
+    H264_NAL_DPA = 2,            // Coded slice data partition A
+    H264_NAL_DPB = 3,            // Coded slice data partition B
+    H264_NAL_DPC = 4,            // Coded slice data partition C
+    H264_NAL_IDR_SLICE = 5,      // Coded slice of an IDR picture
+    H264_NAL_SEI = 6,            // Supplemental enhancement information
+    H264_NAL_SPS = 7,            // Sequence parameter set
+    H264_NAL_PPS = 8,            // Picture parameter set
+    H264_NAL_AUD = 9,            // Access unit delimiter
+    H264_NAL_END_SEQUENCE = 10,  // End of sequence
+    H264_NAL_END_STREAM = 11,    // End of stream
+    H264_NAL_FILLER_DATA = 12,   // Filler data
 };
 
 /**
@@ -273,15 +273,15 @@ enum H264NalUnitType {
  * Reference: ITU-T H.265 Table 7-1
  */
 enum HevcNalUnitType {
-    HEVC_NAL_IDR_W_RADL = 19,     // IDR picture with RADL pictures
-    HEVC_NAL_IDR_N_LP = 20,       // IDR picture without leading pictures
-    HEVC_NAL_CRA_NUT = 21,        // Clean random access picture
-    HEVC_NAL_VPS = 32,            // Video parameter set
-    HEVC_NAL_SPS = 33,            // Sequence parameter set
-    HEVC_NAL_PPS = 34,            // Picture parameter set
-    HEVC_NAL_AUD = 35,            // Access unit delimiter
-    HEVC_NAL_PREFIX_SEI = 39,     // Prefix SEI message
-    HEVC_NAL_SUFFIX_SEI = 40,     // Suffix SEI message
+    HEVC_NAL_IDR_W_RADL = 19,  // IDR picture with RADL pictures
+    HEVC_NAL_IDR_N_LP = 20,    // IDR picture without leading pictures
+    HEVC_NAL_CRA_NUT = 21,     // Clean random access picture
+    HEVC_NAL_VPS = 32,         // Video parameter set
+    HEVC_NAL_SPS = 33,         // Sequence parameter set
+    HEVC_NAL_PPS = 34,         // Picture parameter set
+    HEVC_NAL_AUD = 35,         // Access unit delimiter
+    HEVC_NAL_PREFIX_SEI = 39,  // Prefix SEI message
+    HEVC_NAL_SUFFIX_SEI = 40,  // Suffix SEI message
 };
 
 /**
@@ -290,15 +290,15 @@ enum HevcNalUnitType {
  * Reference: AV1 Bitstream & Decoding Process Specification
  */
 enum AV1ObuType {
-    OBU_SEQUENCE_HEADER = 1,        // Sequence header, appears at key frames
-    OBU_TEMPORAL_DELIMITER = 2,     // Temporal delimiter
-    OBU_FRAME_HEADER = 3,           // Frame header
-    OBU_TILE_GROUP = 4,             // Tile group
-    OBU_METADATA = 5,               // Metadata
-    OBU_FRAME = 6,                  // Frame (combined frame header and tile group)
-    OBU_REDUNDANT_FRAME_HEADER = 7, // Redundant frame header
-    OBU_TILE_LIST = 8,              // Tile list
-    OBU_PADDING = 15,               // Padding
+    OBU_SEQUENCE_HEADER = 1,         // Sequence header, appears at key frames
+    OBU_TEMPORAL_DELIMITER = 2,      // Temporal delimiter
+    OBU_FRAME_HEADER = 3,            // Frame header
+    OBU_TILE_GROUP = 4,              // Tile group
+    OBU_METADATA = 5,                // Metadata
+    OBU_FRAME = 6,                   // Frame (combined frame header and tile group)
+    OBU_REDUNDANT_FRAME_HEADER = 7,  // Redundant frame header
+    OBU_TILE_LIST = 8,               // Tile list
+    OBU_PADDING = 15,                // Padding
 };
 
 /**
@@ -318,9 +318,8 @@ inline bool iskeyFrame(AVCodecID codec_id, const uint8_t* pVideo, int demux_flag
         uint8_t b = pVideo[2] == 1 ? pVideo[3] : pVideo[4];
         int nal_unit_type = b >> 1;
         // Check for VPS, SPS, PPS, or SEI NAL units which indicate key frame start
-        if (nal_unit_type == HEVC_NAL_VPS || nal_unit_type == HEVC_NAL_SPS ||
-            nal_unit_type == HEVC_NAL_PPS || nal_unit_type == HEVC_NAL_PREFIX_SEI ||
-            nal_unit_type == HEVC_NAL_SUFFIX_SEI) {
+        if (nal_unit_type == HEVC_NAL_VPS || nal_unit_type == HEVC_NAL_SPS || nal_unit_type == HEVC_NAL_PPS ||
+            nal_unit_type == HEVC_NAL_PREFIX_SEI || nal_unit_type == HEVC_NAL_SUFFIX_SEI) {
             bPS = true;
         }
     } else if (codec_id == AV_CODEC_ID_H264) {
@@ -328,8 +327,8 @@ inline bool iskeyFrame(AVCodecID codec_id, const uint8_t* pVideo, int demux_flag
         int nal_ref_idc = b >> 5;
         int nal_unit_type = b & 0x1f;
         // Check for SEI, SPS, PPS, or AUD NAL units which indicate key frame start
-        if (nal_unit_type == H264_NAL_SEI || nal_unit_type == H264_NAL_SPS ||
-            nal_unit_type == H264_NAL_PPS || nal_unit_type == H264_NAL_AUD) {
+        if (nal_unit_type == H264_NAL_SEI || nal_unit_type == H264_NAL_SPS || nal_unit_type == H264_NAL_PPS ||
+            nal_unit_type == H264_NAL_AUD) {
             bPS = true;
         }
     } else if (codec_id == AV_CODEC_ID_AV1) {

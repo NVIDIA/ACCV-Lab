@@ -18,8 +18,10 @@ from typing import Union, Sequence, Dict, Any, Callable, List, TYPE_CHECKING, Ty
 import json
 import numbers
 import math
+import importlib.util
 import warnings
 import copy
+import pickle
 
 import torch
 import numpy as np
@@ -114,23 +116,25 @@ class TensorDumper(SingletonBase):
         The format type determines how tensor data is serialized when dumped.
 
         Note:
-            For binary types (``BINARY``, ``IMAGE_RGB``, ``IMAGE_BGR``, ``IMAGE_I``), entries are added to the
-            main JSON file indicating the filenames of the stored data. Also, files containing meta-data are
-            created and stored in the same directory. For ``BINARY``, the meta-data is the shape and dtype of
-            the tensor. For ``IMAGE_*``, the meta-data is the original range of the image data (min and max
-            value) and the image format (RGB, BGR, Intensity).
+            For binary types except ``PICKLE`` (i.e. ``BINARY``, ``IMAGE_RGB``, ``IMAGE_BGR``, ``IMAGE_I``),
+            entries are added to the main JSON file indicating the filenames of the stored data. Also, files
+            containing meta-data are created and stored in the same directory. For ``BINARY``, the meta-data
+            is the shape and dtype of the tensor. For ``IMAGE_*``, the meta-data is the original range of the
+            image data (min and max value) and the image format (RGB, BGR, Intensity). For ``PICKLE``, no
+            meta-data is written as the pickled object is self-contained.
 
         Note:
-            For ``BINARY`` and ``IMAGE_*`` formats, entries are added to the main JSON file indicating the
-            filenames of the stored data. The filenames for these cases are:
+            For ``BINARY``, ``IMAGE_*`` and ``PICKLE`` formats, entries are added to the main JSON file
+            indicating the filenames of the stored data. The filenames for these cases are:
 
               - blob/image data: ``[<main_json_file_name>]<path_to_data_in_dumped_structure>.<file_type>``
-              - meta-data: ``[<main_json_file_name>]<path_to_data_in_dumped_structure>.<file_type>.meta.json``
+              - meta-data (if applicable):
+                ``[<main_json_file_name>]<path_to_data_in_dumped_structure>.<file_type>.meta.json``
 
         Note:
-            For images containing multiple channels, the color channel is the last dimension. If this is not
-            the case, permutation of the axes needs to be applied to move the color channel to the last
-            dimension. The permutation can be applied using the ``permute_axes`` parameter, e.g. of
+            For images containing multiple channels, the color channel is assumed to be the last dimension. If
+            this is not the case, permutation of the axes needs to be applied to move the color channel to the
+            last dimension. The permutation can be applied using the ``permute_axes`` parameter, e.g. of
             :meth:`add_tensor_data`.
 
             If a tensor contains more than the necessary number of dimensions (3 for color images,
@@ -154,6 +158,8 @@ class TensorDumper(SingletonBase):
         #: Tensor data converted to PNG image format (grayscale).
         #: Single channel; no explicit channel dimension.
         IMAGE_I = 4
+        #: Tensor data saved as pickle files.
+        PICKLE = 5
 
         @classmethod
         def is_image(cls, dump_type: 'TensorDumper.Type') -> bool:
@@ -165,10 +171,12 @@ class TensorDumper(SingletonBase):
             eps_numerical_data: float = 1e-6,
             num_errors_per_tensor_to_show: int = 1,
             allow_missing_data_in_current: bool = False,
+            allow_missing_data_in_previous: bool = False,
         ):
             self.eps_numerical_data = eps_numerical_data
             self.num_errors_per_tensor_to_show = num_errors_per_tensor_to_show
             self.allow_missing_data_in_current = allow_missing_data_in_current
+            self.allow_missing_data_in_previous = allow_missing_data_in_previous
 
     class _TensorWithFormat:
         def __init__(self, tensor: Any, dump_type: 'TensorDumper.Type', permute_axes: OptionalSequence):
@@ -200,15 +208,21 @@ class TensorDumper(SingletonBase):
     def __init__(self, *args, **kwargs):
         '''
         Args:
-            dump_dir: The directory to dump the data to. If provided, the dumper will be enabled automatically.
-                If not provided, the dumper will be disabled and can be enabled later by calling :meth:`enable`.
+            dump_dir: The directory to dump the data to. If provided, the dumper will be enabled
+                automatically. If not provided, the dumper will be disabled and can be enabled later by
+                calling :meth:`enable`.
         '''
         if not hasattr(self, '_initialized'):
-            try:
-                import accvlab.batching_helpers
-            except ImportError:
+            # Only import accvlab.batching_helpers if it is available. If it is not, show a warning about
+            # dumping of RaggedBatch data being not supported.
+            accvlab_spec = importlib.util.find_spec("accvlab")
+            batching_helpers_spec = None
+            if accvlab_spec is not None and accvlab_spec.submodule_search_locations is not None:
+                batching_helpers_spec = importlib.util.find_spec("accvlab.batching_helpers")
+            if batching_helpers_spec is None:
                 warnings.warn(
-                    "`accvlab.batching_helpers` is not available. Dumping of `RaggedBatch` data is not supported."
+                    "`accvlab.batching_helpers` is not available. Dumping of `RaggedBatch` data is not "
+                    "supported."
                 )
             self._initialized = True
             self._enabled = False
@@ -228,6 +242,7 @@ class TensorDumper(SingletonBase):
         if self._enabled:
             raise RuntimeError("`TensorDumper` is already enabled. Can only be enabled once.")
         self._dump_dir = dump_dir
+        self._range_stack = []
         self._dump_count = 0
         self._tensor_struct = {}
         self._grad_struct = {}
@@ -235,8 +250,16 @@ class TensorDumper(SingletonBase):
         self._enabled = True
         self._after_dump_count_actions = {}
         self._custom_converters = {np.ndarray: lambda x: torch.from_numpy(x)}
+        # If not None, this overrides *all* dump type settings (per-call dump_type and dump_type_override).
+        self._dump_type_for_all = None
+
+        self._dump_is_compare = False
+        self._dump_is_compare_params = None
 
         # Set the methods
+        self.set_dump_is_compare = self._set_dump_is_compare_enabled
+        self.push_range = self._push_range_enabled
+        self.pop_range = self._pop_range_enabled
         self.add_tensor_data = self._add_tensor_data_enabled
         self.add_grad_data = self._add_grad_data_enabled
         self.set_dump_type_for_all = self._set_dump_type_for_all_enabled
@@ -244,10 +267,72 @@ class TensorDumper(SingletonBase):
         self.compare_to_dumped_data = self._compare_to_dumped_data_enabled
         self.set_gradients = self._set_gradients_enabled
         self.reset_dump_count = self._reset_dump_count_enabled
+        self.set_dump_count = self._set_dump_count_enabled
         self.perform_after_dump_count = self._perform_after_dump_count_enabled
         self.register_custom_converter = self._register_custom_converter_enabled
         self.enable_ragged_batch_dumping = self._enable_ragged_batch_dumping_enabled
         self.run_if_enabled = self._run_if_enabled_enabled
+
+    def push_range(self, range_name: Union[str, Callable[[], str]]):
+        '''Push a range to the range stack.
+
+        Multiple ranges can be pushed and popped in a nested manner. The ranges will be prepended to the dump
+        path (see e.g. the ``path`` argument in :meth:`add_tensor_data`) in the order in which they were
+        pushed.
+
+        The ranges can be used to conveniently disambiguate the names of data entries where the same
+        name is used in multiple contexts (e.g. multiple iterations of a loop, function called from
+        multiple places, etc.).
+
+        Important:
+            To ensure that the formatting is performed only if the tensor dumper is enabled,
+            the range should not be formatted when passing the argument. Instead, the formatting happens
+            inside the method, and the additional arguments (``args``) are used to format the range name.
+
+        Args:
+            range_name: The name of the range to push.
+            *args: Additional arguments to format the range name. If not provided, the range name is used
+                as is.
+        '''
+        pass
+
+    def pop_range(self):
+        '''Pop the last range from the range stack.
+
+        Args:
+            range_name: The name of the range to pop.
+        '''
+        pass
+
+    def set_dump_is_compare(
+        self,
+        eps_numerical_data: float = 1e-6,
+        num_errors_per_tensor_to_show: int = 1,
+        allow_missing_data_in_current: bool = False,
+        allow_missing_data_in_previous: bool = False,
+        as_warning: bool = False,
+    ) -> bool:
+        '''Automatically replace calls to :meth:`dump` with calls to :meth:`compare_to_dumped_data`.
+
+        Note:
+            The parameters defined in this method will be forwarded to :meth:`compare_to_dumped_data`.
+            Note that ``compare_if_empty`` is not passed here. Instead, the value passed to :meth:`dump` is
+            used.
+
+        See Also:
+            Please see the documentation of :meth:`compare_to_dumped_data` for more details.
+
+        Args:
+            eps_numerical_data: The numerical tolerance for the comparison of numerical data.
+            num_errors_per_tensor_to_show: The number of most significant errors to show per tensor.
+            allow_missing_data_in_current: If ``True``, the comparison will not raise an error if the current data is missing
+                some keys which are present in the reference data.
+            allow_missing_data_in_previous: If ``True``, the comparison will not raise an error if the reference data is missing
+                some keys which are present in the current data.
+            as_warning: If ``True``, no error is raised in case of a mismatch and instead, a warning is printed.
+                If ``False``, an error is raised.
+        '''
+        pass
 
     @property
     def is_enabled(self) -> bool:
@@ -257,7 +342,7 @@ class TensorDumper(SingletonBase):
     def add_tensor_data(
         self,
         path: str,
-        data: TensorDataStructure,
+        data: Union[TensorDataStructure, Callable[[], TensorDataStructure]],
         dump_type: 'TensorDumper.Type',
         dump_type_override: OptionalTypeDict = None,
         permute_axes: OptionalSequence = None,
@@ -299,7 +384,7 @@ class TensorDumper(SingletonBase):
     def add_grad_data(
         self,
         path: str,
-        data: TensorDataStructure,
+        data: Union[TensorDataStructure, Callable[[], TensorDataStructure]],
         dump_type: 'TensorDumper.Type',
         dump_type_override: OptionalTypeDict = None,
         permute_grad_axes: OptionalSequence = None,
@@ -364,8 +449,18 @@ class TensorDumper(SingletonBase):
         # Empty method to minimize overhead if not enabled. Will be replaced when enabling.
         pass
 
-    def dump(self):
-        '''Dump the data to the dump directory.'''
+    def dump(self, dump_if_empty: bool = True):
+        '''Dump the data to the dump directory.
+
+        Note:
+            Setting ``dump_if_empty`` to ``False`` is useful to not count iterations where no data is dumped
+            as a separate iteration.
+
+        Args:
+            dump_if_empty: If ``True``, the data will be dumped even if it is empty.
+                If ``False``, the data will not be dumped if it is empty, and the dump count will not be
+                incremented.
+        '''
         # Empty method to minimize overhead if not enabled. Will be replaced when enabling.
         pass
 
@@ -374,7 +469,9 @@ class TensorDumper(SingletonBase):
         eps_numerical_data: float = 1e-6,
         num_errors_per_tensor_to_show: int = 1,
         allow_missing_data_in_current: bool = False,
+        allow_missing_data_in_previous: bool = False,
         as_warning: bool = False,
+        compare_if_empty: bool = True,
     ):
         '''Compare the data to previously dumped data.
 
@@ -389,19 +486,30 @@ class TensorDumper(SingletonBase):
             modifying multiple places in the code is to call :meth:`set_dump_type_for_all`
             when generating the reference data.
 
+        Important:
+            The `compare_if_empty` parameter needs to be consistent with the `dump_if_empty` parameter of
+            :meth:`dump` of the calls to :meth:`dump` which are used to dump the reference data to compare
+            to.
+
         Note:
-            The comparison can be set to allow missing data in the current data by setting ``allow_missing_data_in_current`` to ``True``.
-            This is e.g. useful if the current data is based on an implementation in progress, so that some of the data is not yet available.
-            In this case, the comparison will not raise an error if the current data is missing some data which is present in the reference data.
-            Instead, a warning will be printed.
+            The comparison can be set to allow missing keys in the current and/or reference data by setting
+            ``allow_missing_data_in_current`` and/or ``allow_missing_data_in_previous`` to ``True``.
+            This is e.g. useful if the current data is based on an implementation in progress, so that some
+            of the data is not yet available, or if the current run produces additional data which is not
+            needed for the comparison (and not present in the reference).
 
         Args:
             eps_numerical_data: The numerical tolerance for the comparison of numerical data.
             num_errors_per_tensor_to_show: The number of most significant errors to show per tensor.
-            allow_missing_data_in_current: If ``True``, the comparison will not raise an error if the current data is missing
-                some data which is present in the reference data.
-            as_warning: If ``True``, no error is raised in case of a mismatch and instead, a warning is printed.
-                If ``False``, an error is raised.
+            allow_missing_data_in_current: If ``True``, the comparison will not raise an error if the current
+                data is missing some keys which are present in the reference data.
+            allow_missing_data_in_previous: If ``True``, the comparison will not raise an error if the
+                reference data is missing some keys which are present in the current data.
+            as_warning: If ``True``, no error is raised in case of a mismatch and instead, a warning is
+                printed. If ``False``, an error is raised.
+            compare_if_empty: If ``True``, the comparison will be performed even if the current data is empty.
+                If ``False``, the comparison will not be performed if the current data is empty, and the dump
+                count will not be incremented.
         '''
         # Empty method to minimize overhead if not enabled. Will be replaced when enabling.
         pass
@@ -424,14 +532,32 @@ class TensorDumper(SingletonBase):
     def reset_dump_count(self):
         '''Reset the dump count.
 
-        Important:
-            Resetting the dump count means that:
+        This method can be used to reset the dump count to 0.
+        This is useful for debugging (e.g. when comparing to previously dumped data) to start from the first
+        dump.
 
-              - In case of dumping: the next dump will overwrite a previous dump (starting from the first dump).
-              - In case of comparing to previously dumped data: the next comparison will start from the first dump.
+        See Also:
 
-        This method is useful for debugging e.g. to rerun the same code multiple times to check for
-        determinism, while always comparing to the same dumped data.
+            This method is equivalent to calling :meth:`set_dump_count` with a value of 0. Please see
+            the documentation of :meth:`set_dump_count` for more details.
+
+        '''
+        # Empty method to minimize overhead if not enabled. Will be replaced when enabling.
+        pass
+
+    def set_dump_count(self, count: int):
+        '''Set the dump count.
+
+        This method can be used to set the dump count to a specific value.
+        This is useful for debugging (e.g. when comparing to previously dumped data) to jump to a specific
+        iteration.
+
+        Note:
+            If any actions are registered to be performed after a given number of dumps, they will be
+            triggered if the count corresponds to the number of dumps set.
+
+        Args:
+            count: The dump count to set.
         '''
         # Empty method to minimize overhead if not enabled. Will be replaced when enabling.
         pass
@@ -445,11 +571,11 @@ class TensorDumper(SingletonBase):
         been dumped (by passing the :func:`exit`-function as the action).
 
         Important:
-            If :meth:`reset_dump_count` is called, the dump count is reset to 0,
-            and the action will be performed after the ``count``-th dump after the reset.
-
-            Note that this also means that the action can be performed multiple times if
-            the dump count is reset after the action has been performed.
+            The action is performed after the dump count reaches the given ``count`` value.
+            If :meth:`set_dump_count` is called, the dump count is adjusted to a given value,
+            and this also influences when the action is performed. For example, if :meth:`set_dump_count` is
+            called with a value of 3 and an action is registered to be performed after 5 dumps, the action
+            will be performed after another 2 dumps.
 
         Important:
             This method can be called multiple times with the same count.
@@ -547,6 +673,9 @@ class TensorDumper(SingletonBase):
         once the TensorDumper is enabled, and the original (disabled) methods are
         replaced by the enabled variants.
         '''
+        cls._set_dump_is_compare_enabled.__doc__ = cls.set_dump_is_compare.__doc__
+        cls._push_range_enabled.__doc__ = cls.push_range.__doc__
+        cls._pop_range_enabled.__doc__ = cls.pop_range.__doc__
         cls._add_tensor_data_enabled.__doc__ = cls.add_tensor_data.__doc__
         cls._add_grad_data_enabled.__doc__ = cls.add_grad_data.__doc__
         cls._set_dump_type_for_all_enabled.__doc__ = cls.set_dump_type_for_all.__doc__
@@ -554,6 +683,7 @@ class TensorDumper(SingletonBase):
         cls._compare_to_dumped_data_enabled.__doc__ = cls.compare_to_dumped_data.__doc__
         cls._set_gradients_enabled.__doc__ = cls.set_gradients.__doc__
         cls._reset_dump_count_enabled.__doc__ = cls.reset_dump_count.__doc__
+        cls._set_dump_count_enabled.__doc__ = cls.set_dump_count.__doc__
         cls._perform_after_dump_count_enabled.__doc__ = cls.perform_after_dump_count.__doc__
         cls._register_custom_converter_enabled.__doc__ = cls.register_custom_converter.__doc__
         cls._enable_ragged_batch_dumping_enabled.__doc__ = cls.enable_ragged_batch_dumping.__doc__
@@ -561,10 +691,50 @@ class TensorDumper(SingletonBase):
 
     # ===== Enabled Variants of the Methods =====
 
+    def _set_dump_is_compare_enabled(
+        self,
+        eps_numerical_data: float = 1e-6,
+        num_errors_per_tensor_to_show: int = 1,
+        allow_missing_data_in_current: bool = False,
+        allow_missing_data_in_previous: bool = False,
+        as_warning: bool = False,
+    ):
+        '''TEMPORARY DOCSTRING
+        This is the enabled variant of the corresponding method (same name without leading `_` and training `_enabled`).
+        This docstring will be replaced with the docstring of the corresponding method when an instance is requested
+        for the first time.
+        '''
+        self._dump_is_compare = True
+        self._dump_is_compare_params = {
+            "eps_numerical_data": eps_numerical_data,
+            "num_errors_per_tensor_to_show": num_errors_per_tensor_to_show,
+            "allow_missing_data_in_current": allow_missing_data_in_current,
+            "allow_missing_data_in_previous": allow_missing_data_in_previous,
+            "as_warning": as_warning,
+        }
+
+    def _push_range_enabled(self, range_name: Union[str, Callable[[], str]]):
+        '''TEMPORARY DOCSTRING
+        This is the enabled variant of the corresponding method (same name without leading `_` and training `_enabled`).
+        This docstring will be replaced with the docstring of the corresponding method when an instance is requested
+        for the first time.
+        '''
+        if callable(range_name):
+            range_name = range_name()
+        self._range_stack.append(range_name)
+
+    def _pop_range_enabled(self):
+        '''TEMPORARY DOCSTRING
+        This is the enabled variant of the corresponding method (same name without leading `_` and training `_enabled`).
+        This docstring will be replaced with the docstring of the corresponding method when an instance is requested
+        for the first time.
+        '''
+        self._range_stack.pop()
+
     def _add_tensor_data_enabled(
         self,
         path: str,
-        data: TensorDataStructure,
+        data: Union[TensorDataStructure, Callable[[], TensorDataStructure]],
         dump_type: 'TensorDumper.Type',
         dump_type_override: OptionalTypeDict = None,
         permute_axes: OptionalSequence = None,
@@ -576,10 +746,18 @@ class TensorDumper(SingletonBase):
         This docstring will be replaced with the docstring of the corresponding method when an instance is requested
         for the first time.
         '''
+        if len(self._range_stack) > 0:
+            path = ".".join(self._range_stack) + "." + path
+        if callable(data):
+            data = data()
         if exclude is not None:
             data = TensorDumper._exclude_elements(data, exclude)
         if len(self._custom_converters) > 0:
             data = TensorDumper._get_with_custom_converters_applied(data, self._custom_converters)
+        # If the global dump type is set, it overrides everything else.
+        if self._dump_type_for_all is not None:
+            dump_type = self._dump_type_for_all
+            dump_type_override = None
         data_with_format = TensorDumper._format_data_elements(
             data, dump_type, dump_type_override, permute_axes, permute_axes_override
         )
@@ -588,7 +766,7 @@ class TensorDumper(SingletonBase):
     def _add_grad_data_enabled(
         self,
         path: str,
-        data: TensorDataStructure,
+        data: Union[TensorDataStructure, Callable[[], TensorDataStructure]],
         dump_type: 'TensorDumper.Type',
         dump_type_override: OptionalTypeDict = None,
         permute_grad_axes: OptionalSequence = None,
@@ -600,10 +778,18 @@ class TensorDumper(SingletonBase):
         This docstring will be replaced with the docstring of the corresponding method when an instance is requested
         for the first time.
         '''
+        if len(self._range_stack) > 0:
+            path = ".".join(self._range_stack) + "." + path
+        if callable(data):
+            data = data()
         if exclude is not None:
             data = TensorDumper._exclude_elements(data, exclude)
         if len(self._custom_converters) > 0:
             data = TensorDumper._get_with_custom_converters_applied(data, self._custom_converters)
+        # If the global dump type is set, it overrides everything else.
+        if self._dump_type_for_all is not None:
+            dump_type = self._dump_type_for_all
+            dump_type_override = None
         for_grads_with_format = TensorDumper._format_data_elements(
             data, dump_type, dump_type_override, permute_grad_axes, permute_grad_axes_override
         )
@@ -618,7 +804,10 @@ class TensorDumper(SingletonBase):
         This docstring will be replaced with the docstring of the corresponding method when an instance is requested
         for the first time.
         '''
+        # Store the global dump type for the future
+        self._dump_type_for_all = dump_type
 
+        # Apply the dump type to the already set data.
         def set_dump_type(data: TensorDumper._TensorWithFormat) -> TensorDumper._TensorWithFormat:
             data.dump_type = dump_type
             return data
@@ -632,12 +821,26 @@ class TensorDumper(SingletonBase):
                 self._grad_struct, TensorDumper._TensorWithFormat, set_dump_type
             )
 
-    def _dump_enabled(self):
+    def _dump_enabled(self, dump_if_empty: bool = True):
         '''TEMPORARY DOCSTRING
         This is the enabled variant of the corresponding method (same name without leading `_` and training `_enabled`).
         This docstring will be replaced with the docstring of the corresponding method when an instance is requested
         for the first time.
         '''
+
+        if self._dump_is_compare:
+            return self.compare_to_dumped_data(
+                eps_numerical_data=self._dump_is_compare_params["eps_numerical_data"],
+                num_errors_per_tensor_to_show=self._dump_is_compare_params["num_errors_per_tensor_to_show"],
+                allow_missing_data_in_current=self._dump_is_compare_params["allow_missing_data_in_current"],
+                as_warning=self._dump_is_compare_params["as_warning"],
+                compare_if_empty=dump_if_empty,
+            )
+
+        # If dumping is disabled for empty dumps, return early (and don't increment the dump count).
+        if not dump_if_empty and len(self._tensor_struct) == 0 and len(self._grad_struct) == 0:
+            return
+
         self._dump_struct(self._tensor_struct, "tensors")
         if len(self._grad_struct) > 0:
             if not self._grad_computed:
@@ -657,53 +860,66 @@ class TensorDumper(SingletonBase):
         eps_numerical_data: float = 1e-6,
         num_errors_per_tensor_to_show: int = 1,
         allow_missing_data_in_current: bool = False,
+        allow_missing_data_in_previous: bool = False,
         as_warning: bool = False,
+        compare_if_empty: bool = True,
     ):
         '''TEMPORARY DOCSTRING
         This is the enabled variant of the corresponding method (same name without leading `_` and training `_enabled`).
         This docstring will be replaced with the docstring of the corresponding method when an instance is requested
         for the first time.
         '''
-        # Create config from parameters
-        config = TensorDumper._ComparisonConfig(
-            eps_numerical_data=eps_numerical_data,
-            num_errors_per_tensor_to_show=num_errors_per_tensor_to_show,
-            allow_missing_data_in_current=allow_missing_data_in_current,
-        )
+        # If comparison is disabled for empty data and the current data is empty, return early (and don't
+        # increment the dump count).
+        if not compare_if_empty and len(self._tensor_struct) == 0 and len(self._grad_struct) == 0:
+            return
+        try:
+            # Create config from parameters
+            config = TensorDumper._ComparisonConfig(
+                eps_numerical_data=eps_numerical_data,
+                num_errors_per_tensor_to_show=num_errors_per_tensor_to_show,
+                allow_missing_data_in_current=allow_missing_data_in_current,
+                allow_missing_data_in_previous=allow_missing_data_in_previous,
+            )
 
-        is_tensor_data_consistent = self._compare_to_dumped_data(
-            self._tensor_struct,
-            "tensors",
-            config,
-            as_warning,
-        )
-        has_grad_data = len(self._grad_struct) > 0
-        if has_grad_data:
-            if not self._grad_computed:
-                raise ValueError(
-                    "Gradients were not computed. Call `set_gradients` before comparing to previously dumped data."
-                )
-            is_grad_data_consistent = self._compare_to_dumped_data(
-                self._grad_struct,
-                "grads",
+            is_tensor_data_consistent = self._compare_to_dumped_data(
+                self._tensor_struct,
+                "tensors",
                 config,
                 as_warning,
             )
-        else:
-            is_grad_data_consistent = True
-        if is_tensor_data_consistent:
-            print(
-                f"`TensorDumper:` Tensor data is consistent with previously dumped data for dump {self._dump_count}."
-            )
-        if has_grad_data and is_grad_data_consistent:
-            print(
-                f"`TensorDumper:` Grad data is consistent with previously dumped data for dump {self._dump_count}."
-            )
-
-        self._tensor_struct = {}
-        self._grad_struct = {}
-        self._grad_computed = False
-        self._dump_count += 1
+            has_grad_data = len(self._grad_struct) > 0
+            if has_grad_data:
+                if not self._grad_computed:
+                    raise ValueError(
+                        "Gradients were not computed. Call `set_gradients` before comparing to previously dumped data."
+                    )
+                is_grad_data_consistent = self._compare_to_dumped_data(
+                    self._grad_struct,
+                    "grads",
+                    config,
+                    as_warning,
+                )
+            else:
+                is_grad_data_consistent = True
+            if is_tensor_data_consistent:
+                print(
+                    f"`TensorDumper:` Tensor data is consistent with previously dumped data for dump {self._dump_count}."
+                )
+            if has_grad_data and is_grad_data_consistent:
+                print(
+                    f"`TensorDumper:` Grad data is consistent with previously dumped data for dump {self._dump_count}."
+                )
+        finally:
+            # Keep compare and dump interchangeable:
+            # - always clear buffered data, even if comparison raises
+            # - always advance dump_count to stay in sync with a `dump()`-based run loop
+            self._tensor_struct = {}
+            self._grad_struct = {}
+            self._grad_computed = False
+            self._dump_count += 1
+            if self._dump_count in self._after_dump_count_actions:
+                self._after_dump_count_actions[self._dump_count]()
 
     def _set_gradients_enabled(self, function_values: Union[torch.Tensor, List[torch.Tensor]]):
         '''TEMPORARY DOCSTRING
@@ -720,7 +936,17 @@ class TensorDumper(SingletonBase):
         This docstring will be replaced with the docstring of the corresponding method when an instance is requested
         for the first time.
         '''
-        self._dump_count = 0
+        self.set_dump_count(0)
+
+    def _set_dump_count_enabled(self, count: int):
+        '''TEMPORARY DOCSTRING
+        This is the enabled variant of the corresponding method (same name without leading `_` and training `_enabled`).
+        This docstring will be replaced with the docstring of the corresponding method when an instance is requested
+        for the first time.
+        '''
+        self._dump_count = count
+        if self._dump_count in self._after_dump_count_actions:
+            self._after_dump_count_actions[self._dump_count]()
 
     def _perform_after_dump_count_enabled(self, count: int, action: Callable):
         '''TEMPORARY DOCSTRING
@@ -908,7 +1134,8 @@ class TensorDumper(SingletonBase):
         return struct_with_tensors
 
     def _get_dump_dir(self) -> str:
-        return f"{self._dump_dir}/{self._dump_count}"
+        res = f"{self._dump_dir}/{self._dump_count}"
+        return res
 
     def _get_json_filename(self, type_of_struct: str) -> str:
         return f"{type_of_struct}.json"
@@ -934,6 +1161,8 @@ class TensorDumper(SingletonBase):
                 TensorDumper._dump_image(
                     f"{dump_dir}/[{json_file_name}]{file_name}", file_data["data"], dump_type
                 )
+            elif dump_type == TensorDumper.Type.PICKLE:
+                TensorDumper._dump_pickle(f"{dump_dir}/[{json_file_name}]{file_name}", file_data["data"])
             else:
                 raise ValueError(f"Unsupported file type: {file_name}")
 
@@ -979,12 +1208,14 @@ class TensorDumper(SingletonBase):
             is_self_tensor = non_tensor_struct is None
             for key in dumped_data.keys():
                 if not key in json_struct_to_compare:
-                    res.append(
-                        ComparisonError(
-                            f"  Missing key '{key}' at path: {get_path_to_show(curr_path)} in dumped reference",
-                            math.inf,
+                    if not config.allow_missing_data_in_current:
+                        res.append(
+                            ComparisonError(
+                                f"  Missing key '{key}' at path: {get_path_to_show(curr_path)} in current "
+                                f"data but present in reference",
+                                math.inf,
+                            )
                         )
-                    )
                     continue
                 is_child_tensor = is_self_tensor or not key in non_tensor_struct
                 non_tensor_struct_child = non_tensor_struct[key] if not is_child_tensor else None
@@ -1000,12 +1231,13 @@ class TensorDumper(SingletonBase):
                     r = order_errors_by_weight(r)
                     r = r[: config.num_errors_per_tensor_to_show] if len(r) > 0 else []
                 res.extend(r)
-            if not config.allow_missing_data_in_current:
+            if not config.allow_missing_data_in_previous:
                 for key in json_struct_to_compare.keys():
                     if not key in dumped_data:
                         res.append(
                             ComparisonError(
-                                f"  Extra key '{key}' at path: {get_path_to_show(curr_path)} in dumped reference",
+                                f"  Extra key '{key}' at path: {get_path_to_show(curr_path)} in current "
+                                f"data but not present in reference",
                                 math.inf,
                             )
                         )
@@ -1016,7 +1248,8 @@ class TensorDumper(SingletonBase):
             if len(dumped_data) != len(json_struct_to_compare):
                 res.append(
                     ComparisonError(
-                        f"  Length mismatch at path: {get_path_to_show(curr_path)}\n    Dumped data: {dumped_data}\n    Struct to compare: {json_struct_to_compare}",
+                        f"  Length mismatch at path: {get_path_to_show(curr_path)}\n"
+                        f"    Dumped data: {dumped_data}\n    Struct to compare: {json_struct_to_compare}",
                         math.inf,
                     )
                 )
@@ -1042,7 +1275,9 @@ class TensorDumper(SingletonBase):
                 difference = abs(json_struct_to_compare - dumped_data)
                 return [
                     ComparisonError(
-                        f"  Numerical mismatch at path: {get_path_to_show(curr_path)}\n    Dumped data: {dumped_data}\n    Struct to compare: {json_struct_to_compare}\n    Difference (current - dumped): {json_struct_to_compare - dumped_data}",
+                        f"  Numerical mismatch at path: {get_path_to_show(curr_path)}\n"
+                        f"    Dumped data: {dumped_data}\n    Struct to compare: {json_struct_to_compare}\n"
+                        f"    Difference (current - dumped): {json_struct_to_compare - dumped_data}",
                         difference,
                     )
                 ]
@@ -1052,7 +1287,8 @@ class TensorDumper(SingletonBase):
             if dumped_data != json_struct_to_compare:
                 return [
                     ComparisonError(
-                        f"  Mismatch at path: {get_path_to_show(curr_path)}\n    Dumped data: {dumped_data}\n    Struct to compare: {json_struct_to_compare}",
+                        f"  Mismatch at path: {get_path_to_show(curr_path)}\n    Dumped data: {dumped_data}\n"
+                        f"    Struct to compare: {json_struct_to_compare}",
                         0.0,
                     )
                 ]
@@ -1076,7 +1312,9 @@ class TensorDumper(SingletonBase):
             first_file_split_at_extension = first_file.rsplit(".", 1)
             first_file_no_extension, extension = first_file_split_at_extension
             raise ValueError(
-                f"Cannot compare to dumped data with binary or image format.\nFound image or binary format at: {first_file_no_extension}\nwith format: {extension}\nPlease use the JSON format when dumping the data for comparison."
+                f"Cannot compare to dumped data with binary or image format.\nFound image or binary format "
+                f"at: {first_file_no_extension}\nwith format: {extension}\nPlease use the JSON format when "
+                f"dumping the data for comparison."
             )
 
         json_file_name = self._get_json_filename(type_of_struct)
@@ -1086,7 +1324,9 @@ class TensorDumper(SingletonBase):
                 dumped_data = json.load(f)
         except FileNotFoundError:
             raise FileNotFoundError(
-                f"No previously dumped data found for [{type_of_struct}] data for dump {self._dump_count}\nunder file path: {json_file_path}.\nDump the data first before comparing to previously dumped data."
+                f"No previously dumped data found for [{type_of_struct}] data for dump {self._dump_count}\n"
+                f"under file path: {json_file_path}.\nDump the data first before comparing to previously "
+                f"dumped data."
             )
 
         res_errors = self._walk_and_compare(
@@ -1100,11 +1340,15 @@ class TensorDumper(SingletonBase):
         if len(res_errors) > 0:
             error_message = "\n".join([error.message for error in res_errors])
             error_message = (
-                f"NOTE: The following errors were found for the dumped [{type_of_struct}] data for dump {self._dump_count}.\n"
-                f"      Up to {config.num_errors_per_tensor_to_show} most significant errors are shown per tensor.\n"
-                + error_message
+                f"NOTE: The following errors were found for the dumped [{type_of_struct}] data for dump "
+                f"{self._dump_count}.\n"
+                f"      Up to {config.num_errors_per_tensor_to_show} most significant errors are shown per "
+                f"tensor.\n" + error_message
             )
-            error_message = f"Comparison of data with previously dumped data failed for [{type_of_struct}] data for dump {self._dump_count}.\n{error_message}"
+            error_message = (
+                f"Comparison of data with previously dumped data failed for [{type_of_struct}] data for dump "
+                f"{self._dump_count}.\n{error_message}"
+            )
             if as_warning:
                 warnings.warn(error_message)
             else:
@@ -1137,7 +1381,8 @@ class TensorDumper(SingletonBase):
             raise ImportError(
                 "OpenCV (cv2) is not installed, but is required for dumping images via TensorDumper.\n"
                 "Please install the ACCV-Lab packages with optional dependencies enabled. "
-                "For details, see the Installation Guide (section on installation with optional dependencies)."
+                "For details, see the Installation Guide (section on installation with optional "
+                "dependencies)."
             ) from exc
 
         def ensure_image_range_ang_get_orig_range(image: torch.Tensor) -> tuple[torch.Tensor, List[float]]:
@@ -1151,10 +1396,14 @@ class TensorDumper(SingletonBase):
 
         assert (dump_type == TensorDumper.Type.IMAGE_I and file_data.ndim == 2) or (
             dump_type != TensorDumper.Type.IMAGE_I and file_data.ndim == 3
-        ), f"Number of image dimensions does not match the dump type for file:\n{file_name}.\nImage data has {file_data.ndim} dimensions; dump type is {dump_type}."
-        assert (
-            dump_type == TensorDumper.Type.IMAGE_I or file_data.shape[-1] == 3
-        ), f"Color image must have 3 channels, but image to be dumped to:\n{file_name}\nhas {file_data.shape[-1]} channels."
+        ), (
+            f"Number of image dimensions does not match the dump type for file:\n{file_name}.\nImage data "
+            f"has {file_data.ndim} dimensions; dump type is {dump_type}."
+        )
+        assert dump_type == TensorDumper.Type.IMAGE_I or file_data.shape[-1] == 3, (
+            f"Color image must have 3 channels, but image to be dumped to:\n{file_name}\nhas "
+            f"{file_data.shape[-1]} channels."
+        )
 
         file_data, orig_range = ensure_image_range_ang_get_orig_range(file_data)
         file_data = file_data.detach().cpu().contiguous().numpy().astype(np.uint8)
@@ -1181,6 +1430,11 @@ class TensorDumper(SingletonBase):
             json.dump(
                 file_meta_info, open(f"{file_name}.meta.json", "w"), cls=TensorDumper._CustomEncoder, indent=2
             )
+
+    @staticmethod
+    def _dump_pickle(file_name: str, file_data: Any):
+        with open(file_name, "wb") as f:
+            pickle.dump(file_data, f)
 
     @staticmethod
     def _ensure_dir_exists(dir_name: str):
@@ -1266,7 +1520,8 @@ class TensorDumper(SingletonBase):
                 data, torch.Tensor, lambda x: TensorDumper._TensorWithFormat(x, dump_type, permute_axes)
             )
             return data
-        # If dump type overrides are provided, we need to traverse the data and apply the overrides to the tensors
+        # If dump type overrides are provided, we need to traverse the data and apply the overrides to the
+        # tensors
         elif dump_type_override is not None:
             data = TensorDumper._traverse_remember_waypoints_and_apply(
                 data,
@@ -1329,6 +1584,9 @@ class TensorDumper(SingletonBase):
                 res_files = {res_data: {"data": tensor, "dump_type": data.dump_type}}
             elif TensorDumper.Type.is_image(data.dump_type):
                 res_data = f"{path}.png"
+                res_files = {res_data: {"data": tensor, "dump_type": data.dump_type}}
+            elif data.dump_type == TensorDumper.Type.PICKLE:
+                res_data = f"{path}.pkl"
                 res_files = {res_data: {"data": tensor, "dump_type": data.dump_type}}
             else:
                 raise ValueError(f"Unsupported dump type: {data.dump_type}")
@@ -1414,16 +1672,18 @@ class TensorDumper(SingletonBase):
         # If we are inserting a dictionary, we can insert into non-empty or empty dicts
         if isinstance(value, Dict):
             for key in value.keys():
-                assert (
-                    key not in curr_data
-                ), f"Path `{path}` has an existing element with key `{key}`. Cannot insert element from `value` with the same key."
+                assert key not in curr_data, (
+                    f"Path `{path}` has an existing element with key `{key}`. Cannot insert element from "
+                    f"`value` with the same key."
+                )
                 curr_data[key] = value[key]
         # If we are inserting a tensor or a sequence, we can only insert into an empty dict
         elif isinstance(value, (TensorDumper._TensorWithFormat, Sequence)):
             assert parent is not None, f"Can only insert dictionaries at the root level."
-            assert (
-                len(curr_data) == 0
-            ), f"Path part `{path}` points to an existing non-empty dictionary. Cannot insert tensors or sequences as this would overwrite the existing elements."
+            assert len(curr_data) == 0, (
+                f"Path part `{path}` points to an existing non-empty dictionary. Cannot insert tensors or "
+                "sequences as this would overwrite the existing elements."
+            )
             parent[path_parts[-1]] = value
         else:
             raise ValueError(f"Unsupported data type: {type(value)}")

@@ -40,8 +40,9 @@ allow_missing_data_in_current = False
 
 # @NOTE
 # Here, we dump tensor in iteration 0 and compare to the dumped data in iteration 1.
-# In a typical use-case, one would dump the data in one run, store it, and then compare in future runs,
-# while e.g. working on optimizations, to ensure that the optimizations do not introduce errors in the data.
+# In a typical use-case, one would dump the data in one run, and then compare to the dumped data in subsequent
+# runs, while e.g. working on optimizations, to ensure that the optimizations do not introduce errors (which
+# would lead to a mismatch in the dumped data).
 for i in range(2):
     # @NOTE: Generate data to dump/compare to
     if not make_tensor_data_inconsistent:
@@ -82,8 +83,9 @@ for i in range(2):
     # reference data. However, as we set some of the data to be in BINARY format, we need to override this to
     # use the comparison functionality.
     #
-    # In practice, this may be useful to switch between dumping the data for manual inspection (original
-    # formats) or comparison (all JSON).
+    # In practice, this may be useful to switch between dumping the data for manual inspection (originally
+    # selected formats) or the automatic comparison functionality used in this example (all data in JSON
+    # format).
     dumper.set_dump_type_for_all(TensorDumper.Type.JSON)
 
     # @NOTE

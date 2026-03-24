@@ -25,6 +25,7 @@ NAMESPACE_PACKAGES = [
     # 'accvlab.example_skbuild_package',
     'accvlab.on_demand_video_decoder',
     'accvlab.batching_helpers',
+    'accvlab.multi_tensor_copier',
     'accvlab.dali_pipeline_framework',
     'accvlab.draw_heatmap',
     'accvlab.optim_test_tools',

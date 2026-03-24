@@ -72,6 +72,7 @@ photometric
 randomization
 rtype
 dtype
+dtypes
 uint
 functor
 prefetch
@@ -185,6 +186,12 @@ literalinclude
 blockquote
 distributable
 posix
+destructor
+parallelly
+dicts
+enqueue
+enqueued
 JIT
 prepend
 prepended
+profiler

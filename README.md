@@ -21,7 +21,7 @@ This section provides a brief overview of the contained packages & evaluations p
 see the `CONTAINED PACKAGES` section in the documentation for a more detailed description of the packages, 
 their functionality and usage, as well as the API reference for each package and examples demonstrating the 
 usage of the packages. Evaluation results are also provided for some of the packages (On-Demand Video Decoder, 
-Batching Helpers, DALI Pipeline Framework).
+Batching Helpers, Multi-Tensor Copier, DALI Pipeline Framework).
 
 > **ℹ️ Note**: We are planning to add demos for packages contained in ACCV-Lab in the future. Apart from 
 > acting as tutorials show-casing real-world examples, they will include the implementation of the experiments 
@@ -34,6 +34,10 @@ The contained packages are:
   training.
 - **Batching Helpers**: Facilitates easy-to-implement batching for non‑uniform sample sizes, a common issue in 
   loss computation in the ADAS domain.
+- **Multi-Tensor Copier**: Efficient copying of tensors in nested structures (lists, tuples, dicts) from 
+  CPU to GPU. Automatically finds all tensors in the structure, asynchronously applies pinned memory staging, 
+  packs small tensors into a single transfer, and performs other optimizations to significantly reduce the 
+  overhead of copying many small, variable-size tensors e.g. typical in ADAS training meta-data.
 - **DALI Pipeline Framework**: Framework on top of 
   [NVIDIA DALI](https://docs.nvidia.com/deeplearning/dali/user-guide/docs/) that simplifies creation of 
   pipelines for typical ADAS use‑cases and enables integration into existing training implementations with 

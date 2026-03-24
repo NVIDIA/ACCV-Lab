@@ -150,8 +150,8 @@ for i in range(10):
     #    The custom handling is done by adding a custom extension to the dumper, which is then used to dump
     #    the object (the custom converter is registered above).
     # 3. `unneeded_data` is excluded from the dump.
-    #    This is useful to e.g. exclude data which is part of the structure, but either not needed in the 
-    #    dump, or which will be added to the dump later via custom processing logic (see below for bounding 
+    #    This is useful to e.g. exclude data which is part of the structure, but either not needed in the
+    #    dump, or which will be added to the dump later via custom processing logic (see below for bounding
     #    box images).
     dumper.add_tensor_data(
         "images.other_images",

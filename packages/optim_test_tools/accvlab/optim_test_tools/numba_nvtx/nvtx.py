@@ -18,7 +18,6 @@ import ctypes
 
 from . import _nvtx_numba_ext as _ext  # type: ignore[attr-defined]
 
-
 _SYMBOLS_READY = False
 
 

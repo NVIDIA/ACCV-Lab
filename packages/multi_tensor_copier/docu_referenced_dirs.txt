@@ -1,0 +1,6 @@
+# This file lists additional directories (besides docs) that are referenced by documentation
+# The docs directory is always mirrored automatically
+# Add one directory name per line, without the docs directory
+# Lines starting with # are comments and are ignored
+
+example

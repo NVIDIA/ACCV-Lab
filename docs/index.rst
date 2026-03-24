@@ -63,6 +63,7 @@ Please see the documentation of each namespace package for usage instructions (a
 
    contained_package_docs_mirror/on_demand_video_decoder/docs/index
    contained_package_docs_mirror/batching_helpers/docs/index
+   contained_package_docs_mirror/multi_tensor_copier/docs/index
    contained_package_docs_mirror/dali_pipeline_framework/docs/index
    contained_package_docs_mirror/draw_heatmap/docs/index
    contained_package_docs_mirror/optim_test_tools/docs/index

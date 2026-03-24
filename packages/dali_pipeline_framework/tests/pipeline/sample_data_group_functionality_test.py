@@ -257,7 +257,7 @@ def test_set_data_from_dali_generic_iterator_output_with_flattened_names():
     src["sequence"][0]["value"] = 0.0
     src["sequence"][1]["value"] = 1.0
 
-    # Simulate DALIGenericIterator output: a list of dicts keyed by flattened names
+    # Simulate DALIGenericIterator output: a list of dictionaries keyed by flattened names
     flattened_names = src.field_names_flat
     flat_values = src.get_data()
     iterator_like_output = [{name: value for name, value in zip(flattened_names, flat_values)}]

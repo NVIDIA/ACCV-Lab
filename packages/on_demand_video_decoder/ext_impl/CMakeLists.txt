@@ -18,7 +18,7 @@ cmake_minimum_required(VERSION 3.20)
 # CUDA Architecture Configuration
 # ============================================================================
 # WARNING: When building via `pip wheel` or `python setup.py`, the 
-# `accvlab_build_config.build_cmake_args_from_env()` function will AUTO-DETECT
+# `accvlab_build_config.build_cmake_args()` will (among other things) AUTO-DETECT
 # the current machine's GPU and pass -DCMAKE_CUDA_ARCHITECTURES=<detected_arch>
 # to CMake. This OVERRIDES the default values below!
 #

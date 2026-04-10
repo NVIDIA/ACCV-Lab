@@ -16,7 +16,6 @@ from setuptools import setup, find_packages
 
 setup(
     name="accvlab_build_config",
-    version="0.1.0",
     description="Build configuration utilities for ACCV-Lab packages",
     author="ACCV-Lab Team",
     packages=find_packages(),

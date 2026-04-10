@@ -1,21 +1,22 @@
-[build-system]        
+[build-system]
 requires = [
   "setuptools>=42",
   "scikit-build",
   "numpy",
-  "ninja; platform_system!='Windows'"
+  "ninja; platform_system!='Windows'",
+  "setuptools-scm>=8",
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "accvlab.on_demand_video_decoder"
-version = "0.1.0"
+dynamic = ["version"]
 description = "On-demand video decoder (part of the ACCV-Lab package)."
 requires-python = ">=3.8"
 dependencies = [
     "torch>=2.0.0",
     "numpy>=1.22.2",
-    "accvlab-build-config>=0.1.0",
+    "accvlab-build-config>=0.0.0",
 ]
 
 [project.optional-dependencies]
@@ -28,8 +29,13 @@ optional = [
 [tool.skbuild]
 cmake.source-dir = "ext_impl"
 cmake.minimum-version = "3.18"
-cmake.install-dir = "accvlab/on_demand_video_decoder" 
+cmake.install-dir = "accvlab/on_demand_video_decoder"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["accvlab.on_demand_video_decoder*"]
+
+[tool.setuptools_scm]
+version_scheme = "no-guess-dev"
+fallback_version = "0.0.0"
+root = "../.."

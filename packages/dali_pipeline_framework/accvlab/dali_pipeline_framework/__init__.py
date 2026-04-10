@@ -12,6 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("accvlab.dali_pipeline_framework")
+except PackageNotFoundError:
+    __version__ = "0.0.0"
+
 # Import all child packages
 from . import inputs
 from . import internal_helpers
@@ -19,4 +26,11 @@ from . import operators_impl
 from . import pipeline
 from . import processing_steps
 
-__all__ = ['inputs', 'internal_helpers', 'operators_impl', 'pipeline', 'processing_steps']
+__all__ = [
+    "__version__",
+    'inputs',
+    'internal_helpers',
+    'operators_impl',
+    'pipeline',
+    'processing_steps',
+]

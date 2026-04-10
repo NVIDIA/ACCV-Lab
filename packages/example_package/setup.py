@@ -75,7 +75,6 @@ run_external_build(str(Path(__file__).parent))
 
 setup(
     name="accvlab.example_package",
-    version="0.1.0",
     description="ACCV-Lab Example Package",
     ext_modules=get_extensions(),
     cmdclass={"build_ext": BuildExtension},

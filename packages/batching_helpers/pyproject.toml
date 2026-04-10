@@ -1,16 +1,16 @@
 [build-system]
-requires = ["setuptools>=64", "wheel", "torch>=2.0.0"]
+requires = ["setuptools>=64", "wheel", "torch>=2.0.0", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "accvlab.batching_helpers"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Batching Helpers Package (part of the ACCV-Lab package)."
 requires-python = ">=3.8"
 dependencies = [
     "torch>=2.0.0",
     "numpy>=1.22.2",
-    "accvlab-build-config>=0.1.0",
+    "accvlab-build-config>=0.0.0",
 ]
 
 [project.optional-dependencies]
@@ -21,3 +21,8 @@ optional = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["accvlab.batching_helpers*"]
+
+[tool.setuptools_scm]
+version_scheme = "no-guess-dev"
+fallback_version = "0.0.0"
+root = "../.."

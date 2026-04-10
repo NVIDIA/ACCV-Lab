@@ -17,11 +17,15 @@ cmake_minimum_required(VERSION 3.20)
 # NOTE: CMAKE_CUDA_ARCHITECTURES is inherited from parent ext_impl/CMakeLists.txt
 # To customize, set CUSTOM_CUDA_ARCHS environment variable before building.
 
-project(accvlab.on_demand_video_decoder VERSION 0.1.0 LANGUAGES CXX CUDA)
+# Numeric x.y.z for project(); pip/skbuild passes -DACCVLAB_PACKAGE_CMAKE_VERSION= from setuptools-scm.
+if(NOT DEFINED ACCVLAB_PACKAGE_CMAKE_VERSION)
+  set(ACCVLAB_PACKAGE_CMAKE_VERSION "0.0.0" CACHE STRING "Semver for CMake project(); set by setup.py when building via pip")
+endif()
+project(accvlab.on_demand_video_decoder VERSION ${ACCVLAB_PACKAGE_CMAKE_VERSION} LANGUAGES CXX CUDA)
 
-set(PYNVONDEMANDDEC_VERSION_MAJOR 0)
-set(PYNVONDEMANDDEC_VERSION_MINOR 1)
-set(PYNVONDEMANDDEC_VERSION_PATCH 0)
+set(PYNOD_MAJOR_VERSION ${PROJECT_VERSION_MAJOR})
+set(PYNOD_MINOR_VERSION ${PROJECT_VERSION_MINOR})
+set(PYNOD_PATCH_VERSION ${PROJECT_VERSION_PATCH})
 
 if(POLICY CMP0135)
   #  https://cmake.org/cmake/help/latest/policy/CMP0135.html

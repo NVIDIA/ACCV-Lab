@@ -14,16 +14,13 @@
 
 from skbuild import setup
 from setuptools import find_namespace_packages
-from pathlib import Path
+from accvlab_build_config import build_cmake_args  # type: ignore
 
-from accvlab_build_config import build_cmake_args_from_env  # type: ignore
-
-_cmake_args = build_cmake_args_from_env()
+_cmake_args = build_cmake_args()
 
 
 setup(
     name="accvlab.example_skbuild_package",
-    version="0.1.0",
     description="ACCV-Lab SKBuild Example Package",
     packages=find_namespace_packages(include=["accvlab.example_skbuild_package*"]),
     include_package_data=True,

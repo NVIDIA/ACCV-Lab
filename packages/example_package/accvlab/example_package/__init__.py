@@ -17,6 +17,13 @@ ACCV-Lab Examples Module
 Demonstrates manual build configuration with C++/CUDA extensions.
 """
 
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("accvlab.example_package")
+except PackageNotFoundError:
+    __version__ = "0.0.0"
+
 from typing import Callable
 
 from torch import Tensor
@@ -45,6 +52,7 @@ def hello_examples() -> str:
 
 
 __all__ = [
+    '__version__',
     'hello_examples',
     'cpp_vector_sum',
     'cpp_matrix_transpose',

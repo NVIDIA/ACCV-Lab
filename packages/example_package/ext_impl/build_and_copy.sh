@@ -34,7 +34,7 @@ TORCH_CMAKE_PREFIX_PATH=$(python -c "import torch; print(torch.utils.cmake_prefi
 echo "Computing CMake arguments from environment..."
 # Ensure helper is available; instruct user if not installed
 if ! python - <<'PY'
-from accvlab_build_config.helpers.cmake_args import build_cmake_args_from_env  # noqa: F401
+from accvlab_build_config.helpers.cmake_args import build_cmake_args  # noqa: F401
 PY
 then
     echo "Error: Python package 'accvlab_build_config' not found." >&2
@@ -43,7 +43,7 @@ then
     exit 1
 fi
 # Read helper-produced cmake -D args into array
-readarray -t CMAKE_ARGS < <(python -c "from accvlab_build_config.helpers.cmake_args import build_cmake_args_from_env; print('\n'.join(build_cmake_args_from_env()))")
+readarray -t CMAKE_ARGS < <(python -c "from accvlab_build_config.helpers.cmake_args import build_cmake_args; print('\n'.join(build_cmake_args()))")
 
 # Configure CMake
 echo "Configuring CMake..."

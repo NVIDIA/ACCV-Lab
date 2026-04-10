@@ -24,7 +24,8 @@ from .build_utils import (
     get_abs_setup_dir,
 )
 from .cmake_args import (
-    build_cmake_args_from_env,
+    build_cmake_args,
+    get_project_root,
 )
 
 __all__ = [
@@ -33,5 +34,6 @@ __all__ = [
     'get_compile_flags',
     'run_external_build',
     'get_abs_setup_dir',
-    'build_cmake_args_from_env',
+    'build_cmake_args',
+    'get_project_root',
 ]

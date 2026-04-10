@@ -17,6 +17,13 @@ ACCV-Lab Examples Module
 Demonstrates manual build configuration with C++/CUDA extensions
 """
 
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("accvlab.example_skbuild_package")
+except PackageNotFoundError:
+    __version__ = "0.0.0"
+
 from .functions import (
     vector_add,
     vector_scale,
@@ -32,6 +39,7 @@ def hello_examples():
 
 
 __all__ = [
+    '__version__',
     'hello_examples',
     'vector_add',
     'vector_scale',

@@ -15,12 +15,14 @@
 """ """
 
 import sys
+
 from setuptools import find_namespace_packages
 
 from pkg_resources import VersionConflict, require
 
 import skbuild
-from accvlab_build_config import build_cmake_args_from_env  # type: ignore
+
+from accvlab_build_config import build_cmake_args  # type: ignore
 
 try:
     require("setuptools>=42")
@@ -28,11 +30,10 @@ except VersionConflict:
     print("Error: version of setuptools is too old (<42)!")
     sys.exit(1)
 
-_cmake_args = build_cmake_args_from_env()
+_cmake_args = build_cmake_args()
 
 skbuild.setup(
     name="accvlab.on_demand_video_decoder",
-    version="0.1.0",
     description="On-demand video decoder (part of the ACCV-Lab package).",
     packages=find_namespace_packages(include=["accvlab.on_demand_video_decoder*"]),
     include_package_data=True,

@@ -15,13 +15,12 @@
 from skbuild import setup
 from setuptools import find_namespace_packages
 
-from accvlab_build_config import build_cmake_args_from_env
+from accvlab_build_config import build_cmake_args
 
-_cmake_args = build_cmake_args_from_env()
+_cmake_args = build_cmake_args()
 
 setup(
     name="accvlab.optim_test_tools",
-    version="0.1.0",
     description="Optimization Testing Tools Package (part of the ACCV-Lab package).",
     packages=find_namespace_packages(include=["accvlab.optim_test_tools*"]),
     include_package_data=True,

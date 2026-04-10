@@ -12,9 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("accvlab.multi_tensor_copier")
+except PackageNotFoundError:
+    __version__ = "0.0.0"
+
 from .async_copy import AsyncCopyHandle, start_copy
 
 __all__ = [
+    "__version__",
     "AsyncCopyHandle",
     "start_copy",
 ]

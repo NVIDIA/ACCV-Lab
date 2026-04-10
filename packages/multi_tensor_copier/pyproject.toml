@@ -3,18 +3,19 @@ requires = [
     "setuptools>=64",
     "wheel",
     "torch>=2.0.0",
+    "setuptools-scm>=8",
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "accvlab.multi_tensor_copier"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Async copying of nested tensor structures (ACCV-Lab)."
 requires-python = ">=3.8"
 dependencies = [
     "torch>=2.0.0",
     "numpy>=1.22.2",
-    "accvlab-build-config>=0.1.0",
+    "accvlab-build-config>=0.0.0",
 ]
 
 [project.optional-dependencies]
@@ -26,3 +27,7 @@ optional = [
 where = ["."]
 include = ["accvlab.multi_tensor_copier*"]
 
+[tool.setuptools_scm]
+version_scheme = "no-guess-dev"
+fallback_version = "0.0.0"
+root = "../.."

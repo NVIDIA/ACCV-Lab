@@ -1,5 +1,40 @@
 import os
-from typing import List
+import re
+from pathlib import Path
+from typing import List, Optional
+
+# Marker file at the ACCV-Lab monorepo root (see `.nav` in the repository).
+_NAV_MARKER = ".nav"
+# Must match `.nav` contents after strip (UTF-8); see repository root `.nav`.
+_NAV_EXPECTED_CONTENT = "project root"
+
+
+def _nav_file_is_valid(path: Path) -> bool:
+    if not path.is_file():
+        return False
+    try:
+        text = path.read_text(encoding="utf-8").strip()
+    except OSError:
+        return False
+    return text == _NAV_EXPECTED_CONTENT
+
+
+def _find_repo_root_via_nav(start: Path) -> Optional[Path]:
+    """
+    Walk upward from ``start`` (file or directory) until a ``.nav`` file exists
+    whose contents equal ``project root`` (UTF-8); that directory is the repo root.
+    """
+    cur = start.resolve()
+    if cur.is_file():
+        cur = cur.parent
+    for _ in range(64):
+        nav = cur / _NAV_MARKER
+        if _nav_file_is_valid(nav):
+            return cur
+        if cur.parent == cur:
+            break
+        cur = cur.parent
+    return None
 
 
 def _parse_bool_env(value: str) -> bool:
@@ -41,7 +76,27 @@ def _detect_cuda_architectures() -> List[str]:
         return []
 
 
-def build_cmake_args_from_env() -> List[str]:
+def get_project_root() -> Path:
+    """Return the ACCV-Lab monorepo root identified by a valid ``.nav`` marker."""
+    anchors = (
+        ("accvlab_build_config.helpers.cmake_args", Path(__file__)),
+        ("current working directory", Path.cwd()),
+    )
+    for _label, anchor in anchors:
+        found = _find_repo_root_via_nav(anchor)
+        if found is not None:
+            return found
+    raise RuntimeError(
+        "ACCV-Lab repository root not found: could not locate a valid `.nav` file "
+        f"({_NAV_MARKER!r} with UTF-8 text exactly {_NAV_EXPECTED_CONTENT!r} after strip). "
+        "Searched upward from this Python module and from the process current working directory. "
+        "Build from a full checkout of the repository, run commands with a cwd inside that tree "
+        "(e.g. a package directory under `packages/`), or install `accvlab-build-config` editable "
+        "from `build_config/` so `cmake_args` resolves from source."
+    )
+
+
+def _build_cmake_args_from_env() -> List[str]:
     """
     Build a list of -D CMake arguments from environment variables to harmonize
     build configuration across setuptools, external CMake, and scikit-build flows.
@@ -114,7 +169,34 @@ def build_cmake_args_from_env() -> List[str]:
     return args
 
 
+def _build_cmake_args_package_scm_version(repo_root: Path) -> List[str]:
+    """
+    Pass numeric version from setuptools-scm to CMake as a repo-aligned package
+    version define (and harmless for CMake projects that ignore the variable).
+    """
+    from setuptools_scm import get_version
+
+    v = get_version(
+        root=str(repo_root),
+        version_scheme="no-guess-dev",
+        fallback_version="0.0.0",
+    )
+    m = re.match(r"^(\d+)\.(\d+)\.(\d+)", v)
+    numeric = "0.0.0"
+    if m:
+        numeric = f"{m.group(1)}.{m.group(2)}.{m.group(3)}"
+    return [f"-DACCVLAB_PACKAGE_CMAKE_VERSION={numeric}"]
+
+
+def build_cmake_args() -> List[str]:
+    """
+    Full CMake -D list: environment-based flags plus repo-aligned SCM version define.
+    """
+    root = get_project_root()
+    return _build_cmake_args_from_env() + _build_cmake_args_package_scm_version(root)
+
+
 if __name__ == "__main__":
     # Print arguments one per line for easy consumption in bash arrays
-    for a in build_cmake_args_from_env():
+    for a in build_cmake_args():
         print(a)

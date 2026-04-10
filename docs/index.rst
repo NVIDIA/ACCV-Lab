@@ -76,6 +76,17 @@ Demos
 
 Demos for the individual packages will be added in the future.
 
+References
+----------
+
+.. toctree::
+   :maxdepth: 2
+   :caption: References
+   :includehidden:
+   
+   release_notes_page
+
+
 Indices and Tables
 ------------------
 

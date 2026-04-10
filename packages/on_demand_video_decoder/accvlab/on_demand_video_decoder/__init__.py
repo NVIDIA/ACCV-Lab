@@ -14,15 +14,12 @@
 
 """ """
 
-__author__ = "NVIDIA"
-__copyright__ = "Copyright 2024, NVIDIA"
-__credits__ = []
-__license__ = "MIT"
-__version__ = "0.1.0"
-__maintainer__ = "NVIDIA"
-__email__ = "TODO"
-__status__ = "Production"
+from importlib.metadata import PackageNotFoundError, version
 
+try:
+    __version__ = version("accvlab.on_demand_video_decoder")
+except PackageNotFoundError:
+    __version__ = "0.0.0"
 
 import os
 import ctypes
@@ -79,6 +76,7 @@ from ._internal.types import Codec
 from ._internal.utils import drop_videos_cache, DropCacheStatus
 
 __all__ = [
+    "__version__",
     # C++ core interfaces
     'PyNvGopDecoder',
     'PyNvSampleReader',

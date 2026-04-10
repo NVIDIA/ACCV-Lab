@@ -7,25 +7,67 @@ import warnings
 from pathlib import Path
 
 # -- Path setup --------------------------------------------------------------
+# Use the installed build_config package to resolve the repo root.
+try:
+    from accvlab_build_config import get_project_root
+except ModuleNotFoundError as exc:
+    if exc.name == "accvlab_build_config":
+        raise RuntimeError(
+            "Sphinx documentation build requires the installed 'accvlab-build-config' package, "
+            "but it is not available in this environment. Install it first (for example "
+            "`pip install -e build_config` from the repository root."
+        ) from exc
+    raise
+
 # Use installed packages for autodoc; only add local Sphinx extensions
-project_root = Path(__file__).parent.parent
+project_root = get_project_root()
+sys.path.insert(0, str(project_root))
 # Add local Sphinx extensions
 sys.path.insert(0, str(Path(__file__).parent / '_ext'))
 
+from namespace_packages_config import NAMESPACE_PACKAGES
+
 # -- Project information -----------------------------------------------------
 project = 'ACCV-Lab'
-copyright = '2025, NVIDIA Corporation'
+copyright = '2026, NVIDIA Corporation'
 author = 'NVIDIA Corporation'
 
-# The version info from the package
-try:
-    import accvlab
 
-    version = accvlab.__version__
-    release = version
-except (ImportError, AttributeError):
-    version = '0.1.0'
-    release = '0.1.0'
+def _get_docs_version() -> str:
+    """Read and validate installed versions for all distributions included in the docs."""
+    from importlib.metadata import PackageNotFoundError, version as _dist_version
+
+    dist_names = ["accvlab-build-config", *NAMESPACE_PACKAGES]
+    versions: dict[str, str] = {}
+    missing: list[str] = []
+
+    for dist_name in dist_names:
+        try:
+            versions[dist_name] = _dist_version(dist_name)
+        except PackageNotFoundError:
+            missing.append(dist_name)
+
+    if missing:
+        raise RuntimeError(
+            "Could not determine installed versions for all packages included in the "
+            f"documentation: {', '.join(missing)}."
+        )
+
+    unique_versions = sorted(set(versions.values()))
+    if len(unique_versions) != 1:
+        version_details = "\n".join(
+            f"  - {dist_name}: {dist_version}" for dist_name, dist_version in versions.items()
+        )
+        raise RuntimeError(
+            "Version mismatch across pacakges included in the documentation:\n" f"{version_details}"
+        )
+
+    return unique_versions[0]
+
+
+# The docs version must match across all documented ACCV-Lab distributions.
+version = _get_docs_version()
+release = version
 
 # -- General configuration ---------------------------------------------------
 extensions = [

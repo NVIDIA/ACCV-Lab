@@ -12,6 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("accvlab.batching_helpers")
+except PackageNotFoundError:
+    __version__ = "0.0.0"
+
 # Import the relevant data type & functions directly into the top-level package
 from .data_format import RaggedBatch
 from .batched_indexing_ops import (
@@ -35,6 +42,7 @@ from .batched_processing_py import (
 
 # The order of the elements as defined here will be maintained by the Sphinx-generated documentation
 __all__ = [
+    "__version__",
     'RaggedBatch',
     *sorted(
         [

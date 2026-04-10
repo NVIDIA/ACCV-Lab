@@ -121,7 +121,7 @@ RUN pip install pynvml
 
 RUN apt-get install -y libjpeg-dev zlib1g-dev
 
-RUN pip install --upgrade pip setuptools==80.9.0 wheel
+RUN pip install --upgrade pip setuptools==80.9.0 wheel setuptools-scm>=8
 
 RUN pip install cupy
 

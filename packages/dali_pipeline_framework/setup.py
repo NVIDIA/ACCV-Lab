@@ -14,15 +14,13 @@
 
 from skbuild import setup
 from setuptools import find_namespace_packages
-from pathlib import Path
-from accvlab_build_config import build_cmake_args_from_env  # type: ignore
+from accvlab_build_config import build_cmake_args  # type: ignore
 
-_cmake_args = build_cmake_args_from_env()
+_cmake_args = build_cmake_args()
 
 
 setup(
     name="accvlab.dali_pipeline_framework",
-    version="0.1.0",
     description="DALI Pipeline Framework Package (part of the ACCV-Lab package).",
     packages=find_namespace_packages(include=["accvlab.dali_pipeline_framework*"]),
     include_package_data=True,

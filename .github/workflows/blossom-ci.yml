@@ -54,6 +54,7 @@ jobs:
           repository: ${{ fromJson(needs.Authorization.outputs.args).repo }}
           ref: ${{ fromJson(needs.Authorization.outputs.args).ref }}
           lfs: 'true'
+          fetch-depth: 0
       - name: Run blossom action
         uses: NVIDIA/blossom-action@main
         env:

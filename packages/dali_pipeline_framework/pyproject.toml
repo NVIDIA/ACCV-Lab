@@ -1,16 +1,16 @@
 [build-system]
-requires = ["setuptools>=64", "wheel", "torch>=2.0.0", "scikit-build>=0.17.0", "pybind11>=2.10.0"]
+requires = ["setuptools>=64", "wheel", "torch>=2.0.0", "scikit-build>=0.17.0", "pybind11>=2.10.0", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "accvlab.dali_pipeline_framework"
-version = "0.1.0"
+dynamic = ["version"]
 description = "DALI Pipeline Framework Package (part of the ACCV-Lab package)."
 requires-python = ">=3.8"
 dependencies = [
     "torch>=2.0.0",
     "numpy>=1.22.2",
-    "accvlab-build-config>=0.1.0",
+    "accvlab-build-config>=0.0.0",
     "nvidia-dali-cuda120>=1.51.2",
     "numba>=0.59",
 ]
@@ -33,4 +33,9 @@ include = ["accvlab.dali_pipeline_framework*"]
 [tool.skbuild]
 cmake.source-dir = "ext_impl"
 cmake.minimum-version = "3.18"
-cmake.install-dir = "." 
+cmake.install-dir = "."
+
+[tool.setuptools_scm]
+version_scheme = "no-guess-dev"
+fallback_version = "0.0.0"
+root = "../.."

@@ -86,7 +86,6 @@ run_external_build(str(Path(__file__).parent))
 
 setup(
     name="accvlab.batching_helpers",
-    version="0.1.0",
     description="Batching Helpers Package (part of the ACCV-Lab package).",
     ext_modules=get_extensions(),
     cmdclass={"build_ext": BuildExtension},

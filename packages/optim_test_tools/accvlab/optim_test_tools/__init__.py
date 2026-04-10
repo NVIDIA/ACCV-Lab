@@ -12,11 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("accvlab.optim_test_tools")
+except PackageNotFoundError:
+    __version__ = "0.0.0"
+
 from .stopwatch import Stopwatch
 from .nvtx_range_wrapper import NVTXRangeWrapper
 from .tensor_dumper import TensorDumper
 
 __all__ = [
+    "__version__",
     "Stopwatch",
     "NVTXRangeWrapper",
     "TensorDumper",

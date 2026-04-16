@@ -366,7 +366,7 @@ class FFmpegDemuxer {
                 nBPP = 1;
                 break;
             default:
-                LOG(WARNING) << "ChromaFormat not recognized. Assuming 420";
+                // LOG(WARNING) << "ChromaFormat not recognized. Assuming 420";
                 eChromaFormat = AV_PIX_FMT_YUV420P;
                 nBitDepth = 8;
                 nChromaHeight = (nHeight + 1) >> 1;

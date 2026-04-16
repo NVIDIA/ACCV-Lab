@@ -73,10 +73,13 @@ except ImportError:
 from ._internal.decoder import CreateGopDecoder, CachedGopDecoder
 
 # Type definitions
-from ._internal.types import Codec
+from ._internal.types import Codec, GopRef
 
 # Utility functions
 from ._internal.utils import drop_videos_cache, DropCacheStatus
+
+# Shared GOP store (cross-process cache)
+from ._internal.shared_gop_store import SharedGopStore
 
 __all__ = [
     # C++ core interfaces
@@ -93,6 +96,9 @@ __all__ = [
     'CreateGopDecoder',
     # Type definitions
     'Codec',
+    'GopRef',
+    # Shared GOP store
+    'SharedGopStore',
     # Utility functions
     'drop_videos_cache',
     'DropCacheStatus',

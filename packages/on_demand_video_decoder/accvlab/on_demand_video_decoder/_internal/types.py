@@ -17,6 +17,27 @@ Type definitions and enumerations for the video decoder module.
 """
 
 from enum import Enum
+from typing import NamedTuple
+
+
+class GopRef(NamedTuple):
+    """Lightweight, picklable reference to GOP data in shared memory.
+
+    Designed to be passed through DataLoader IPC queues (tens of bytes)
+    instead of the actual GOP packet data (tens of KB).  The main process
+    calls ``SharedGopStore.get_batch()`` to read the referenced shm blocks
+    as zero-copy numpy views.
+
+    Attributes:
+        shm_name: POSIX SharedMemory name for the data block.
+        data_size: Number of bytes of GOP packet data.
+        first_frame_id: First frame index covered by this GOP.
+        gop_len: Number of frames in this GOP.
+    """
+    shm_name: str
+    data_size: int
+    first_frame_id: int
+    gop_len: int
 
 
 class Codec(Enum):

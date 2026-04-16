@@ -25,6 +25,7 @@ section helps you quickly locate the sample code that matches your requirements.
 | [SampleDecodeFromGopFilesToListAPI.py](../samples/SampleDecodeFromGopFilesToListAPI.py) | Selective GOP loading | {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.LoadGopsToList`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOPListRGB` |
 | [SampleDecodeFromGopList.py](../samples/SampleDecodeFromGopList.py) | Batch decode from multiple demux results (N demux → 1 decode) | {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOPListRGB` |
 | [SampleStreamAsyncAccess.py](../samples/SampleStreamAsyncAccess.py) | Async stream decoding with prefetching | {py:func}`~accvlab.on_demand_video_decoder.CreateSampleReader`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvSampleReader.DecodeN12ToRGBAsync`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvSampleReader.DecodeN12ToRGBAsyncGetBuffer` |
+| [SampleSharedGopStore.py](../samples/SampleSharedGopStore.py) | Cross-process shared GOP cache for DataLoader | {py:class}`~accvlab.on_demand_video_decoder.SharedGopStore`, {py:class}`~accvlab.on_demand_video_decoder.GopRef` |
 
 For details on the **Key APIs**, please refer to the API documentation of the corresponding functions and classes.
 
@@ -59,6 +60,10 @@ If you need to save GOP data to disk:
 If you need to batch decode from multiple separate demux operations:
     (e.g., DataLoader workers demux in parallel, main process batch decode)
     → Use SampleDecodeFromGopList
+
+If you need cross-process shared GOP caching for DataLoader workers:
+    (e.g., workers demux GOPs into shared memory, main process reads zero-copy)
+    → Use SampleSharedGopStore
 ```
 
 ### 1.3 Core Concepts
@@ -76,6 +81,8 @@ Before diving into the samples, understanding these concepts will be helpful:
 - **FastInit**: An optimization technique that caches stream metadata to accelerate decoder initialization for multiple clips with similar properties.
 
 - **GOP Caching**: A Python-side caching mechanism that stores extracted GOP data in memory. When the same video file is requested with a `frame_id` that falls within an already cached GOP range, the cached data is returned directly without re-demuxing from the video file.
+
+- **SharedGopStore**: A cross-process shared memory cache for GOP data, backed by POSIX SharedMemory (`/dev/shm`). Workers store GOP packets in shared memory and pass lightweight `GopRef` references through the DataLoader IPC queue. The main process reads the data as zero-copy numpy views via `get_batch()`. Uses file-based locking (`flock`) for cross-process safety and LRU eviction when capacity is exceeded.
 
 ## 2. Quick Start
 
@@ -1291,4 +1298,196 @@ def collate_fn(batch):
 ```bash
 cd packages/on_demand_video_decoder/samples
 python SampleDecodeFromGopList.py
+```
+
+### 3.5 Shared GOP Store
+
+SharedGopStore provides a cross-process shared memory cache for GOP packet data, designed for PyTorch 
+DataLoader integration. Workers store demuxed GOP data in POSIX shared memory and pass lightweight `GopRef` 
+references through the IPC queue, while the main process reads the data as zero-copy numpy views.
+
+#### 3.5.1 Use Cases
+
+- Multi-worker DataLoader with separation access (workers demux, main process decodes on GPU)
+- Multi-camera setups where different workers may request overlapping GOPs
+- Reducing redundant demuxing when multiple workers access the same video segment
+- Training pipelines that need to pass GOP data from workers to main process efficiently
+
+#### 3.5.2 Architecture
+
+```
+Main Process                     Worker Processes
+─────────────                    ────────────────
+SharedGopStore.create()
+    │
+    ├──spawn──> Worker 0: SharedGopStore.attach()
+    │               lookup(video, frame_id)
+    │                 ├─ HIT  → return GopRef
+    │                 └─ MISS → demux from disk
+    │                          put(video, data) → GopRef
+    │               queue.put(GopRef)  ← tens of bytes
+    │
+    ├──spawn──> Worker 1: (same pattern)
+    │               ...
+    │
+    ◄── queue.get() ── [GopRef, GopRef, ...]
+    │
+    get_batch(refs)  ← zero-copy numpy views
+    │
+    DecodeFromGOPListRGB(...)  ← GPU decode
+    │
+    cleanup()  ← unlink all shm blocks
+```
+
+#### 3.5.3 Sample: SharedGopStore
+
+**File:** `packages/on_demand_video_decoder/samples/SampleSharedGopStore.py`
+
+> **ℹ️ Note**: This sample is a pure CPU / shared-memory demo. No GPU or video files are required — 
+> GOP data is simulated with random bytes.
+
+**Core APIs**
+
+- {py:class}`~accvlab.on_demand_video_decoder.SharedGopStore`: Cross-process shared memory GOP cache
+  - `create(capacity, store_id)`: Allocate a new store (main process)
+  - `attach(capacity, store_id)`: Attach to existing store (worker processes)
+  - `lookup(video_path, frame_id)`: Lock-free cache lookup, returns `GopRef` or `None`
+  - `put(video_path, first_frame_id, gop_len, data)`: Store GOP data, returns `GopRef`
+  - `get_batch(refs)`: Read a batch of `GopRef` as zero-copy numpy views (main process)
+  - `read(ref)`: Read a single `GopRef` as a zero-copy numpy view
+  - `cleanup()`: Unlink all shared memory blocks (main process, on shutdown)
+  - `close()`: Close handles without unlinking (worker processes, before exit)
+- {py:class}`~accvlab.on_demand_video_decoder.GopRef`: Lightweight, picklable reference to GOP data in 
+  shared memory (passed through DataLoader IPC queue)
+
+**Code Walkthrough**
+
+**Step 1: Main process creates the store before spawning workers**
+
+```python
+from accvlab.on_demand_video_decoder import SharedGopStore
+
+STORE_ID = 0       # typically LOCAL_RANK
+CAPACITY = 120     # must exceed in-flight GOPs (see sizing below)
+
+store = SharedGopStore.create(capacity=CAPACITY, store_id=STORE_ID)
+```
+
+**Step 2: Worker processes attach and perform lookup/put**
+
+```python
+def worker_fn(store_id, capacity, tasks, result_queue):
+    store = SharedGopStore.attach(capacity=capacity, store_id=store_id)
+
+    refs = []
+    for video_path, frame_id, gop_first_frame, gop_len in tasks:
+        # Lock-free lookup
+        ref = store.lookup(video_path, frame_id)
+        if ref is None:
+            # Cache miss: demux from disk (or simulate)
+            gop_data = demux_gop_from_video(video_path, frame_id)
+            ref = store.put(video_path, gop_first_frame, gop_len, gop_data)
+        refs.append(ref)
+
+    # Send lightweight refs (tens of bytes each) through IPC queue
+    result_queue.put(refs)
+    store.close()
+```
+
+**Step 3: Main process reads zero-copy data and decodes**
+
+```python
+# Collect refs from all workers
+all_refs = queue_a.get() + queue_b.get()
+
+# Read shared memory blocks as zero-copy numpy views
+arrays = store.get_batch(all_refs)
+
+# Decode on GPU
+decoded_frames = decoder.DecodeFromGOPListRGB(arrays, file_paths, frame_ids, True)
+```
+
+**Step 4: Cleanup on shutdown**
+
+```python
+store.cleanup()  # unlinks all /dev/shm blocks for this store
+```
+
+**Capacity Sizing**
+
+The `capacity` parameter must exceed the maximum number of GOPs that can be "in flight" (queued in the 
+DataLoader + being consumed by the training loop):
+
+```
+min_capacity > (prefetch_factor * num_workers + 1) * batch_size * num_cameras
+```
+
+A recommended formula is:
+
+```python
+capacity = batch_size * num_cameras * 10
+```
+
+If capacity is too small, GOPs may be evicted before the main process can read them. In this case, 
+`read()` returns a zeros array and emits a `RuntimeWarning` with diagnostic information instead of 
+crashing.
+
+**GopRef IPC Efficiency**
+
+`GopRef` is a `NamedTuple` with 4 fields (shm_name, data_size, first_frame_id, gop_len). It serializes 
+to ~60 bytes via pickle, compared to ~4-40 KB for the actual GOP packet data. This makes DataLoader IPC 
+overhead negligible.
+
+```python
+import pickle
+from accvlab.on_demand_video_decoder import GopRef
+
+ref = GopRef(shm_name="gs_0_12345_0", data_size=4096, first_frame_id=0, gop_len=30)
+print(len(pickle.dumps(ref)))  # ~60 bytes
+```
+
+**LRU Eviction**
+
+When the store is full, `put()` evicts the least-recently-used entry (lowest `access_tick`). Both 
+`lookup()` and `put()` refresh an entry's tick, so frequently accessed GOPs are retained. Evicted shm 
+blocks are cleaned up during the next `get_batch()` call.
+
+**Cross-Process Safety**
+
+- `lookup()` is lock-free (worst case: stale miss, one extra disk read)
+- `put()` acquires an `flock` for atomicity (double-check after acquiring the lock)
+- `get_batch()` acquires an `flock` to prevent eviction while opening handles
+- Works with `spawn`'d DataLoader workers (unlike `multiprocessing.Lock`)
+
+**Running the Sample**
+
+```bash
+cd packages/on_demand_video_decoder/samples
+python SampleSharedGopStore.py
+```
+
+Expected output:
+
+```text
+SharedGopStore Demo
+============================================================
+
+[Main] Creating SharedGopStore (capacity=12, store_id=0)
+
+[Main] Spawning 2 workers...
+  [Worker 12345] Attached to store (id=0, capacity=12)
+  [Worker 12345] MISS /data/video/cam0.mp4 frame=15 -> put as gs_0_...
+  ...
+  [Worker 12346] HIT  /data/video/cam0.mp4 frame=20
+  ...
+
+[Main] Received 12 GopRef references from workers
+[Main] GopRef size: 60 bytes (vs ~4096 bytes of actual GOP data)
+
+[Main] Got 12 zero-copy numpy views:
+  [0] shape=(4096,), dtype=uint8, nbytes=4096
+  ...
+
+[Main] Cleanup complete. All shared memory released.
+[Main] Verified: no shared memory files leaked.
 ```

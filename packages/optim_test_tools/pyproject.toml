@@ -5,18 +5,19 @@ requires = [
     "torch>=2.0.0",
     "scikit-build>=0.17.0",
     "pybind11>=2.10.0",
+    "setuptools-scm>=8",
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "accvlab.optim_test_tools"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Optimization Testing Tools Package (part of the ACCV-Lab package)."
 requires-python = ">=3.8"
 dependencies = [
     "torch>=2.0.0",
     "numpy>=1.22.2",
-    "accvlab-build-config>=0.1.0",
+    "accvlab-build-config>=0.0.0",
     "psutil",
 ]
 
@@ -30,4 +31,9 @@ optional = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["accvlab.optim_test_tools*"] 
+include = ["accvlab.optim_test_tools*"]
+
+[tool.setuptools_scm]
+version_scheme = "no-guess-dev"
+fallback_version = "0.0.0"
+root = "../.."

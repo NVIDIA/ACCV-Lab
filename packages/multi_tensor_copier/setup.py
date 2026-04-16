@@ -45,7 +45,6 @@ def get_extensions():
 
 setup(
     name="accvlab.multi_tensor_copier",
-    version="0.1.0",
     description="Async copying of nested tensor structures (ACCV-Lab).",
     packages=find_namespace_packages(include=["accvlab.multi_tensor_copier*"]),
     ext_modules=get_extensions(),

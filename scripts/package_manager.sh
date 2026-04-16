@@ -178,13 +178,11 @@ fi
 # Change to project root
 cd "$PROJECT_ROOT"
 
-# Set environment variables to ensure current Python is used
-export PYTHONPATH="${PYTHONPATH}:$(pwd)"
-export PYTHON_EXECUTABLE=$(which python)
-export PIP_EXECUTABLE=$(which pip)
+# Resolve the Python interpreter used for all package operations
+export PYTHON_EXECUTABLE=$(command -v python)
 
 echo "Using Python: $PYTHON_EXECUTABLE"
-echo "Using Pip: $PIP_EXECUTABLE"
+echo "Using Pip: $($PYTHON_EXECUTABLE -m pip --version)"
 echo "Python version: $($PYTHON_EXECUTABLE --version)"
 
 if [[ "$MODE" == "wheel" ]]; then
@@ -214,42 +212,43 @@ HELPER_DIR="build_config"
 if [ -f "$HELPER_DIR/setup.py" ]; then
     echo ""
     echo "Installing helper package: $HELPER_DIR (required for other packages)"
-    cd "$HELPER_DIR"
-    
+    HELPER_PATH="$PROJECT_ROOT/$HELPER_DIR"
+
     if [[ "$EDITABLE_MODE" == true ]]; then
         echo "  Installing helper in editable mode..."
-        $PIP_EXECUTABLE install -e . $BUILD_ISOLATION_FLAG || { echo "  ✗ Failed to install helper package"; exit 1; }
+        $PYTHON_EXECUTABLE -m pip install -e "$HELPER_PATH" $BUILD_ISOLATION_FLAG || { echo "  ✗ Failed to install helper package"; exit 1; }
     else
         echo "  Installing helper in regular mode..."
-        $PIP_EXECUTABLE install . $BUILD_ISOLATION_FLAG || { echo "  ✗ Failed to install helper package"; exit 1; }
+        $PYTHON_EXECUTABLE -m pip install "$HELPER_PATH" $BUILD_ISOLATION_FLAG || { echo "  ✗ Failed to install helper package"; exit 1; }
     fi
-    
-    cd - > /dev/null
+
     echo "  ✓ Successfully installed helper package"
 else
     echo "  ✗ Helper package setup.py not found in $HELPER_DIR, aborting."
     exit 1
 fi
 
-# Build pip command with appropriate flags
+# Build pip command with appropriate flags as an argv array.
+# This avoids `eval` and keeps paths with spaces intact.
 build_pip_command() {
-    local base_cmd="$PIP_EXECUTABLE"
-    local wheel_flags=""
-    local deps_flag=""
-    
+    PIP_COMMAND=("$PYTHON_EXECUTABLE" -m pip)
+    PIP_COMMAND+=("$@")
+
     if [[ "$MODE" == "wheel" ]]; then
-        wheel_flags="--wheel-dir \"$OUTPUT_DIR\""
+        PIP_COMMAND+=(--wheel-dir "$OUTPUT_DIR")
         if [[ "$NO_INDEX" == true ]]; then
-            wheel_flags="$wheel_flags --no-index"
+            PIP_COMMAND+=(--no-index)
         fi
         # In wheel mode, control dependency resolution based on WITH_DEPS (analogous to WITH_BUILD_ISOLATION)
         # Default behavior (WITH_DEPS=false) is to avoid resolving dependencies with '--no-deps'
         if [[ "$WITH_DEPS" == false ]]; then
-            deps_flag="--no-deps"
+            PIP_COMMAND+=(--no-deps)
         fi
     fi
-    
-    echo "$base_cmd $1 $wheel_flags $deps_flag $BUILD_ISOLATION_FLAG"
+
+    if [[ -n "$BUILD_ISOLATION_FLAG" ]]; then
+        PIP_COMMAND+=("$BUILD_ISOLATION_FLAG")
+    fi
 }
 
 # For wheel mode, also build the helper package wheel
@@ -259,7 +258,8 @@ if [[ "$MODE" == "wheel" ]]; then
     cd "$HELPER_DIR"
     
     echo "  Building wheel..."
-    eval $(build_pip_command "wheel .") || { echo "  ✗ Failed to build helper package wheel"; exit 1; }
+    build_pip_command wheel .
+    "${PIP_COMMAND[@]}" || { echo "  ✗ Failed to build helper package wheel"; exit 1; }
     
     cd - > /dev/null
     echo "  ✓ Successfully built helper package wheel"
@@ -273,7 +273,7 @@ else
 fi
 
 # Get the list of namespace packages from the config
-NAMESPACE_PACKAGES=$(python3 -c "
+NAMESPACE_PACKAGES=$($PYTHON_EXECUTABLE -c "
 from namespace_packages_config import get_namespace_packages
 packages = get_namespace_packages()
 for pkg in packages:
@@ -297,6 +297,7 @@ for pkg in $NAMESPACE_PACKAGES; do
     # Extract package name (last part after the dot)
     PACKAGE_NAME=$(echo "$pkg" | sed 's/.*\.//')
     PACKAGE_DIR="packages/$PACKAGE_NAME"
+    PACKAGE_PATH="$PROJECT_ROOT/$PACKAGE_DIR"
     
     # Check if package directory exists
     if [ ! -d "$PACKAGE_DIR" ]; then
@@ -310,53 +311,38 @@ for pkg in $NAMESPACE_PACKAGES; do
         continue
     fi
     
-    # Change to package directory and process
-    cd "$PACKAGE_DIR"
-    
     if [[ "$MODE" == "install" ]]; then
         if [[ "$EDITABLE_MODE" == true ]]; then
             if [[ "$OPTIONAL_DEPS" == true ]]; then
                 echo "  Installing in editable mode with optional dependencies..."
-                $PIP_EXECUTABLE install -e .[optional] $BUILD_ISOLATION_FLAG
+                $PYTHON_EXECUTABLE -m pip install -e "$PACKAGE_PATH[optional]" $BUILD_ISOLATION_FLAG || { echo "  ✗ Failed to install $pkg"; exit 1; }
             else
                 echo "  Installing in editable mode..."
-                $PIP_EXECUTABLE install -e . $BUILD_ISOLATION_FLAG
+                $PYTHON_EXECUTABLE -m pip install -e "$PACKAGE_PATH" $BUILD_ISOLATION_FLAG || { echo "  ✗ Failed to install $pkg"; exit 1; }
             fi
         else
             if [[ "$OPTIONAL_DEPS" == true ]]; then
                 echo "  Installing in regular mode with optional dependencies..."
-                $PIP_EXECUTABLE install .[optional] $BUILD_ISOLATION_FLAG
+                $PYTHON_EXECUTABLE -m pip install "$PACKAGE_PATH[optional]" $BUILD_ISOLATION_FLAG || { echo "  ✗ Failed to install $pkg"; exit 1; }
             else
                 echo "  Installing in regular mode..."
-                $PIP_EXECUTABLE install . $BUILD_ISOLATION_FLAG
+                $PYTHON_EXECUTABLE -m pip install "$PACKAGE_PATH" $BUILD_ISOLATION_FLAG || { echo "  ✗ Failed to install $pkg"; exit 1; }
             fi
         fi
+        echo "  ✓ Successfully installed $pkg"
     elif [[ "$MODE" == "wheel" ]]; then
+        cd "$PACKAGE_DIR"
         if [[ "$OPTIONAL_DEPS" == true ]]; then
             echo "  Building wheel with optional dependencies..."
-            eval $(build_pip_command "wheel .[optional]")
+            build_pip_command wheel ".[optional]"
+            "${PIP_COMMAND[@]}" || { echo "  ✗ Failed to build wheel for $pkg"; exit 1; }
         else
             echo "  Building wheel..."
-            eval $(build_pip_command "wheel .")
+            build_pip_command wheel .
+            "${PIP_COMMAND[@]}" || { echo "  ✗ Failed to build wheel for $pkg"; exit 1; }
         fi
-    fi
-    
-    # Return to project root
-    cd - > /dev/null
-    
-    if [ $? -eq 0 ]; then
-        if [[ "$MODE" == "install" ]]; then
-            echo "  ✓ Successfully installed $pkg"
-        else
-            echo "  ✓ Successfully built wheel for $pkg"
-        fi
-    else
-        if [[ "$MODE" == "install" ]]; then
-            echo "  ✗ Failed to install $pkg"
-        else
-            echo "  ✗ Failed to build wheel for $pkg"
-        fi
-        exit 1
+        cd - > /dev/null
+        echo "  ✓ Successfully built wheel for $pkg"
     fi
 done
 

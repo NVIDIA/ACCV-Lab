@@ -110,6 +110,15 @@ The wheel building script:
   wheels for dependencies will be prepared. You can pass `--with-deps` to the script if you want to use the 
   default `pip wheel` behavior instead (i.e. prepare wheels for all dependencies as well).
 
+> **ℹ️ Note**: Wheel versions are derived from git metadata via `setuptools-scm`. To get meaningful version
+> numbers, build from a repository checkout where `.git`, tags, and sufficient history are available. If git
+> metadata is missing (for example in a source export or shallow CI checkout without tags), the package version
+> may fall back to `0.0.0`.
+
+> **ℹ️ Note**: Even in `wheel` mode, the script installs or updates the `accvlab-build-config` helper package
+> in the active Python environment before building the wheels, because that helper is used by the other
+> ACCV-Lab packages during the build.
+
 #### Installing from Built Wheels
 
 After building wheels, you can install them:
@@ -171,6 +180,20 @@ python -c "import accvlab.batching_helpers; print('Batching helpers loaded succe
 python -c "import accvlab.dali_pipeline_framework; print('DALI pipeline framework loaded successfully')"
 python -c "import accvlab.on_demand_video_decoder; print('On-demand video decoder loaded successfully')"
 ```
+
+### Check Installed Versions
+
+Each top-level ACCV-Lab package exposes `__version__`, and you can also query the installed distribution
+metadata directly, e.g.:
+
+```bash
+# Check package-level __version__
+python -c "import accvlab.on_demand_video_decoder as pkg; print(pkg.__version__)"
+```
+
+> **ℹ️ Note**: `accvlab` itself is an implicit namespace package and therefore does not provide
+> `accvlab.__version__`. Query a concrete package such as `accvlab.on_demand_video_decoder.__version__`,
+> or use `importlib.metadata.version(...)` with a distribution name.
 
 ### Check Available Namespace Packages
 

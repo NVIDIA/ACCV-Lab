@@ -31,10 +31,10 @@ import pytest
 
 from accvlab.on_demand_video_decoder import GopRef, SharedGopStore
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_gop_data(size: int = 1024, seed: int = 42) -> np.ndarray:
     """Create deterministic fake GOP packet data."""
@@ -44,10 +44,12 @@ def _make_gop_data(size: int = 1024, seed: int = 42) -> np.ndarray:
 
 def _shm_files_for_store(store_id: int):
     """List /dev/shm files belonging to a store."""
-    return glob.glob(f"/dev/shm/gs_{store_id}_*") + \
-           glob.glob(f"/dev/shm/gs_meta_{store_id}") + \
-           glob.glob(f"/dev/shm/gs_tick_{store_id}") + \
-           glob.glob(f"/dev/shm/gs_lock_{store_id}")
+    return (
+        glob.glob(f"/dev/shm/gs_{store_id}_*")
+        + glob.glob(f"/dev/shm/gs_meta_{store_id}")
+        + glob.glob(f"/dev/shm/gs_tick_{store_id}")
+        + glob.glob(f"/dev/shm/gs_lock_{store_id}")
+    )
 
 
 # Use a unique store_id range (9000+) to avoid collisions with real training.
@@ -80,13 +82,13 @@ def store(store_id):
 # GopRef serialization
 # ---------------------------------------------------------------------------
 
+
 class TestGopRef:
     """Tests for GopRef NamedTuple."""
 
     def test_pickle_roundtrip(self):
         """GopRef must survive pickle roundtrip (DataLoader IPC)."""
-        ref = GopRef(shm_name="gs_0_12345_0", data_size=1024,
-                     first_frame_id=0, gop_len=30)
+        ref = GopRef(shm_name="gs_0_12345_0", data_size=1024, first_frame_id=0, gop_len=30)
         restored = pickle.loads(pickle.dumps(ref))
         assert restored == ref
         assert type(restored) is GopRef
@@ -109,6 +111,7 @@ class TestGopRef:
 # ---------------------------------------------------------------------------
 # Basic lifecycle
 # ---------------------------------------------------------------------------
+
 
 class TestLifecycle:
     """Create -> put -> lookup -> read -> cleanup."""
@@ -154,6 +157,7 @@ class TestLifecycle:
 # Lookup boundary conditions
 # ---------------------------------------------------------------------------
 
+
 class TestLookupBoundary:
     """Frame-range boundary hit/miss."""
 
@@ -187,6 +191,7 @@ class TestLookupBoundary:
 # Put double-check
 # ---------------------------------------------------------------------------
 
+
 class TestPutDoubleCheck:
     """put() with same GOP twice should not create duplicate shm."""
 
@@ -207,6 +212,7 @@ class TestPutDoubleCheck:
 # ---------------------------------------------------------------------------
 # LRU eviction
 # ---------------------------------------------------------------------------
+
 
 class TestLRUEviction:
     """Capacity full -> oldest entry evicted."""
@@ -257,6 +263,7 @@ class TestLRUEviction:
 # get_batch + orphan cleanup
 # ---------------------------------------------------------------------------
 
+
 class TestGetBatch:
     """get_batch() reads shm blocks and cleans orphans."""
 
@@ -302,6 +309,7 @@ class TestGetBatch:
 # Capacity-too-small fallback (evicted before read)
 # ---------------------------------------------------------------------------
 
+
 class TestCapacityTooSmall:
     """read() returns zeros + RuntimeWarning when shm block was evicted."""
 
@@ -320,6 +328,7 @@ class TestCapacityTooSmall:
             orphan_path = f"/dev/shm/{ref0.shm_name}"
             if os.path.exists(orphan_path):
                 from multiprocessing import shared_memory
+
                 shm = shared_memory.SharedMemory(name=ref0.shm_name, create=False)
                 shm.close()
                 shm.unlink()
@@ -361,6 +370,7 @@ class TestCapacityTooSmall:
             orphan_path = f"/dev/shm/{ref0.shm_name}"
             if os.path.exists(orphan_path):
                 from multiprocessing import shared_memory
+
                 shm = shared_memory.SharedMemory(name=ref0.shm_name, create=False)
                 shm.close()
                 shm.unlink()
@@ -386,6 +396,7 @@ class TestCapacityTooSmall:
 # attach errors
 # ---------------------------------------------------------------------------
 
+
 class TestAttachErrors:
 
     def test_attach_nonexistent_raises(self):
@@ -397,6 +408,7 @@ class TestAttachErrors:
 # ---------------------------------------------------------------------------
 # Multiple stores isolation
 # ---------------------------------------------------------------------------
+
 
 class TestStoreIsolation:
     """Different store_ids do not interfere."""
@@ -434,16 +446,19 @@ class TestStoreIsolation:
 # Cross-process test (spawn mode)
 # ---------------------------------------------------------------------------
 
+
 def _worker_fn(store_id, capacity, video_path, first_frame_id, gop_len, data_bytes, result_queue):
     """Worker process: attach to store, put data, lookup, send result back."""
     store = SharedGopStore.attach(capacity=capacity, store_id=store_id)
     data = np.frombuffer(data_bytes, dtype=np.uint8)
     ref = store.put(video_path, first_frame_id, gop_len, data)
     hit = store.lookup(video_path, first_frame_id)
-    result_queue.put({
-        'ref': ref,
-        'hit': hit,
-    })
+    result_queue.put(
+        {
+            'ref': ref,
+            'hit': hit,
+        }
+    )
     store.close()
 
 
@@ -492,14 +507,15 @@ class TestCrossProcess:
 # Statistics
 # ---------------------------------------------------------------------------
 
+
 class TestStats:
     """get_stats / reset_stats correctness."""
 
     def test_stats_after_operations(self, store):
         store.put("/v.mp4", 0, 30, _make_gop_data(256))
 
-        store.lookup("/v.mp4", 15)   # hit
-        store.lookup("/v.mp4", 15)   # hit
+        store.lookup("/v.mp4", 15)  # hit
+        store.lookup("/v.mp4", 15)  # hit
         store.lookup("/other.mp4", 0)  # miss
 
         stats = store.get_stats()

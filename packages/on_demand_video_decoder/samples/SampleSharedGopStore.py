@@ -47,10 +47,10 @@ import numpy as np
 import accvlab.on_demand_video_decoder as nvc
 from accvlab.on_demand_video_decoder import GopRef, SharedGopStore
 
-
 # ---------------------------------------------------------------------------
 # Simulated worker function (runs in a spawned child process)
 # ---------------------------------------------------------------------------
+
 
 def worker_fn(store_id, capacity, tasks, result_queue):
     """
@@ -74,15 +74,16 @@ def worker_fn(store_id, capacity, tasks, result_queue):
             print(f"  [Worker {pid}] HIT  {video_path} frame={frame_id}")
         else:
             # Step 2: Cache miss -> "load from disk" (simulated with random bytes)
-            fake_gop_data = np.random.randint(
-                0, 256, size=4096, dtype=np.uint8)
+            fake_gop_data = np.random.randint(0, 256, size=4096, dtype=np.uint8)
             ref = store.put(video_path, gop_first_frame, gop_len, fake_gop_data)
             print(f"  [Worker {pid}] MISS {video_path} frame={frame_id} -> put as {ref.shm_name}")
         refs.append(ref)
 
     stats = store.get_stats()
-    print(f"  [Worker {pid}] Stats: hits={stats['hits']}, misses={stats['misses']}, "
-          f"hit_rate={stats['hit_rate']:.0%}")
+    print(
+        f"  [Worker {pid}] Stats: hits={stats['hits']}, misses={stats['misses']}, "
+        f"hit_rate={stats['hit_rate']:.0%}"
+    )
 
     # Send lightweight GopRef list through the "IPC queue"
     result_queue.put(refs)
@@ -92,6 +93,7 @@ def worker_fn(store_id, capacity, tasks, result_queue):
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def SampleSharedGopStore():
     """
@@ -134,12 +136,12 @@ def SampleSharedGopStore():
     ]
     # Worker B requests overlapping videos -> should get cache hits
     tasks_b = [
-        ("/data/video/cam0.mp4", 20, 0, 30),   # same GOP as worker A
-        ("/data/video/cam1.mp4", 25, 0, 30),   # same GOP as worker A
-        ("/data/video/cam2.mp4", 10, 0, 30),   # same GOP as worker A
-        ("/data/video/cam6.mp4", 15, 0, 30),   # new video
-        ("/data/video/cam7.mp4", 15, 0, 30),   # new video
-        ("/data/video/cam8.mp4", 15, 0, 30),   # new video
+        ("/data/video/cam0.mp4", 20, 0, 30),  # same GOP as worker A
+        ("/data/video/cam1.mp4", 25, 0, 30),  # same GOP as worker A
+        ("/data/video/cam2.mp4", 10, 0, 30),  # same GOP as worker A
+        ("/data/video/cam6.mp4", 15, 0, 30),  # new video
+        ("/data/video/cam7.mp4", 15, 0, 30),  # new video
+        ("/data/video/cam8.mp4", 15, 0, 30),  # new video
     ]
 
     # ── 3. Spawn workers ─────────────────────────────────────────
@@ -148,10 +150,8 @@ def SampleSharedGopStore():
     queue_a = ctx.Queue()
     queue_b = ctx.Queue()
 
-    worker_a = ctx.Process(target=worker_fn,
-                           args=(STORE_ID, CAPACITY, tasks_a, queue_a))
-    worker_b = ctx.Process(target=worker_fn,
-                           args=(STORE_ID, CAPACITY, tasks_b, queue_b))
+    worker_a = ctx.Process(target=worker_fn, args=(STORE_ID, CAPACITY, tasks_a, queue_a))
+    worker_b = ctx.Process(target=worker_fn, args=(STORE_ID, CAPACITY, tasks_b, queue_b))
 
     # Start A first, wait for it, then start B (so B sees A's data)
     worker_a.start()
@@ -168,8 +168,9 @@ def SampleSharedGopStore():
     all_refs = refs_a + refs_b
 
     print(f"\n[Main] Received {len(all_refs)} GopRef references from workers")
-    print(f"[Main] GopRef size: {len(pickle.dumps(all_refs[0]))} bytes "
-          f"(vs ~4096 bytes of actual GOP data)")
+    print(
+        f"[Main] GopRef size: {len(pickle.dumps(all_refs[0]))} bytes " f"(vs ~4096 bytes of actual GOP data)"
+    )
 
     # ── 5. get_batch: read shm blocks + orphan cleanup ────────────
     print(f"\n[Main] Resolving {len(all_refs)} references (atomic open + orphan cleanup)...")
@@ -188,9 +189,12 @@ def SampleSharedGopStore():
 
     # Verify no shm files remain
     import glob
-    remaining = glob.glob(f"/dev/shm/gs_{STORE_ID}_*") + \
-                glob.glob(f"/dev/shm/gs_meta_{STORE_ID}") + \
-                glob.glob(f"/dev/shm/gs_tick_{STORE_ID}")
+
+    remaining = (
+        glob.glob(f"/dev/shm/gs_{STORE_ID}_*")
+        + glob.glob(f"/dev/shm/gs_meta_{STORE_ID}")
+        + glob.glob(f"/dev/shm/gs_tick_{STORE_ID}")
+    )
     assert not remaining, f"Leaked shm files: {remaining}"
     print("[Main] Verified: no shared memory files leaked.")
 

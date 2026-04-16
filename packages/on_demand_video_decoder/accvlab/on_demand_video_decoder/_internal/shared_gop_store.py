@@ -58,16 +58,18 @@ from .types import GopRef
 # ---------------------------------------------------------------------------
 
 # 96 bytes per entry -- fits in L1 cache for capacity < 500 (< 48 KB total).
-ENTRY_DTYPE = np.dtype([
-    ('video_path_hash', np.uint64),  # deterministic MD5 hash of video_path
-    ('first_frame_id', np.int32),    # first frame ID of this GOP
-    ('gop_len', np.int32),           # number of frames in this GOP
-    ('data_size', np.int32),         # actual GOP data size in bytes
-    ('state', np.uint8),             # 0=FREE, 1=USED
-    ('_pad', np.uint8, (3,)),        # alignment padding
-    ('access_tick', np.int64),       # monotonic counter for LRU ordering
-    ('shm_name', 'S64'),            # SharedMemory name for the data block
-])
+ENTRY_DTYPE = np.dtype(
+    [
+        ('video_path_hash', np.uint64),  # deterministic MD5 hash of video_path
+        ('first_frame_id', np.int32),  # first frame ID of this GOP
+        ('gop_len', np.int32),  # number of frames in this GOP
+        ('data_size', np.int32),  # actual GOP data size in bytes
+        ('state', np.uint8),  # 0=FREE, 1=USED
+        ('_pad', np.uint8, (3,)),  # alignment padding
+        ('access_tick', np.int64),  # monotonic counter for LRU ordering
+        ('shm_name', 'S64'),  # SharedMemory name for the data block
+    ]
+)
 
 _STATE_FREE = np.uint8(0)
 _STATE_USED = np.uint8(1)
@@ -119,22 +121,19 @@ class SharedGopStore:
         meta_size = capacity * ENTRY_DTYPE.itemsize
         if _create:
             _cleanup_stale_shm(meta_name)
-            self._meta_shm = shared_memory.SharedMemory(
-                name=meta_name, create=True, size=meta_size)
+            self._meta_shm = shared_memory.SharedMemory(name=meta_name, create=True, size=meta_size)
             # Zero-initialize all entries (state=FREE)
             np.frombuffer(self._meta_shm.buf, dtype=np.uint8)[:] = 0
         else:
             try:
-                self._meta_shm = shared_memory.SharedMemory(
-                    name=meta_name, create=False)
+                self._meta_shm = shared_memory.SharedMemory(name=meta_name, create=False)
             except FileNotFoundError:
                 raise FileNotFoundError(
                     f"SharedGopStore with store_id={store_id} not found. "
                     f"Call SharedGopStore.create() in the main process first."
                 )
 
-        self._entries = np.ndarray(
-            capacity, dtype=ENTRY_DTYPE, buffer=self._meta_shm.buf)
+        self._entries = np.ndarray(capacity, dtype=ENTRY_DTYPE, buffer=self._meta_shm.buf)
 
         # --- File-based lock (works across spawn'd processes) ---
         self._lock_path = f"/dev/shm/gs_lock_{store_id}"
@@ -147,12 +146,10 @@ class SharedGopStore:
         tick_name = f"gs_tick_{store_id}"
         if _create:
             _cleanup_stale_shm(tick_name)
-            self._tick_shm = shared_memory.SharedMemory(
-                name=tick_name, create=True, size=8)
+            self._tick_shm = shared_memory.SharedMemory(name=tick_name, create=True, size=8)
             np.frombuffer(self._tick_shm.buf, dtype=np.int64)[:] = 0
         else:
-            self._tick_shm = shared_memory.SharedMemory(
-                name=tick_name, create=False)
+            self._tick_shm = shared_memory.SharedMemory(name=tick_name, create=False)
         self._tick_arr = np.ndarray(1, dtype=np.int64, buffer=self._tick_shm.buf)
 
         # --- Per-process handle cache (not shared) ---
@@ -220,10 +217,11 @@ class SharedGopStore:
         vp_hash = _hash_video_path(video_path)
         for i in range(self.capacity):
             e = self._entries[i]
-            if (e['state'] == _STATE_USED
-                    and e['video_path_hash'] == vp_hash
-                    and e['first_frame_id'] <= frame_id
-                    < e['first_frame_id'] + e['gop_len']):
+            if (
+                e['state'] == _STATE_USED
+                and e['video_path_hash'] == vp_hash
+                and e['first_frame_id'] <= frame_id < e['first_frame_id'] + e['gop_len']
+            ):
                 e['access_tick'] = self._next_tick()
                 self._hits += 1
                 return GopRef(
@@ -235,8 +233,7 @@ class SharedGopStore:
         self._misses += 1
         return None
 
-    def put(self, video_path: str, first_frame_id: int,
-            gop_len: int, data: np.ndarray) -> GopRef:
+    def put(self, video_path: str, first_frame_id: int, gop_len: int, data: np.ndarray) -> GopRef:
         """Store GOP packet data and return a :class:`GopRef`.
 
         Holds ``flock`` during eviction + insertion to guarantee atomicity.
@@ -260,8 +257,7 @@ class SharedGopStore:
             # Clean up if same GOP was previously cached then evicted
             _cleanup_stale_shm(shm_name)
 
-            shm = shared_memory.SharedMemory(
-                name=shm_name, create=True, size=data_size)
+            shm = shared_memory.SharedMemory(name=shm_name, create=True, size=data_size)
             shm.buf[:data_size] = data.tobytes()
             shm.close()  # close handle; shm persists until unlink
 
@@ -301,6 +297,7 @@ class SharedGopStore:
                 shm = shared_memory.SharedMemory(name=shm_name, create=False)
             except FileNotFoundError:
                 import warnings
+
                 warnings.warn(
                     f"SharedGopStore: shm block '{shm_name}' not found. "
                     f"This means a GOP was evicted before the main process "
@@ -316,7 +313,7 @@ class SharedGopStore:
         else:
             shm = self._local_shm_handles[shm_name]
 
-        return np.frombuffer(shm.buf[:ref.data_size], dtype=np.uint8)
+        return np.frombuffer(shm.buf[: ref.data_size], dtype=np.uint8)
 
     def get_batch(self, refs: List[GopRef]) -> List[np.ndarray]:
         """Read a batch of GOPs from shared memory (zero-copy).
@@ -348,8 +345,7 @@ class SharedGopStore:
         """Per-process cache statistics."""
         total = self._hits + self._misses
         hit_rate = self._hits / total if total > 0 else 0.0
-        used_slots = int(np.count_nonzero(
-            self._entries['state'] == _STATE_USED))
+        used_slots = int(np.count_nonzero(self._entries['state'] == _STATE_USED))
         return {
             'hits': self._hits,
             'misses': self._misses,
@@ -483,6 +479,7 @@ class SharedGopStore:
 # ---------------------------------------------------------------------------
 # Module-private helpers
 # ---------------------------------------------------------------------------
+
 
 def _force_close_shm(shm) -> None:
     """Close a SharedMemory handle, suppressing BufferError from live numpy views.

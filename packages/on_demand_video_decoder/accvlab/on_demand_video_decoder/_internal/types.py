@@ -34,6 +34,7 @@ class GopRef(NamedTuple):
         first_frame_id: First frame index covered by this GOP.
         gop_len: Number of frames in this GOP.
     """
+
     shm_name: str
     data_size: int
     first_frame_id: int

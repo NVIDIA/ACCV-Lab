@@ -85,6 +85,7 @@ extensions = [
     'note_literalinclude',  # Local extension: note-literalinclude directive
     'module_docstring',  # Local extension: module-docstring directive
     'markdown_note_admonitions',  # Convert Markdown blockquotes to Sphinx admonitions
+    'namedtuple_attributes',  # Prefer docstring attribute docs over NamedTuple defaults
 ]
 
 # Optionally enable spelling if available; warn if not, including the original error

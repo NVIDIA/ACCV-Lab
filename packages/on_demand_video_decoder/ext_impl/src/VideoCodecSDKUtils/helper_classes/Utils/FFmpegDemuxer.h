@@ -365,12 +365,19 @@ class FFmpegDemuxer {
                 nChromaHeight = (nHeight + 1) >> 1;
                 nBPP = 1;
                 break;
-            default:
-                LOG(WARNING) << "ChromaFormat not recognized. Assuming 420";
+            default: {
+                // Warn on first occurrence only to avoid log spam when the
+                // same unsupported pixfmt streams in repeatedly.
+                static bool warned = false;
+                if (!warned) {
+                    LOG(WARNING) << "ChromaFormat not recognized. Assuming 420";
+                    warned = true;
+                }
                 eChromaFormat = AV_PIX_FMT_YUV420P;
                 nBitDepth = 8;
                 nChromaHeight = (nHeight + 1) >> 1;
                 nBPP = 1;
+            }
         }
 
         bMp4H264 =

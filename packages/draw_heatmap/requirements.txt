@@ -1,3 +1,0 @@
-torch>=2.0.0
-accvlab.batching_helpers>=0.0.0
-accvlab-build-config>=0.0.0 

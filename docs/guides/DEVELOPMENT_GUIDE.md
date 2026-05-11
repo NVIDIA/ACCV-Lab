@@ -201,7 +201,14 @@ Add your package metadata and dependencies to `pyproject.toml`. For example, the
 
 ```toml
 [build-system]
-requires = ["setuptools>=64", "wheel", "torch>=2.0.0", "setuptools-scm>=8"]
+requires = [
+    "setuptools>=64",
+    "wheel",
+    "torch>=2.0.0",
+    "pybind11>=2.10.0",
+    "setuptools-scm>=8",
+    "accvlab-build-config @ file:../../build_config",
+]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -212,13 +219,16 @@ requires-python = ">=3.8"
 dependencies = [
     "torch>=2.0.0",
     "numpy>=1.22.2",
-    "accvlab-build-config>=0.0.0",
 ]
 
 [project.optional-dependencies]
 optional = [
     "pytest",
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["accvlab.example_package*"]
 
 [tool.setuptools_scm]
 version_scheme = "no-guess-dev"
@@ -227,6 +237,11 @@ root = "../.."
 ```
 
 Use this pattern for your own namespace package, adapting the dependency names as needed.
+
+> **ℹ️ Note**: The `accvlab-build-config @ file:../../build_config` build dependency is intentionally a
+> local path reference. From a package under `packages/<package_name>/`, it resolves to the repository's `build_config/` package 
+> so isolated pip builds use the local helper package. See
+> [Installing with Build Isolation](INSTALLATION_GUIDE.md#installing-with-build-isolation) for the related precautions.
 
 > **ℹ️ Note**: ACCV-Lab packages use `setuptools-scm` for versioning. The package version is derived from SCM
 > metadata, while `[project]` marks it as dynamic and `[tool.setuptools_scm]` configures how it is resolved,
@@ -730,14 +745,16 @@ The `accvlab_build_config` package provides the following shared build & configu
 - `load_config()` - Loads build configuration from environment variables (shared across all build types). Please see the 
   [Available Build Variables](INSTALLATION_GUIDE.md#available-build-variables) section of the 
   [Installation Guide](INSTALLATION_GUIDE.md) for the list of the supported variables.
-- `detect_cuda_info()` - Detects CUDA availability and version
+- `detect_cuda_info()` - Detects CUDA availability and GPU architectures. Missing PyTorch or CPU-only PyTorch raises a
+  build configuration error.
 - `get_compile_flags()` - Generates compiler flags for PyTorch extensions; based on the variable values obtained from 
   `load_config()`. The generated flags can then be passed to the PyTorch extensions (see example below).
 - `build_cmake_args()` - Produces the full CMake `-D` argument list for CMake-based builds. It contains two parts:
   - **Environment-derived build settings**: Converts ACCV-Lab build variables into CMake cache entries:
     - `DEBUG_BUILD` → `CMAKE_BUILD_TYPE`
     - `CPP_STANDARD` → `CMAKE_CXX_STANDARD`, `CMAKE_CUDA_STANDARD`
-    - `CUSTOM_CUDA_ARCHS` → `CMAKE_CUDA_ARCHITECTURES` (auto-detect if unset)
+    - `CUSTOM_CUDA_ARCHS` → `CMAKE_CUDA_ARCHITECTURES` (auto-detect via CUDA-enabled PyTorch if unset; if no architecture
+      can be detected, do not pass it so package-specific CMake defaults apply)
     - `VERBOSE_BUILD` → `CMAKE_VERBOSE_MAKEFILE`
     - `OPTIMIZE_LEVEL`, `USE_FAST_MATH`, `ENABLE_PROFILING` → appended to `CMAKE_CXX_FLAGS`, `CMAKE_CUDA_FLAGS`
     - Always sets `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON`
@@ -754,6 +771,9 @@ Each namespace package's `setup.py` imports and uses these shared utilities, for
 
 ```python
 from torch.utils.cpp_extension import BuildExtension, CppExtension, CUDAExtension
+
+# The real setup.py files wrap this import in a guarded block with a prominent
+# missing-dependency message. The message body is omitted here for brevity.
 from accvlab_build_config import (
     load_config,
     detect_cuda_info,
@@ -838,7 +858,9 @@ Depending on the package type, build variables are consumed as follows:
 - Scikit-build packages:
   - In `setup.py`, pass CMake arguments from the helper:
   ```python
-  from accvlab_build_config.helpers.cmake_args import build_cmake_args
+  # The real setup.py files wrap this import in a guarded block with a prominent
+  # missing-dependency message. The message body is omitted here for brevity.
+  from accvlab_build_config import build_cmake_args
 
   _cmake_args = build_cmake_args()
   setup(

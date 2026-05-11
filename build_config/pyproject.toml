@@ -1,5 +1,9 @@
 [build-system]
-requires = ["setuptools>=64", "wheel", "torch>=1.7.0", "setuptools-scm>=8"]
+requires = [
+    "setuptools>=64", 
+    "wheel", 
+    "setuptools-scm>=8"
+]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -11,7 +15,7 @@ authors = [
     {name = "ACCV-Lab Team"}
 ]
 dependencies = [
-    "torch>=1.7.0",
+    "torch>=2.0.0",
     "setuptools-scm>=8",
 ]
 

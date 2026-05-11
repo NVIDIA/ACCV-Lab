@@ -120,8 +120,3 @@ Installation
 
 This package is installed as part of the `accvlab` package. Please refer to the 
 :doc:`Installation Guide <../../../guides/INSTALLATION_GUIDE>` for more details.
-
-.. important::
-   This package has a runtime dependency on the 
-   :doc:`accvlab.batching_helpers <../../batching_helpers/docs/introduction>` package. Please install it 
-   before installing this package.

@@ -228,6 +228,9 @@ else
     exit 1
 fi
 
+# In wheel mode the helper is installed only so package builds can import it.
+# It is not emitted into the wheelhouse because prepared wheels no longer need build-time helpers.
+
 # Build pip command with appropriate flags as an argv array.
 # This avoids `eval` and keeps paths with spaces intact.
 build_pip_command() {
@@ -250,20 +253,6 @@ build_pip_command() {
         PIP_COMMAND+=("$BUILD_ISOLATION_FLAG")
     fi
 }
-
-# For wheel mode, also build the helper package wheel
-if [[ "$MODE" == "wheel" ]]; then
-    echo ""
-    echo "Building helper package wheel: build_config"
-    cd "$HELPER_DIR"
-    
-    echo "  Building wheel..."
-    build_pip_command wheel .
-    "${PIP_COMMAND[@]}" || { echo "  ✗ Failed to build helper package wheel"; exit 1; }
-    
-    cd - > /dev/null
-    echo "  ✓ Successfully built helper package wheel"
-fi
 
 echo ""
 if [[ "$MODE" == "install" ]]; then

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # Copyright (c) 2025, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,10 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import TYPE_CHECKING
+
 import torch
 from accvlab.draw_heatmap.draw_heatmap_ext import draw_heatmap_batched_impl
 from accvlab.draw_heatmap.draw_heatmap_ext import draw_heatmap_batched_classwise_impl
-from accvlab.batching_helpers import RaggedBatch
+
+if TYPE_CHECKING:
+    from accvlab.batching_helpers import RaggedBatch
 
 
 def draw_heatmap_batched(

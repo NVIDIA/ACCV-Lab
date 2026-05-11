@@ -1,3 +1,0 @@
-# Optional requirements for draw_heatmap
-pytest
-shapely

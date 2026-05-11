@@ -1,3 +1,0 @@
-torch>=2.0.0
-numpy>=1.22.2
-accvlab-build-config>=0.0.0 

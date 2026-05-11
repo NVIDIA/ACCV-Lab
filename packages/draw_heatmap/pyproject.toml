@@ -1,5 +1,12 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel", "torch>=2.0.0", "ninja", "setuptools-scm>=8"]
+requires = [
+    "setuptools>=61.0",
+    "wheel",
+    "torch>=2.0.0",
+    "ninja",
+    "setuptools-scm>=8",
+    "accvlab-build-config @ file:../../build_config",
+]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -9,8 +16,6 @@ description = "Draw Heatmap Package (part of the ACCV-Lab package)."
 requires-python = ">=3.8"
 dependencies = [
     "torch>=2.0.0",
-    "accvlab.batching_helpers>=0.0.0",
-    "accvlab-build-config>=0.0.0",
 ]
 
 [project.optional-dependencies]

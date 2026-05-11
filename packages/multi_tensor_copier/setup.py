@@ -17,7 +17,28 @@ from __future__ import annotations
 from setuptools import find_namespace_packages, setup
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 
-from accvlab_build_config import detect_cuda_info, get_compile_flags, load_config
+_ACCVLAB_BUILD_CONFIG_IMPORT_ERROR = """
+#########################################################################################
+# Missing build dependency: accvlab-build-config.                                       #
+#                                                                                       #
+# ACCV-Lab package builds normally use --no-build-isolation, so the shared build helper #
+# must already be installed in the active environment. Install it first with:           #
+#                                                                                       #
+#     pip install <ACCV-Lab root>/build_config                                          #
+#                                                                                       #
+# and retry.                                                                            #
+#                                                                                       #
+# Alternatively, use <ACCV-Lab root>/scripts/package_manager.sh to install packages in  #
+# the documented order.                                                                 #
+#########################################################################################
+"""
+
+try:
+    from accvlab_build_config import detect_cuda_info, get_compile_flags, load_config
+except ModuleNotFoundError as exc:
+    if exc.name != "accvlab_build_config":
+        raise
+    raise RuntimeError(_ACCVLAB_BUILD_CONFIG_IMPORT_ERROR) from exc
 
 
 def get_extensions():

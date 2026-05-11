@@ -3,6 +3,8 @@ import re
 from pathlib import Path
 from typing import List, Optional
 
+from .build_utils import missing_torch_error, require_torch_cuda_support
+
 # Marker file at the ACCV-Lab monorepo root (see `.nav` in the repository).
 _NAV_MARKER = ".nav"
 # Must match `.nav` contents after strip (UTF-8); see repository root `.nav`.
@@ -58,22 +60,32 @@ def _normalize_cpp_standard(value: str) -> str:
 def _detect_cuda_architectures() -> List[str]:
     """
     Try to detect CUDA architectures from PyTorch if available.
-    Returns a list like ['70', '75', '80'] ([] if not detected).
+
+    Returns a list like ['70', '75', '80']. Returns an empty list if PyTorch is
+    CUDA-enabled but no CUDA devices are available.
+
+    Raises:
+        RuntimeError: If PyTorch is not installed or is installed without CUDA
+            support. ACCV-Lab CUDA extension builds require a CUDA-enabled
+            PyTorch wheel, so this is treated as a build configuration error
+            rather than as "CUDA not detected".
     """
     try:
         import torch  # type: ignore
+    except ImportError as exc:
+        raise missing_torch_error() from exc
 
-        if not torch.cuda.is_available():
-            return []
-        arches: List[str] = []
-        for i in range(torch.cuda.device_count()):
-            major, minor = torch.cuda.get_device_capability(i)
-            arch = f"{major}{minor}"
-            if arch not in arches:
-                arches.append(arch)
-        return arches
-    except Exception:
+    require_torch_cuda_support(torch)
+
+    if not torch.cuda.is_available():
         return []
+    arches: List[str] = []
+    for i in range(torch.cuda.device_count()):
+        major, minor = torch.cuda.get_device_capability(i)
+        arch = f"{major}{minor}"
+        if arch not in arches:
+            arches.append(arch)
+    return arches
 
 
 def get_project_root() -> Path:

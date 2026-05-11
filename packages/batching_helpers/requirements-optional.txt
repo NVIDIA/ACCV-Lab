@@ -1,2 +1,0 @@
-# Optional requirements for batching_helpers
-pytest

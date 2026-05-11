@@ -15,7 +15,28 @@
 from skbuild import setup
 from setuptools import find_namespace_packages
 
-from accvlab_build_config import build_cmake_args
+_ACCVLAB_BUILD_CONFIG_IMPORT_ERROR = """
+#########################################################################################
+# Missing build dependency: accvlab-build-config.                                       #
+#                                                                                       #
+# ACCV-Lab package builds normally use --no-build-isolation, so the shared build helper #
+# must already be installed in the active environment. Install it first with:           #
+#                                                                                       #
+#     pip install <ACCV-Lab root>/build_config                                          #
+#                                                                                       #
+# and retry.                                                                            #
+#                                                                                       #
+# Alternatively, use <ACCV-Lab root>/scripts/package_manager.sh to install packages in  #
+# the documented order.                                                                 #
+#########################################################################################
+"""
+
+try:
+    from accvlab_build_config import build_cmake_args
+except ModuleNotFoundError as exc:
+    if exc.name != "accvlab_build_config":
+        raise
+    raise RuntimeError(_ACCVLAB_BUILD_CONFIG_IMPORT_ERROR) from exc
 
 _cmake_args = build_cmake_args()
 

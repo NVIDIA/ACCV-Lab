@@ -24,6 +24,47 @@ import sys
 from typing import Optional
 
 
+def missing_torch_error() -> RuntimeError:
+    return RuntimeError("""
+#########################################################################################
+# Missing build dependency: torch.                                                      #
+#                                                                                       #
+# ACCV-Lab CUDA extension builds require PyTorch with CUDA support.                     #
+#                                                                                       #
+# Install a CUDA-enabled PyTorch wheel and retry. When using pip build isolation,       #
+# configure PIP_INDEX_URL/PIP_EXTRA_INDEX_URL so the isolated build environment         #
+# resolves a CUDA-enabled torch wheel. See:                                             #
+#                                                                                       #
+#     docs/guides/INSTALLATION_GUIDE.md#installing-with-build-isolation                 #
+#########################################################################################
+""")
+
+
+def require_torch_cuda_support(torch_module) -> None:
+    if getattr(torch_module.version, "cuda", None) is not None:
+        return
+
+    torch_version = getattr(torch_module, "__version__", "unknown")
+    raise RuntimeError(f"""
+#########################################################################################
+# PyTorch was installed without CUDA support.                                           #
+#                                                                                       #
+# ACCV-Lab CUDA extension builds require a CUDA-enabled PyTorch wheel.                  #
+#                                                                                       #
+# Detected PyTorch build:                                                               #
+#                                                                                       #
+#     torch.__version__ = {torch_version!r:<62}#
+#     torch.version.cuda = None                                                         #
+#                                                                                       #
+# Install PyTorch with CUDA support and retry. When using pip build isolation,          #
+# configure PIP_INDEX_URL/PIP_EXTRA_INDEX_URL so the isolated build environment         #
+# resolves a CUDA-enabled torch wheel. See:                                             #
+#                                                                                       #
+#     docs/guides/INSTALLATION_GUIDE.md#installing-with-build-isolation                 #
+#########################################################################################
+""")
+
+
 def load_config(default_config: Optional[dict] = None) -> dict:
     """Load configuration from environment variables or use defaults
 
@@ -74,10 +115,16 @@ def load_config(default_config: Optional[dict] = None) -> dict:
 
 
 def detect_cuda_info():
-    """Detect CUDA availability and GPU architectures
+    """Detect CUDA availability and GPU architectures.
+
+    Missing or CPU-only PyTorch is treated as a build configuration error:
+    ACCV-Lab CUDA extension builds require a CUDA-enabled PyTorch wheel.
 
     Returns:
         dict: CUDA information including availability and GPU architectures
+
+    Raises:
+        RuntimeError: If PyTorch is not installed or is installed without CUDA support.
     """
     cuda_info = {
         'cuda_available': False,
@@ -86,6 +133,8 @@ def detect_cuda_info():
 
     try:
         import torch
+
+        require_torch_cuda_support(torch)
 
         if torch.cuda.is_available():
             cuda_info['cuda_available'] = True
@@ -96,8 +145,8 @@ def detect_cuda_info():
                 arch = f"{capability[0]}{capability[1]}"
                 if arch not in cuda_info['gpu_architectures']:
                     cuda_info['gpu_architectures'].append(arch)
-    except ImportError:
-        pass  # torch not available
+    except ImportError as exc:
+        raise missing_torch_error() from exc
 
     return cuda_info
 

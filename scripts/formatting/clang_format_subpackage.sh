@@ -43,11 +43,7 @@ if [ $# -eq 0 ] || [ $# -gt 1 ] || [[ "$1" == -* ]]; then
         echo "Error: Unknown option: $1"
     fi
     echo "Available namespace packages:"
-    python3 -c "
-from namespace_packages_config import get_package_names
-for pkg in get_package_names():
-    print(f'  - {pkg}')
-"
+    python3 "$SCRIPT_DIR/helpers/list_namespace_packages.py"
     exit 1
 fi
 
@@ -69,15 +65,20 @@ if ! command -v clang-format &> /dev/null; then
     return 0 2>/dev/null || exit 0
 fi
 
-# Format C++ files in packages/<package>/ (includes tests/ and ext_impl/ subdirectories)
+# Format C++ files while excluding directories declared in .gitmodules.
 echo "Formatting C++ files in packages/$PACKAGE/..."
 if [ -d "packages/$PACKAGE" ]; then
-    CPP_FILES=$(find "packages/$PACKAGE" -regex '.*\.\(cpp\|cc\|c\|cu\|hpp\|h\|cuh\)' 2>/dev/null)
-    if [ -n "$CPP_FILES" ]; then
-        echo "$CPP_FILES" | xargs clang-format -style=file -fallback-style=none -i
-    else
-        echo "  No C++ files found"
-    fi
+    python3 "$SCRIPT_DIR/helpers/run_formatter_on_files.py" \
+        --extension .cpp \
+        --extension .cc \
+        --extension .c \
+        --extension .cu \
+        --extension .hpp \
+        --extension .h \
+        --extension .cuh \
+        --root "packages/$PACKAGE" \
+        --empty-message "  No C++ files found in packages/$PACKAGE" \
+        -- clang-format -style=file -fallback-style=none -i
 fi
 
 echo "C++ formatting for namespace package '$PACKAGE' completed successfully!"

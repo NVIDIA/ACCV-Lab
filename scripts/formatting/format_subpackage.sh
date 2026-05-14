@@ -35,11 +35,7 @@ if [ $# -eq 0 ] || [ $# -gt 1 ] || [[ "$1" == -* ]]; then
         echo "Error: Unknown option: $1"
     fi
     echo "Available namespace packages:"
-    python3 -c "
-from namespace_packages_config import get_package_names
-for pkg in get_package_names():
-    print(f'  - {pkg}')
-"
+    python3 "$SCRIPT_DIR/helpers/list_namespace_packages.py"
     exit 1
 fi
 

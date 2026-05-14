@@ -79,45 +79,19 @@ if ! command -v clang-format &> /dev/null; then
 fi
 
 if [ "$INCLUDE_SUBPACKAGES" = true ]; then
-    # Format all namespace packages
+    # Format all namespace packages, excluding directories declared in .gitmodules.
     echo "Formatting namespace packages..."
     echo "Using nearest .clang-format (auto-discovery)"
-    python3 -c "
-from namespace_packages_config import get_package_names
-import subprocess
-import os
-import shutil
-import sys
-
-# We intentionally do not pass a specific config path so clang-format
-# will auto-discover the nearest .clang-format for each file
-
-# Check if clang-format is available
-if not shutil.which('clang-format'):
-    print('  Warning: clang-format not found, skipping C++ formatting')
-    exit(0)
-
-packages = get_package_names()
-if not packages:
-    print('  No namespace packages found')
-else:
-    for pkg in packages:
-        print(f'  Formatting C++ in namespace package: {pkg}')
-        
-        # Format packages/<package>/ (includes tests/ and ext_impl/ subdirectories)
-        pkg_path = f'packages/{pkg}'
-        if os.path.exists(pkg_path):
-            try:
-                result = subprocess.run(['find', pkg_path, '-regex', r'.*\.\(cpp\|cc\|c\|cu\|hpp\|h\|cuh\)'], 
-                                      capture_output=True, text=True, check=True)
-                if result.stdout.strip():
-                    cpp_files = result.stdout.strip().split('\n')
-                    subprocess.run(['clang-format', '-style=file', '-fallback-style=none', '-i'] + cpp_files, check=True)
-                else:
-                    print(f'    No C++ files found in {pkg_path}')
-            except subprocess.CalledProcessError:
-                pass
-" CLANG_FORMAT_CONFIG="$CLANG_FORMAT_CONFIG"
+    python3 "$SCRIPT_DIR/helpers/run_formatter_on_namespace_packages.py" \
+        --extension .cpp \
+        --extension .cc \
+        --extension .c \
+        --extension .cu \
+        --extension .hpp \
+        --extension .h \
+        --extension .cuh \
+        --language-name "C++" \
+        -- clang-format -style=file -fallback-style=none -i
 else
     echo "Skipping namespace packages (use --include-subpackages to format them)"
     echo "Note: C++ code only exists in namespace packages"

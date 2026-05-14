@@ -753,8 +753,7 @@ The `accvlab_build_config` package provides the following shared build & configu
   - **Environment-derived build settings**: Converts ACCV-Lab build variables into CMake cache entries:
     - `DEBUG_BUILD` → `CMAKE_BUILD_TYPE`
     - `CPP_STANDARD` → `CMAKE_CXX_STANDARD`, `CMAKE_CUDA_STANDARD`
-    - `CUSTOM_CUDA_ARCHS` → `CMAKE_CUDA_ARCHITECTURES` (auto-detect via CUDA-enabled PyTorch if unset; if no architecture
-      can be detected, do not pass it so package-specific CMake defaults apply)
+    - `CUSTOM_CUDA_ARCHS` → `CMAKE_CUDA_ARCHITECTURES`
     - `VERBOSE_BUILD` → `CMAKE_VERBOSE_MAKEFILE`
     - `OPTIMIZE_LEVEL`, `USE_FAST_MATH`, `ENABLE_PROFILING` → appended to `CMAKE_CXX_FLAGS`, `CMAKE_CUDA_FLAGS`
     - Always sets `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON`
@@ -764,6 +763,11 @@ The `accvlab_build_config` package provides the following shared build & configu
     it.
 - `run_external_build()` - Executes `build_and_copy.sh` build script (used in external implementations, see 
   [External Implementations](#external-implementations) section for more details).
+
+> **ℹ️ Note**: The authoritative list of supported build variables, defaults, and CUDA 
+> architecture handling is in the 
+> [Available Build Variables](INSTALLATION_GUIDE.md#available-build-variables) section of the 
+> [Installation Guide](INSTALLATION_GUIDE.md).
 
 ### Usage in Namespace Packages
 
@@ -817,6 +821,13 @@ Please see the `setup.py` files of the example packages (e.g. `packages/example_
 `packages/example_skbuild_package/setup.py`) for complete working examples for different package types.
 
 ### How Build Variables Are Picked Up
+
+> **ℹ️ Note**: The authoritative list of supported build variables, defaults, and CUDA 
+> architecture handling is in the 
+> [Available Build Variables](INSTALLATION_GUIDE.md#available-build-variables) section of the 
+> [Installation Guide](INSTALLATION_GUIDE.md). The 
+> [Shared Build & Configuration Utilities](#shared-build--configuration-utilities) section explains how the 
+> shared helper utilities consume those variables.
 
 Depending on the package type, build variables are consumed as follows:
 
@@ -931,8 +942,8 @@ Note that
 
 ## Code Formatting
 
-The ACCV-Lab project uses automated code formatting to maintain consistent code style across all namespace 
-packages. Please see the [Formatting Guide](FORMATTING_GUIDE.md) for details.
+The ACCV-Lab project uses automated code formatting to maintain consistent code style across common code and 
+all namespace packages. Please see the [Formatting Guide](FORMATTING_GUIDE.md) for details.
 
 ### Script Features
 

@@ -9,7 +9,7 @@ dependencies needed to build and install ACCV-Lab, including all the contained n
 The Dockerfile is located in the `docker` directory of the ACCV-Lab repository.
 
 The Dockerfile uses the [nvidia/cuda](https://hub.docker.com/r/nvidia/cuda) image 
-(version: `nvidia/cuda:12.4.1-devel-ubuntu22.04`) as the base image.
+(version: `nvidia/cuda:12.8.2-devel-ubuntu22.04`) as the base image.
 
 The Dockerfile has the following optional build arguments:
 - `USER_ID`: The ID of the user to use for the container.

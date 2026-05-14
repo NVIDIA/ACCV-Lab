@@ -35,11 +35,7 @@ if [ $# -eq 0 ] || [ $# -gt 1 ] || [[ "$1" == -* ]]; then
         echo "Error: Unknown option: $1"
     fi
     echo "Available namespace packages:"
-    python3 -c "
-from namespace_packages_config import get_package_names
-for pkg in get_package_names():
-    print(f'  - {pkg}')
-"
+    python3 "$SCRIPT_DIR/helpers/list_namespace_packages.py"
     exit 1
 fi
 
@@ -53,10 +49,14 @@ fi
 
 echo "Formatting namespace package: $PACKAGE"
 
-# Format Python files in packages/<package>/ (includes tests/ and ext_impl/ subdirectories)
+# Format Python files while excluding directories declared in .gitmodules.
 echo "Formatting packages/$PACKAGE/..."
 if [ -d "packages/$PACKAGE" ]; then
-    black packages/$PACKAGE/
+    python3 "$SCRIPT_DIR/helpers/run_formatter_on_files.py" \
+        --extension .py \
+        --root "packages/$PACKAGE" \
+        --empty-message "  No Python files found in packages/$PACKAGE" \
+        -- black
 fi
 
 echo "Formatting of namespace package '$PACKAGE' completed successfully!" 

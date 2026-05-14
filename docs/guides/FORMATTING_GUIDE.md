@@ -1,9 +1,9 @@
 # Code Formatting Guide
 
-The ACCV-Lab project uses automated code formatting to maintain consistent code style across all namespace 
-packages. The formatting system integrates with the shared configuration system and automatically discovers 
-all namespace packages. The project uses `clang-format` for C++/CUDA code formatting and `black` for Python 
-code formatting.
+The ACCV-Lab project uses automated code formatting to maintain consistent code style across common code and 
+all namespace packages. The formatting system integrates with the shared configuration system, automatically 
+discovers all namespace packages, and skips Git submodules (based on the declarations in the  `.gitmodules` file). The project 
+uses `clang-format` for C++/CUDA code formatting and `black` for Python code formatting.
 
 ## Running Code Formatting
 
@@ -24,7 +24,7 @@ The primary script for all formatting operations is `scripts/format.sh`:
 # Format C++/CUDA code only
 ./scripts/format.sh --cpp
 
-# Format common code only (root files, docs, shared build_config)
+# Format common code only (root files, docs, scripts, shared build_config)
 ./scripts/format.sh --common-only
 
 # Format common code + all namespace packages
@@ -97,6 +97,9 @@ The formatting scripts automatically include external implementation files locat
   namespace packages
 - Both C++/CUDA and Python files in external implementations are supported
 
+> **ℹ️ Note**: Git submodules under external implementation directories are excluded from formatting (based on the declarations 
+> in the `.gitmodules` file).
+
 ## Style Configuration
 
 The project uses custom style configurations for both Python and C++/CUDA formatters to maintain consistent 
@@ -126,7 +129,7 @@ and exclusion patterns.
 > even when formatting files in subdirectories. Individual namespace packages have their own `pyproject.toml` 
 > files for build configuration, but these do not contain `[tool.black]` sections. This ensures Black 
 > consistently uses the root configuration across all namespace packages, maintaining uniform formatting 
->throughout the project.
+> throughout the project.
 
 > **ℹ️ Note**: Unlike `clang-format`, the format is defined in the top-level `pyproject.toml` and cannot be 
 > adjusted in sub-directories (except for excluding them).

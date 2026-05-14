@@ -18,10 +18,150 @@ Provides reusable functions for configuration, CUDA detection, and extension cre
 """
 
 import os
+import re
 from pathlib import Path
+import shutil
 import subprocess
 import sys
-from typing import Optional
+from typing import List, NamedTuple, Optional
+
+
+class CudaArchitectureSelection(NamedTuple):
+    """CUDA architecture selection compatible with the available ``nvcc``.
+
+    Attributes:
+        architectures: CUDA architectures to build as cubin targets.
+        ptx_architectures: At most one architecture to build as a PTX target
+            because a detected GPU architecture had to be capped.
+    """
+
+    architectures: List[str]
+    ptx_architectures: List[str]
+
+
+def _find_nvcc() -> Optional[str]:
+    """
+    Locate the CUDA compiler used to determine supported target architectures.
+    """
+    candidate = os.environ.get("CUDACXX")
+    if candidate:
+        return candidate
+
+    for env_var in ("CUDA_HOME", "CUDA_PATH"):
+        cuda_root = os.environ.get(env_var)
+        if cuda_root:
+            candidate = os.path.join(cuda_root, "bin", "nvcc")
+            if os.path.exists(candidate):
+                return candidate
+
+    return shutil.which("nvcc")
+
+
+def _detect_nvcc_supported_architectures() -> List[str]:
+    """
+    Ask nvcc which virtual GPU architectures it supports.
+    Returns values like ['70', '75', '80', '90'].
+    """
+    nvcc = _find_nvcc()
+    if not nvcc:
+        return []
+
+    try:
+        result = subprocess.run(
+            [nvcc, "--list-gpu-arch"],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            timeout=10,
+        )
+    except Exception:
+        return []
+
+    archs: List[str] = []
+    for match in re.finditer(r"compute_([0-9]+)", result.stdout):
+        arch = match.group(1)
+        if arch not in archs:
+            archs.append(arch)
+
+    return sorted(archs, key=int)
+
+
+def _split_cuda_architectures(value: str) -> List[str]:
+    return [arch.strip() for arch in re.split(r"[,;]", value) if arch.strip()]
+
+
+def _forward_compatible_ptx_architecture(
+    supported_architectures: List[str], max_architecture: int
+) -> Optional[str]:
+    forward_compatible_archs: List[str] = []
+    fallback_archs: List[str] = []
+    for arch in supported_architectures:
+        try:
+            arch_int = int(arch)
+        except ValueError:
+            continue
+
+        if arch_int > max_architecture:
+            continue
+
+        fallback_archs.append(arch)
+        if arch_int % 10 == 0:
+            forward_compatible_archs.append(arch)
+
+    if forward_compatible_archs:
+        return max(forward_compatible_archs, key=int)
+    if fallback_archs:
+        return max(fallback_archs, key=int)
+    return None
+
+
+def select_cuda_architectures_for_nvcc(
+    cuda_architectures: List[str],
+) -> CudaArchitectureSelection:
+    """Select CUDA cubin and PTX targets supported by the installed ``nvcc``.
+
+    Numeric architectures above ``nvcc``'s maximum supported architecture are
+    capped to that maximum. When capping occurs, one PTX target is added using
+    the newest forward-compatible base architecture supported by ``nvcc`` at or
+    below the capped architecture. For example, if the highest supported
+    architecture is ``96``, the PTX target is ``90``.
+
+    Args:
+        cuda_architectures: CUDA architecture numbers to select from, for
+            example ``["80", "90", "103"]``.
+
+    Returns:
+        CudaArchitectureSelection: The capped cubin architectures and, when
+        capping occurred, the single architecture to emit as a PTX target. If
+        ``nvcc`` cannot be found or queried, the input architectures are returned
+        unchanged and no PTX targets are added.
+    """
+    supported_archs = _detect_nvcc_supported_architectures()
+    if not cuda_architectures or not supported_archs:
+        return CudaArchitectureSelection(cuda_architectures, [])
+
+    max_supported = max(int(arch) for arch in supported_archs)
+    capped_archs: List[str] = []
+    any_arch_capped = False
+    for arch in cuda_architectures:
+        try:
+            arch_int = int(arch)
+            capped_arch = str(min(arch_int, max_supported))
+            any_arch_capped = any_arch_capped or arch_int > max_supported
+        except ValueError:
+            capped_arch = arch
+
+        if capped_arch not in capped_archs:
+            capped_archs.append(capped_arch)
+
+    ptx_archs: List[str] = []
+    if any_arch_capped:
+        ptx_arch = _forward_compatible_ptx_architecture(supported_archs, max_supported)
+        if ptx_arch is not None:
+            ptx_archs.append(ptx_arch)
+
+    return CudaArchitectureSelection(capped_archs, ptx_archs)
 
 
 def missing_torch_error() -> RuntimeError:
@@ -106,8 +246,8 @@ def load_config(default_config: Optional[dict] = None) -> dict:
                 config[key] = env_val.lower() in ('1', 'true', 'yes', 'on')
             elif isinstance(config[key], int):
                 config[key] = int(env_val)
-            elif key == 'CUSTOM_CUDA_ARCHS' and env_val:
-                config[key] = env_val.split(',')
+            elif key == 'CUSTOM_CUDA_ARCHS':
+                config[key] = _split_cuda_architectures(env_val) if env_val else None
             else:
                 config[key] = env_val
 
@@ -152,7 +292,13 @@ def detect_cuda_info():
 
 
 def get_compile_flags(config, cuda_info, include_dirs=None):
-    """Construct compilation flags
+    """Construct compilation flags.
+
+    If ``CUSTOM_CUDA_ARCHS`` is unset, detected CUDA architectures are capped to
+    the maximum supported by ``nvcc``. If any architecture is capped, the newest
+    forward-compatible base architecture supported by ``nvcc`` is also emitted
+    as a PTX target. If no architecture can be detected, no explicit CUDA
+    architecture flags are generated.
 
     Args:
         config (dict): Build configuration
@@ -202,17 +348,19 @@ def get_compile_flags(config, cuda_info, include_dirs=None):
 
     # CUDA flags (only if CUDA is available)
     if cuda_info['cuda_available']:
-        cuda_archs = (
-            config['CUSTOM_CUDA_ARCHS']
-            if config['CUSTOM_CUDA_ARCHS'] is not None
-            else cuda_info['gpu_architectures']
-        )
-        if not cuda_archs:
-            cuda_archs = ['70', '75', '80', '86']  # Default modern architectures
+        ptx_archs: List[str] = []
+        if config['CUSTOM_CUDA_ARCHS'] is not None:
+            cuda_archs = config['CUSTOM_CUDA_ARCHS']
+        else:
+            arch_selection = select_cuda_architectures_for_nvcc(cuda_info['gpu_architectures'])
+            cuda_archs = arch_selection.architectures
+            ptx_archs = arch_selection.ptx_architectures
 
         # Generate architecture flags
         for arch in cuda_archs:
             flags['nvcc'].extend([f'-gencode=arch=compute_{arch},code=sm_{arch}'])
+        for arch in ptx_archs:
+            flags['nvcc'].extend([f'-gencode=arch=compute_{arch},code=compute_{arch}'])
 
         # CUDA compilation flags
         flags['nvcc'].extend(

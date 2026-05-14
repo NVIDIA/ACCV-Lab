@@ -180,6 +180,16 @@ root directory):
 ./scripts/build_docs.sh
 ```
 
+**Capture Sphinx warnings in a dedicated file**:
+```bash
+./scripts/build_docs.sh --warning-file docs/_build/sphinx-warnings.log
+```
+This is useful for CI and other automation that wants to inspect warnings separately from the console output.
+
+Relative warning-file paths are resolved from the project root. The warning file captures Sphinx warnings from
+the selected builder (HTML by default, PDF with `--pdf`, or spelling with `--spelling`). In spelling mode, this
+is separate from spelling findings, which are still written to `docs/_build/spelling/output.txt`.
+
 **Manual build**:
 ```bash
 cd docs
@@ -199,7 +209,7 @@ make livehtml
 - The `html` target ensures all scripts run before building
 - The `livehtml` target also runs the scripts for development builds
 - When running spelling via the script, the generation scripts are executed first to ensure mirrored package 
-  docs are up to date
+  docs are up to date. Spelling findings are written to `docs/_build/spelling/output.txt`.
 
 > **ℹ️ Note**:
 > `make livehtml` watches the `docs/` tree and mirrored package documentation, but:
@@ -433,6 +443,7 @@ The configuration includes:
 #### Build Script (`scripts/build_docs.sh`)
 - **Dependency installation**: Installs documentation requirements from `docs/requirements.txt`
 - **Complete build process**: Generation + Sphinx build
+- **Warning capture**: Can write Sphinx warnings from the build to a dedicated file via `--warning-file`
 - **Browser integration**: Optionally opens documentation
 - **Error handling**: Provides clear error messages
 - **Location**: Can be run from any directory (script automatically determines project root)

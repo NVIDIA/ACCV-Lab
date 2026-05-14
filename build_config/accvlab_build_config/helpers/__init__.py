@@ -17,9 +17,11 @@ Build configuration helpers for accvlab packages
 """
 
 from .build_utils import (
+    CudaArchitectureSelection,
     load_config,
     detect_cuda_info,
     get_compile_flags,
+    select_cuda_architectures_for_nvcc,
     run_external_build,
     get_abs_setup_dir,
 )
@@ -29,9 +31,11 @@ from .cmake_args import (
 )
 
 __all__ = [
+    'CudaArchitectureSelection',
     'load_config',
     'detect_cuda_info',
     'get_compile_flags',
+    'select_cuda_architectures_for_nvcc',
     'run_external_build',
     'get_abs_setup_dir',
     'build_cmake_args',

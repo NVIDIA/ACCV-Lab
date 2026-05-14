@@ -388,7 +388,7 @@ DEBUG_BUILD=1 VERBOSE_BUILD=1 ./scripts/package_manager.sh install
 # Optimized build for production
 OPTIMIZE_LEVEL=3 USE_FAST_MATH=1 ./scripts/package_manager.sh install
 
-# Custom CUDA architectures (if you know your GPU architecture)
+# Custom CUDA architectures (if you need to override auto-detection)
 CUSTOM_CUDA_ARCHS="70,75,80" ./scripts/package_manager.sh install
 
 # Enable profiling support
@@ -414,10 +414,18 @@ ENABLE_PROFILING=1 ./scripts/package_manager.sh install
 > `CPP_STANDARD=c++17`. Using newer standards (e.g., C++20) may not be supported for CUDA builds for some 
 > of the packages.
 
-> **⚠️ Important**: If `CUSTOM_CUDA_ARCHS` is not set, ACCV-Lab first tries to auto-detect GPU architectures
-> via CUDA-enabled PyTorch. Missing PyTorch or CPU-only PyTorch is treated as a build configuration error.
-> If PyTorch is CUDA-enabled but no architecture can be detected (for example because no CUDA device is visible),
-> ACCV-Lab does not pass `CMAKE_CUDA_ARCHITECTURES`; package-specific CMake defaults then apply.
+> **⚠️ Important**: If `CUSTOM_CUDA_ARCHS` is not set, ACCV-Lab tries to auto-detect
+> GPU architectures via CUDA-enabled PyTorch. Missing PyTorch or CPU-only PyTorch is treated as a build
+> configuration error.
+>
+> Auto-detected architectures are capped to the maximum architecture supported by the
+> installed `nvcc`, which avoids selecting a GPU architecture that is newer than the CUDA toolkit used for
+> the build. When an architecture is capped, the build also includes one PTX target for the newest supported
+> forward-compatible base architecture.
+>
+> If PyTorch is CUDA-enabled but no architecture can be detected
+> (for example because no CUDA device is visible), ACCV-Lab does not pass `CMAKE_CUDA_ARCHITECTURES`;
+> package-specific CMake defaults then apply.
 
 ## Additional Information
 

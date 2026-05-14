@@ -19,6 +19,8 @@
 # 
 # By default, formats:
 # - Root Python files (namespace_packages_config.py, etc.)
+# - Docs Python files (docs/**/*.py)
+# - Scripts Python files (scripts/**/*.py)
 # - Common accvlab code (accvlab/__init__.py, etc.)
 # - Common build_config code (build_config/_helpers/, build_config/__init__.py)
 # - All subpackages (both in accvlab/ and build_config/subpackages/)
@@ -46,7 +48,7 @@ while [[ $# -gt 0 ]]; do
             echo ""
             echo "Format Python code in the project with Black."
             echo ""
-            echo "By default, formats only common code (root files, docs, common accvlab, common build_config)."
+            echo "By default, formats only common code (root files, docs, scripts, common accvlab, common build_config)."
             echo ""
             echo "Options:"
             echo "  --include-subpackages    Also format individual subpackages"
@@ -88,26 +90,19 @@ if [ -d "docs" ]; then
     find docs/ -name "*.py" -exec black {} \;
 fi
 
-if [ "$INCLUDE_SUBPACKAGES" = true ]; then
-    # Format all namespace packages
-    echo "Formatting namespace packages..."
-    python3 -c "
-from namespace_packages_config import get_package_names
-import subprocess
-import os
+# Format scripts Python files if they exist
+if [ -d "scripts" ]; then
+    echo "Formatting scripts Python files..."
+    find scripts/ -name "*.py" -exec black {} \;
+fi
 
-packages = get_package_names()
-if not packages:
-    print('  No namespace packages found')
-else:
-    for pkg in packages:
-        print(f'  Formatting namespace package: {pkg}')
-        
-        # Format packages/<package>/ (includes tests/ and ext_impl/ subdirectories)
-        package_path = f'packages/{pkg}'
-        if os.path.exists(package_path):
-            subprocess.run(['black', package_path], check=True)
-"
+if [ "$INCLUDE_SUBPACKAGES" = true ]; then
+    # Format all namespace packages, excluding directories declared in .gitmodules.
+    echo "Formatting namespace packages..."
+    python3 "$SCRIPT_DIR/helpers/run_formatter_on_namespace_packages.py" \
+        --extension .py \
+        --language-name Python \
+        -- black
 else
     echo "Skipping namespace packages (use --include-subpackages to format them)"
 fi

@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 from typing import List, Optional
 
-from .build_utils import missing_torch_error, require_torch_cuda_support
+from .build_utils import detect_cuda_info, select_cuda_architectures_for_nvcc
 
 # Marker file at the ACCV-Lab monorepo root (see `.nav` in the repository).
 _NAV_MARKER = ".nav"
@@ -57,35 +57,16 @@ def _normalize_cpp_standard(value: str) -> str:
     return v
 
 
-def _detect_cuda_architectures() -> List[str]:
-    """
-    Try to detect CUDA architectures from PyTorch if available.
+def _format_cmake_cuda_architectures(archs: List[str], ptx_archs: List[str]) -> List[str]:
+    if not ptx_archs:
+        return archs
 
-    Returns a list like ['70', '75', '80']. Returns an empty list if PyTorch is
-    CUDA-enabled but no CUDA devices are available.
-
-    Raises:
-        RuntimeError: If PyTorch is not installed or is installed without CUDA
-            support. ACCV-Lab CUDA extension builds require a CUDA-enabled
-            PyTorch wheel, so this is treated as a build configuration error
-            rather than as "CUDA not detected".
-    """
-    try:
-        import torch  # type: ignore
-    except ImportError as exc:
-        raise missing_torch_error() from exc
-
-    require_torch_cuda_support(torch)
-
-    if not torch.cuda.is_available():
-        return []
-    arches: List[str] = []
-    for i in range(torch.cuda.device_count()):
-        major, minor = torch.cuda.get_device_capability(i)
-        arch = f"{major}{minor}"
-        if arch not in arches:
-            arches.append(arch)
-    return arches
+    cmake_archs: List[str] = []
+    for arch in archs:
+        cmake_archs.append(f"{arch}-real")
+    for arch in ptx_archs:
+        cmake_archs.append(f"{arch}-virtual")
+    return cmake_archs
 
 
 def get_project_root() -> Path:
@@ -112,6 +93,11 @@ def _build_cmake_args_from_env() -> List[str]:
     """
     Build a list of -D CMake arguments from environment variables to harmonize
     build configuration across setuptools, external CMake, and scikit-build flows.
+
+    If ``CUSTOM_CUDA_ARCHS`` is unset, detected CUDA architectures are capped to
+    the maximum supported by ``nvcc``. If capping occurs, CMake builds cubins for
+    the capped architectures and adds one PTX target for the newest supported
+    forward-compatible base architecture.
     """
     args: List[str] = []
     # Always export compile_commands.json for tooling/validation
@@ -139,9 +125,15 @@ def _build_cmake_args_from_env() -> List[str]:
         args.append(f'-DCMAKE_CUDA_ARCHITECTURES={norm_archs}')
     else:
         # Attempt auto-detection via torch; if empty, let CMake defaults apply
-        detected = _detect_cuda_architectures()
+        cuda_info = detect_cuda_info()
+        detected = cuda_info['gpu_architectures'] if cuda_info['cuda_available'] else []
         if detected:
-            args.append(f'-DCMAKE_CUDA_ARCHITECTURES={";".join(detected)}')
+            selection = select_cuda_architectures_for_nvcc(detected)
+            cmake_archs = _format_cmake_cuda_architectures(
+                selection.architectures,
+                selection.ptx_architectures,
+            )
+            args.append(f'-DCMAKE_CUDA_ARCHITECTURES={";".join(cmake_archs)}')
 
     # VERBOSE_BUILD -> CMAKE_VERBOSE_MAKEFILE
     if _parse_bool_env(os.environ.get("VERBOSE_BUILD", "")):
@@ -186,7 +178,7 @@ def _build_cmake_args_package_scm_version(repo_root: Path) -> List[str]:
     Pass numeric version from setuptools-scm to CMake as a repo-aligned package
     version define (and harmless for CMake projects that ignore the variable).
     """
-    from setuptools_scm import get_version
+    from setuptools_scm import get_version  # type: ignore
 
     v = get_version(
         root=str(repo_root),
@@ -203,6 +195,10 @@ def _build_cmake_args_package_scm_version(repo_root: Path) -> List[str]:
 def build_cmake_args() -> List[str]:
     """
     Full CMake -D list: environment-based flags plus repo-aligned SCM version define.
+
+    Auto-detected CUDA architectures are capped to ``nvcc`` support when
+    ``CUSTOM_CUDA_ARCHS`` is unset. If capping occurs, one PTX target is emitted
+    for the newest supported forward-compatible base architecture.
     """
     root = get_project_root()
     return _build_cmake_args_from_env() + _build_cmake_args_package_scm_version(root)

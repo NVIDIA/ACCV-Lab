@@ -83,10 +83,12 @@ __all__ = [
     # C++ core interfaces
     'PyNvGopDecoder',
     'PyNvSampleReader',
+    'PyNvBatchAsyncStreamReader',
     'FastStreamInfo',
     'DecodedFrameExt',
     'RGBFrame',
     'CreateSampleReader',
+    'CreateBatchAsyncStreamReader',
     'GetFastInitInfo',
     'SavePacketsToFile',
     # Python decoder with caching

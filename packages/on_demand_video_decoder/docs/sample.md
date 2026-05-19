@@ -25,6 +25,7 @@ section helps you quickly locate the sample code that matches your requirements.
 | [SampleDecodeFromGopFilesToListAPI.py](../samples/SampleDecodeFromGopFilesToListAPI.py) | Selective GOP loading | {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.LoadGopsToList`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOPListRGB` |
 | [SampleDecodeFromGopList.py](../samples/SampleDecodeFromGopList.py) | Batch decode from multiple demux results (N demux → 1 decode) | {py:meth}`~accvlab.on_demand_video_decoder.PyNvGopDecoder.DecodeFromGOPListRGB` |
 | [SampleStreamAsyncAccess.py](../samples/SampleStreamAsyncAccess.py) | Async stream decoding with prefetching | {py:func}`~accvlab.on_demand_video_decoder.CreateSampleReader`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvSampleReader.DecodeN12ToRGBAsync`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvSampleReader.DecodeN12ToRGBAsyncGetBuffer` |
+| [SampleBatchAsyncStreamAccess.py](../samples/SampleBatchAsyncStreamAccess.py) | 2D async stream decoding — multiple frames per video per call, with prefetching | {py:func}`~accvlab.on_demand_video_decoder.CreateBatchAsyncStreamReader`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvBatchAsyncStreamReader.Decode`, {py:meth}`~accvlab.on_demand_video_decoder.PyNvBatchAsyncStreamReader.GetBuffer` |
 | [SampleSharedGopStore.py](../samples/SampleSharedGopStore.py) | Cross-process shared GOP cache for DataLoader | {py:class}`~accvlab.on_demand_video_decoder.SharedGopStore`, {py:class}`~accvlab.on_demand_video_decoder.GopRef` |
 
 For details on the **Key APIs**, please refer to the API documentation of the corresponding functions and classes.
@@ -43,7 +44,9 @@ If you need random frame access:
         → Use SampleRandomAccess
 
 If you need sequential frame decoding:
-    If you need async decoding with prefetching for lower latency:
+    If you need multiple frames per video per call (2D batch):
+        → Use SampleBatchAsyncStreamAccess
+    Else if you need async decoding with prefetching for lower latency:
         → Use SampleStreamAsyncAccess
     Otherwise:
         → Use SampleStreamAccess
@@ -552,6 +555,154 @@ Iteration N:
 ```bash
 cd packages/on_demand_video_decoder/samples
 python SampleStreamAsyncAccess.py
+```
+
+#### 3.2.4 Sample: Batch Async Stream Access (2D)
+
+**File:** `packages/on_demand_video_decoder/samples/SampleBatchAsyncStreamAccess.py`
+
+**When to Use**
+
+The 2D batch async API is preferred over basic async stream access when:
+- Each iteration consumes **multiple frames per video** (e.g. multi-sweep
+  StreamPETR-like training where one batch needs F sweeps × V cameras;
+  multimodal LLM and robotics timeline workloads that read multiple frames
+  per video)
+- You want to retrieve V × F frames via a **single async submission** — a
+  capability the 1D async API cannot provide, because its in-flight buffer
+  holds only one result per reader, so issuing F sequential 1D async calls
+  in Python does not give you F frames decoding in parallel
+
+The 1D async API ({py:meth}`~accvlab.on_demand_video_decoder.PyNvSampleReader.DecodeN12ToRGBAsync`)
+remains the right choice when you only need one frame per video per
+iteration.
+
+**Key Differences from 1D Async Stream Access**
+
+The ``filepaths`` argument is the **same** for both APIs — a flat
+``List[str]`` with one file name per video / camera (length V). Only the
+shape of ``frame_ids`` and the returned structure differ: 1D takes a flat
+list of frame ids and returns ``List[RGBFrame]``, 2D takes a ``V × F``
+list-of-lists of frame ids and returns ``List[List[RGBFrame]]``.
+
+| Feature | 1D Async ({py:class}`~accvlab.on_demand_video_decoder.PyNvSampleReader`) | 2D Batch Async ({py:class}`~accvlab.on_demand_video_decoder.PyNvBatchAsyncStreamReader`) |
+|---------|---------|---------|
+| ``filepaths`` shape | ``List[str]`` (len V) — one file per video | ``List[str]`` (len V) — same as 1D |
+| Frame ids shape | ``List[int]`` (len V) | ``List[List[int]]`` (V × F, inner lists must be equal length) |
+| Returned structure | ``List[RGBFrame]`` (len V) | ``List[List[RGBFrame]]`` (V × F) |
+| Frames decoded per call | V | V × F |
+| Result buffer | 1 result, V frames | 1 result, V × F frames |
+| Pool sized at construction by | (n/a — per-reader) | ``max_frames_per_decode_call`` |
+
+> **ℹ️ Note**: In one ``Decode()`` call, every video must request the **same**
+> number of frames F. The ``frame_ids`` argument is shaped ``V × F``; jagged
+> inner lists are rejected with ``invalid_argument``.
+
+**Core APIs**
+
+- {py:func}`~accvlab.on_demand_video_decoder.CreateBatchAsyncStreamReader`: Construct a 2D batch async reader
+- {py:meth}`~accvlab.on_demand_video_decoder.PyNvBatchAsyncStreamReader.Decode`: Submit an async 2D decode (returns immediately)
+- {py:meth}`~accvlab.on_demand_video_decoder.PyNvBatchAsyncStreamReader.GetBuffer`: Block until decode is done and return decoded frames
+
+**Code Walkthrough**
+
+Construct the reader. ``max_frames_per_decode_call`` is the F upper bound
+(per ``Decode()`` call, not per video file):
+
+```python
+import accvlab.on_demand_video_decoder as nvc
+
+reader = nvc.CreateBatchAsyncStreamReader(
+    num_of_set=1,
+    num_of_file=6,                  # V upper bound
+    max_frames_per_decode_call=4,   # F upper bound (per Decode() call)
+    iGpu=0,
+)
+```
+
+Build a 2D frame_ids and submit:
+
+```python
+V = len(file_path_list)
+F = 4
+# frame_ids[v][f] = f-th frame requested for video v.
+# All inner lists must be the same length (jagged inner lengths are rejected).
+frame_ids = [[0, 7, 14, 21]] * V
+
+reader.Decode(file_path_list, frame_ids, as_bgr=False)
+# Returns immediately; decoding happens on a background worker thread.
+```
+
+Retrieve the result:
+
+```python
+out = reader.GetBuffer(file_path_list, frame_ids, as_bgr=False)
+# out is List[List[RGBFrame]] indexed [v][f].
+# out[v][f].shape == (H, W, 3), dtype uint8, GPU memory.
+```
+
+**Two Contracts to Remember**
+
+> **ℹ️ Note**: When 
+> {py:meth}`~accvlab.on_demand_video_decoder.PyNvBatchAsyncStreamReader.GetBuffer` 
+> returns, all GPU work (decode + internal copies) is already complete. You 
+> can read the returned frames on any CUDA stream — including PyTorch's 
+> default stream — without additional synchronization.
+
+> **⚠️ Important**: The returned 
+> {py:class}`~accvlab.on_demand_video_decoder.RGBFrame` objects are zero-copy 
+> views into the reader's internal aggregator pool. Submitting the next 
+> {py:meth}`~accvlab.on_demand_video_decoder.PyNvBatchAsyncStreamReader.Decode` 
+> reuses that memory. You **must** clone every frame you want to keep 
+> **before** the next ``Decode()`` call. Skipping the clone leads to silent 
+> data corruption.
+
+**Canonical Prefetch Pattern**
+
+```python
+# Iteration 0: prime the pipeline
+reader.Decode(files, frame_ids_0, as_bgr=False)
+out = reader.GetBuffer(files, frame_ids_0, as_bgr=False)
+
+# Clone before submitting the next batch
+tensors_0 = [
+    [torch.as_tensor(out[v][f], device="cuda").clone() for f in range(F)]
+    for v in range(V)
+]
+
+# Prefetch iteration 1 in parallel with processing iteration 0
+reader.Decode(files, frame_ids_1, as_bgr=False)
+# ... process tensors_0 here (model forward, etc.) ...
+
+# Iteration 1: GetBuffer is usually already-ready because of the prefetch
+out = reader.GetBuffer(files, frame_ids_1, as_bgr=False)
+tensors_1 = [
+    [torch.as_tensor(out[v][f], device="cuda").clone() for f in range(F)]
+    for v in range(V)
+]
+reader.Decode(files, frame_ids_2, as_bgr=False)
+# ... process tensors_1 ...
+```
+
+**Resolution Handling**
+
+Videos in a single ``Decode()`` call may have **different resolutions** — each
+video gets its own per-slot aggregator pool, sized lazily to that video's
+``F * H_v * W_v * 3`` on the first ``Decode()`` that hits the slot. If a later
+``Decode()`` swaps in a video at the same slot with a different resolution,
+the pool is reallocated automatically (grows if larger; reuses the existing
+allocation if same or smaller).
+
+Per-frame shape consequence: ``out[v][f].shape == (H_v, W_v, 3)`` may vary
+across ``v``. The frames are not stack-able into a single
+``[V, F, H, W, 3]`` tensor without resize/pad — that is a physical fact of
+mixed-resolution input, not an API limitation.
+
+**Running the Sample**
+
+```bash
+cd packages/on_demand_video_decoder/samples
+python SampleBatchAsyncStreamAccess.py
 ```
 
 ### 3.3 Separation Access Decoding

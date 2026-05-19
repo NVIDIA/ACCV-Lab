@@ -25,7 +25,7 @@ dependencies = [
 optional = [
     "pytest",
     "opencv-python-headless",
-    "cupy==13.6.0",
+    "cupy-cuda12x==13.6.0",
     "pyquaternion",
     "nuscenes-devkit",
     "shapely",

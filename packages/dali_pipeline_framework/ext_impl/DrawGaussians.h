@@ -22,7 +22,6 @@
 
 #include "dali/core/error_handling.h"
 #include "dali/core/static_switch.h"
-#include "dali/kernels/dynamic_scratchpad.h"
 #include "dali/pipeline/data/types.h"
 #include "dali/pipeline/operator/operator.h"
 
@@ -99,9 +98,6 @@ class DrawGaussians : public ::dali::Operator<Backend> {
     void RunImpl(::dali::Workspace& ws) override;
 
    private:
-    dali::kernels::DynamicScratchpad _scratch_alloc;
-    size_t _curr_scratch_size = 0;
-
     std::vector<float> _k_for_classes;
 
     float _radius_to_sigma_factor;

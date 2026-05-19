@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM nvidia/cuda:12.4.1-devel-ubuntu22.04
+FROM nvidia/cuda:12.8.2-devel-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -86,7 +86,7 @@ RUN pip install numpy==1.23.5 \
     scipy==1.15.3 \
     opencv-python-headless==4.5.5.64
 
-RUN pip install torch==2.6.0 torchvision==0.21.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+RUN pip install torch==2.11.0 torchvision==0.26.0 torchaudio==2.11.0 --index-url https://download.pytorch.org/whl/cu128
 
 RUN pip install black
 
@@ -101,13 +101,13 @@ RUN pip install sphinx \
 RUN pip install ninja \
     scikit-build
 
-RUN pip install pycuda==2025.1.1 \
+RUN pip install pycuda==2025.1.2 \
     pybind11==3.0.0 \
     cvcuda-cu12==0.15.0
 
 RUN pip install pandas==1.5.3 \
     IPython \
-    nvidia-dali-cuda120==1.51.2 \
+    nvidia-dali-cuda120==1.53.0 \
     nvtx \
     psutil \
     numba==0.59 \
@@ -123,7 +123,7 @@ RUN apt-get install -y libjpeg-dev zlib1g-dev
 
 RUN pip install --upgrade pip setuptools==80.9.0 wheel setuptools-scm>=8
 
-RUN pip install cupy==13.6.0
+RUN pip install cupy-cuda12x==13.6.0
 
 WORKDIR /workspace
 

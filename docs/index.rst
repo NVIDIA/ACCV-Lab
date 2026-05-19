@@ -14,6 +14,12 @@ contained packages and a :ref:`Quick Start <project_overview-quick-start>` secti
 detailed guides on how to use this project (:doc:`Installation Guide <guides/INSTALLATION_GUIDE>`,
 :doc:`Development Guide <guides/DEVELOPMENT_GUIDE>`, ...) and further information.
 
+.. note::
+
+   The online documentation reflects the current state of the ``main`` branch. If you need the documentation for a specific version, 
+   please follow the instructions in the :ref:`Quick Start <project_overview-quick-start>` section to build the documentation 
+   locally.
+
 .. toctree::
    :maxdepth: 2
    :caption: General Info

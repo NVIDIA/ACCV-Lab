@@ -24,14 +24,23 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Parse flags
 VERBOSE_FLAG=""
+WARNING_FILE=""
 PDF_MODE=0
 OPEN_MODE=0
 SPELLING_MODE=0
-for arg in "$@"; do
-    case "$arg" in
+while [[ $# -gt 0 ]]; do
+    case "$1" in
         -v|--verbose)
             VERBOSE_FLAG="--verbose"
             echo "Verbose mode enabled"
+            ;;
+        --warning-file)
+            if [[ -z "${2:-}" || "${2:-}" == -* ]]; then
+                echo "Error: --warning-file requires a file path"
+                exit 1
+            fi
+            WARNING_FILE="$2"
+            shift
             ;;
         -p|--pdf)
             PDF_MODE=1
@@ -43,18 +52,21 @@ for arg in "$@"; do
             SPELLING_MODE=1
             ;;
         -h|--help)
-            echo "Usage: $0 [-v|--verbose] [-p|--pdf] [-s|--spelling] [-o|--open]"
+            echo "Usage: $0 [-v|--verbose] [--warning-file PATH] [-p|--pdf] [-s|--spelling] [-o|--open]"
             echo "  Default builds HTML docs. Use --pdf to build PDF via LaTeX."
+            echo "  Use --warning-file PATH to write Sphinx warnings to a dedicated file."
+            echo "    Relative warning-file paths are resolved from the project root."
             echo "  Use --spelling to run spelling checks with sphinxcontrib-spelling."
             echo "  Use --open to auto-open the built HTML/PDF if supported."
             exit 0
             ;;
         *)
-            echo "Error: Unknown argument '$arg'"
+            echo "Error: Unknown argument '$1'"
             echo "Use -h|--help for usage."
             exit 1
             ;;
     esac
+    shift
 done
 
 echo "=========================="
@@ -76,6 +88,10 @@ if [ ! -d "docs" ]; then
     exit 1
 fi
 
+if [[ -n "$WARNING_FILE" && "$WARNING_FILE" != /* ]]; then
+    WARNING_FILE="$PROJECT_ROOT/$WARNING_FILE"
+fi
+
 # Install documentation dependencies, which are listed in the requirements.txt file
 # of the docs directory
 echo "Installing documentation dependencies..."
@@ -83,6 +99,14 @@ pip install -r docs/requirements.txt
 
 cd docs
 make clean
+
+SPHINXOPTS_ARGS="$VERBOSE_FLAG"
+if [[ -n "$WARNING_FILE" ]]; then
+    mkdir -p "$(dirname "$WARNING_FILE")"
+    : > "$WARNING_FILE"
+    SPHINXOPTS_ARGS="${SPHINXOPTS_ARGS:+$SPHINXOPTS_ARGS }-w $WARNING_FILE"
+    echo "Sphinx warnings will be written to: $WARNING_FILE"
+fi
 
 if [[ "$PDF_MODE" -eq 1 && "$SPELLING_MODE" -eq 1 ]]; then
     echo "Error: --pdf and --spelling cannot be used together. Choose one."
@@ -92,7 +116,7 @@ fi
 if [[ "$PDF_MODE" -eq 1 ]]; then
     echo "Building PDF documentation..."
     make generate
-    make latexpdf SPHINXOPTS="$VERBOSE_FLAG"
+    make latexpdf SPHINXOPTS="$SPHINXOPTS_ARGS"
     echo ""
     echo "PDF build complete!"
     # Try to open the resulting PDF (handle common naming variants)
@@ -156,7 +180,7 @@ PY
     # Ensure generated/mirrored docs are up to date before spelling
     make generate
     # Run the spelling builder
-    make spelling SPHINXOPTS="$VERBOSE_FLAG"
+    make spelling SPHINXOPTS="$SPHINXOPTS_ARGS"
     echo ""
     echo "Spelling check complete!"
     # Point to common output location
@@ -172,7 +196,7 @@ PY
     fi
 else
     echo "Building HTML documentation..."
-    make html SPHINXOPTS="$VERBOSE_FLAG"
+    make html SPHINXOPTS="$SPHINXOPTS_ARGS"
     echo ""
     echo "Documentation build complete!"
     echo "Open docs/_build/html/index.html in your browser to view the documentation."

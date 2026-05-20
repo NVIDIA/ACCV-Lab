@@ -23,6 +23,7 @@ extern "C" {
 #include <libavformat/avio.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/log.h>
+#include <libavutil/pixdesc.h>
 /* Explicitly include bsf.h when building against FFmpeg 4.3 (libavcodec 58.45.100) or later for backward compatibility */
 #if LIBAVCODEC_VERSION_INT >= 3824484
 #include <libavcodec/bsf.h>
@@ -193,6 +194,259 @@ static int64_t ffbufio_seek(void* opaque, int64_t offset, int whence) {
 /**
 * @brief libavformat wrapper class. Retrieves the elementary encoded stream from the container format.
 */
+// =====================================================================
+// SPS extradata parser — fallback for pixel format detection
+// ---------------------------------------------------------------------
+// `avformat_find_stream_info` usually fills `AVCodecParameters::format`
+// through codec-side parsing. In some builds, pixel format information
+// may remain unavailable in `codecpar->format`, which can cause later
+// logic to fall back to a default chroma layout.
+//
+// The helpers in this namespace parse the SPS NAL stored in container
+// extradata (HVCC for HEVC, avcC for H.264) and extract the minimum
+// fields needed to infer pixel format, specifically `bit_depth_luma`
+// and `chroma_format_idc`.
+//
+// This is a lightweight metadata parser: it reads stream parameter
+// fields only and is used for format detection rather than frame
+// reconstruction.
+// =====================================================================
+namespace ffmpeg_demuxer_detail {
+
+struct BitReader {
+    const uint8_t* buf;
+    int byte;
+    int bit;
+    int size;
+};
+
+inline int br_read_bit(BitReader* b) {
+    if (b->byte >= b->size) return 0;
+    int v = (b->buf[b->byte] >> (7 - b->bit)) & 1;
+    if (++b->bit == 8) { b->bit = 0; b->byte++; }
+    return v;
+}
+
+inline unsigned br_read_bits(BitReader* b, int n) {
+    unsigned v = 0;
+    while (n-- > 0) { v = (v << 1) | (unsigned)br_read_bit(b); }
+    return v;
+}
+
+inline unsigned br_read_ue(BitReader* b) {
+    int zeros = 0;
+    while (zeros < 32 && b->byte < b->size && br_read_bit(b) == 0) zeros++;
+    return (1u << zeros) - 1 + br_read_bits(b, zeros);
+}
+
+// Strip H.264/HEVC emulation prevention bytes (0x00 0x00 0x03 -> 0x00 0x00).
+inline int rbsp_strip(const uint8_t* src, int n, uint8_t* dst, int dst_capacity) {
+    int o = 0;
+    for (int i = 0; i < n && o < dst_capacity; i++) {
+        if (i + 2 < n && src[i] == 0 && src[i+1] == 0 && src[i+2] == 3) {
+            if (o + 2 > dst_capacity) break;
+            dst[o++] = 0; dst[o++] = 0; i += 2;
+        } else {
+            dst[o++] = src[i];
+        }
+    }
+    return o;
+}
+
+// Locate an SPS NAL inside HEVC HVCC extradata.
+inline bool find_hevc_sps(const uint8_t* ed, int n,
+                          const uint8_t** sps_out, int* sps_len_out) {
+    if (n < 23 || ed[0] != 1) return false;  // configurationVersion=1 expected
+    int p = 22;
+    int num_arrays = ed[p++];
+    for (int a = 0; a < num_arrays && p < n; a++) {
+        if (p + 3 > n) return false;
+        int nal_type = ed[p] & 0x3F;
+        int num_nalus = (ed[p+1] << 8) | ed[p+2];
+        p += 3;
+        for (int i = 0; i < num_nalus; i++) {
+            if (p + 2 > n) return false;
+            int nl = (ed[p] << 8) | ed[p+1];
+            p += 2;
+            if (p + nl > n) return false;
+            if (nal_type == 33 /* HEVC NAL_SPS */) {
+                *sps_out = ed + p;
+                *sps_len_out = nl;
+                return true;
+            }
+            p += nl;
+        }
+    }
+    return false;
+}
+
+// Locate the first SPS NAL inside H.264 avcC extradata.
+inline bool find_h264_sps(const uint8_t* ed, int n,
+                          const uint8_t** sps_out, int* sps_len_out) {
+    if (n < 7 || ed[0] != 1) return false;  // configurationVersion=1
+    int num_sps = ed[5] & 0x1F;
+    if (num_sps < 1) return false;
+    int p = 6;
+    if (p + 2 > n) return false;
+    int nl = (ed[p] << 8) | ed[p+1];
+    p += 2;
+    if (p + nl > n) return false;
+    *sps_out = ed + p;
+    *sps_len_out = nl;
+    return true;
+}
+
+// Parse a HEVC SPS RBSP for chroma_format_idc and bit_depth_luma.
+inline bool parse_hevc_sps(const uint8_t* sps_nal, int len,
+                           int* bit_depth_out, int* chroma_idc_out) {
+    if (len < 3) return false;
+    uint8_t buf[8192];
+    int copy_len = len > (int)sizeof(buf) ? (int)sizeof(buf) : len;
+    int rl = rbsp_strip(sps_nal, copy_len, buf, (int)sizeof(buf));
+    BitReader b{ buf, 0, 0, rl };
+
+    br_read_bits(&b, 16);                       // 2-byte HEVC NAL header
+    br_read_bits(&b, 4);                        // sps_video_parameter_set_id
+    int max_sub = (int)br_read_bits(&b, 3);     // sps_max_sub_layers_minus1
+    br_read_bits(&b, 1);                        // sps_temporal_id_nesting_flag
+
+    // profile_tier_level (profilePresentFlag = 1)
+    br_read_bits(&b, 2 + 1 + 5);                // general_profile_space/tier/idc
+    br_read_bits(&b, 32);                       // general_profile_compatibility_flag
+    br_read_bits(&b, 4);                        // 4 source-format flags
+    br_read_bits(&b, 43);                       // constraint flags
+    br_read_bits(&b, 1);                        // general_inbld_flag
+    br_read_bits(&b, 8);                        // general_level_idc
+
+    int sub_p[8] = {0}, sub_l[8] = {0};
+    for (int i = 0; i < max_sub; i++) {
+        sub_p[i] = br_read_bit(&b);
+        sub_l[i] = br_read_bit(&b);
+    }
+    if (max_sub > 0) {
+        for (int i = max_sub; i < 8; i++) br_read_bits(&b, 2);
+    }
+    for (int i = 0; i < max_sub; i++) {
+        if (sub_p[i]) {
+            br_read_bits(&b, 2 + 1 + 5);
+            br_read_bits(&b, 32);
+            br_read_bits(&b, 4);
+            br_read_bits(&b, 43);
+            br_read_bits(&b, 1);
+        }
+        if (sub_l[i]) br_read_bits(&b, 8);
+    }
+
+    br_read_ue(&b);                             // sps_seq_parameter_set_id
+    *chroma_idc_out = (int)br_read_ue(&b);
+    if (*chroma_idc_out == 3) br_read_bit(&b);  // separate_colour_plane_flag
+    br_read_ue(&b);                             // pic_width_in_luma_samples
+    br_read_ue(&b);                             // pic_height_in_luma_samples
+    if (br_read_bit(&b)) {                      // conformance_window_flag
+        br_read_ue(&b); br_read_ue(&b);
+        br_read_ue(&b); br_read_ue(&b);
+    }
+    *bit_depth_out = 8 + (int)br_read_ue(&b);
+    return true;
+}
+
+// Parse an H.264 SPS RBSP. Baseline / Main profiles imply 4:2:0 8-bit.
+inline bool parse_h264_sps(const uint8_t* sps_nal, int len,
+                           int* bit_depth_out, int* chroma_idc_out) {
+    if (len < 4) return false;
+    uint8_t buf[4096];
+    int copy_len = len > (int)sizeof(buf) ? (int)sizeof(buf) : len;
+    int rl = rbsp_strip(sps_nal, copy_len, buf, (int)sizeof(buf));
+    BitReader b{ buf, 0, 0, rl };
+
+    br_read_bits(&b, 8);                        // 1-byte H.264 NAL header
+    int profile_idc = (int)br_read_bits(&b, 8);
+    br_read_bits(&b, 8);                        // constraint_set + reserved
+    br_read_bits(&b, 8);                        // level_idc
+    br_read_ue(&b);                             // seq_parameter_set_id
+
+    // Only the high profiles carry chroma_format_idc / bit_depth fields.
+    // ITU-T H.264 (V14) 7.4.2.1.1.
+    static const int hi_profiles[] = {
+        100, 110, 122, 244, 44, 83, 86, 118, 128, 138, 139, 134, 135
+    };
+    bool is_high = false;
+    for (size_t i = 0; i < sizeof(hi_profiles) / sizeof(hi_profiles[0]); i++) {
+        if (profile_idc == hi_profiles[i]) { is_high = true; break; }
+    }
+    if (!is_high) {
+        *chroma_idc_out = 1;   // implied 4:2:0
+        *bit_depth_out  = 8;   // implied 8-bit
+        return true;
+    }
+
+    *chroma_idc_out = (int)br_read_ue(&b);
+    if (*chroma_idc_out == 3) br_read_bit(&b);  // separate_colour_plane_flag
+    *bit_depth_out = 8 + (int)br_read_ue(&b);
+    return true;
+}
+
+// Map (chroma_format_idc, bit_depth) to the AVPixelFormat enum values the
+// existing eChromaFormat switch handles. Returns AV_PIX_FMT_NONE for
+// combinations we do not synthesize; the existing default-branch fallback
+// will then preserve current behavior.
+inline AVPixelFormat pix_fmt_from_sps(int chroma_idc, int bit_depth) {
+    switch (chroma_idc) {
+        case 0:  // monochrome
+            if (bit_depth == 8)  return AV_PIX_FMT_GRAY8;
+            if (bit_depth == 10) return AV_PIX_FMT_GRAY10LE;
+            break;
+        case 1:  // 4:2:0
+            if (bit_depth == 8)  return AV_PIX_FMT_YUV420P;
+            if (bit_depth == 10) return AV_PIX_FMT_YUV420P10LE;
+            if (bit_depth == 12) return AV_PIX_FMT_YUV420P12LE;
+            break;
+        case 3:  // 4:4:4
+            if (bit_depth == 8)  return AV_PIX_FMT_YUV444P;
+            if (bit_depth == 10) return AV_PIX_FMT_YUV444P10LE;
+            if (bit_depth == 12) return AV_PIX_FMT_YUV444P12LE;
+            break;
+        default:
+            break;
+    }
+    return AV_PIX_FMT_NONE;
+}
+
+// Top-level entry point. Returns AV_PIX_FMT_NONE when recovery is not
+// possible (unsupported codec, missing extradata, malformed SPS, or an
+// unmappable chroma/bit-depth combination).
+inline AVPixelFormat recover_pix_fmt_from_extradata(const AVCodecParameters* cp) {
+    if (!cp || !cp->extradata || cp->extradata_size <= 0) {
+        return AV_PIX_FMT_NONE;
+    }
+    const uint8_t* sps = nullptr;
+    int sps_len = 0;
+    int bit_depth = 8;
+    int chroma_idc = 1;
+
+    if (cp->codec_id == AV_CODEC_ID_HEVC) {
+        if (!find_hevc_sps(cp->extradata, cp->extradata_size, &sps, &sps_len)) {
+            return AV_PIX_FMT_NONE;
+        }
+        if (!parse_hevc_sps(sps, sps_len, &bit_depth, &chroma_idc)) {
+            return AV_PIX_FMT_NONE;
+        }
+    } else if (cp->codec_id == AV_CODEC_ID_H264) {
+        if (!find_h264_sps(cp->extradata, cp->extradata_size, &sps, &sps_len)) {
+            return AV_PIX_FMT_NONE;
+        }
+        if (!parse_h264_sps(sps, sps_len, &bit_depth, &chroma_idc)) {
+            return AV_PIX_FMT_NONE;
+        }
+    } else {
+        return AV_PIX_FMT_NONE;
+    }
+
+    return pix_fmt_from_sps(chroma_idc, bit_depth);
+}
+
+}  // namespace ffmpeg_demuxer_detail
+
 class FFmpegDemuxer {
    private:
     AVFormatContext* fmtc = NULL;
@@ -329,6 +583,21 @@ class FFmpegDemuxer {
         eChromaFormat = (AVPixelFormat)fmtc->streams[iVideoStream]->codecpar->format;
         color_space = fmtc->streams[iVideoStream]->codecpar->color_space;
         color_range = fmtc->streams[iVideoStream]->codecpar->color_range;
+
+        // FFmpeg builds without the HEVC / H.264 decoder cannot determine pix_fmt
+        // during stream-info probing. Fall back to parsing SPS extradata so the
+        // switch below sees the real format instead of taking the default branch.
+        if (eChromaFormat == AV_PIX_FMT_NONE) {
+            AVPixelFormat recovered = ffmpeg_demuxer_detail::recover_pix_fmt_from_extradata(
+                fmtc->streams[iVideoStream]->codecpar);
+            if (recovered != AV_PIX_FMT_NONE) {
+                const char* name = av_get_pix_fmt_name(recovered);
+                LOG(INFO) << "Recovered pix_fmt from SPS extradata: "
+                          << (name ? name : "?");
+                eChromaFormat = recovered;
+            }
+        }
+
         switch (eChromaFormat) {
             case AV_PIX_FMT_YUV420P10LE:
             case AV_PIX_FMT_GRAY10LE:  // monochrome is treated as 420 with chroma filled with 0x0

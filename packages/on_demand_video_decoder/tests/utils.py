@@ -141,7 +141,14 @@ def get_data_dir():
 
 
 def select_random_clip(path_base):
-    subdirs = [d for d in os.listdir(path_base) if os.path.isdir(os.path.join(path_base, d))]
+    # Only consider sample_clip* subdirs as eligible for the general random-clip
+    # tests. Other data/ subdirs (e.g. pix_fmt_variants/) hold targeted fixtures
+    # whose contents may not be RGB-decodable on the runtime GPU.
+    subdirs = [
+        d
+        for d in os.listdir(path_base)
+        if os.path.isdir(os.path.join(path_base, d)) and d.startswith("sample_clip")
+    ]
     if not subdirs:
         return None
     clip_dir = os.path.join(path_base, random.choice(subdirs))

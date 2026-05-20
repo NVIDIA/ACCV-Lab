@@ -406,7 +406,7 @@ ENABLE_PROFILING=1 ./scripts/package_manager.sh install
 | `OPTIMIZE_LEVEL` | int: `0`–`3` | `3` | Compiler optimization level |
 | `CPP_STANDARD` | string: `c++17` | `c++17` | C++ standard to use |
 | `VERBOSE_BUILD` | bool: `0`/`1`, `true`/`false`, `yes`/`no`, `on`/`off` | `0` | Show detailed build output |
-| `CUSTOM_CUDA_ARCHS` | list: e.g. `"70,75,80"` or `"75;80;86"` | PyTorch auto-detect, then package default | Target CUDA architectures |
+| `CUSTOM_CUDA_ARCHS` | list: e.g. `"70,75,80"` or `"75;80;86"` | PyTorch auto-detect, then package default | Explicit CUDA architecture override |
 | `USE_FAST_MATH` | bool: `0`/`1`, `true`/`false`, `yes`/`no`, `on`/`off` | `1` | Enable fast math optimizations |
 | `ENABLE_PROFILING` | bool: `0`/`1`, `true`/`false`, `yes`/`no`, `on`/`off` | `0` | Enable profiling support |
 
@@ -418,10 +418,13 @@ ENABLE_PROFILING=1 ./scripts/package_manager.sh install
 > GPU architectures via CUDA-enabled PyTorch. Missing PyTorch or CPU-only PyTorch is treated as a build
 > configuration error.
 >
-> Auto-detected architectures are capped to the maximum architecture supported by the
-> installed `nvcc`, which avoids selecting a GPU architecture that is newer than the CUDA toolkit used for
-> the build. When an architecture is capped, the build also includes one PTX target for the newest supported
-> forward-compatible base architecture.
+> Auto-detected architectures are emitted as real/cubin targets only when the installed `nvcc` exactly supports
+> them. If a detected architecture is unsupported, ACCV-Lab emits a supported PTX target below the detected
+> architecture, preferring base architectures whose number is divisible by 10 (for example, `100` for a
+> detected `103` architecture).
+>
+> `CUSTOM_CUDA_ARCHS` is an explicit override. When it is set, ACCV-Lab passes those architectures through
+> unchanged instead of applying the auto-detection fallback logic.
 >
 > If PyTorch is CUDA-enabled but no architecture can be detected
 > (for example because no CUDA device is visible), ACCV-Lab does not pass `CMAKE_CUDA_ARCHITECTURES`;

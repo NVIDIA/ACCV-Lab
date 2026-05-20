@@ -211,3 +211,4 @@ picklable
 ABI
 aggregator
 multimodal
+cubin

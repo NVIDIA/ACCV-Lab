@@ -90,13 +90,13 @@ RUN pip install torch==2.11.0 torchvision==0.26.0 torchaudio==2.11.0 --index-url
 
 RUN pip install black
 
-RUN pip install sphinx \
-    sphinx-rtd-theme \
-    sphinx-autodoc-typehints \
-    sphinx-autobuild \
-    linkify-it-py \
-    myst-parser \
-    sphinxcontrib-spelling
+RUN pip install sphinx==8.1.3 \
+    sphinx-rtd-theme==3.1.0 \
+    sphinx-autodoc-typehints==3.0.1 \
+    sphinx-autobuild==2024.10.3 \
+    linkify-it-py==2.1.0 \
+    myst-parser==4.0.1 \
+    sphinxcontrib-spelling==8.0.2
 
 RUN pip install ninja \
     scikit-build

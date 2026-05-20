@@ -31,8 +31,8 @@ class CudaArchitectureSelection(NamedTuple):
 
     Attributes:
         architectures: CUDA architectures to build as cubin targets.
-        ptx_architectures: At most one architecture to build as a PTX target
-            because a detected GPU architecture had to be capped.
+        ptx_architectures: CUDA architectures to build as PTX targets because
+            detected GPU architectures were not exact ``nvcc`` cubin targets.
     """
 
     architectures: List[str]
@@ -91,8 +91,8 @@ def _split_cuda_architectures(value: str) -> List[str]:
     return [arch.strip() for arch in re.split(r"[,;]", value) if arch.strip()]
 
 
-def _forward_compatible_ptx_architecture(
-    supported_architectures: List[str], max_architecture: int
+def _supported_ptx_fallback_architecture(
+    supported_architectures: List[str], detected_architecture: int
 ) -> Optional[str]:
     forward_compatible_archs: List[str] = []
     fallback_archs: List[str] = []
@@ -102,7 +102,7 @@ def _forward_compatible_ptx_architecture(
         except ValueError:
             continue
 
-        if arch_int > max_architecture:
+        if arch_int > detected_architecture:
             continue
 
         fallback_archs.append(arch)
@@ -121,47 +121,52 @@ def select_cuda_architectures_for_nvcc(
 ) -> CudaArchitectureSelection:
     """Select CUDA cubin and PTX targets supported by the installed ``nvcc``.
 
-    Numeric architectures above ``nvcc``'s maximum supported architecture are
-    capped to that maximum. When capping occurs, one PTX target is added using
-    the newest forward-compatible base architecture supported by ``nvcc`` at or
-    below the capped architecture. For example, if the highest supported
-    architecture is ``96``, the PTX target is ``90``.
+    A detected architecture is emitted as a cubin target only when
+    ``nvcc --list-gpu-arch`` reports that exact architecture. Unsupported
+    detected architectures use a PTX fallback at or below the detected
+    architecture, preferring the newest supported base architecture where the
+    architecture number is divisible by 10.
 
     Args:
         cuda_architectures: CUDA architecture numbers to select from, for
             example ``["80", "90", "103"]``.
 
     Returns:
-        CudaArchitectureSelection: The capped cubin architectures and, when
-        capping occurred, the single architecture to emit as a PTX target. If
-        ``nvcc`` cannot be found or queried, the input architectures are returned
-        unchanged and no PTX targets are added.
+        CudaArchitectureSelection: The exact cubin architectures and any PTX
+        fallback architectures. If ``nvcc`` cannot be found or queried, the
+        input architectures are returned unchanged and no PTX targets are added.
     """
     supported_archs = _detect_nvcc_supported_architectures()
     if not cuda_architectures or not supported_archs:
         return CudaArchitectureSelection(cuda_architectures, [])
 
-    max_supported = max(int(arch) for arch in supported_archs)
-    capped_archs: List[str] = []
-    any_arch_capped = False
+    supported_arch_set = set(supported_archs)
+    selected_archs: List[str] = []
+    ptx_archs: List[str] = []
+
     for arch in cuda_architectures:
+        if arch in supported_arch_set:
+            if arch not in selected_archs:
+                selected_archs.append(arch)
+            continue
+
         try:
             arch_int = int(arch)
-            capped_arch = str(min(arch_int, max_supported))
-            any_arch_capped = any_arch_capped or arch_int > max_supported
         except ValueError:
-            capped_arch = arch
+            if arch not in selected_archs:
+                selected_archs.append(arch)
+            continue
 
-        if capped_arch not in capped_archs:
-            capped_archs.append(capped_arch)
+        ptx_arch = _supported_ptx_fallback_architecture(supported_archs, arch_int)
+        if ptx_arch is None:
+            if arch not in selected_archs:
+                selected_archs.append(arch)
+            continue
 
-    ptx_archs: List[str] = []
-    if any_arch_capped:
-        ptx_arch = _forward_compatible_ptx_architecture(supported_archs, max_supported)
-        if ptx_arch is not None:
+        if ptx_arch not in ptx_archs:
             ptx_archs.append(ptx_arch)
 
-    return CudaArchitectureSelection(capped_archs, ptx_archs)
+    return CudaArchitectureSelection(selected_archs, ptx_archs)
 
 
 def missing_torch_error() -> RuntimeError:
@@ -294,11 +299,11 @@ def detect_cuda_info():
 def get_compile_flags(config, cuda_info, include_dirs=None):
     """Construct compilation flags.
 
-    If ``CUSTOM_CUDA_ARCHS`` is unset, detected CUDA architectures are capped to
-    the maximum supported by ``nvcc``. If any architecture is capped, the newest
-    forward-compatible base architecture supported by ``nvcc`` is also emitted
-    as a PTX target. If no architecture can be detected, no explicit CUDA
-    architecture flags are generated.
+    If ``CUSTOM_CUDA_ARCHS`` is unset, detected CUDA architectures are emitted
+    as cubin targets only when ``nvcc`` reports exact support. Unsupported
+    detections fall back to supported PTX at or below the detected architecture.
+    If no architecture can be detected, no explicit CUDA architecture flags are
+    generated.
 
     Args:
         config (dict): Build configuration

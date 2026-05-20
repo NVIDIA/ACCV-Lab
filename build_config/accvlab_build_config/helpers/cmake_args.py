@@ -94,10 +94,10 @@ def _build_cmake_args_from_env() -> List[str]:
     Build a list of -D CMake arguments from environment variables to harmonize
     build configuration across setuptools, external CMake, and scikit-build flows.
 
-    If ``CUSTOM_CUDA_ARCHS`` is unset, detected CUDA architectures are capped to
-    the maximum supported by ``nvcc``. If capping occurs, CMake builds cubins for
-    the capped architectures and adds one PTX target for the newest supported
-    forward-compatible base architecture.
+    If ``CUSTOM_CUDA_ARCHS`` is unset, detected CUDA architectures become CMake
+    real targets only when ``nvcc`` reports exact support. Unsupported
+    detections use supported virtual/PTX targets at or below the detected
+    architecture.
     """
     args: List[str] = []
     # Always export compile_commands.json for tooling/validation
@@ -196,9 +196,9 @@ def build_cmake_args() -> List[str]:
     """
     Full CMake -D list: environment-based flags plus repo-aligned SCM version define.
 
-    Auto-detected CUDA architectures are capped to ``nvcc`` support when
-    ``CUSTOM_CUDA_ARCHS`` is unset. If capping occurs, one PTX target is emitted
-    for the newest supported forward-compatible base architecture.
+    Auto-detected CUDA architectures use exact ``nvcc`` real targets when
+    supported. Unsupported detections fall back to supported PTX targets at or
+    below the detected architecture when ``CUSTOM_CUDA_ARCHS`` is unset.
     """
     root = get_project_root()
     return _build_cmake_args_from_env() + _build_cmake_args_package_scm_version(root)

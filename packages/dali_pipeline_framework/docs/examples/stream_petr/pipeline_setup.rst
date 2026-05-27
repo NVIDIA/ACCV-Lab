@@ -96,6 +96,11 @@ Wrap as Structured Iterator
 The pipeline is wrapped as a ``DALIStructuredOutputIterator``. A post-processing function aligns the
 output format to the structures expected by StreamPETR training.
 
+The implementation uses
+:meth:`~accvlab.dali_pipeline_framework.pipeline.DALIStructuredOutputIterator.CreateAsDataLoaderObject` so that
+the returned iterator is also recognized by ``isinstance(..., DataLoader)`` checks in training code expecting a
+PyTorch ``DataLoader``.
+
 For detail on the post-processing function, see :doc:`custom_post_processing`.
 
 .. note-literalinclude:: ../../../examples/pipeline_setup/stream_petr_pipeline.py
@@ -105,5 +110,4 @@ For detail on the post-processing function, see :doc:`custom_post_processing`.
    :lineno-match:
    :start-at: # ===== Wrap as iterator =====
    :end-before: return res_iterator
-
 

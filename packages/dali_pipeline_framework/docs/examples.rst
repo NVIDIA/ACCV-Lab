@@ -14,6 +14,14 @@ Pipeline Setup Examples
    * - Example
      - Description
      - Entry Point Script
+   * - :doc:`examples/simple_pipeline/index`
+     - **Introductory example** using synthetic data (no external dataset required) and implementing a simple pipeline. 
+       Demonstrates the core framework components: implementing a :class:`~accvlab.dali_pipeline_framework.inputs.DataProvider`,
+       building a :class:`~accvlab.dali_pipeline_framework.pipeline.SampleDataGroup` data format blueprint, using
+       :class:`~accvlab.dali_pipeline_framework.inputs.ShuffledShardedInputCallable`, applying processing
+       steps and defining consistent vs. independent processing (for random augmentations), and retrieving results
+       as nested dicts. Recommended as a starting point before the more complex examples below.
+     - ``packages/dali_pipeline_framework/examples/simple_full_pipeline/run_example.py``
    * - :doc:`examples/2d_object_detection/index`
      - Shows how to set up a pipeline for 2D object detection. This example also demonstrates the flexibility
        of the pipeline framework by allowing the switch between single-camera and multi-camera data (adding a 
@@ -35,6 +43,7 @@ Pipeline Setup Examples
    :maxdepth: 1
    :hidden:
 
+   examples/simple_pipeline/index
    examples/2d_object_detection/index
    examples/stream_petr/index
    examples/flexible_step/index

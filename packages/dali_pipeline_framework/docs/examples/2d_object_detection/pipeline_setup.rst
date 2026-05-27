@@ -96,7 +96,7 @@ drop-in replacement for a PyTorch ``DataLoader``.
    :end-at: return res_iterator
 
 .. seealso::
-   For an example using sequence-based sampling and multi-task learning (3D object detection with auxiliary 
-   2D object detection) see :doc:`../stream_petr/index`.
 
+   For an example using sequence-based sampling and multi-task learning (3D object detection with auxiliary
+   2D object detection) see :doc:`../stream_petr/index`.
 

@@ -16,11 +16,22 @@ import argparse
 import sys
 import os
 
+try:
+    from accvlab.optim_test_tools import Stopwatch, NVTXRangeWrapper, TensorDumper
+except ImportError as exc:
+    print(
+        "ERROR: Could not import `accvlab.optim_test_tools`, which provides helper utilities used by this "
+        "example (for example, dumping pipeline outputs for inspection and profiling the example loop). "
+        "The `optim_test_tools` package is part of this ACCV-Lab repository, so this usually means not all "
+        "packages of this project are installed. Please see `docs/guides/INSTALLATION_GUIDE.md` or the HTML "
+        "documentation for installation details.",
+        file=sys.stderr,
+    )
+    raise SystemExit(1) from exc
+
 from pipeline_setup import *
 
 import input_definitions as defs
-
-from accvlab.optim_test_tools import Stopwatch, NVTXRangeWrapper, TensorDumper
 
 _current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -69,9 +80,13 @@ if __name__ == "__main__":
     # Override config with command line arguments
     config = add_stream_petr_config_to_arguments(config, args)
 
+    # `setup_dali_pipeline_stream_petr_train()` returns the iterator described in the StreamPETR example docs
+    # page "StreamPETR Pipeline Setup", section "Wrap as Structured Iterator", including the PyTorch
+    # DataLoader masking.
     dali_data_provider = setup_dali_pipeline_stream_petr_train(
         defs.nuscenes_root_dir, defs.nuscenes_version, sys.maxsize, config, batch_size=args.batch_size
     )
+
     dali_iter = iter(dali_data_provider)
 
     for i in range(args.num_iterations):

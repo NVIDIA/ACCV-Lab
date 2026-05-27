@@ -7,6 +7,7 @@ This example consists of the following parts:
    :maxdepth: 1
 
    pipeline_setup
+   entry_point
 
 .. important::
 

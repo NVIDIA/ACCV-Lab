@@ -347,7 +347,7 @@ def setup_dali_pipeline_2d_object_detection(
     #
     # Also, we use the `CreateAsDataLoaderObject()` method rather than the constructor directly. This ensures
     # that the iterator object is masked as a PyTorch DataLoader object, so that checks such as
-    # `assert isinstance(iterator_object, DataLoader)` pass.
+    # `assert isinstance(iterator_object, DataLoader)` inside the training implementation pass.
     res_iterator = DALIStructuredOutputIterator.CreateAsDataLoaderObject(
         input_callable.length, pipe, res_data_setup
     )

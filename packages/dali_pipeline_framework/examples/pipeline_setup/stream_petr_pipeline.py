@@ -598,9 +598,15 @@ def setup_dali_pipeline_stream_petr_train(
 
     # ===== Wrap as iterator =====
     # @NOTE
-    # Wrap pipeline as a DALIStructuredOutputIterator (drop-in replacement for a PyTorch DataLoader).
-    # Setup the post-processing function to align the data format with StreamPETR training expectations.
-    # See the 2D object detection example for more details.
+    # Wrap the pipeline as an DALIStructuredOutputIterator, which can be used as a drop-in replacement for a
+    # PyTorch DataLoader.
+    #
+    # Note that apart from the pipeline, the info on the epoch size and the data format of the output
+    # (`res_data_setup`) need to be set explicitly in the iterator wrapper.
+    #
+    # Also, we use the `CreateAsDataLoaderObject()` method rather than the constructor directly. This ensures
+    # that the iterator object is masked as a PyTorch DataLoader object, so that checks such as
+    # `assert isinstance(iterator_object, DataLoader)` inside the training implementation pass.
     dali_structured_to_torch_used = partial(dali_structured_to_torch, for_training=True)
     # @NOTE: Set up the iterator
     res_iterator = DALIStructuredOutputIterator.CreateAsDataLoaderObject(

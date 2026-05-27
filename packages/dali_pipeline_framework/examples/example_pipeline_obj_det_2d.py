@@ -23,11 +23,22 @@ if _dali_extensions_root not in sys.path:
     sys.path.insert(0, _dali_extensions_root)
 
 
+try:
+    from accvlab.optim_test_tools import Stopwatch, NVTXRangeWrapper, TensorDumper
+except ImportError as exc:
+    print(
+        "ERROR: Could not import `accvlab.optim_test_tools`, which provides helper utilities used by this "
+        "example (for example, dumping pipeline outputs for inspection and profiling the example loop). "
+        "The `optim_test_tools` package is part of this ACCV-Lab repository, so this usually means not all "
+        "packages of this project are installed. Please see `docs/guides/INSTALLATION_GUIDE.md` or the HTML "
+        "documentation for installation details.",
+        file=sys.stderr,
+    )
+    raise SystemExit(1) from exc
+
 from pipeline_setup import *
 
 import input_definitions as defs
-
-from accvlab.optim_test_tools import Stopwatch, NVTXRangeWrapper, TensorDumper
 
 # Note that we do not activate the stopwatch here (and therefore also do not need
 # to obtain the singleton object here). In this example, we provide command-line

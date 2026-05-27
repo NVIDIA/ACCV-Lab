@@ -9,6 +9,7 @@ This example consists of the following parts:
    pipeline_setup
    custom_processing_step
    custom_post_processing
+   entry_point
 
 .. important::
 

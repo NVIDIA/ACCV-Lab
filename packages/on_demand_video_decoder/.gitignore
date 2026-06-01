@@ -142,12 +142,12 @@ dmypy.json
 weights/
 weights2/
 
-*.mp4
-!data/sample_clip/moving_shape_circle_h265.mp4
-!data/sample_clip/moving_shape_ellipse_h265.mp4
-!data/sample_clip/moving_shape_hexagon_h265.mp4
-!data/sample_clip/moving_shape_rect_h265.mp4
-!data/sample_clip/moving_shape_triangle_h265.mp4
+# *.mp4
+# !data/sample_clip/moving_shape_circle_h265.mp4
+# !data/sample_clip/moving_shape_ellipse_h265.mp4
+# !data/sample_clip/moving_shape_hexagon_h265.mp4
+# !data/sample_clip/moving_shape_rect_h265.mp4
+# !data/sample_clip/moving_shape_triangle_h265.mp4
 cache
 reference
 GopDecoderTest

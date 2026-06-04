@@ -438,8 +438,22 @@ void PyNvGopDecoder::decode_from_packet_list(std::vector<std::vector<int>> packe
 void PyNvGopDecoder::decode_from_gop_list(const std::vector<const uint8_t*>& datas,
                                           const std::vector<size_t>& sizes,
                                           const std::vector<std::string>& filepaths,
-                                          const std::vector<int> frame_ids, bool as_bgr,
-                                          std::vector<RGBFrame>* dst) {
+                                          const std::vector<int>& frame_ids, bool convert_to_rgb, bool as_bgr,
+                                          std::vector<DecodedFrameExt>* out_if_no_color_conversion,
+                                          std::vector<RGBFrame>* out_if_color_converted) {
+    if (convert_to_rgb) {
+        if (out_if_color_converted == nullptr || out_if_no_color_conversion != nullptr) {
+            throw std::invalid_argument(
+                "[ERROR] RGB decode requires out_if_color_converted and a null "
+                "out_if_no_color_conversion");
+        }
+    } else {
+        if (out_if_color_converted != nullptr || out_if_no_color_conversion == nullptr) {
+            throw std::invalid_argument(
+                "[ERROR] raw decode requires out_if_no_color_conversion and a null "
+                "out_if_color_converted");
+        }
+    }
     nvtxRangePushA("DecodeFromPacketList");
 
     if (datas.size() != sizes.size()) {
@@ -509,6 +523,17 @@ void PyNvGopDecoder::decode_from_gop_list(const std::vector<const uint8_t*>& dat
         throw std::invalid_argument("[ERROR] filepaths and frame_ids must have the same length");
     }
 
+    for (uint32_t i = 0; i < aggregated_frames; ++i) {
+        if (frame_ids[i] < first_frame_ids_all[i] ||
+            frame_ids[i] >= first_frame_ids_all[i] + gop_lens_all[i]) {
+            nvtxRangePop();
+            throw std::invalid_argument("[ERROR] GOP range from " + std::to_string(first_frame_ids_all[i]) +
+                                        " to " + std::to_string(first_frame_ids_all[i] + gop_lens_all[i]) +
+                                        " does not contain frame_id " + std::to_string(frame_ids[i]) +
+                                        " for file " + filepaths[i]);
+        }
+    }
+
     const int total_frames = static_cast<int>(aggregated_frames);
 
     if (total_frames > this->max_num_files) {
@@ -569,14 +594,9 @@ void PyNvGopDecoder::decode_from_gop_list(const std::vector<const uint8_t*>& dat
         }
     }
 
-    // Decode to RGB using unified path
-    std::vector<RGBFrame> output_frames;
-    output_frames.resize(total_frames);
-
     int st = main_decode(color_ranges_all, codec_ids_all, widths_all, heights_all, frame_sizes_all, filepaths,
-                         frame_ids, /*convert_to_rgb=*/true, as_bgr, vpacket_queue,
-                         /*out_if_no_color_conversion=*/nullptr,
-                         /*out_if_color_converted=*/dst);
+                         frame_ids, convert_to_rgb, as_bgr, vpacket_queue, out_if_no_color_conversion,
+                         out_if_color_converted);
     if (st != 0) {
         nvtxRangePop();
         throw std::runtime_error("[ERROR] main_decode failed.");

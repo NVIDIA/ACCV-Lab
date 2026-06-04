@@ -135,17 +135,21 @@ class PyNvGopDecoder {
     /**
      * Decode frames from a list of serialized packet bundles (each as a contiguous byte array)
      * The method parses each bundle via parseSerializedPacketData, rebuilds packet queues, and
-     * calls main_decode once for all aggregated frames with RGB output.
+     * calls main_decode once for all aggregated frames.
      * @param datas Vector of pointers to serialized packet data buffers
      * @param sizes Vector of sizes for each serialized packet data buffer
      * @param filepaths Vector of source filepaths corresponding to each target frame (aggregated)
      * @param frame_ids Vector of target frame IDs (aggregated across all bundles)
-     * @param as_bgr Whether to output BGR (true) or RGB (false)
-     * @param dst Output vector of RGBFrame with size equal to frame_ids.size()
+     * @param convert_to_rgb Whether to output RGBFrame instead of DecodedFrameExt
+     * @param as_bgr Whether to output BGR (true) or RGB (false), only used for RGB output
+     * @param out_if_no_color_conversion Output vector of DecodedFrameExt when convert_to_rgb is false
+     * @param out_if_color_converted Output vector of RGBFrame when convert_to_rgb is true
      */
     void decode_from_gop_list(const std::vector<const uint8_t*>& datas, const std::vector<size_t>& sizes,
-                              const std::vector<std::string>& filepaths, const std::vector<int> frame_ids,
-                              bool as_bgr, std::vector<RGBFrame>* dst);
+                              const std::vector<std::string>& filepaths, const std::vector<int>& frame_ids,
+                              bool convert_to_rgb, bool as_bgr,
+                              std::vector<DecodedFrameExt>* out_if_no_color_conversion,
+                              std::vector<RGBFrame>* out_if_color_converted);
 
     /**
      * Merge multiple packet data buffers containing SerializedPacketBundle data into a single data buffer (multithreaded)

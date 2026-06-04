@@ -824,7 +824,9 @@ void Init_PyNvGopDecoder(py::module& m) {
             )pbdoc")
         .def(
             "DecodeFromGOPListRGB",
-            [](std::shared_ptr<PyNvGopDecoder>& dec, const std::vector<py::array_t<uint8_t>>& numpy_datas,
+            [](std::shared_ptr<PyNvGopDecoder>& dec,
+               const std::vector<py::array_t<uint8_t, py::array::c_style | py::array::forcecast>>&
+                   numpy_datas,
                const std::vector<std::string>& filepaths, const std::vector<int>& frame_ids, bool as_bgr) {
                 try {
                     // Convert numpy arrays to pointers and sizes (requires GIL)
@@ -842,7 +844,8 @@ void Init_PyNvGopDecoder(py::module& m) {
                     // Release GIL for GPU decoding
                     {
                         py::gil_scoped_release release;
-                        dec->decode_from_gop_list(datas, sizes, filepaths, frame_ids, as_bgr, &result);
+                        dec->decode_from_gop_list(datas, sizes, filepaths, frame_ids, true, as_bgr, nullptr,
+                                                  &result);
                     }
                     return result;
                 } catch (const std::exception& e) {
@@ -875,6 +878,56 @@ void Init_PyNvGopDecoder(py::module& m) {
             Note:
                 The method parses each bundle, reconstructs per-frame packet queues, and decodes
                 via a unified pipeline.
+            )pbdoc")
+        .def(
+            "DecodeFromGOPList",
+            [](std::shared_ptr<PyNvGopDecoder>& dec,
+               const std::vector<py::array_t<uint8_t, py::array::c_style | py::array::forcecast>>&
+                   numpy_datas,
+               const std::vector<std::string>& filepaths, const std::vector<int>& frame_ids) {
+                try {
+                    // Convert numpy arrays to pointers and sizes (requires GIL)
+                    std::vector<const uint8_t*> datas;
+                    std::vector<size_t> sizes;
+                    datas.reserve(numpy_datas.size());
+                    sizes.reserve(numpy_datas.size());
+
+                    for (const auto& arr : numpy_datas) {
+                        datas.push_back(static_cast<const uint8_t*>(arr.data()));
+                        sizes.push_back(arr.size());
+                    }
+
+                    std::vector<DecodedFrameExt> result;
+                    // Release GIL for GPU decoding
+                    {
+                        py::gil_scoped_release release;
+                        dec->decode_from_gop_list(datas, sizes, filepaths, frame_ids, false, false, &result,
+                                                  nullptr);
+                    }
+                    return result;
+                } catch (const std::exception& e) {
+                    throw std::runtime_error(e.what());
+                }
+            },
+            py::arg("numpy_datas"), py::arg("filepaths"), py::arg("frame_ids"),
+            R"pbdoc(
+            Decodes multiple serialized GOP bundles into native YUV frames.
+
+            This method is the raw-output counterpart of :meth:`DecodeFromGOPListRGB`.
+            It parses each bundle, reconstructs per-frame packet queues, and decodes
+            via the unified pipeline without RGB/BGR color conversion.
+
+            Args:
+                numpy_datas: List of numpy arrays, each containing a SerializedPacketBundle
+                filepaths: List of source file paths for each requested frame
+                frame_ids: List of target frame IDs
+
+            Returns:
+                List of DecodedFrameExt objects containing decoded native YUV frame data
+
+            Raises:
+                RuntimeError: If GOP data is invalid or decoding fails
+                ValueError: If input arrays have mismatched dimensions
             )pbdoc")
         .def(
             "LoadGops",

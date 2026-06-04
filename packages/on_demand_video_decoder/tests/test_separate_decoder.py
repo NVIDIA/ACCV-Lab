@@ -347,5 +347,43 @@ def test_separate_access_gop_list_api():
         assert len(gop_decoded_list) == num_frames_to_use
 
 
+def test_separate_access_gop_list_raw_api():
+    """Test GetGOPList + DecodeFromGOPList raw API."""
+    clip_dir = os.path.join(utils.get_data_dir(), "sample_clip")
+    files = [os.path.join(clip_dir, name) for name in sorted(os.listdir(clip_dir))[:3]]
+    frames = [0, 7, 14]
+    max_num_files_to_use = len(files)
+    expected_frame_size = 256 * 256 * 3 // 2
+
+    nv_gop_dec1 = nvc.CreateGopDecoder(
+        maxfiles=max_num_files_to_use,
+        iGpu=0,
+    )
+    nv_gop_dec2 = nvc.CreateGopDecoder(
+        maxfiles=max_num_files_to_use,
+        iGpu=0,
+    )
+
+    gop_list = nv_gop_dec1.GetGOPList(files, frames)
+    assert gop_list is not None and len(gop_list) == len(files), (
+        f"GetGOPList returned invalid data. "
+        f"Expected {len(files)} bundles, got {len(gop_list) if gop_list else 0}"
+    )
+
+    gop_data_list = [gop_data for gop_data, _, _ in gop_list]
+    decoded_frames = nv_gop_dec2.DecodeFromGOPList(gop_data_list, files, frames)
+
+    assert decoded_frames is not None and len(decoded_frames) == len(files), (
+        f"DecodeFromGOPList returned {len(decoded_frames) if decoded_frames else 0} "
+        f"frames, expected {len(files)}"
+    )
+
+    for file_name, frame_id, decoded_frame in zip(files, frames, decoded_frames):
+        assert decoded_frame.framesize() == expected_frame_size, (
+            f"frame size mismatch for {file_name} frame {frame_id}: "
+            f"{decoded_frame.framesize()} != {expected_frame_size}"
+        )
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-v"]))

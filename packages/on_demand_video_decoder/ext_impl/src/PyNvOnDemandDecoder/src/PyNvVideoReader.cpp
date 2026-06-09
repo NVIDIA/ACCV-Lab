@@ -60,6 +60,11 @@ void PyNvVideoReader::parse_keyframe_idx(std::vector<int>& key_frame_ids, std::m
         auto ret = cur_demuxer->Demux(&pVideo, &nVideoBytes, &timestamp, &flags);
         ++frame_cnt;
 
+        if (!ret && cur_demuxer->HasDemuxError()) {
+            throw std::invalid_argument("[ERROR] Demux error for file: " + this->filename + ": " +
+                                        cur_demuxer->GetLastDemuxError());
+        }
+
         if (nVideoBytes) {
             if (!ret) {
                 throw std::invalid_argument("[ERROR] Demux error");
@@ -378,6 +383,7 @@ void PyNvVideoReader::DemuxGopProc(PyNvGopDemuxer* demuxer,
     } catch (const std::exception& e) {
         nvtxRangePop();
         std::cerr << e.what() << std::endl;
+        throw;
     }
     nvtxRangePop();
 }

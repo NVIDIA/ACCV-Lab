@@ -248,12 +248,18 @@ void PyNvGopDecoder::DemuxGopProc(PyNvGopDemuxer* demuxer,
         gop_lens.reserve(sorted_frame_ids.size());
     }
 
+    auto make_demux_error = [&](int target_frame_id, const std::string& reason) {
+        return "[ERROR] GOP demux failed for file: " + demuxer->GetFilename() +
+               " frame_id=" + std::to_string(target_frame_id) + ": " + reason;
+    };
+
     try {
         packet_array.reserve(std::accumulate(gop_lens.begin(), gop_lens.end(), 0));
         int nVideoBytes = 0;
         uint8_t* pVideo = NULL;
 
         for (int i = 0; i < sorted_frame_ids.size(); ++i) {
+            const int target_frame_id = sorted_frame_ids[i];
             bool seeking = true;
             int frame_id_out = 0;
             int key_frame_id = 0;
@@ -265,15 +271,24 @@ void PyNvGopDecoder::DemuxGopProc(PyNvGopDemuxer* demuxer,
             int gop_len = 0;
             do {
                 if (seeking) {
-                    if (seek_with_no_map) {
-                        ret = demuxer->SeekGopFirstFrameNoMap(&pVideo, &nVideoBytes, sorted_frame_ids[i],
-                                                              frame_id_out);
-                    } else {
-                        ret = demuxer->Seek(&pVideo, &nVideoBytes, first_frame_ids[i], frame_id_out);
+                    try {
+                        if (seek_with_no_map) {
+                            ret = demuxer->SeekGopFirstFrameNoMap(&pVideo, &nVideoBytes, sorted_frame_ids[i],
+                                                                  frame_id_out);
+                        } else {
+                            ret = demuxer->Seek(&pVideo, &nVideoBytes, first_frame_ids[i], frame_id_out);
+                        }
+                    } catch (const std::exception& e) {
+                        throw std::runtime_error(make_demux_error(target_frame_id, e.what()));
                     }
                     if (!ret) {
-                        throw std::out_of_range("[Error] Seeking for frame_id:" +
-                                                std::to_string(first_frame_ids[i]));
+                        int requested_frame_id = seek_with_no_map ? sorted_frame_ids[i] : first_frame_ids[i];
+                        std::string message =
+                            "[Error] Seeking for frame_id:" + std::to_string(requested_frame_id);
+                        if (demuxer->HasDemuxError()) {
+                            message += ": " + demuxer->GetLastDemuxError();
+                        }
+                        throw std::runtime_error(make_demux_error(target_frame_id, message));
                     }
                     seeking = false;
                     key_frame_id = frame_id_out;
@@ -281,14 +296,23 @@ void PyNvGopDecoder::DemuxGopProc(PyNvGopDemuxer* demuxer,
                         first_frame_ids.push_back(key_frame_id);
                     }
                 } else {
-                    auto ret = demuxer->Demux(&pVideo, &nVideoBytes, frame_id_out, &flags, &bRef);
-                    if (nVideoBytes) {
-                        if (!ret) {
-                            throw std::out_of_range("[Error] Demuxing");
+                    bool ret = false;
+                    try {
+                        ret = demuxer->Demux(&pVideo, &nVideoBytes, frame_id_out, &flags, &bRef);
+                    } catch (const std::exception& e) {
+                        throw std::runtime_error(make_demux_error(target_frame_id, e.what()));
+                    }
+                    if (!ret) {
+                        if (demuxer->HasDemuxError()) {
+                            throw std::runtime_error(make_demux_error(
+                                target_frame_id, "[ERROR] Demuxing failed: " + demuxer->GetLastDemuxError()));
                         }
-                    } else {
+                        if (nVideoBytes) {
+                            throw std::out_of_range(make_demux_error(target_frame_id, "[Error] Demuxing"));
+                        }
                         continue;
                     }
+                    if (!nVideoBytes) continue;
                     bool find_key_frame = iskeyFrame(demuxer->GetDemuxer()->GetVideoCodec(), pVideo, flags);
                     find_next_key_frame |= find_key_frame;
                     if (find_key_frame) next_key_frame_id = frame_id_out;
@@ -366,9 +390,10 @@ void PyNvGopDecoder::DemuxGopProc(PyNvGopDemuxer* demuxer,
             if (seek_with_no_map) gop_lens.push_back(gop_len);
         }
         packet_queue->push_back(std::make_tuple(nullptr, -1, 0));
-    } catch (const std::exception& e) {
+    } catch (...) {
         packet_queue->push_back(std::make_tuple(nullptr, -1, 0));
-        LOG(ERROR) << "DemuxGopProc failed: " << e.what();
+        nvtxRangePop();  //DemuxGopProc
+        throw;
     }
     nvtxRangePop();  //DemuxGopProc
 }

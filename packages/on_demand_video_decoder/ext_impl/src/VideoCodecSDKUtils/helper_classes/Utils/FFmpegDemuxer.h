@@ -33,6 +33,7 @@ extern "C" {
 #include "nvcuvid.h"
 #include "NvCodecUtils.h"
 #include "nvtx3/nvtx3.hpp"
+#include <string>
 using namespace std;
 //---------------------------------------------------------------------------
 //! \file FFmpegDemuxer.h
@@ -475,6 +476,19 @@ class FFmpegDemuxer {
     unsigned int frameCount = 0;
 
     FFBufferIO* ffbufIO = NULL;
+    bool demux_error = false;
+    std::string demux_error_message;
+
+    void ClearDemuxError() {
+        demux_error = false;
+        demux_error_message.clear();
+    }
+
+    void SetDemuxError(const std::string& message) {
+        demux_error = true;
+        demux_error_message = message;
+        LOG(ERROR) << message;
+    }
 
    public:
     class DataProvider {
@@ -908,6 +922,8 @@ class FFmpegDemuxer {
             return true;
     }
     bool IsValid() const { return fmtc != nullptr; }
+    bool HasDemuxError() const { return demux_error; }
+    const std::string& GetLastDemuxError() const { return demux_error_message; }
     int64_t TsFromTime(double ts_sec) {
         /* Internal timestamp representation is integer, so multiply to AV_TIME_BASE
          * and switch to fixed point precision arithmetics; */
@@ -941,7 +957,9 @@ class FFmpegDemuxer {
 
     bool Demux(uint8_t** ppVideo, int* pnVideoBytes, int64_t* pts = NULL, int* flag = NULL) {
         NVTX_SCOPED_RANGE("demux")
+        ClearDemuxError();
         if (!fmtc) {
+            SetDemuxError("No AVFormatContext provided for demux.");
             return false;
         }
 
@@ -956,6 +974,11 @@ class FFmpegDemuxer {
             av_packet_unref(pkt);
         }
         if (e < 0) {
+            if (e != AVERROR_EOF) {
+                SetDemuxError("FFmpeg read frame failed for codec " +
+                              std::string(avcodec_get_name(eVideoCodec)) +
+                              ", ret=" + std::to_string(e));
+            }
             return false;
         }
 
@@ -963,8 +986,34 @@ class FFmpegDemuxer {
             if (pktFiltered->data) {
                 av_packet_unref(pktFiltered);
             }
-            ck(av_bsf_send_packet(bsfc, pkt));
-            ck(av_bsf_receive_packet(bsfc, pktFiltered));
+            if (!bsfc) {
+                SetDemuxError("FFmpeg bitstream filter is not initialized for codec " +
+                              std::string(avcodec_get_name(eVideoCodec)));
+                av_packet_unref(pkt);
+                return false;
+            }
+
+            const int send_ret = av_bsf_send_packet(bsfc, pkt);
+            if (send_ret < 0) {
+                SetDemuxError("FFmpeg bitstream filter send failed for codec " +
+                              std::string(avcodec_get_name(eVideoCodec)) +
+                              ", ret=" + std::to_string(send_ret));
+                av_packet_unref(pkt);
+                return false;
+            }
+
+            const int recv_ret = av_bsf_receive_packet(bsfc, pktFiltered);
+            if (recv_ret < 0) {
+                SetDemuxError("FFmpeg bitstream filter receive failed for codec " +
+                              std::string(avcodec_get_name(eVideoCodec)) +
+                              ", ret=" + std::to_string(recv_ret));
+                return false;
+            }
+            if (!pktFiltered->data || pktFiltered->size <= 0) {
+                SetDemuxError("FFmpeg bitstream filter produced an empty packet for codec " +
+                              std::string(avcodec_get_name(eVideoCodec)));
+                return false;
+            }
             *ppVideo = pktFiltered->data;
             *pnVideoBytes = pktFiltered->size;
             if (pts) *pts = (int64_t)(pktFiltered->pts);
@@ -1074,6 +1123,14 @@ class FFmpegDemuxer {
             };
         };
 
+        auto demux_or_throw = [&](int64_t* out_pts) {
+            bool ret = Demux(ppVideo, pnVideoBytes, out_pts);
+            if (!ret) {
+                throw runtime_error(HasDemuxError() ? GetLastDemuxError()
+                                                    : "Demux returned no packet while seeking");
+            }
+        };
+
         /* This will seek for exact frame number;
          * Note that decoder may not be able to decode such frame; */
         auto seek_for_exact_frame = [&](PacketData& pkt_data, SeekContext& seek_ctx) {
@@ -1083,9 +1140,7 @@ class FFmpegDemuxer {
 
             int condition = 0;
             do {
-                if (!Demux(ppVideo, pnVideoBytes, &seek_ctx.out_frame_pts)) {
-                    break;
-                }
+                demux_or_throw(&seek_ctx.out_frame_pts);
                 condition = is_seek_done(pkt_data, seek_ctx);
 
                 // We've gone too far and need to seek backwards;
@@ -1114,7 +1169,7 @@ class FFmpegDemuxer {
             if (rv < 0) throw std::runtime_error("Failed to seek");
 
             avcodec_flush_buffers(codecContext);
-            Demux(ppVideo, pnVideoBytes, &seek_ctx.out_frame_pts);
+            demux_or_throw(&seek_ctx.out_frame_pts);
             seek_ctx.out_frame_duration = pktFiltered->duration;
         };
 
@@ -1122,7 +1177,7 @@ class FFmpegDemuxer {
         auto seek_for_prev_key_frame = [&](PacketData& pkt_data, SeekContext& seek_ctx) {
             seek_frame(seek_ctx, AVSEEK_FLAG_BACKWARD);
 
-            Demux(ppVideo, pnVideoBytes, &seek_ctx.out_frame_pts);
+            demux_or_throw(&seek_ctx.out_frame_pts);
             // seek_ctx.out_frame_pts = pkt_data.pts;
             seek_ctx.out_frame_duration = pkt_data.duration;
         };
@@ -1211,6 +1266,14 @@ class FFmpegDemuxer {
             };
         };
 
+        auto demux_or_throw = [&](int64_t* out_pts) {
+            bool ret = Demux(ppVideo, pnVideoBytes, out_pts);
+            if (!ret) {
+                throw runtime_error(HasDemuxError() ? GetLastDemuxError()
+                                                    : "Demux returned no packet while seeking");
+            }
+        };
+
         /* This will seek to nearest I-frame;
      * Idea is to seek to N'th exact frame and rewing to nearest I-frame; */
         auto seek_for_nearest_iframe = [&](PacketData& pkt_data, SeekContext& seek_ctx) {
@@ -1220,7 +1283,7 @@ class FFmpegDemuxer {
             if (rv < 0) throw std::runtime_error("Failed to seek");
 
             avcodec_flush_buffers(codecContext);
-            Demux(ppVideo, pnVideoBytes, &seek_ctx.out_frame_pts);
+            demux_or_throw(&seek_ctx.out_frame_pts);
             seek_ctx.out_frame_duration = pktFiltered->duration;
         };
 
@@ -1228,7 +1291,7 @@ class FFmpegDemuxer {
         auto seek_for_prev_key_frame = [&](PacketData& pkt_data, SeekContext& seek_ctx) {
             seek_frame(seek_ctx, AVSEEK_FLAG_BACKWARD);
 
-            Demux(ppVideo, pnVideoBytes, &seek_ctx.out_frame_pts);
+            demux_or_throw(&seek_ctx.out_frame_pts);
             // seek_ctx.out_frame_pts = pkt_data.pts;
             seek_ctx.out_frame_duration = pkt_data.duration;
         };

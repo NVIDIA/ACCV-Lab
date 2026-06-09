@@ -412,6 +412,10 @@ inline std::vector<int> parse_gop_start_idx(FFmpegDemuxer* demuxer, std::map<int
         auto ret = demuxer->Demux(&pVideo, &nVideoBytes, &timestamp, &flags);
         ++frame_cnt;
 
+        if (!ret && demuxer->HasDemuxError()) {
+            throw std::invalid_argument("[ERROR] Demux error: " + demuxer->GetLastDemuxError());
+        }
+
         if (nVideoBytes) {
             if (!ret) {
                 throw std::invalid_argument("[ERROR] Demux error");

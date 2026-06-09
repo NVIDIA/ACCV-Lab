@@ -82,6 +82,10 @@ bool PyNvGopDemuxer::Demux(uint8_t** ppVideo, int* pnVideoBytes, int& frame_id, 
     auto ret = demuxer->Demux(ppVideo, pnVideoBytes, &timestamp, pFlags);
 
     if (!ret) {
+        if (demuxer->HasDemuxError()) {
+            throw std::runtime_error("[ERROR] Demux failed for file: " + this->filename + ": " +
+                                     demuxer->GetLastDemuxError());
+        }
         return false;
     }
 

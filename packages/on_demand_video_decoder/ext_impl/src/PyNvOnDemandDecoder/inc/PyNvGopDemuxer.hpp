@@ -47,6 +47,12 @@ class PyNvGopDemuxer {
 
     FFmpegDemuxer* GetDemuxer() { return demuxer.get(); }
 
+    bool HasDemuxError() const { return demuxer && demuxer->HasDemuxError(); }
+
+    std::string GetLastDemuxError() const { return demuxer ? demuxer->GetLastDemuxError() : ""; }
+
+    const std::string& GetFilename() const { return filename; }
+
     bool IsVFR() { return demuxer->IsVFR(); }
     bool IsVFRV2() { return demuxer->IsVFRV2(); }
 

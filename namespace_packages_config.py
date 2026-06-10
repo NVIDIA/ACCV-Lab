@@ -27,6 +27,7 @@ NAMESPACE_PACKAGES = [
     'accvlab.batching_helpers',
     'accvlab.multi_tensor_copier',
     'accvlab.dali_pipeline_framework',
+    'accvlab.lane_helpers',
     'accvlab.draw_heatmap',
     'accvlab.optim_test_tools',
     # Add new namespace packages in the same way as above

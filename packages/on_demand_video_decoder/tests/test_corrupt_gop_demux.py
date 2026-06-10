@@ -20,12 +20,7 @@ import pytest
 
 def test_corrupt_hevc_demux_raises_actionable_error():
     """Regression guard for corrupt HEVC mdat packets in GetGOPList."""
-    video = (
-        Path(__file__).resolve().parents[1]
-        / "data"
-        / "pix_fmt_variants"
-        / "hevc_hvc1_yuv420p10le.mp4"
-    )
+    video = Path(__file__).resolve().parents[1] / "data" / "pix_fmt_variants" / "hevc_hvc1_yuv420p10le.mp4"
 
     from accvlab.on_demand_video_decoder import CreateGopDecoder
 

@@ -113,8 +113,8 @@ RUN pip install pandas==1.5.3 \
     numba==0.59 \
     pyquaternion==0.9.9
 
-RUN pip install nuscenes-devkit && \
-    pip install shapely tqdm pillow networkx fire
+RUN pip install nuscenes-devkit==1.2.0 && \
+    pip install shapely==2.0.7 tqdm==4.67.3 pillow==12.2.0 networkx==3.4.2 fire==0.7.1
 
 RUN pip install pytest pytest-timeout
 RUN pip install pynvml

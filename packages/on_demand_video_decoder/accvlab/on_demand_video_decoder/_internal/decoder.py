@@ -19,6 +19,7 @@ This module provides the CachedGopDecoder class and CreateGopDecoder factory fun
 for video GOP extraction with transparent caching functionality.
 """
 
+from collections import OrderedDict
 from typing import List, Tuple, Any
 import numpy as np
 
@@ -54,11 +55,22 @@ class CachedGopDecoder:
 
     Cache hit condition for each file: ``first_frame_id <= frame_id < first_frame_id + gop_len``
 
+    The cache holds at most one GOP per file and is bounded to ``maxfiles`` slots (the
+    same ``maxfiles`` passed to :func:`CreateGopDecoder`) with LRU eviction, so it never
+    grows beyond the number of files that can be processed concurrently.
+
+    Note:
+        The cache uses the file path as its key. It assumes the file at a given
+        path never changes while the decoder is alive. If you replace a file with
+        new content but keep the same path, the cache may still return the old
+        GOP data. To avoid this, call :meth:`clear_cache` after replacing a file
+        with the same path.
+
     See Also:
         :class:`PyNvGopDecoder`: The underlying decoder class with full method documentation
     """
 
-    def __init__(self, decoder: PyNvGopDecoder, *, _key=None) -> None:
+    def __init__(self, decoder: PyNvGopDecoder, maxfiles: int, *, _key=None) -> None:
         """
         Initialize the cached GOP decoder.
 
@@ -68,6 +80,8 @@ class CachedGopDecoder:
 
         Args:
             decoder: The internal decoder instance
+            maxfiles: Maximum number of files processed concurrently; also the number
+                of GOP cache slots (one GOP per file, LRU eviction beyond this bound).
 
         Raises:
             RuntimeError: If called directly instead of using CreateGopDecoder()
@@ -77,8 +91,11 @@ class CachedGopDecoder:
                 "CachedGopDecoder cannot be instantiated directly. " "Use CreateGopDecoder() instead."
             )
         self._decoder = decoder
-        # Cache structure: {filepath: (packets_numpy, first_frame_id, gop_len)}
-        self._gop_cache = {}
+        self._maxfiles = maxfiles
+        # Cache structure: OrderedDict {filepath: (packets_numpy, first_frame_id, gop_len)}.
+        # Bounded to `maxfiles` slots (one GOP per file) with LRU eviction; ordered
+        # from least- to most-recently-used.
+        self._gop_cache: "OrderedDict[str, Tuple[np.ndarray, int, int]]" = OrderedDict()
         # Track cache hit status for each file in the last GetGOP call
         self._last_cache_hits = []
 
@@ -98,6 +115,20 @@ class CachedGopDecoder:
         _, first_frame_id, gop_len = self._gop_cache[filepath]
         return first_frame_id <= frame_id < first_frame_id + gop_len
 
+    def _cache_put(self, filepath: str, entry: Tuple[np.ndarray, int, int]) -> None:
+        """
+        Insert or refresh a cache entry, then evict LRU entries beyond ``maxfiles``.
+
+        Marks the entry as most-recently-used. A single ``GetGOP`` / ``GetGOPList``
+        call is bounded to ``maxfiles`` files, so all files touched in the current
+        call become most-recently-used and eviction only ever drops files from
+        earlier calls.
+        """
+        self._gop_cache[filepath] = entry
+        self._gop_cache.move_to_end(filepath)
+        while len(self._gop_cache) > self._maxfiles:
+            self._gop_cache.popitem(last=False)  # evict least-recently-used
+
     def GetGOP(
         self,
         filepaths: List[str],
@@ -112,6 +143,9 @@ class CachedGopDecoder:
         (i.e., the requested frame_ids fall within previously cached GOP ranges).
         If all hit, cached data is returned directly without re-demuxing.
 
+        GOP replacement is per video: the cache keeps only one GOP per video (keyed by
+        file path). Videos are evicted by LRU when the cache exceeds ``maxfiles`` entries.
+
         Args:
             filepaths: List of video file paths to extract GOP data from
             frame_ids: List of frame IDs to extract GOP data for (one per file)
@@ -125,6 +159,10 @@ class CachedGopDecoder:
             - list of first frame IDs for each GOP
             - list of GOP lengths for each GOP
 
+        Raises:
+            ValueError: If ``useGOPCache=True`` and the number of files exceeds
+                ``maxfiles`` (the cache capacity set in :func:`CreateGopDecoder`).
+
         Example:
             >>> decoder = CreateGopDecoder(maxfiles=6, iGpu=0)
             >>> # First call - fetches from video files
@@ -136,6 +174,13 @@ class CachedGopDecoder:
             # No caching, directly call C++ implementation
             self._last_cache_hits = [False] * len(filepaths)
             return self._decoder.GetGOP(filepaths, frame_ids, fastStreamInfos)
+
+        if len(filepaths) > self._maxfiles:
+            raise ValueError(
+                f"Number of files to decode ({len(filepaths)}) exceeds maxfiles "
+                f"({self._maxfiles}) set in CreateGopDecoder. Create a new decoder "
+                f"with a larger maxfiles."
+            )
 
         # Check cache hits for each file
         cache_hits = [self._is_cache_hit(fp, fid) for fp, fid in zip(filepaths, frame_ids)]
@@ -153,7 +198,7 @@ class CachedGopDecoder:
         for filepath, (packets, first_frame_ids, gop_lens) in zip(filepaths, results):
             # Each result contains data for a single file
             # first_frame_ids and gop_lens are lists with single element
-            self._gop_cache[filepath] = (packets, first_frame_ids[0], gop_lens[0])
+            self._cache_put(filepath, (packets, first_frame_ids[0], gop_lens[0]))
 
         # Merge and return in GetGOP format
         return self._merge_cached_data(filepaths)
@@ -213,7 +258,11 @@ class CachedGopDecoder:
         Returns:
             Dictionary with cache statistics and per-file information
         """
-        info = {"cached_files_count": len(self._gop_cache), "cached_files": {}}
+        info = {
+            "cached_files_count": len(self._gop_cache),
+            "max_cached_files": self._maxfiles,
+            "cached_files": {},
+        }
         for filepath, (packets, first_fid, gop_len) in self._gop_cache.items():
             info["cached_files"][filepath] = {
                 "first_frame_id": first_fid,
@@ -258,11 +307,11 @@ class CachedGopDecoder:
         Unlike meth:`GetGOP` which returns merged data, this method returns separate
         GOP data for each video, enabling more granular control and caching.
 
-        When useGOPCache=True, this method:
-        1. Checks cache hits for each file individually
-        2. Only demuxes for cache misses
-        3. Updates cache with new data
-        4. Returns results from cache (preserving original order)
+        When useGOPCache=True:
+        1. GOP replacement is per video: the cache keeps only one GOP per video
+           (keyed by file path).
+        2. Videos are evicted by LRU when the cache exceeds ``maxfiles`` entries.
+        3. On a cache miss, the GOP is demuxed from the video file.
 
         Args:
             filepaths: List of video file paths to extract GOP data from
@@ -276,6 +325,10 @@ class CachedGopDecoder:
             - numpy array with serialized GOP data for that video
             - list of first frame IDs for each GOP in that video
             - list of GOP lengths for each GOP in that video
+
+        Raises:
+            ValueError: If ``useGOPCache=True`` and the number of files exceeds
+                ``maxfiles`` (the cache capacity set in :func:`CreateGopDecoder`).
 
         Example:
             >>> decoder = CreateGopDecoder(maxfiles=6, iGpu=0)
@@ -297,9 +350,22 @@ class CachedGopDecoder:
             self._last_cache_hits = [False] * len(filepaths)
             return self._decoder.GetGOPList(filepaths, frame_ids, fastStreamInfos)
 
+        if len(filepaths) > self._maxfiles:
+            raise ValueError(
+                f"Number of files to decode ({len(filepaths)}) exceeds maxfiles "
+                f"({self._maxfiles}) set in CreateGopDecoder. Create a new decoder "
+                f"with a larger maxfiles."
+            )
+
         # Check cache hits for each file
         cache_hits = [self._is_cache_hit(fp, fid) for fp, fid in zip(filepaths, frame_ids)]
         self._last_cache_hits = cache_hits
+
+        # Mark current-call hits as most-recently-used BEFORE inserting misses, so the
+        # LRU eviction in _cache_put never drops a file we are about to return.
+        for fp, hit in zip(filepaths, cache_hits):
+            if hit:
+                self._gop_cache.move_to_end(fp)
 
         # Find indices of cache misses
         miss_indices = [i for i, hit in enumerate(cache_hits) if not hit]
@@ -317,7 +383,7 @@ class CachedGopDecoder:
                 filepath = filepaths[idx]
                 # Each result contains data for a single file
                 # first_frame_ids_list and gop_lens_list are lists with single element
-                self._gop_cache[filepath] = (packets, first_frame_ids_list[0], gop_lens_list[0])
+                self._cache_put(filepath, (packets, first_frame_ids_list[0], gop_lens_list[0]))
 
         # Build results from cache in original order
         results = []
@@ -354,7 +420,8 @@ def CreateGopDecoder(
     transparent GOP caching support.
 
     Args:
-        maxfiles: Maximum number of unique files that can be processed concurrently
+        maxfiles: Maximum number of unique files that can be processed concurrently.
+            Also bounds the GOP cache to ``maxfiles`` slots (one GOP per file).
         iGpu: GPU device ID to use for decoding (0 for primary GPU)
         suppressNoColorRangeWarning: Suppress warning when no color range can be
                                      extracted from video files (limited/MPEG range is assumed)
@@ -373,4 +440,4 @@ def CreateGopDecoder(
         >>> packets, fids, glens = decoder.GetGOP(['v0.mp4'], [15], useGOPCache=True)
     """
     cpp_decoder = _CreateGopDecoderCpp(maxfiles, iGpu, suppressNoColorRangeWarning)
-    return CachedGopDecoder(cpp_decoder, _key=_CREATION_KEY)
+    return CachedGopDecoder(cpp_decoder, maxfiles, _key=_CREATION_KEY)

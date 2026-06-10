@@ -142,6 +142,29 @@ class TestLifecycle:
         view = store.read(ref)
         np.testing.assert_array_equal(view, data)
 
+    def test_put_accepts_bytes(self, store):
+        """put() accepts raw bytes without requiring a numpy array wrapper."""
+        data = _make_gop_data(4096, seed=17)
+        ref = store.put("/video/bytes.mp4", 0, 30, data.tobytes())
+        view = store.read(ref)
+        np.testing.assert_array_equal(view, data)
+
+    def test_put_accepts_mutable_bytes_like_objects(self, store):
+        """put() accepts bytearray and memoryview GOP payloads."""
+        data0 = _make_gop_data(512, seed=18)
+        data1 = _make_gop_data(768, seed=19)
+
+        ref0 = store.put("/video/bytearray.mp4", 0, 30, bytearray(data0))
+        ref1 = store.put("/video/memoryview.mp4", 0, 30, memoryview(data1))
+
+        np.testing.assert_array_equal(store.read(ref0), data0)
+        np.testing.assert_array_equal(store.read(ref1), data1)
+
+    def test_put_rejects_empty_bytes(self, store):
+        """put() rejects empty payloads before allocating SharedMemory."""
+        with pytest.raises(ValueError, match="must not be empty"):
+            store.put("/video/empty.mp4", 0, 30, b"")
+
     def test_cleanup_removes_all_shm(self, store_id):
         """After cleanup(), no shm files remain for this store."""
         s = SharedGopStore.create(capacity=4, store_id=store_id)

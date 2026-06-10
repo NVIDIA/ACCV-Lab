@@ -53,10 +53,11 @@ dependencies (needed for some tests and examples), pass the `--optional` flag ex
 ./scripts/package_manager.sh install -e --optional
 ```
 
-> **⚠️ Important**: Installing with optional dependencies is required if you plan to run the contained
-> tests, as they rely on optional dependencies such as `pytest` (and possibly other dependencies). It may be 
-> also required for the contained examples, as they may use additional packages which are otherwise 
-> not used in the core library.
+> **⚠️ Important**: Installing with optional dependencies is required for workflows that rely on packages
+> outside the core library, including contained tests, contained examples, and documentation generation.
+> Documentation generation may run package-local asset hooks, for example to regenerate plots from committed
+> data, and those hooks can require plotting or data-processing packages. Tests commonly require tools such as
+> `pytest` and may require further packages.
 
 The package manager script:
 - Automatically installs the required `accvlab_build_config` helper package (see the `build_config` directory

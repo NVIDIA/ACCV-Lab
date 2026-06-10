@@ -2,7 +2,7 @@
 requires = [
     "setuptools>=64",
     "wheel",
-    "torch>=2.0.0",
+    "scikit-build>=0.17.0",
     "pybind11>=2.10.0",
     "setuptools-scm>=8",
     "accvlab-build-config @ file:../../build_config",
@@ -10,9 +10,9 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "accvlab.example_package"
+name = "accvlab.lane_helpers"
 dynamic = ["version"]
-description = "ACCV-Lab Example Package"
+description = "Lane helper utilities for ACCV-Lab."
 requires-python = ">=3.8"
 dependencies = [
     "torch>=2.0.0",
@@ -27,7 +27,7 @@ optional = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["accvlab.example_package*"]
+include = ["accvlab.lane_helpers*"]
 
 [tool.setuptools_scm]
 version_scheme = "no-guess-dev"

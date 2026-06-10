@@ -9,6 +9,7 @@ The documentation system provides:
 
 - **Explicit namespace package configuration** through `namespace_packages_config.py`
 - **Dynamic documentation generation** for each configured namespace package
+- **Optional package-local asset generation** for generated documentation assets such as plots
 - **Comprehensive API reference** with auto-generated content (extracted from docstrings)
 - **Referenced directories mirroring** to access files from the individual namespace packages in the 
   documentation by
@@ -43,6 +44,10 @@ The documentation generation makes use of multiple scripts:
   - **Template-based**: Uses consistent templates for all namespace packages (but generated files may be 
     modified as needed)
   - **Safe regeneration**: Only creates missing files if no `index.rst` is present for the namespace package
+- **`generate_package_docs_assets.py`**: Runs optional package-local documentation asset hooks
+  - **Package-owned**: Each package can decide whether it needs generated assets and how to create them
+  - **Format-agnostic**: The hook can read any package-owned input files and write any output files in the output folder; 
+    The core docs system does not prescribe a data format
 - **`update_docs_index.py`**: Updates main index file by including references to newly added namespace 
   packages
 - **`mirror_referenced_dirs.py`**: Mirrors (symlinks by default) the `docs` directory and other needed 
@@ -64,27 +69,28 @@ The documentation generation makes use of multiple scripts:
 #### Main Documentation Directory (`docs/`)
 ```
 docs/
-├── conf.py                        # Sphinx configuration using namespace_packages_config
-├── index.rst                      # Main documentation index
+├── conf.py                         # Sphinx configuration using namespace_packages_config
+├── index.rst                       # Main documentation index
 ├── generate_new_namespace_package_docs.py   # Creates structure for new namespace packages
-├── update_docs_index.py           # Updates navigation and indices
-├── mirror_referenced_dirs.py      # Mirrors referenced directories (symlinks by default)
-├── sync_root_readme_for_docs.py   # Syncs project root README into docs/project_overview
-├── Makefile                       # Build commands
-├── requirements.txt               # Documentation dependencies
-├── project_overview/              # Synced copy of the project root README used as docs overview
-├── contained_package_docs_mirror/ # Mirrored package documentation via symlinks (or copies)
-│   ├── example_package/           # Example namespace package docs (representative)
-│   │   ├── docs/                  # Documentation files
-│   │   │   ├── index.rst          # Namespace package overview
-│   │   │   ├── intro.rst          # Introduction (manual content)
-│   │   │   └── api.rst            # API reference (auto-generated)
-│   │   └── examples/              # Additional mirrored directory (referenced in docs)
-│   └── [other_packages]/          # Other configured namespace packages
-├── common/                        # Shared documentation resources
+├── generate_package_docs_assets.py # Runs optional package-local docs asset hooks
+├── update_docs_index.py            # Updates navigation and indices
+├── mirror_referenced_dirs.py       # Mirrors referenced directories (symlinks by default)
+├── sync_root_readme_for_docs.py    # Syncs project root README into docs/project_overview
+├── Makefile                        # Build commands
+├── requirements.txt                # Documentation dependencies
+├── project_overview/               # Synced copy of the project root README used as docs overview
+├── contained_package_docs_mirror/  # Mirrored package documentation via symlinks (or copies)
+│   ├── example_package/            # Example namespace package docs (representative)
+│   │   ├── docs/                   # Documentation files
+│   │   │   ├── index.rst           # Namespace package overview
+│   │   │   ├── intro.rst           # Introduction (manual content)
+│   │   │   └── api.rst             # API reference (auto-generated)
+│   │   └── examples/               # Additional mirrored directory (referenced in docs)
+│   └── [other_packages]/           # Other configured namespace packages
+├── common/                         # Shared documentation resources
 ├── _static/css/
-│           └── custom.css         # Custom styling
-└── _build/                        # Built documentation output
+│           └── custom.css          # Custom styling
+└── _build/                         # Built documentation output
 ```
 
 **Notes**:
@@ -103,7 +109,10 @@ packages/
     ├── docs/                      # Source documentation files
     │   ├── index.rst              # Namespace package overview
     │   ├── intro.rst              # Introduction (manual content)
-    │   └── api.rst                # API reference (auto-generated)
+    │   ├── api.rst                # API reference (auto-generated)
+    │   ├── _on_doc_generation.py  # Optional package-local docs asset hook
+    │   └── _generated/            # Generated assets created at docs build time
+    ├── evaluation_results/        # Optional committed inputs for generated docs assets
     ├── docu_referenced_dirs.txt   # List of additional directories to copy
     ├── examples/                  # Example code (mirrored and referenced by docs)
     └── [other_dirs]/              # Other package directories
@@ -112,6 +121,9 @@ packages/
 
 **Notes**:
 - The `packages/example_package/` structure shows the source documentation that gets mirrored during build
+- The `example_package` includes a small generated plot example: committed CSV data under
+  `packages/example_package/evaluation_results/` is converted into an image under
+  `packages/example_package/docs/_generated/` during the docs build
 - **⚠️ Important**: Content should be edited in the source locations (`packages/<package_name>/docs/`), not in 
   the mirrored locations
 - In case of the `example_package`, the `examples/` directory is mirrored to maintain documentation references 
@@ -172,6 +184,65 @@ etc.) can still be found after the documentation is mirrored to the build locati
 - Only list additional directories that are referenced by your documentation. Note that the API documentation
   does not rely on this mirroring, but is extracted from the installed packages.
 
+### Package-Local Generated Assets
+
+Packages can generate documentation assets during the docs build by adding an optional hook:
+
+```text
+packages/<package_name>/docs/_on_doc_generation.py
+```
+
+If present, `generate_package_docs_assets.py` imports the hook and calls:
+
+```python
+def generate_docs_assets(context):
+    ...
+```
+
+The hook receives a context with package and documentation paths, including:
+
+- `context.project_root`
+- `context.package_root`
+- `context.docs_root`
+- `context.generated_dir`
+
+The docs asset generator creates `context.generated_dir` before calling the hook. This directory is always:
+
+```text
+packages/<package_name>/docs/_generated/
+```
+
+It also writes a local `.gitignore` file there so generated assets remain untracked. The hook should write
+generated images or other generated files directly into `context.generated_dir`, or into subdirectories below
+it if a package needs additional structure.
+
+Source documentation files remain static. For example, an `.rst` file can reference a generated image with a
+normal relative path:
+
+```rst
+.. figure:: _generated/runtime_plot.png
+   :alt: Runtime plot
+```
+
+Packages own the input data and generation logic. For example, a package can commit benchmark result tables
+under `packages/<package_name>/evaluation_results/` and generate plots from those tables during the docs
+build. If a generated asset is required by the static docs, the hook should fail with a clear error when the
+required input data is missing or malformed.
+
+> **⚠️ Important**: Documentation asset hooks must not run evaluations, benchmarks, or other measurement
+> workflows. They should only regenerate documentation assets, such as plots, from data that is already
+> available in the repository. It is recommended to store results in simple formats such as .csv or .md, 
+> and use those as the source of truth for the plots.
+>
+> Keep committed plot or evaluation inputs outside the package `docs/` folder, for example under
+> `packages/<package_name>/evaluation_results/`. This prevents Sphinx from discovering e.g. `.md` data tables as
+> standalone documentation pages while keeping the inputs package-local.
+
+Package-specific dependencies needed only by the hook should be declared in that package's optional
+dependencies in `pyproject.toml`. The default local installation path (`./scripts/install_local.sh`) installs
+optional package dependencies. If you build docs after installing packages without optional dependencies,
+package-local asset hooks may fail when their optional plotting or parsing dependencies are missing.
+
 ### Building Documentation Locally
 
 **Quick build using the script** (can be run from any directory, example shows running from the project 
@@ -208,6 +279,9 @@ make livehtml
   in sequence
 - The `html` target ensures all scripts run before building
 - The `livehtml` target also runs the scripts for development builds
+- Package-local docs asset hooks run before package docs are mirrored, so generated assets under
+  `packages/<package_name>/docs/_generated/` are available from both the package docs source tree and the
+  mirrored docs tree.
 - When running spelling via the script, the generation scripts are executed first to ensure mirrored package 
   docs are up to date. Spelling findings are written to `docs/_build/spelling/output.txt`.
 
@@ -220,6 +294,9 @@ make livehtml
 >  - It does **not** reinstall or rebuild packages for you. This means that if you change the docstrings in 
 >    the source tree of a package, you need to reinstall the package (for example via 
 >    `./scripts/install_local.sh`) and then restart `make livehtml` to see updated docstrings.
+>  - It does **not** rerun package-local docs asset hooks for you after startup. This means that if you change
+>    committed plot data or hook code, you need to restart `make livehtml` (or run `make generate`) to
+>    regenerate plots and other generated docs assets.
 
 ### Spell-checking
 
@@ -456,6 +533,10 @@ the per-package runtime dependencies defined in each package's `pyproject.toml`)
 - Theme packages
 - Other documentation-specific dependencies
 
+Package-specific docs asset dependencies belong to the corresponding package's optional dependencies. This keeps the 
+global documentation requirements focused on the Sphinx build itself while allowing package-owned hooks to declare their 
+own plotting or data-processing dependencies.
+
 ### File Descriptions
 
 #### Core Configuration Files
@@ -478,6 +559,12 @@ automatically as part of the docs build; you normally do not need to run them ma
 - **`packages/<package_name>/docs/index.rst`**: Namespace package overview (source)
 - **`packages/<package_name>/docs/intro.rst`**: Manual introduction content (source)
 - **`packages/<package_name>/docs/api.rst`**: Auto-generated API reference (source)
+- **`packages/<package_name>/docs/_on_doc_generation.py`**: Optional hook for package-local generated docs
+  assets
+- **`packages/<package_name>/docs/_generated/`**: Generated documentation assets created during docs
+  generation and ignored by Git
+- **`packages/<package_name>/evaluation_results/`**: Optional package-owned committed inputs for generated
+  docs assets, such as benchmark tables used for plots
 - **`packages/<package_name>/docu_referenced_dirs.txt`**: List of directories containing files used in the 
   documentation in addition to `docs` (to mirror into the documentation source directory).
 - **`docs/contained_package_docs_mirror/<package_name>/docs/`**: Mirrored documentation (symlink to the 

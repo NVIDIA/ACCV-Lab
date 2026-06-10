@@ -56,6 +56,21 @@ Examples
 For examples, see :doc:`examples`. The example makes use of ``note-literalinclude`` to include the 
 example code in the documentation and highlight notes in the code (comment blocks starting with ``# @NOTE``).
 
+Generated Documentation Assets
+------------------------------
+
+This package also demonstrates package-local documentation asset generation. The docs build reads committed
+data from ``evaluation_results/simple_plot.csv`` and writes the generated plot to
+``docs/_generated/simple_plot.png``. The source documentation remains static and references the generated
+image using a normal relative path.
+
+.. figure:: _generated/simple_plot.png
+   :alt: Simple generated plot from committed CSV data
+   :align: center
+   :width: 70%
+
+   Example plot generated from committed CSV data during documentation generation.
+
 .. toctree::
    :maxdepth: 2
    :caption: Examples

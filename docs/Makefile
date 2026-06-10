@@ -23,8 +23,9 @@ help:
 
 # Generate namespace package documentation before building
 generate:
-	python3 mirror_referenced_dirs.py
 	python3 generate_new_namespace_package_docs.py
+	python3 generate_package_docs_assets.py
+	python3 mirror_referenced_dirs.py
 	python3 update_docs_index.py
 
 # Sync the root README into the docs tree before building
@@ -41,7 +42,7 @@ clean:
 	@$(SPHINXBUILD) -M clean "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 	rm -rf $(BUILDDIR)/
 	rm -rf api/generated/
-	rm -rf ../packages/*/docs/generated/
+	rm -rf ../packages/*/docs/_generated/
 
 # Auto-build documentation (watches for changes)
 livehtml: sync-readme generate

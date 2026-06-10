@@ -20,8 +20,8 @@
 #include <cuda_runtime.h>
 #include <torch/extension.h>
 
-#define CHECK_CUDA(x) AT_ASSERTM(x.is_cuda(), #x " must be a CUDA tensor")
-#define CHECK_CONTIGUOUS(x) AT_ASSERTM(x.is_contiguous(), #x " must be contiguous")
+#define CHECK_CUDA(x) TORCH_CHECK(x.is_cuda(), #x " must be a CUDA tensor")
+#define CHECK_CONTIGUOUS(x) TORCH_CHECK(x.is_contiguous(), #x " must be contiguous")
 #define CHECK_INPUT(x) \
     CHECK_CUDA(x);     \
     CHECK_CONTIGUOUS(x);
@@ -69,11 +69,11 @@ void draw_heatmap_launcher(at::Tensor& heatmap, const at::Tensor& centers, const
     CHECK_INPUT(radii);
     CHECK_INPUT(heatmap_idxes);
 
-    AT_ASSERTM(centers.size(0) == radii.size(0), "centers and radii must have the same size at dim0");
-    AT_ASSERTM(centers.size(0) == heatmap_idxes.size(0),
-               "centers and heatmap_idxes must have the same size at dim0");
-    AT_ASSERTM(heatmap.dim() == 3, "heatmap must be of shape [num_heatmaps, height, width]");
-    AT_ASSERTM(centers.dim() == 2 && centers.size(1) == 2, "centers must be of shape [num_targets, 2]");
+    TORCH_CHECK(centers.size(0) == radii.size(0), "centers and radii must have the same size at dim0");
+    TORCH_CHECK(centers.size(0) == heatmap_idxes.size(0),
+                "centers and heatmap_idxes must have the same size at dim0");
+    TORCH_CHECK(heatmap.dim() == 3, "heatmap must be of shape [num_heatmaps, height, width]");
+    TORCH_CHECK(centers.dim() == 2 && centers.size(1) == 2, "centers must be of shape [num_targets, 2]");
 
     const int num_targets = centers.size(0);
     const int num_heatmaps = heatmap.size(0);
@@ -101,15 +101,15 @@ void draw_heatmap_batched_launcher(at::Tensor& heatmap, const at::Tensor& center
 
     const int batch_size = heatmap.size(0);
     const int num_targets = radii.size(1);
-    AT_ASSERTM(
+    TORCH_CHECK(
         batch_size == radii.size(0) && batch_size == centers.size(0) && batch_size == nums_targets.size(0),
         "batch_size (dim 0) need to be the same for all inputs");
-    AT_ASSERTM(num_targets == centers.size(1),
-               "maximum number of targets (dim 1) need to be the same centers and radii");
-    AT_ASSERTM(heatmap.dim() == 3, "heatmap must be of shape [batch_size, height, width]");
-    AT_ASSERTM(centers.dim() == 3 && centers.size(2) == 2,
-               "centers must be of shape [batch_size, num_targets, 2]");
-    AT_ASSERTM(radii.dim() == 2, "radii must be of shape [batch_size, num_targets]");
+    TORCH_CHECK(num_targets == centers.size(1),
+                "maximum number of targets (dim 1) need to be the same centers and radii");
+    TORCH_CHECK(heatmap.dim() == 3, "heatmap must be of shape [batch_size, height, width]");
+    TORCH_CHECK(centers.dim() == 3 && centers.size(2) == 2,
+                "centers must be of shape [batch_size, num_targets, 2]");
+    TORCH_CHECK(radii.dim() == 2, "radii must be of shape [batch_size, num_targets]");
 
     const int height = heatmap.size(1);
     const int width = heatmap.size(2);
@@ -138,23 +138,23 @@ void draw_heatmap_batched_classwise_launcher(at::Tensor& heatmap, const at::Tens
 
     const int batch_size = heatmap.size(0);
     const int num_targets = radii.size(1);
-    AT_ASSERTM(
+    TORCH_CHECK(
         batch_size == radii.size(0) && batch_size == centers.size(0) && batch_size == nums_targets.size(0),
         "batch_size (dim 0) need to be the same for all inputs");
-    AT_ASSERTM(num_targets == centers.size(1),
-               "maximum number of targets (dim 1) need to be the same centers and radii");
-    AT_ASSERTM(heatmap.dim() == 4, "heatmap must be of shape [batch_size, max_num_classes, height, width]");
-    AT_ASSERTM(centers.dim() == 3 && centers.size(2) == 2,
-               "centers must be of shape [batch_size, num_targets, 2]");
-    AT_ASSERTM(radii.dim() == 2, "radii must be of shape [batch_size, num_targets]");
+    TORCH_CHECK(num_targets == centers.size(1),
+                "maximum number of targets (dim 1) need to be the same centers and radii");
+    TORCH_CHECK(heatmap.dim() == 4, "heatmap must be of shape [batch_size, max_num_classes, height, width]");
+    TORCH_CHECK(centers.dim() == 3 && centers.size(2) == 2,
+                "centers must be of shape [batch_size, num_targets, 2]");
+    TORCH_CHECK(radii.dim() == 2, "radii must be of shape [batch_size, num_targets]");
 
     const int height = heatmap.size(2);
     const int width = heatmap.size(3);
     const int max_num_classes = heatmap.size(1);
     // Validate labels tensor shape and range before launching the kernel
-    AT_ASSERTM(labels.dim() == 2, "labels must be of shape [batch_size, radii.size(1)]");
-    AT_ASSERTM(labels.size(0) == batch_size && labels.size(1) == num_targets,
-               "labels shape must be [batch_size, radii.size(1)]");
+    TORCH_CHECK(labels.dim() == 2, "labels must be of shape [batch_size, radii.size(1)]");
+    TORCH_CHECK(labels.size(0) == batch_size && labels.size(1) == num_targets,
+                "labels shape must be [batch_size, radii.size(1)]");
     AT_DISPATCH_FLOATING_TYPES(
         heatmap.scalar_type(), "draw_heatmap_cuda_batched", ([&] {
             draw_heatmap_batched_cuda(

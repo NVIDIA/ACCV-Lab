@@ -64,48 +64,48 @@
 #define DISPATCH_INDEX_TYPES(TYPE, NAME, ...) \
     AT_DISPATCH_SWITCH(TYPE, NAME, DISPATCH_CASE_INDEX_TYPES(__VA_ARGS__))
 
-#define CHECK_CUDA(x) AT_ASSERTM(x.is_cuda(), #x " must be a CUDA tensor")
-#define CHECK_CPU(x) AT_ASSERTM(x.is_cpu(), #x " must be a CPU tensor")
-#define CHECK_CONTIGUOUS(x) AT_ASSERTM(x.is_contiguous(), #x " must be contiguous")
-#define CHECK_SAME_CUDA_DEVICE(tensors_list...)                                                        \
-    {                                                                                                  \
-        const std::vector<torch::Tensor> tensors = {tensors_list};                                     \
-        CHECK_CUDA(tensors[0]);                                                                        \
-        const auto& device = tensors[0].device();                                                      \
-        for (size_t i = 1; i < tensors.size(); ++i) {                                                  \
-            AT_ASSERTM(tensors[i].device() == device, "All input tensors must be on the same device"); \
-        }                                                                                              \
+#define CHECK_CUDA(x) TORCH_CHECK(x.is_cuda(), #x " must be a CUDA tensor")
+#define CHECK_CPU(x) TORCH_CHECK(x.is_cpu(), #x " must be a CPU tensor")
+#define CHECK_CONTIGUOUS(x) TORCH_CHECK(x.is_contiguous(), #x " must be contiguous")
+#define CHECK_SAME_CUDA_DEVICE(tensors_list...)                                                         \
+    {                                                                                                   \
+        const std::vector<torch::Tensor> tensors = {tensors_list};                                      \
+        CHECK_CUDA(tensors[0]);                                                                         \
+        const auto& device = tensors[0].device();                                                       \
+        for (size_t i = 1; i < tensors.size(); ++i) {                                                   \
+            TORCH_CHECK(tensors[i].device() == device, "All input tensors must be on the same device"); \
+        }                                                                                               \
     }
-#define CHECK_SAME_DTYPE(error_msg, tensors_list...)                                     \
-    {                                                                                    \
-        const std::vector<torch::Tensor> tensors = {tensors_list};                       \
-        for (size_t i = 1; i < tensors.size(); ++i) {                                    \
-            AT_ASSERTM(tensors[i].scalar_type() == tensors[0].scalar_type(), error_msg); \
-        }                                                                                \
+#define CHECK_SAME_DTYPE(error_msg, tensors_list...)                                      \
+    {                                                                                     \
+        const std::vector<torch::Tensor> tensors = {tensors_list};                        \
+        for (size_t i = 1; i < tensors.size(); ++i) {                                     \
+            TORCH_CHECK(tensors[i].scalar_type() == tensors[0].scalar_type(), error_msg); \
+        }                                                                                 \
     }
 
-#define CHECK_SIZE_MATCH(tensor1, tensor2)                                                    \
-    {                                                                                         \
-        /* If the tensors are empty, the actual sizes are not relevant */                     \
-        if (!((tensor1).numel() == 0 && (tensor2).numel() == 0)) {                            \
-            AT_ASSERTM((tensor1).dim() == (tensor2).dim(),                                    \
-                       #tensor1 " and " #tensor2 " must have the same number of dimensions"); \
-            for (size_t i = 0; i < (tensor1).dim(); ++i) {                                    \
-                AT_ASSERTM((tensor1).size(i) == (tensor2).size(i),                            \
-                           #tensor1 " and " #tensor2 " must have the same size");             \
-            }                                                                                 \
-        }                                                                                     \
+#define CHECK_SIZE_MATCH(tensor1, tensor2)                                                     \
+    {                                                                                          \
+        /* If the tensors are empty, the actual sizes are not relevant */                      \
+        if (!((tensor1).numel() == 0 && (tensor2).numel() == 0)) {                             \
+            TORCH_CHECK((tensor1).dim() == (tensor2).dim(),                                    \
+                        #tensor1 " and " #tensor2 " must have the same number of dimensions"); \
+            for (size_t i = 0; i < (tensor1).dim(); ++i) {                                     \
+                TORCH_CHECK((tensor1).size(i) == (tensor2).size(i),                            \
+                            #tensor1 " and " #tensor2 " must have the same size");             \
+            }                                                                                  \
+        }                                                                                      \
     }
 
 #define CHECK_SIZE_MATCH_FIRST_DIMS(tensor1, tensor2, num_dims_to_check)                                     \
     {                                                                                                        \
         /* If the tensors are empty, the actual sizes are not relevant */                                    \
         if (!((tensor1).numel() == 0 && (tensor2).numel() == 0)) {                                           \
-            AT_ASSERTM((tensor1).dim() >= (num_dims_to_check) && (tensor2).dim() >= (num_dims_to_check),     \
-                       #tensor1 " and " #tensor2 " must have at least " +                                    \
-                           std::to_string(num_dims_to_check) + " dimensions");                               \
+            TORCH_CHECK((tensor1).dim() >= (num_dims_to_check) && (tensor2).dim() >= (num_dims_to_check),    \
+                        #tensor1 " and " #tensor2 " must have at least " +                                   \
+                            std::to_string(num_dims_to_check) + " dimensions");                              \
             for (size_t i = 0; i < (num_dims_to_check); ++i) {                                               \
-                AT_ASSERTM(                                                                                  \
+                TORCH_CHECK(                                                                                 \
                     (tensor1).size(i) == (tensor2).size(i),                                                  \
                     #tensor1 " and " #tensor2 " must have the same size in dimension " + std::to_string(i)); \
             }                                                                                                \
@@ -116,35 +116,35 @@
     {                                                                                                        \
         /* If the tensors are empty, the actual sizes are not relevant */                                    \
         if (!((tensor1).numel() == 0 && (tensor2).numel() == 0)) {                                           \
-            AT_ASSERTM((tensor1).dim() == (tensor2).dim(),                                                   \
-                       #tensor1 " and " #tensor2 " must have the same number of dimensions");                \
+            TORCH_CHECK((tensor1).dim() == (tensor2).dim(),                                                  \
+                        #tensor1 " and " #tensor2 " must have the same number of dimensions");               \
             for (size_t i = 0; i < (tensor1).dim(); ++i) {                                                   \
                 if (i == (dim_to_allow_mismatch)) {                                                          \
                     continue;                                                                                \
                 }                                                                                            \
-                AT_ASSERTM(                                                                                  \
+                TORCH_CHECK(                                                                                 \
                     (tensor1).size(i) == (tensor2).size(i),                                                  \
                     #tensor1 " and " #tensor2 " must have the same size in dimension " + std::to_string(i)); \
             }                                                                                                \
         }                                                                                                    \
     }
 
-#define CHECK_NUM_DIMS(tensor, num_dims)                                                  \
-    {                                                                                     \
-        /* If the tensor is empty, the number of dimensions is not relevant */            \
-        if (!((tensor).numel() == 0)) {                                                   \
-            AT_ASSERTM((tensor).dim() == (num_dims),                                      \
-                       #tensor " must have " + std::to_string(num_dims) + " dimensions"); \
-        }                                                                                 \
+#define CHECK_NUM_DIMS(tensor, num_dims)                                                   \
+    {                                                                                      \
+        /* If the tensor is empty, the number of dimensions is not relevant */             \
+        if (!((tensor).numel() == 0)) {                                                    \
+            TORCH_CHECK((tensor).dim() == (num_dims),                                      \
+                        #tensor " must have " + std::to_string(num_dims) + " dimensions"); \
+        }                                                                                  \
     }
 
-#define CHECK_NUM_DIMS_AT_LEAST(tensor, num_dims)                                                  \
-    {                                                                                              \
-        /* If the tensor is empty, the number of dimensions is not relevant */                     \
-        if (!((tensor).numel() == 0)) {                                                            \
-            AT_ASSERTM((tensor).dim() >= (num_dims),                                               \
-                       #tensor " must have at least " + std::to_string(num_dims) + " dimensions"); \
-        }                                                                                          \
+#define CHECK_NUM_DIMS_AT_LEAST(tensor, num_dims)                                                   \
+    {                                                                                               \
+        /* If the tensor is empty, the number of dimensions is not relevant */                      \
+        if (!((tensor).numel() == 0)) {                                                             \
+            TORCH_CHECK((tensor).dim() >= (num_dims),                                               \
+                        #tensor " must have at least " + std::to_string(num_dims) + " dimensions"); \
+        }                                                                                           \
     }
 
 static inline int64_t get_number_data_elements_per_index(const torch::Tensor& input_data,

@@ -48,7 +48,8 @@ There are two example projects which showcase how a namespace package is structu
 - `packages/example_package`: Showcases a package containing PyTorch extensions built using
   `CppExtension` and `CUDAExtension` provided by PyTorch as well as an external implementation (see
   [External Implementations](#external-implementations) section for more details on external implementations)
-  as described below.
+  as described below. It also includes a package-local documentation asset hook that generates a simple plot
+  from committed CSV data under `evaluation_results/` during the docs build.
 - `packages/example_skbuild_package`: Showcases a package using `scikit-build` for C++/CUDA implementation 
   (see the [Alternative: SKBuild-Based Packages](#alternative-skbuild-based-packages) section for more 
   details on this approach).
@@ -70,6 +71,8 @@ To add a new namespace package (e.g., `example_package`), you need to create:
 | **Setup** | `packages/example_package/setup.py` | Package build configuration |
 | **Project Config** | `packages/example_package/pyproject.toml` | Modern Python project configuration and authoritative dependency definition |
 | **Documentation include list (optional)** | `packages/example_package/docu_referenced_dirs.txt` | List additional directories referenced by the docs (besides `docs/`). See [Documentation Setup Guide](DOCUMENTATION_SETUP_GUIDE.md) for more details.|
+| **Documentation asset hook (optional)** | `packages/example_package/docs/_on_doc_generation.py` | Generate package-owned docs assets such as plots from committed evaluation data. See [Documentation Setup Guide](DOCUMENTATION_SETUP_GUIDE.md#package-local-generated-assets). |
+| **Evaluation results (optional)** | `packages/example_package/evaluation_results/` | Package-owned committed inputs for generating docs assets, such as data to plot. |
 
 > **ℹ️ Note**: Apart from the above, further folders/files can be included (and made use of manually or added to the 
 > documentation) if needed. A typical use case is to include e.g. an `examples` directory which is:
@@ -84,26 +87,29 @@ The following diagram shows the relevant project structure containing the folder
 
 ```
 accvlab/
-├── packages/                        # Namespace packages directory
+├── packages/                         # Namespace packages directory
 │   ├── optim_test_tools/...
 │   ├── batching_helpers/...
-│   └── example_package/             # ← New namespace package
-│       ├── accvlab/                 # ← Namespace root
-│       │   └── example_package/     # ← Implementation for "example_package" package
+│   └── example_package/              # ← New namespace package
+│       ├── accvlab/                  # ← Namespace root
+│       │   └── example_package/      # ← Implementation for "example_package" package
 │       │       ├── __init__.py
-│       │       ├── csrc/            # ← C++/CUDA sources
-│       │       └── include/         # ← Headers
-│       ├── ext_impl/                # ← Optional: external implementation
+│       │       ├── csrc/             # ← C++/CUDA sources
+│       │       └── include/          # ← Headers
+│       ├── ext_impl/                 # ← Optional: external implementation
 │       │   ├── build_and_copy.sh
 │       │   └── ...
-│       ├── tests/                   # ← Tests for "example_package" package
-│       ├── docs/                    # ← Documentation for "example_package" package
-│       ├── setup.py                 # ← Package build configuration
-│       ├── pyproject.toml           # ← Project configuration (including dependencies)
-│       └── docu_referenced_dirs.txt # ← Optional: list additional directories referenced by the docs (besides `docs/`)
-├── build_config/                    # Shared build utilities
-├── docs/                            # Main documentation
-└── namespace_packages_config.py     # ← Namespace package needs to be listed here
+│       ├── tests/                    # ← Tests for "example_package" package
+│       ├── evaluation_results/       # ← Optional committed inputs for generated docs assets
+│       ├── docs/                     # ← Documentation for "example_package" package
+│       │   ├── _on_doc_generation.py # ← Optional docs asset hook
+│       │   └── ...
+│       ├── setup.py                  # ← Package build configuration
+│       ├── pyproject.toml            # ← Project configuration (including dependencies)
+│       └── docu_referenced_dirs.txt  # ← Optional: list additional directories referenced by the docs (besides `docs/`)
+├── build_config/                     # Shared build utilities
+├── docs/                             # Main documentation
+└── namespace_packages_config.py      # ← Namespace package needs to be listed here
 ```
 
 Note that inside the package, there is the directory structure `accvlab/example_package`. This is where the 
@@ -238,6 +244,11 @@ root = "../.."
 
 Use this pattern for your own namespace package, adapting the dependency names as needed.
 
+Use `[project.optional-dependencies].optional` for dependencies needed by tests, examples, or package-local
+documentation asset hooks, but not by the core package at runtime. For example, if a docs hook generates plots
+from committed data, put the plotting library in the package's optional dependencies rather than in the base
+`[project].dependencies`.
+
 > **ℹ️ Note**: The `accvlab-build-config @ file:../../build_config` build dependency is intentionally a
 > local path reference. From a package under `packages/<package_name>/`, it resolves to the repository's `build_config/` package 
 > so isolated pip builds use the local helper package. See
@@ -317,6 +328,18 @@ Most of the contained packages extend this basic structure considerably to provi
 documentation. Please see the [Documentation Setup Guide](DOCUMENTATION_SETUP_GUIDE.md) for more details on 
 the documentation system and how to set it up.
 
+If your package needs generated docs assets, add `packages/<package_name>/docs/_on_doc_generation.py`. The
+documentation build creates `packages/<package_name>/docs/_generated/`, keeps it untracked, and passes that
+directory to the hook. Keep user-facing `.rst`/`.md` files static and reference generated assets with relative
+paths such as `_generated/<asset_name>.png`. The hook should generate those assets from committed inputs and
+fail clearly if required inputs are missing. Store committed plot or evaluation inputs outside the package
+`docs/` folder, for example under `packages/<package_name>/evaluation_results/`, so Sphinx does not discover
+data tables as standalone documentation pages.
+
+> **⚠️ Important**: Documentation asset hooks must not run evaluations, benchmarks, or other measurement
+> workflows. They should only regenerate documentation assets, such as plots, from data that is already
+> available in the repository.
+
 #### 8. Test Your Package
 
 ```bash
@@ -352,6 +375,10 @@ When adding a new namespace package, ensure you have:
 - [ ] **Documentation**: Generated with docs scripts and customized intro
 - [ ] **Documentation include list (optional)**: `docu_referenced_dirs.txt` created and populated if extra 
   folders (e.g. `examples/`) are referenced and are needed to build the documentation
+- [ ] **Documentation asset hook (optional)**: `_on_doc_generation.py` added if the package needs generated
+  documentation assets
+- [ ] **Evaluation results (optional)**: `packages/<package_name>/evaluation_results/` contains committed
+  inputs for generated docs assets if needed
 - [ ] **Examples (optional)**: `packages/<package_name>/examples/` created and referenced from docs if used
 - [ ] **Dependencies**: Declared runtime and optional dependencies in `pyproject.toml`
 - [ ] **External implementation**: (Optional) `packages/<package_name>/ext_impl/` for external builds

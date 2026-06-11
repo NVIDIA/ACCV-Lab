@@ -109,8 +109,10 @@ int PyNvGopDecoder::GetYUVFromFrame(NvDecoder* decoder, const uint8_t* pFrame, u
     decoded_frame.timestamp = timestamp;
     decoded_frame.SetColorRange(color_range);
 
-    // Copy the decode frames from device
-    CUDA_DRVAPI_CALL(cuMemcpyDtoD((CUdeviceptr)pFrame_buffer, (CUdeviceptr)pFrame, decoder->GetFrameSize()));
+    // Queue the decode-buffer copy on the decoder stream. DecProc synchronizes
+    // this stream before returning the Python-visible frame.
+    CUDA_DRVAPI_CALL(cuMemcpyDtoDAsync((CUdeviceptr)pFrame_buffer, (CUdeviceptr)pFrame,
+                                       decoder->GetFrameSize(), decoder->GetStream()));
 
     switch (decoded_frame.format) {
         case Pixel_Format_NV12: {
@@ -480,6 +482,8 @@ void PyNvGopDecoder::DecProc(AVColorRange color_range, NvDecoder* decoder,
         LOG(ERROR) << "number of decoded rgb frames: " << std::to_string(output_frames.size())
                    << " is different with number of frame id:" << std::to_string(sorted_frame_ids.size());
     }
+
+    CUDA_DRVAPI_CALL(cuStreamSynchronize(decoder->GetStream()));
 
     nvtxRangePop();
 }

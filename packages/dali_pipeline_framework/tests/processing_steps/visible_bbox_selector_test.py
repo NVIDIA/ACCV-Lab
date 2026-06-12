@@ -139,6 +139,8 @@ def test_visible_bbox_selector_occlusions(
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_field_names=["bboxes", "depths", "image_hw"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(

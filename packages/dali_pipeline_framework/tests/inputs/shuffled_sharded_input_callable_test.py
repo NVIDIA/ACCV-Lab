@@ -18,7 +18,11 @@ from accvlab.dali_pipeline_framework.inputs.sfuffled_sharded_input_callable impo
     ShuffledShardedInputCallable,
 )
 
-from _test_helpers import build_pipeline_and_iterator, next_ids, SimpleDataProvider
+from _sample_selection_test_helpers import (
+    build_no_processing_pipeline_and_iterator,
+    get_next_batch_ids,
+    SimpleDataProvider,
+)
 
 
 @pytest.mark.parametrize("shuffle", [True, False])
@@ -42,12 +46,12 @@ def test_single_epoch_no_duplicates_and_expected_count(shuffle: bool):
         seed=123,
     )
 
-    _, pipe, iterator = build_pipeline_and_iterator(callable_obj, batch_size, full_iterations)
+    _, pipe, iterator = build_no_processing_pipeline_and_iterator(callable_obj, batch_size, full_iterations)
     try:
         it = iter(iterator)
         ids = []
         for _ in range(full_iterations):
-            ids.extend(next_ids(it))
+            ids.extend(get_next_batch_ids(it))
 
         # Correct total unique count (only full batches, discard potential duplicates)
         assert len(set(ids)) == full_iterations * batch_size
@@ -94,8 +98,8 @@ def test_two_shards_no_overlap_and_complete_partition():
         seed=999,
     )
 
-    _, pipe0, it0 = build_pipeline_and_iterator(call0, batch_size, full_iterations)
-    _, pipe1, it1 = build_pipeline_and_iterator(call1, batch_size, full_iterations)
+    _, pipe0, it0 = build_no_processing_pipeline_and_iterator(call0, batch_size, full_iterations)
+    _, pipe1, it1 = build_no_processing_pipeline_and_iterator(call1, batch_size, full_iterations)
 
     try:
         it0_iter = iter(it0)
@@ -103,8 +107,8 @@ def test_two_shards_no_overlap_and_complete_partition():
         acc0 = []
         acc1 = []
         for _ in range(full_iterations):
-            acc0.extend(next_ids(it0_iter))
-            acc1.extend(next_ids(it1_iter))
+            acc0.extend(get_next_batch_ids(it0_iter))
+            acc1.extend(get_next_batch_ids(it1_iter))
         ids0 = set(acc0)
         ids1 = set(acc1)
 
@@ -141,20 +145,20 @@ def test_two_epochs_shuffle_changes_order_and_each_epoch_valid():
     )
 
     # First epoch
-    _, pipe, it = build_pipeline_and_iterator(call, batch_size, full_iterations)
+    _, pipe, it = build_no_processing_pipeline_and_iterator(call, batch_size, full_iterations)
     it_iter = iter(it)
     ids_epoch0 = []
     for _ in range(full_iterations):
-        ids_epoch0.extend(next_ids(it_iter))
+        ids_epoch0.extend(get_next_batch_ids(it_iter))
 
     with pytest.raises(StopIteration):
-        next_ids(it_iter)
+        get_next_batch_ids(it_iter)
 
     # Reset iterator (new epoch)
     it_iter.reset()
     ids_epoch1 = []
     for _ in range(full_iterations):
-        ids_epoch1.extend(next_ids(it_iter))
+        ids_epoch1.extend(get_next_batch_ids(it_iter))
 
     try:
         # Each epoch internally: no duplicates, no overlaps within epoch, correct counts

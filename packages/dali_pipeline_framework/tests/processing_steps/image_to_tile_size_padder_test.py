@@ -115,6 +115,8 @@ def test_image_to_tile_size_padder(tile_size, expected_sizes):
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_field_names=["metadata"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -174,6 +176,8 @@ def test_image_to_tile_size_padder_no_images_found():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_field_names=["metadata"],
     )
 
     # Should raise KeyError during pipeline construction when trying to find images
@@ -209,6 +213,8 @@ def test_image_to_tile_size_padder_already_padded():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_field_names=["metadata"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(

@@ -15,13 +15,16 @@
 import pytest
 import numpy as np
 
-from accvlab.dali_pipeline_framework.pipeline import PipelineDefinition, DALIStructuredOutputIterator
+from accvlab.dali_pipeline_framework.pipeline import DALIStructuredOutputIterator, PipelineDefinition
 
 from accvlab.dali_pipeline_framework.inputs.sampler_base import SamplerBase
 from accvlab.dali_pipeline_framework.inputs.sampler_input_callable import SamplerInputCallable
 from accvlab.dali_pipeline_framework.inputs.sampler_input_iterable import SamplerInputIterable
 
-from _test_helpers import build_pipeline_and_iterator, SimpleDataProvider
+from _sample_selection_test_helpers import (
+    build_no_processing_pipeline_and_iterator,
+    SimpleDataProvider,
+)
 
 try:
     from typing import override
@@ -127,7 +130,7 @@ def test_sampler_inputs_basic_flow_and_ids_match(input_kind: str):
             num_shards=1,
         )
 
-    _, pipe, iterator = build_pipeline_and_iterator(input_obj, batch_size, num_test_batches)
+    _, pipe, iterator = build_no_processing_pipeline_and_iterator(input_obj, batch_size, num_test_batches)
 
     try:
         it = iter(iterator)
@@ -169,7 +172,7 @@ def test_sampler_across_epoch_boundaries(input_kind: str):
             num_shards=1,
         )
 
-    pipeline_def, pipe, it = build_pipeline_and_iterator(input_obj, batch_size, total_batches)
+    pipeline_def, pipe, it = build_no_processing_pipeline_and_iterator(input_obj, batch_size, total_batches)
     iter_it = iter(it)
 
     # Determine the actual starting epoch base from the first batch. Note that this could be > 0 as
@@ -246,8 +249,16 @@ def test_sampler_inputs_sharding_splits_total_batch(input_kind: str):
         )
 
     # Build two pipelines (one per shard)
-    pd0 = PipelineDefinition(data_loading_callable_iterable=input0, preprocess_functors=[])
-    pd1 = PipelineDefinition(data_loading_callable_iterable=input1, preprocess_functors=[])
+    pd0 = PipelineDefinition(
+        data_loading_callable_iterable=input0,
+        preprocess_functors=[],
+        copy_external_source_passthrough_outputs=True,
+    )
+    pd1 = PipelineDefinition(
+        data_loading_callable_iterable=input1,
+        preprocess_functors=[],
+        copy_external_source_passthrough_outputs=True,
+    )
 
     pipe0 = pd0.get_dali_pipeline(
         enable_conditionals=True,
@@ -344,8 +355,16 @@ def test_sampler_inputs_sharding_across_epoch_boundaries(input_kind: str):
             num_shards=num_shards,
         )
 
-    pd0 = PipelineDefinition(data_loading_callable_iterable=input0, preprocess_functors=[])
-    pd1 = PipelineDefinition(data_loading_callable_iterable=input1, preprocess_functors=[])
+    pd0 = PipelineDefinition(
+        data_loading_callable_iterable=input0,
+        preprocess_functors=[],
+        copy_external_source_passthrough_outputs=True,
+    )
+    pd1 = PipelineDefinition(
+        data_loading_callable_iterable=input1,
+        preprocess_functors=[],
+        copy_external_source_passthrough_outputs=True,
+    )
 
     pipe0 = pd0.get_dali_pipeline(
         enable_conditionals=True,

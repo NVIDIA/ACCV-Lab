@@ -220,6 +220,26 @@ def create_reference_transformation_matrices(rotation_angle_rad, rotation_axis, 
     return rotation_matrix, scaling_matrix, translation_matrix
 
 
+def apply_transformation_to_ego_to_world(ego_to_world, rotation_matrix, scaling_matrix, translation_matrix):
+    """Reference for BEVBBoxesTransformer3D ego_to_world updates (rotation, then scaling, then translation)."""
+
+    res = ego_to_world.copy()
+    res = res @ rotation_matrix.T
+    res = res @ np.linalg.inv(scaling_matrix)
+    res = res @ np.linalg.inv(translation_matrix)
+    return res
+
+
+def apply_transformation_to_world_to_ego(world_to_ego, rotation_matrix, scaling_matrix, translation_matrix):
+    """Reference for BEVBBoxesTransformer3D world_to_ego updates (rotation, then scaling, then translation)."""
+
+    res = world_to_ego.copy()
+    res = rotation_matrix @ res
+    res = scaling_matrix @ res
+    res = translation_matrix @ res
+    return res
+
+
 def apply_transformation_to_vecs(vecs, rotation_matrix, scaling_matrix, translation_matrix, are_points):
     """Apply transformations to points using reference implementation."""
 
@@ -275,13 +295,19 @@ def apply_transformation_to_points(points, rotation_matrix, scaling_matrix, tran
 def verify_matrix_inverse_relationship(ego_to_world, world_to_ego, tolerance=1e-6):
     """Verify that world_to_ego is the inverse of ego_to_world."""
 
+    expected_world_to_ego = torch.linalg.inv(ego_to_world)
+    assert torch.allclose(world_to_ego, expected_world_to_ego, atol=tolerance), (
+        "world_to_ego does not match inv(ego_to_world). "
+        f"Max difference: {torch.max(torch.abs(world_to_ego - expected_world_to_ego)).item()}"
+    )
+
     # Check that world_to_ego @ ego_to_world = identity
     identity_check = world_to_ego @ ego_to_world
     expected_identity = torch.eye(4, dtype=torch.float32)
 
     assert torch.allclose(
         identity_check, expected_identity, atol=tolerance
-    ), f"world_to_ego is not the inverse of ego_to_world. Max difference: {np.max(np.abs(identity_check - expected_identity))}"
+    ), f"world_to_ego is not the inverse of ego_to_world. Max difference: {torch.max(torch.abs(identity_check - expected_identity)).item()}"
 
 
 def verify_transformation_consistency(
@@ -328,6 +354,7 @@ def verify(
     orientations_in,
     proj_matrix_in,
     ego_to_world_in,
+    world_to_ego_in,
     points_out,
     vels_out,
     sizes_out,
@@ -383,6 +410,27 @@ def verify(
         abs_diff_orientations, torch.zeros_like(abs_diff_orientations), atol=tolerance
     ), f"Orientations transformation does not match reference implementation"
 
+    ego_to_world_ref = torch.tensor(
+        apply_transformation_to_ego_to_world(
+            ego_to_world_in, rotation_matrix, scaling_matrix, translation_matrix
+        ),
+        dtype=torch.float32,
+    )
+    world_to_ego_ref = torch.tensor(
+        apply_transformation_to_world_to_ego(
+            world_to_ego_in, rotation_matrix, scaling_matrix, translation_matrix
+        ),
+        dtype=torch.float32,
+    )
+    assert torch.allclose(ego_to_world_ref, ego_to_world_out, atol=tolerance), (
+        "ego_to_world transformation does not match reference implementation. "
+        f"Max difference: {torch.max(torch.abs(ego_to_world_ref - ego_to_world_out)).item()}"
+    )
+    assert torch.allclose(world_to_ego_ref, world_to_ego_out, atol=tolerance), (
+        "world_to_ego transformation does not match reference implementation. "
+        f"Max difference: {torch.max(torch.abs(world_to_ego_ref - world_to_ego_out)).item()}"
+    )
+
     verify_transformation_consistency(points_in, proj_matrix_in, points_out, proj_matrix_out, tolerance)
     verify_transformation_consistency(points_in, ego_to_world_in, points_out, ego_to_world_out, tolerance)
     verify_matrix_inverse_relationship(ego_to_world_out, world_to_ego_out, tolerance)
@@ -427,74 +475,78 @@ def run_transformation_test_with_reference_comparison(
         sequences.extend([translation_range_repl_x, translation_range_repl_y, translation_range_repl_z])
     original_gen, fake_gen = set_dali_uniform_generator_and_get_orig_and_replacement(sequences)
 
-    provider = TestProvider()
-    input_callable = ShuffledShardedInputCallable(
-        provider,
-        batch_size=1,
-        num_shards=1,
-        shard_id=0,
-        shuffle=False,
-    )
+    try:
+        provider = TestProvider()
+        input_callable = ShuffledShardedInputCallable(
+            provider,
+            batch_size=1,
+            num_shards=1,
+            shard_id=0,
+            shuffle=False,
+        )
 
-    step = BEVBBoxesTransformer3D(
-        data_field_names_points="points",
-        data_field_names_velocities="velocities",
-        data_field_names_sizes="sizes",
-        data_field_names_orientation="orientations",
-        data_field_names_proj_matrices_and_extrinsics="proj_matrix",
-        data_field_names_ego_to_world="ego_to_world",
-        data_field_names_world_to_ego="world_to_ego",
-        rotation_range=rotation_range,
-        rotation_axis=2,  # Z-axis
-        scaling_range=scaling_range,
-        translation_max_abs=translation_max_abs,
-    )
+        step = BEVBBoxesTransformer3D(
+            data_field_names_points="points",
+            data_field_names_velocities="velocities",
+            data_field_names_sizes="sizes",
+            data_field_names_orientation="orientations",
+            data_field_names_proj_matrices_and_extrinsics="proj_matrix",
+            data_field_names_ego_to_world="ego_to_world",
+            data_field_names_world_to_ego="world_to_ego",
+            rotation_range=rotation_range,
+            rotation_axis=2,  # Z-axis
+            scaling_range=scaling_range,
+            translation_max_abs=translation_max_abs,
+        )
 
-    pipeline_def = PipelineDefinition(
-        data_loading_callable_iterable=input_callable,
-        preprocess_functors=[step],
-    )
+        pipeline_def = PipelineDefinition(
+            data_loading_callable_iterable=input_callable,
+            preprocess_functors=[step],
+        )
 
-    pipeline = pipeline_def.get_dali_pipeline(
-        enable_conditionals=True,
-        batch_size=1,
-        prefetch_queue_depth=1,
-        num_threads=1,
-        py_start_method="spawn",
-        exec_dynamic=True,
-    )
+        pipeline = pipeline_def.get_dali_pipeline(
+            enable_conditionals=True,
+            batch_size=1,
+            prefetch_queue_depth=1,
+            num_threads=1,
+            py_start_method="spawn",
+            exec_dynamic=True,
+        )
 
-    iterator = DALIStructuredOutputIterator(1, pipeline, pipeline_def.check_and_get_output_data_structure())
-    iterator_iter = iter(iterator)
-    result = next(iterator_iter)
+        iterator = DALIStructuredOutputIterator(
+            1, pipeline, pipeline_def.check_and_get_output_data_structure()
+        )
+        iterator_iter = iter(iterator)
+        result = next(iterator_iter)
 
-    # Get original data for comparison
-    original_data = provider.get_data(0)
+        # Get original data for comparison
+        original_data = provider.get_data(0)
 
-    # Note that `result` has a batch dimension (as it is a DALI iterator output), so we need to index
-    # with [0] to get the single sample. `original_data` does not have a batch dimension as it is the
-    # input data for a single sample.
-    verify(
-        original_data["points"],
-        original_data["velocities"],
-        original_data["sizes"],
-        original_data["orientations"],
-        original_data["proj_matrix"],
-        original_data["ego_to_world"],
-        result["points"][0],
-        result["velocities"][0],
-        result["sizes"][0],
-        result["orientations"][0],
-        result["proj_matrix"][0],
-        result["ego_to_world"][0],
-        result["world_to_ego"][0],
-        expected_rotation_angle,
-        rotation_axis,
-        expected_scaling_factor,
-        expected_translation,
-    )
-
-    restore_generator(original_gen)
+        # Note that `result` has a batch dimension (as it is a DALI iterator output), so we need to index
+        # with [0] to get the single sample. `original_data` does not have a batch dimension as it is the
+        # input data for a single sample.
+        verify(
+            original_data["points"],
+            original_data["velocities"],
+            original_data["sizes"],
+            original_data["orientations"],
+            original_data["proj_matrix"],
+            original_data["ego_to_world"],
+            original_data["world_to_ego"],
+            result["points"][0],
+            result["velocities"][0],
+            result["sizes"][0],
+            result["orientations"][0],
+            result["proj_matrix"][0],
+            result["ego_to_world"][0],
+            result["world_to_ego"][0],
+            expected_rotation_angle,
+            rotation_axis,
+            expected_scaling_factor,
+            expected_translation,
+        )
+    finally:
+        restore_generator(original_gen)
 
 
 def test_combined_transformations():
@@ -810,6 +862,9 @@ def test_no_transformations_enabled():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        # No copy selectors: all output fields may pass through unchanged when no
+        # transformations are enabled.
     )
 
     pipeline = pipeline_def.get_dali_pipeline(

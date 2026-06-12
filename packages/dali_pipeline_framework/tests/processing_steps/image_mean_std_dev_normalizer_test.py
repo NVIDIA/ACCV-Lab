@@ -135,6 +135,8 @@ def test_image_mean_std_dev_normalizer_single_values():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_field_names=["metadata"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -230,6 +232,8 @@ def test_image_mean_std_dev_normalizer_channel_specific():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_field_names=["metadata"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -296,6 +300,8 @@ def test_image_mean_std_dev_normalizer_edge_cases():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_field_names=["metadata"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -354,6 +360,8 @@ def test_image_mean_std_dev_normalizer_no_images_found():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_field_names=["metadata"],
     )
 
     # This should raise an error during pipeline building

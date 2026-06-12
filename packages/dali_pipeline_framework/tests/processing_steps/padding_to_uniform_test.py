@@ -110,9 +110,29 @@ def test_padding_to_uniform_parametrized(
 
     step = PaddingToUniform(field_names=field_names, fill_value=fill_value)
 
+    passthrough_copy_kwargs = {}
+    if field_names == "image":
+        passthrough_copy_kwargs = {
+            "copy_external_source_passthrough_outputs": True,
+            "passthrough_copy_branch_paths": ["metadata"],
+        }
+    elif field_names == ["image", "values"]:
+        passthrough_copy_kwargs = {
+            "copy_external_source_passthrough_outputs": True,
+            "passthrough_copy_field_names": ["features"],
+            "passthrough_copy_field_names_scope_paths": ["metadata"],
+        }
+    elif field_names == ["image", "features"]:
+        passthrough_copy_kwargs = {
+            "copy_external_source_passthrough_outputs": True,
+            "passthrough_copy_field_names": ["values"],
+            "passthrough_copy_field_names_scope_paths": ["metadata"],
+        }
+
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        **passthrough_copy_kwargs,
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -213,6 +233,8 @@ def test_padding_to_uniform_nested_structure():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_field_names=["image"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(

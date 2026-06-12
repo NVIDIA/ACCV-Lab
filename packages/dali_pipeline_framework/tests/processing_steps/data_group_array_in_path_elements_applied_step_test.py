@@ -173,6 +173,7 @@ def test_data_group_array_in_path_elements_applied_step_independent_processing()
         pipeline_def = PipelineDefinition(
             data_loading_callable_iterable=input_callable,
             preprocess_functors=[step],
+            copy_external_source_passthrough_outputs=True,
         )
 
         pipeline = pipeline_def.get_dali_pipeline(

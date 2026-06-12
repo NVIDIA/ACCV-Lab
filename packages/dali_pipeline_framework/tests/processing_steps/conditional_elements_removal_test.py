@@ -122,6 +122,8 @@ def test_conditional_element_removal(remove_mask_field):
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_field_names=["other_data", "is_active"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(

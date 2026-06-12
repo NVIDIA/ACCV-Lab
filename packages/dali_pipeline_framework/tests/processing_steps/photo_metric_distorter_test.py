@@ -353,6 +353,8 @@ def test_photometric_distorter_single_transformation(
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_field_names=["metadata"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -457,6 +459,8 @@ def test_photometric_distorter_basic(use_uint8):
         pipeline_def = PipelineDefinition(
             data_loading_callable_iterable=input_callable,
             preprocess_functors=[step],
+            copy_external_source_passthrough_outputs=True,
+            passthrough_copy_field_names=["metadata"],
         )
 
         pipeline = pipeline_def.get_dali_pipeline(
@@ -606,6 +610,8 @@ def test_photometric_distorter_float_uint8_compare():
             pipeline_def = PipelineDefinition(
                 data_loading_callable_iterable=input_callable,
                 preprocess_functors=[step],
+                copy_external_source_passthrough_outputs=True,
+                passthrough_copy_field_names=["metadata"],
             )
 
             pipeline = pipeline_def.get_dali_pipeline(
@@ -707,6 +713,8 @@ def test_photometric_distorter_bgr():
         pipeline_def = PipelineDefinition(
             data_loading_callable_iterable=input_callable,
             preprocess_functors=[step],
+            copy_external_source_passthrough_outputs=True,
+            passthrough_copy_field_names=["metadata"],
         )
 
         pipeline = pipeline_def.get_dali_pipeline(
@@ -795,6 +803,8 @@ def test_photometric_distorter_no_augmentations():
         pipeline_def = PipelineDefinition(
             data_loading_callable_iterable=input_callable,
             preprocess_functors=[step],
+            copy_external_source_passthrough_outputs=True,
+            passthrough_copy_field_names=["metadata"],
         )
 
         pipeline = pipeline_def.get_dali_pipeline(
@@ -857,6 +867,8 @@ def test_photometric_distorter_no_images_found():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_field_names=["metadata"],
     )
 
     # This should raise an error during pipeline building

@@ -1,0 +1,34 @@
+[build-system]
+requires = [
+    "setuptools>=64",
+    "wheel",
+    "scikit-build>=0.17.0",
+    "pybind11>=2.10.0",
+    "setuptools-scm>=8",
+    "accvlab-build-config @ file:../../build_config",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "accvlab.lane_helpers"
+dynamic = ["version"]
+description = "Lane helper utilities for ACCV-Lab."
+requires-python = ">=3.8"
+dependencies = [
+    "torch>=2.0.0",
+    "numpy>=1.22.2",
+]
+
+[project.optional-dependencies]
+optional = [
+    "pytest",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["accvlab.lane_helpers*"]
+
+[tool.setuptools_scm]
+version_scheme = "no-guess-dev"
+fallback_version = "0.0.0"
+root = "../.."

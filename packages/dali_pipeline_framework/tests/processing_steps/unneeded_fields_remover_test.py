@@ -165,6 +165,8 @@ def test_remove_single_field():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_branch_paths=["annotation", "other_data", "metadata"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -247,6 +249,8 @@ def test_remove_multiple_fields(field_names):
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_branch_paths=["annotation", "other_data"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -294,6 +298,8 @@ def test_remove_nonexistent_fields():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_branch_paths=["annotation", "other_data", "metadata", "temp_field"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -348,6 +354,8 @@ def test_remove_all_fields():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_field_names=["other_data", "metadata"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -398,6 +406,9 @@ def test_remove_nested_to_remove_fields():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_field_names=["keep_this_field"],
+        passthrough_copy_branch_paths=["nested"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(

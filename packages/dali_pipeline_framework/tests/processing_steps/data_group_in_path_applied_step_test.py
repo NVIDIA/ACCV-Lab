@@ -167,6 +167,7 @@ def test_data_group_in_path_applied_step_replaces_only_in_subtree(path_to_apply_
         preprocess_functors=[step],
         prefetch_queue_depth=3,
         use_parallel_external_source=True,
+        copy_external_source_passthrough_outputs=True,
     )
 
     pipeline = pipeline_def.get_dali_pipeline(

@@ -27,8 +27,14 @@ except ImportError:
     from typing_extensions import override
 
 
-def build_pipeline_and_iterator(input_obj, batch_size: int, num_batches: int):
-    pipeline_def = PipelineDefinition(data_loading_callable_iterable=input_obj, preprocess_functors=[])
+def build_no_processing_pipeline_and_iterator(input_obj, batch_size: int, num_batches: int):
+    """Build a DALI pipeline that forwards input samples without processing steps."""
+
+    pipeline_def = PipelineDefinition(
+        data_loading_callable_iterable=input_obj,
+        preprocess_functors=[],
+        copy_external_source_passthrough_outputs=True,
+    )
     pipe = pipeline_def.get_dali_pipeline(
         enable_conditionals=True,
         batch_size=batch_size,
@@ -42,12 +48,16 @@ def build_pipeline_and_iterator(input_obj, batch_size: int, num_batches: int):
     return pipeline_def, pipe, iterator
 
 
-def next_ids(iterator_iter):
+def get_next_batch_ids(iterator_iter):
+    """Advance a structured-output iterator and return the current batch IDs."""
+
     out = next(iterator_iter)
     return out["id"].tolist()
 
 
 class SimpleDataProvider(DataProvider):
+    """Data provider used by input tests to produce deterministic sample IDs."""
+
     def __init__(self):
         # Blueprint with a single INT32 field 'id' and some additional (constant) fields
         self._blueprint = SampleDataGroup()
@@ -59,6 +69,8 @@ class SimpleDataProvider(DataProvider):
 
     @override
     def get_data(self, sample_id: int) -> SampleDataGroup:
+        """Return one sample with ``id`` equal to ``sample_id``."""
+
         s = self.sample_data_structure
         s["id"] = int(sample_id)
         s["additional"]["some_data"] = [1, 2, 3]
@@ -67,10 +79,14 @@ class SimpleDataProvider(DataProvider):
 
     @override
     def get_number_of_samples(self) -> int:
+        """Return a large fixed sample count for sharding and epoch tests."""
+
         return 10000
 
     @property
     @override
     def sample_data_structure(self) -> SampleDataGroup:
+        """Return an empty sample structure matching this provider's output."""
+
         # Return an empty-like blueprint each time to avoid sharing state
         return self._blueprint.get_empty_like_self()

@@ -149,13 +149,16 @@ def setup_simple_pipeline(
     # `check_data_format` controls type/format checks inside the DALI pipeline. It is useful to enable during
     # development, when adding custom steps, or when changing the input data structure, as it catches mistakes
     # such as assigning a field with the wrong DALI type. After the pipeline and data format have been
-    # validated, it is usually disabled in production to avoid the additional runtime overhead. We keep it
-    # enabled here because this small tutorial benefits from clearer errors.
+    # validated, it is usually disabled in production to avoid the related overhead.
     pipeline_def = PipelineDefinition(
         input_callable,
         preprocess_functors=processing_steps,
-        check_data_format=True,  # Enable during development/debugging, disable in production.
+        check_data_format=False,  # Enable during development/debugging, disable in production.
         print_sample_data_group_format=True,  # This is useful to inspect the data format after each step (for debugging).
+        # Disable the DALI external-source pass-through issue copy workaround: callable inputs with
+        # batch_size > 1 are outside the affected case. See the API docs for this constructor argument for
+        # details about the underlying issue and when a copy is needed.
+        copy_external_source_passthrough_outputs=False,
     )
 
     # @NOTE

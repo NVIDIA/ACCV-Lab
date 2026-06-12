@@ -114,6 +114,8 @@ def test_simple_comparison_condition():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_branch_paths=["annotation", "other_data"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -160,6 +162,8 @@ def test_complex_condition_with_and_or():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_branch_paths=["annotation", "other_data"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -206,6 +210,8 @@ def test_not_condition():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_branch_paths=["annotation", "other_data"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -248,6 +254,8 @@ def test_remove_condition_fields():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_branch_paths=["annotation", "other_data"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -297,6 +305,8 @@ def test_multiple_annotation_fields():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_branch_paths=["annotation", "other_data"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -354,6 +364,8 @@ def test_comparison_operators(operator, operator_name, value, expected):
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_branch_paths=["annotation", "other_data"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -392,6 +404,8 @@ def test_boolean_field_condition():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_branch_paths=["annotation", "other_data"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -431,6 +445,8 @@ def test_other_data_preserved():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_branch_paths=["annotation", "other_data"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -477,6 +493,8 @@ def test_number_in_identifier():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_branch_paths=["annotation", "other_data"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -542,6 +560,8 @@ def test_logical_vs_bitwise_and():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_branch_paths=["annotation", "other_data"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -606,6 +626,8 @@ def test_direct_field_comparison_operators(operator, operator_name, expected):
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_branch_paths=["annotation", "other_data"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -646,6 +668,8 @@ def test_decimal_values_in_condition():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_branch_paths=["annotation", "other_data"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -687,6 +711,8 @@ def test_negative_values_and_unary_minus():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_branch_paths=["annotation", "other_data"],
     )
 
     pipeline = pipeline_def.get_dali_pipeline(
@@ -714,6 +740,8 @@ def test_negative_values_and_unary_minus():
     pipeline_def2 = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step2],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_branch_paths=["annotation", "other_data"],
     )
 
     pipeline2 = pipeline_def2.get_dali_pipeline(

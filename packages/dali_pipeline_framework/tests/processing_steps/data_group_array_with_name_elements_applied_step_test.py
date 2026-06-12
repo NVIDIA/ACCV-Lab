@@ -190,6 +190,7 @@ def test_data_group_array_with_name_elements_applied_step_independent_processing
             preprocess_functors=[step],
             prefetch_queue_depth=2,
             check_data_format=False,
+            copy_external_source_passthrough_outputs=True,
         )
 
         pipeline = pipeline_def.get_dali_pipeline(

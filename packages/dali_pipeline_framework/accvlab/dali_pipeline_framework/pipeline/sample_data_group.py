@@ -395,7 +395,7 @@ class SampleDataGroup:
                     f"(fields of type SampleDataGroup), but types do not match."
                 )
 
-        if self._types[name] == types.DALIDataType.STRING and not isinstance(value, dali.data_node.DataNode):
+        if self._types[name] == types.DALIDataType.STRING and not self._is_dali_data_node(value):
             self._values[name] = self._convert_from_string(value)
         else:
             self._values[name] = self._apply_mapping_check_and_convert(name, value)
@@ -450,7 +450,7 @@ class SampleDataGroup:
             raise KeyError(f"No field with name '{name}'")
 
         value = self._values[name]
-        if self._types[name] == types.DALIDataType.STRING and not isinstance(value, dali.data_node.DataNode):
+        if self._types[name] == types.DALIDataType.STRING and not self._is_dali_data_node(value):
             return self._convert_to_string(value)
         return value
 
@@ -1541,15 +1541,18 @@ class SampleDataGroup:
     def _check_or_convert_types(self, name: Union[str, int], data: Any) -> Any:
         # Get the expected type of the data field
         dali_type = self._types[name]
+        is_data_node = self._is_dali_data_node(data)
+
+        if dali_type == types.DALIDataType.STRING and is_data_node:
+            # String fields are represented as uint8 tensors inside the DALI graph. String handling
+            # outside the DALI pipeline remains restricted to regular string values.
+            if self._do_check_type:
+                return check_type(data, np.uint8, name)
+            return data
 
         # Only perform runtime type checking inside the DALI pipeline when explicitly enabled.
         # Skipping this preserves tensor layout metadata (important for steps like AxesLayoutSetter).
         if self._do_check_type:
-            # Support both regular and debug-mode DALI nodes
-            is_data_node = isinstance(data, getattr(dali.data_node, "DataNode", ())) or isinstance(
-                data, getattr(getattr(dali, "_debug_mode", object()), "DataNodeDebug", ())
-            )
-
             # If we are inside the DALI pipeline, we need to check that the data type is correct (regardless of
             # the `_do_convert` flag).
             if is_data_node:
@@ -1581,6 +1584,12 @@ class SampleDataGroup:
             data = cupy.array(data, dtype=np_type)
 
         return data
+
+    @staticmethod
+    def _is_dali_data_node(data: Any) -> bool:
+        return isinstance(data, dali.data_node.DataNode) or isinstance(
+            data, getattr(getattr(dali, "_debug_mode", object()), "DataNodeDebug", ())
+        )
 
     def _convert_from_string(
         self, data: Union[dali.pipeline.DataNode, str, Sequence[str], None]

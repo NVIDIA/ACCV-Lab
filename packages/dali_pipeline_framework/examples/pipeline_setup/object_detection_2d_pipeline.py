@@ -270,12 +270,20 @@ def setup_dali_pipeline_2d_object_detection(
     # @NOTE
     # Define the pipeline consisting of the 'input_callable' and 'pre_processing_steps'.
     #
-    # IMPORTANT: Note how `check_data_format` is set to `False` here. This is done to avoid the overhead of
+    # IMPORTANT: Note that `check_data_format` is set to `False` here. This is done to avoid the overhead of
     # checking the data format during pipeline execution. During development, it is recommended to set it
     # to `True` to catch potential issues early, and later set it to `False` to avoid the overhead in
     # production.
     pipeline_def = PipelineDefinition(
-        input_callable, pre_processing_steps, check_data_format=False, print_sample_data_group_format=True
+        input_callable,
+        pre_processing_steps,
+        check_data_format=False,
+        print_sample_data_group_format=True,
+        # Disable the DALI external-source pass-through issue copy workaround: all final outputs are processed
+        # by the configured pipeline steps instead of being returned directly from the input source. See the
+        # API docs for this constructor argument for details about the underlying issue and when a copy is
+        # needed.
+        copy_external_source_passthrough_outputs=False,
     )
 
     # @NOTE

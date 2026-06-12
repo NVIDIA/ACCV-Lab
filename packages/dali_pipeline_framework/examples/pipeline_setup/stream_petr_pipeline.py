@@ -546,12 +546,20 @@ def setup_dali_pipeline_stream_petr_train(
     # @NOTE
     # Define the pipeline by wiring the input implementation and the pre-processing steps.
     #
-    # IMPORTANT: Note how `check_data_format` is set to `False` here. This is done to avoid the overhead of
+    # IMPORTANT: Note that `check_data_format` is set to `False` here. This is done to avoid the overhead of
     # checking the data format during pipeline execution. During development, it is recommended to set it
     # to `True` to catch potential issues early, and later set it to `False` to avoid the overhead in
     # production.
     pipeline_def = PipelineDefinition(
-        input_impl, pre_processing_steps, check_data_format=False, print_sample_data_group_format=True
+        input_impl,
+        pre_processing_steps,
+        check_data_format=False,
+        print_sample_data_group_format=True,
+        # Enable the DALI external-source pass-through issue copy workaround only for final fields that are or
+        # may be passed through the pipeline unchanged. See the API docs for this constructor argument for
+        # details about the underlying issue and when a copy is needed.
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_field_names=["timestamp", "ego_pose", "ego_pose_inv"],
     )
 
     # @NOTE

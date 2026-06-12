@@ -94,9 +94,16 @@ def test_axes_layout_setter(field_names, layout_to_set):
         layout_to_set=layout_to_set,
     )
 
+    selected_field_names = {field_names} if isinstance(field_names, str) else set(field_names)
+    passthrough_field_names = [
+        name for name in ["image", "image2", "feature_map", "other_data"] if name not in selected_field_names
+    ]
+
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[step],
+        copy_external_source_passthrough_outputs=True,
+        passthrough_copy_field_names=passthrough_field_names,
     )
 
     pipeline = pipeline_def.get_dali_pipeline(

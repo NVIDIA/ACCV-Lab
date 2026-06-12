@@ -193,7 +193,7 @@ class DALIStructuredOutputIterator(object):
 
     @classmethod
     def CreateAsDataLoaderObject(cls, *args, **kwargs):
-        from .dali_structured_output_iterator_data_loader_wrapper import get_masked_as_type
+        from ._dali_structured_output_iterator_data_loader_wrapper import get_masked_as_type
 
         used_type = get_masked_as_type(cls, DataLoader)
         obj = used_type(*args, **kwargs)

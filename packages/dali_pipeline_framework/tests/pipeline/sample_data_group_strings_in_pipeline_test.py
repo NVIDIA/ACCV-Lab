@@ -76,6 +76,7 @@ def test_strings_roundtrip_through_pipeline():
     pipeline_def = PipelineDefinition(
         data_loading_callable_iterable=input_callable,
         preprocess_functors=[],  # No processing; pass-through
+        copy_external_source_passthrough_outputs=True,
     )
 
     pipeline = pipeline_def.get_dali_pipeline(

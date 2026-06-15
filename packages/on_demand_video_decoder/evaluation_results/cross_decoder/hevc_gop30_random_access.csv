@@ -1,0 +1,6 @@
+gpu,accvlab_gpu,pynvc_gpu,decord_gpu,decord_cpu,opencv_cpu
+A100,337,189,114,44,34
+H200 NVL,402,316,170,68,52
+B200,474,345,,56,47
+B300,416,324,126,40,32
+RTX PRO 6000,420,377,,25,41

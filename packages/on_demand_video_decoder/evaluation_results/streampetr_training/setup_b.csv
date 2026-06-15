@@ -1,0 +1,3 @@
+config,image_ms,video_ms,speedup
+1 GPU,878,862,1.02
+8 GPU,1310,1070,1.22

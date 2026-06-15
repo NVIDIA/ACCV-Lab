@@ -1,0 +1,3 @@
+config,image_ms,video_opencv_ms,video_ours_ms,speedup_vs_image
+1 GPU,725,1674,751,0.97
+8 GPU,1025,2663,908,1.13

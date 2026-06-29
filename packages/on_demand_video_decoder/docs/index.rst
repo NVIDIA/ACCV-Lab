@@ -14,4 +14,5 @@ This documentation contains the following sections:
    api
    sample
    pytorch_integration_examples/index
+   mps_optimization
    evaluation

@@ -169,7 +169,7 @@ def select_cuda_architectures_for_nvcc(
     return CudaArchitectureSelection(selected_archs, ptx_archs)
 
 
-def missing_torch_error() -> RuntimeError:
+def _missing_torch_error() -> RuntimeError:
     return RuntimeError("""
 #########################################################################################
 # Missing build dependency: torch.                                                      #
@@ -185,7 +185,7 @@ def missing_torch_error() -> RuntimeError:
 """)
 
 
-def require_torch_cuda_support(torch_module) -> None:
+def _require_torch_cuda_support(torch_module) -> None:
     if getattr(torch_module.version, "cuda", None) is not None:
         return
 
@@ -279,7 +279,7 @@ def detect_cuda_info():
     try:
         import torch
 
-        require_torch_cuda_support(torch)
+        _require_torch_cuda_support(torch)
 
         if torch.cuda.is_available():
             cuda_info['cuda_available'] = True
@@ -291,9 +291,135 @@ def detect_cuda_info():
                 if arch not in cuda_info['gpu_architectures']:
                     cuda_info['gpu_architectures'].append(arch)
     except ImportError as exc:
-        raise missing_torch_error() from exc
+        raise _missing_torch_error() from exc
 
     return cuda_info
+
+
+def _format_torch_cuda_arch_list(architectures: List[str]) -> str:
+    """Convert compact CUDA architecture numbers to ``TORCH_CUDA_ARCH_LIST`` format.
+
+    Args:
+        architectures: CUDA architecture numbers in compact form, for example
+            ``["90"]``, ``["103"]``, or ``["120a"]``.
+
+    Returns:
+        str: Semicolon-separated architecture names in PyTorch format, for
+        example ``"9.0"`` or ``"9.0;10.3"``.
+    """
+    formatted: List[str] = []
+    for arch in architectures:
+        arch = arch.strip()
+        if not arch:
+            continue
+        if re.match(r"^\d+\.\d", arch):
+            formatted.append(arch)
+            continue
+
+        match = re.match(r"^(\d+)([a-z]?)$", arch)
+        if not match:
+            formatted.append(arch)
+            continue
+
+        digits, suffix = match.group(1), match.group(2)
+        if len(digits) == 1:
+            formatted.append(f"{digits}.0{suffix}")
+        else:
+            formatted.append(f"{digits[:-1]}.{digits[-1]}{suffix}")
+
+    seen = set()
+    unique: List[str] = []
+    for item in formatted:
+        if item not in seen:
+            seen.add(item)
+            unique.append(item)
+    return ";".join(unique)
+
+
+def resolve_cuda_architecture_selection(
+    cuda_info: dict,
+) -> Optional[CudaArchitectureSelection]:
+    """Resolve cubin and PTX targets from ``CUSTOM_CUDA_ARCHS`` or auto-detection.
+
+    When ``CUSTOM_CUDA_ARCHS`` is set, architectures are passed through unchanged
+    without ``nvcc`` fallback rewriting. Otherwise detected GPU architectures are
+    mapped to exact cubin targets when supported, with PTX fallbacks when not.
+
+    Args:
+        cuda_info: CUDA information from ``detect_cuda_info()``.
+
+    Returns:
+        Optional[CudaArchitectureSelection]: Selected cubin and PTX targets, or
+        ``None`` when CUDA is unavailable and ``CUSTOM_CUDA_ARCHS`` is unset.
+    """
+    custom_archs = os.environ.get("CUSTOM_CUDA_ARCHS")
+    if custom_archs:
+        return CudaArchitectureSelection(_split_cuda_architectures(custom_archs), [])
+
+    if not cuda_info.get("cuda_available"):
+        return None
+
+    detected = cuda_info.get("gpu_architectures") or []
+    if not detected:
+        return None
+
+    return select_cuda_architectures_for_nvcc(detected)
+
+
+def format_torch_cuda_arch_list_from_selection(
+    selection: CudaArchitectureSelection,
+) -> str:
+    """Format an architecture selection for PyTorch ``TORCH_CUDA_ARCH_LIST``.
+
+    Args:
+        selection: Cubin and PTX targets from ``resolve_cuda_architecture_selection()``
+            or ``select_cuda_architectures_for_nvcc()``.
+
+    Returns:
+        str: Semicolon-separated PyTorch architecture names. PTX fallbacks use
+        the ``+PTX`` suffix.
+    """
+    arch_names: List[str] = []
+    for arch in selection.architectures:
+        arch_names.append(_format_torch_cuda_arch_list([arch]))
+    for arch in selection.ptx_architectures:
+        arch_names.append(f"{_format_torch_cuda_arch_list([arch])}+PTX")
+
+    seen = set()
+    unique: List[str] = []
+    for item in arch_names:
+        if item not in seen:
+            seen.add(item)
+            unique.append(item)
+    return ";".join(unique)
+
+
+def _resolve_torch_cuda_arch_list(cuda_info: Optional[dict] = None) -> Optional[str]:
+    """Resolve ``TORCH_CUDA_ARCH_LIST`` for PyTorch CMake extension builds.
+
+    PyTorch's CMake integration ignores ``CMAKE_CUDA_ARCHITECTURES`` and uses
+    ``TORCH_CUDA_ARCH_LIST`` instead. Uses the same architecture selection rules
+    as ``resolve_cuda_architecture_selection()``.
+
+    Args:
+        cuda_info: CUDA information from ``detect_cuda_info()``. When ``None``,
+            CUDA info is detected automatically.
+
+    Returns:
+        Optional[str]: Formatted ``TORCH_CUDA_ARCH_LIST`` value, or ``None`` when
+        no architectures can be resolved.
+    """
+    if cuda_info is None:
+        cuda_info = detect_cuda_info()
+
+    selection = resolve_cuda_architecture_selection(cuda_info)
+    if selection is None:
+        return None
+
+    if not selection.architectures and not selection.ptx_architectures:
+        return None
+
+    return format_torch_cuda_arch_list_from_selection(selection)
 
 
 def get_compile_flags(config, cuda_info, include_dirs=None):

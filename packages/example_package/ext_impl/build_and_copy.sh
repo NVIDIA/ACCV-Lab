@@ -43,7 +43,7 @@ then
     exit 1
 fi
 # Read helper-produced cmake -D args into array
-readarray -t CMAKE_ARGS < <(python -c "from accvlab_build_config.helpers.cmake_args import build_cmake_args; print('\n'.join(build_cmake_args()))")
+readarray -t CMAKE_ARGS < <(python -c "from accvlab_build_config.helpers.cmake_args import build_cmake_args, CUDA_ARCH_STRATEGY_TORCH; print('\n'.join(build_cmake_args(CUDA_ARCH_STRATEGY_TORCH)))")
 
 # Configure CMake
 echo "Configuring CMake..."

@@ -39,7 +39,7 @@ _ACCVLAB_BUILD_CONFIG_IMPORT_ERROR = """
 """
 
 try:
-    from accvlab_build_config import build_cmake_args  # type: ignore
+    from accvlab_build_config import build_cmake_args, CUDA_ARCH_STRATEGY_CMAKE  # type: ignore
 except ModuleNotFoundError as exc:
     if exc.name != "accvlab_build_config":
         raise
@@ -51,7 +51,7 @@ except VersionConflict:
     print("Error: version of setuptools is too old (<42)!")
     sys.exit(1)
 
-_cmake_args = build_cmake_args()
+_cmake_args = build_cmake_args(cuda_arch_strategy=CUDA_ARCH_STRATEGY_CMAKE)
 
 skbuild.setup(
     name="accvlab.on_demand_video_decoder",

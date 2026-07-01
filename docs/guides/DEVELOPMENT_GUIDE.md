@@ -776,11 +776,16 @@ The `accvlab_build_config` package provides the following shared build & configu
   build configuration error.
 - `get_compile_flags()` - Generates compiler flags for PyTorch extensions; based on the variable values obtained from 
   `load_config()`. The generated flags can then be passed to the PyTorch extensions (see example below).
-- `build_cmake_args()` - Produces the full CMake `-D` argument list for CMake-based builds. It contains two parts:
+- `build_cmake_args(cuda_arch_strategy)` - Produces the full CMake `-D` argument list for CMake-based builds.
+  Each CMake package, whether manual or scikit-build, must pass `CUDA_ARCH_STRATEGY_CMAKE` or
+  `CUDA_ARCH_STRATEGY_TORCH` depending on whether its `CMakeLists.txt` uses native CMake CUDA targets or
+  `find_package(Torch)`. It contains two parts:
   - **Environment-derived build settings**: Converts ACCV-Lab build variables into CMake cache entries:
     - `DEBUG_BUILD` → `CMAKE_BUILD_TYPE`
     - `CPP_STANDARD` → `CMAKE_CXX_STANDARD`, `CMAKE_CUDA_STANDARD`
-    - `CUSTOM_CUDA_ARCHS` → `CMAKE_CUDA_ARCHITECTURES`
+    - `CUSTOM_CUDA_ARCHS` → `CMAKE_CUDA_ARCHITECTURES` when using `CUDA_ARCH_STRATEGY_CMAKE`, or
+      `-DACCVLAB_TORCH_CUDA_ARCH_LIST=...` when using `CUDA_ARCH_STRATEGY_TORCH`. Torch CMake projects must
+      set `TORCH_CUDA_ARCH_LIST` from that cache variable before `find_package(Torch)`.
     - `VERBOSE_BUILD` → `CMAKE_VERBOSE_MAKEFILE`
     - `OPTIMIZE_LEVEL`, `USE_FAST_MATH`, `ENABLE_PROFILING` → appended to `CMAKE_CXX_FLAGS`, `CMAKE_CUDA_FLAGS`
     - Always sets `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON`
@@ -877,12 +882,16 @@ Depending on the package type, build variables are consumed as follows:
     `USE_FAST_MATH`, and `ENABLE_PROFILING` to host and device compilers.
 
 - External implementation (manual CMake):
-  - In `ext_impl/build_and_copy.sh`, forward variables using the helper to produce `cmake -D` args:
+  - In `ext_impl/build_and_copy.sh`, forward variables using the helper to produce `cmake -D` args. Use
+    `CUDA_ARCH_STRATEGY_CMAKE` for native CMake CUDA targets, or `CUDA_ARCH_STRATEGY_TORCH` when
+    `CMakeLists.txt` calls `find_package(Torch)`:
   ```bash
-  readarray -t CMAKE_ARGS < <(python -c "from accvlab_build_config.helpers.cmake_args import build_cmake_args; print('\n'.join(build_cmake_args()))")
+  readarray -t CMAKE_ARGS < <(python -c "from accvlab_build_config.helpers.cmake_args import build_cmake_args, CUDA_ARCH_STRATEGY_CMAKE; print('\n'.join(build_cmake_args(CUDA_ARCH_STRATEGY_CMAKE)))")
   cmake .. "${CMAKE_ARGS[@]}" ...
   cmake --build . --parallel
   ```
+  - For Torch CMake projects, replace `CUDA_ARCH_STRATEGY_CMAKE` in the import and call with
+    `CUDA_ARCH_STRATEGY_TORCH`.
   - In `CMakeLists.txt`, avoid hardcoding and guard defaults so passed values win:
   ```cmake
   if(NOT DEFINED CMAKE_CXX_STANDARD)
@@ -892,15 +901,23 @@ Depending on the package type, build variables are consumed as follows:
     set(CMAKE_CUDA_ARCHITECTURES native)
   endif()
   ```
+  - If the CMake project calls `find_package(Torch)`, set the Torch architecture list before that call:
+  ```cmake
+  if(DEFINED ACCVLAB_TORCH_CUDA_ARCH_LIST)
+    set(TORCH_CUDA_ARCH_LIST "${ACCVLAB_TORCH_CUDA_ARCH_LIST}")
+  endif()
+  find_package(Torch REQUIRED)
+  ```
 
 - Scikit-build packages:
-  - In `setup.py`, pass CMake arguments from the helper:
+  - In `setup.py`, pass CMake arguments from the helper. Use `CUDA_ARCH_STRATEGY_CMAKE` for native CMake CUDA
+    targets, or `CUDA_ARCH_STRATEGY_TORCH` when `ext_impl/CMakeLists.txt` calls `find_package(Torch)`:
   ```python
   # The real setup.py files wrap this import in a guarded block with a prominent
   # missing-dependency message. The message body is omitted here for brevity.
-  from accvlab_build_config import build_cmake_args
+  from accvlab_build_config import build_cmake_args, CUDA_ARCH_STRATEGY_CMAKE
 
-  _cmake_args = build_cmake_args()
+  _cmake_args = build_cmake_args(cuda_arch_strategy=CUDA_ARCH_STRATEGY_CMAKE)
   setup(
       ...,
       cmake_source_dir="ext_impl",
@@ -908,6 +925,8 @@ Depending on the package type, build variables are consumed as follows:
       cmake_args=_cmake_args,
   )
   ```
+  - For Torch CMake projects, replace `CUDA_ARCH_STRATEGY_CMAKE` in the import and call with
+    `CUDA_ARCH_STRATEGY_TORCH`.
   - In `ext_impl/CMakeLists.txt`, guard defaults:
   ```cmake
   if(NOT DEFINED CMAKE_CXX_STANDARD)
@@ -916,6 +935,13 @@ Depending on the package type, build variables are consumed as follows:
   if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
     set(CMAKE_CUDA_ARCHITECTURES native)
   endif()
+  ```
+  - If the CMake project calls `find_package(Torch)`, set the Torch architecture list before that call:
+  ```cmake
+  if(DEFINED ACCVLAB_TORCH_CUDA_ARCH_LIST)
+    set(TORCH_CUDA_ARCH_LIST "${ACCVLAB_TORCH_CUDA_ARCH_LIST}")
+  endif()
+  find_package(Torch REQUIRED)
   ```
 
 

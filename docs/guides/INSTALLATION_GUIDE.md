@@ -424,12 +424,15 @@ ENABLE_PROFILING=1 ./scripts/package_manager.sh install
 > architecture, preferring base architectures whose number is divisible by 10 (for example, `100` for a
 > detected `103` architecture).
 >
-> `CUSTOM_CUDA_ARCHS` is an explicit override. When it is set, ACCV-Lab passes those architectures through
-> unchanged instead of applying the auto-detection fallback logic.
+> `CUSTOM_CUDA_ARCHS` is an explicit override. When it is set, ACCV-Lab uses those architectures instead
+> of applying the auto-detection fallback logic. CMake builds that call `find_package(Torch)` receive
+> `-DACCVLAB_TORCH_CUDA_ARCH_LIST=...`, with compact ACCV-Lab values converted to PyTorch format
+> (for example, `90` becomes `9.0`) and set as `TORCH_CUDA_ARCH_LIST` in CMake. Other CMake-based builds
+> receive `CMAKE_CUDA_ARCHITECTURES` instead.
 >
 > If PyTorch is CUDA-enabled but no architecture can be detected
-> (for example because no CUDA device is visible), ACCV-Lab does not pass `CMAKE_CUDA_ARCHITECTURES`;
-> package-specific CMake defaults then apply.
+> (for example because no CUDA device is visible), ACCV-Lab does not pass an explicit CUDA architecture
+> setting; package-specific CMake defaults then apply.
 
 ## Additional Information
 

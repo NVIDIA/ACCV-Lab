@@ -32,13 +32,13 @@ _ACCVLAB_BUILD_CONFIG_IMPORT_ERROR = """
 """
 
 try:
-    from accvlab_build_config import build_cmake_args  # type: ignore
+    from accvlab_build_config import build_cmake_args, CUDA_ARCH_STRATEGY_TORCH  # type: ignore
 except ModuleNotFoundError as exc:
     if exc.name != "accvlab_build_config":
         raise
     raise RuntimeError(_ACCVLAB_BUILD_CONFIG_IMPORT_ERROR) from exc
 
-_cmake_args = build_cmake_args()
+_cmake_args = build_cmake_args(cuda_arch_strategy=CUDA_ARCH_STRATEGY_TORCH)
 
 
 setup(

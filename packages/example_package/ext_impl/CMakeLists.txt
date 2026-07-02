@@ -23,6 +23,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Find CUDA
 find_package(CUDA REQUIRED)
 
+# PyTorch CMake ignores CMAKE_CUDA_ARCHITECTURES and uses TORCH_CUDA_ARCH_LIST.
+# build_and_copy.sh passes cuda_arch_strategy=TORCH via build_cmake_args().
+if(DEFINED ACCVLAB_TORCH_CUDA_ARCH_LIST)
+  set(TORCH_CUDA_ARCH_LIST "${ACCVLAB_TORCH_CUDA_ARCH_LIST}")
+endif()
+
 # Find PyTorch
 find_package(Torch REQUIRED)
 

@@ -28,6 +28,12 @@ execute_process(
 
 list(APPEND CMAKE_PREFIX_PATH "${TORCH_CMAKE_PATH}")
 
+# PyTorch CMake ignores CMAKE_CUDA_ARCHITECTURES and uses TORCH_CUDA_ARCH_LIST.
+# lane_helpers/setup.py passes cuda_arch_strategy=TORCH via build_cmake_args().
+if(DEFINED ACCVLAB_TORCH_CUDA_ARCH_LIST)
+  set(TORCH_CUDA_ARCH_LIST "${ACCVLAB_TORCH_CUDA_ARCH_LIST}")
+endif()
+
 find_package(CUDA REQUIRED)
 find_package(Torch REQUIRED)
 find_package(Python COMPONENTS Interpreter Development REQUIRED)

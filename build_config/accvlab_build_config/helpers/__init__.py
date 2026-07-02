@@ -26,6 +26,8 @@ from .build_utils import (
     get_abs_setup_dir,
 )
 from .cmake_args import (
+    CUDA_ARCH_STRATEGY_CMAKE,
+    CUDA_ARCH_STRATEGY_TORCH,
     build_cmake_args,
     get_project_root,
 )
@@ -38,6 +40,8 @@ __all__ = [
     'select_cuda_architectures_for_nvcc',
     'run_external_build',
     'get_abs_setup_dir',
+    'CUDA_ARCH_STRATEGY_CMAKE',
+    'CUDA_ARCH_STRATEGY_TORCH',
     'build_cmake_args',
     'get_project_root',
 ]

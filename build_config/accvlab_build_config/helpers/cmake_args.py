@@ -3,12 +3,20 @@ import re
 from pathlib import Path
 from typing import List, Optional
 
-from .build_utils import detect_cuda_info, select_cuda_architectures_for_nvcc
+from .build_utils import (
+    detect_cuda_info,
+    format_torch_cuda_arch_list_from_selection,
+    resolve_cuda_architecture_selection,
+)
 
 # Marker file at the ACCV-Lab monorepo root (see `.nav` in the repository).
 _NAV_MARKER = ".nav"
 # Must match `.nav` contents after strip (UTF-8); see repository root `.nav`.
 _NAV_EXPECTED_CONTENT = "project root"
+
+CUDA_ARCH_STRATEGY_CMAKE = "cmake"
+CUDA_ARCH_STRATEGY_TORCH = "torch"
+_VALID_CUDA_ARCH_STRATEGIES = frozenset({CUDA_ARCH_STRATEGY_CMAKE, CUDA_ARCH_STRATEGY_TORCH})
 
 
 def _nav_file_is_valid(path: Path) -> bool:
@@ -69,6 +77,33 @@ def _format_cmake_cuda_architectures(archs: List[str], ptx_archs: List[str]) -> 
     return cmake_archs
 
 
+def _append_cmake_cuda_architectures_args(args: List[str], cuda_info: dict) -> None:
+    selection = resolve_cuda_architecture_selection(cuda_info)
+    if selection is None:
+        return
+
+    cmake_archs = _format_cmake_cuda_architectures(
+        selection.architectures,
+        selection.ptx_architectures,
+    )
+    if not cmake_archs:
+        return
+
+    args.append(f'-DCMAKE_CUDA_ARCHITECTURES={";".join(cmake_archs)}')
+
+
+def _append_torch_cuda_arch_list_args(args: List[str], cuda_info: dict) -> None:
+    selection = resolve_cuda_architecture_selection(cuda_info)
+    if selection is None:
+        return
+
+    torch_cuda_arch_list = format_torch_cuda_arch_list_from_selection(selection)
+    if not torch_cuda_arch_list:
+        return
+
+    args.append(f"-DACCVLAB_TORCH_CUDA_ARCH_LIST={torch_cuda_arch_list}")
+
+
 def get_project_root() -> Path:
     """Return the ACCV-Lab monorepo root identified by a valid ``.nav`` marker."""
     anchors = (
@@ -89,15 +124,22 @@ def get_project_root() -> Path:
     )
 
 
-def _build_cmake_args_from_env() -> List[str]:
+def _build_cmake_args_from_env(cuda_arch_strategy: str) -> List[str]:
     """
     Build a list of -D CMake arguments from environment variables to harmonize
     build configuration across setuptools, external CMake, and scikit-build flows.
 
-    If ``CUSTOM_CUDA_ARCHS`` is unset, detected CUDA architectures become CMake
-    real targets only when ``nvcc`` reports exact support. Unsupported
-    detections use supported virtual/PTX targets at or below the detected
-    architecture.
+    CUDA architecture flags are prepared according to ``cuda_arch_strategy``:
+
+    - ``cmake``: ``-DCMAKE_CUDA_ARCHITECTURES=...``
+    - ``torch``: ``-DACCVLAB_TORCH_CUDA_ARCH_LIST=...`` for skbuild packages that
+      call ``find_package(Torch)`` (copied to ``TORCH_CUDA_ARCH_LIST`` in CMake)
+
+    If ``CUSTOM_CUDA_ARCHS`` is unset, detected CUDA architectures become real
+    targets only when ``nvcc`` reports exact support. Unsupported detections use
+    supported PTX targets at or below the detected architecture. When set,
+    ``CUSTOM_CUDA_ARCHS`` is passed through unchanged (see the Installation
+    Guide).
     """
     args: List[str] = []
     # Always export compile_commands.json for tooling/validation
@@ -117,23 +159,11 @@ def _build_cmake_args_from_env() -> List[str]:
             args.append(f"-DCMAKE_CXX_STANDARD={norm}")
             args.append(f"-DCMAKE_CUDA_STANDARD={norm}")
 
-    # CUSTOM_CUDA_ARCHS -> CMAKE_CUDA_ARCHITECTURES
-    custom_archs = os.environ.get("CUSTOM_CUDA_ARCHS")
-    if custom_archs:
-        # Accept comma or semicolon separated
-        norm_archs = custom_archs.replace(",", ";")
-        args.append(f'-DCMAKE_CUDA_ARCHITECTURES={norm_archs}')
-    else:
-        # Attempt auto-detection via torch; if empty, let CMake defaults apply
-        cuda_info = detect_cuda_info()
-        detected = cuda_info['gpu_architectures'] if cuda_info['cuda_available'] else []
-        if detected:
-            selection = select_cuda_architectures_for_nvcc(detected)
-            cmake_archs = _format_cmake_cuda_architectures(
-                selection.architectures,
-                selection.ptx_architectures,
-            )
-            args.append(f'-DCMAKE_CUDA_ARCHITECTURES={";".join(cmake_archs)}')
+    cuda_info = detect_cuda_info()
+    if cuda_arch_strategy == CUDA_ARCH_STRATEGY_CMAKE:
+        _append_cmake_cuda_architectures_args(args, cuda_info)
+    elif cuda_arch_strategy == CUDA_ARCH_STRATEGY_TORCH:
+        _append_torch_cuda_arch_list_args(args, cuda_info)
 
     # VERBOSE_BUILD -> CMAKE_VERBOSE_MAKEFILE
     if _parse_bool_env(os.environ.get("VERBOSE_BUILD", "")):
@@ -192,19 +222,40 @@ def _build_cmake_args_package_scm_version(repo_root: Path) -> List[str]:
     return [f"-DACCVLAB_PACKAGE_CMAKE_VERSION={numeric}"]
 
 
-def build_cmake_args() -> List[str]:
-    """
-    Full CMake -D list: environment-based flags plus repo-aligned SCM version define.
+def build_cmake_args(cuda_arch_strategy: str) -> List[str]:
+    """Build the full CMake ``-D`` argument list for ACCV-Lab package builds.
 
+    Combines environment-based build flags with a repo-aligned SCM version define.
     Auto-detected CUDA architectures use exact ``nvcc`` real targets when
     supported. Unsupported detections fall back to supported PTX targets at or
     below the detected architecture when ``CUSTOM_CUDA_ARCHS`` is unset.
+
+    Args:
+        cuda_arch_strategy: Select how CUDA GPU architectures are passed to CMake.
+            Pass ``CUDA_ARCH_STRATEGY_CMAKE`` for native CMake CUDA targets, or
+            ``CUDA_ARCH_STRATEGY_TORCH`` for skbuild packages that call
+            ``find_package(Torch)``. Each package's ``setup.py`` must choose the
+            strategy appropriate to its build.
+
+    Returns:
+        List[str]: CMake ``-D`` arguments derived from environment variables and
+        the repository SCM version.
     """
+    if cuda_arch_strategy not in _VALID_CUDA_ARCH_STRATEGIES:
+        valid = ", ".join(sorted(_VALID_CUDA_ARCH_STRATEGIES))
+        raise ValueError(f"Invalid cuda_arch_strategy {cuda_arch_strategy!r}; expected one of: {valid}")
     root = get_project_root()
-    return _build_cmake_args_from_env() + _build_cmake_args_package_scm_version(root)
+    res = _build_cmake_args_from_env(cuda_arch_strategy) + _build_cmake_args_package_scm_version(root)
+    return res
 
 
 if __name__ == "__main__":
+    import sys
+
+    if len(sys.argv) != 2:
+        valid = ", ".join(sorted(_VALID_CUDA_ARCH_STRATEGIES))
+        raise SystemExit(f"usage: {sys.argv[0]} <{valid}>")
+
     # Print arguments one per line for easy consumption in bash arrays
-    for a in build_cmake_args():
+    for a in build_cmake_args(sys.argv[1]):
         print(a)

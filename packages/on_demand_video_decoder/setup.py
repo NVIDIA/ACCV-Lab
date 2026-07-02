@@ -62,4 +62,9 @@ skbuild.setup(
     cmake_source_dir="ext_impl",
     cmake_install_dir="accvlab/on_demand_video_decoder",
     cmake_args=_cmake_args,
+    entry_points={
+        "console_scripts": [
+            "accvlab-mps = accvlab.on_demand_video_decoder._mps.launcher:mps_launch",
+        ],
+    },
 )

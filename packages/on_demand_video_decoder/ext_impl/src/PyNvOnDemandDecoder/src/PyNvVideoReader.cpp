@@ -123,7 +123,10 @@ PyNvVideoReader::PyNvVideoReader(const std::string filename, int iGpu, CUcontext
 #endif
     this->destroy_context = false;
 
-    // To do, we can reuse current context, we can check its func
+    if (cu_context == nullptr && cu_stream != nullptr) {
+        throw std::invalid_argument("[ERROR] cu_stream provided without cu_context. Pass both or neither.");
+    }
+
     if (cu_context == nullptr) {
         CUresult res = cuCtxGetCurrent(&this->cu_context);
         if (res == CUDA_ERROR_NOT_INITIALIZED) {
@@ -135,13 +138,19 @@ PyNvVideoReader::PyNvVideoReader(const std::string filename, int iGpu, CUcontext
                           << std::endl;
             }
         }
+        // If we found an existing context but were given no stream, create one now.
+        if (this->cu_context && cu_stream == nullptr) {
+            ck(cuCtxPushCurrent(this->cu_context));
+            ck(cuStreamCreate(&this->cu_stream, CU_STREAM_DEFAULT));
+            this->owner_stream = true;
+            ck(cuCtxPopCurrent(NULL));
+        }
     } else {
         this->cu_context = cu_context;
         this->cu_stream = cu_stream;
         this->owner_stream = false;
     }
     if (!this->cu_context) {
-        std::cout << "Get and push primary context" << std::endl;
         CUdevice cuDevice = 0;
         ck(cuDeviceGet(&cuDevice, this->gpu_id));
         ck(cuDevicePrimaryCtxRetain(&this->cu_context, cuDevice));
@@ -173,7 +182,7 @@ PyNvVideoReader::PyNvVideoReader(const std::string filename, int iGpu, CUcontext
     ck(cuCtxPushCurrent(this->cu_context));
     // Check the param for NvDecoder [TODO]
     this->decoder.reset(
-        new NvDecoder(this->cu_stream, this->cu_context, true, demuxer->GetNvCodecId(), false, false, false));
+        new NvDecoder(this->cu_stream, this->cu_context, true, demuxer->GetNvCodecId(), false, true, false));
     ck(cuCtxPopCurrent(NULL));
     nvtxRangePop();
     std::vector<int> key_frame_ids;
@@ -763,6 +772,7 @@ DecodedFrameExt PyNvVideoReader::returnYUVFrame(void* pFrame_buffer, void* pFram
             // contiguous. Actual NVENC allocation can have padding?
         }
     }
+    CUDA_DRVAPI_CALL(cuStreamSynchronize(this->decoder->GetStream()));
     return frame;
 }
 
@@ -806,6 +816,7 @@ RGBFrame PyNvVideoReader::returnRGBFrame(void* pFrame_buffer, void* pFrame, bool
                 "for videos in NV12-format");
         }
     }
+    CUDA_DRVAPI_CALL(cuStreamSynchronize(this->decoder->GetStream()));
     return rgb_frame;
 }
 void Init_PyNvVideoReader(py::module& m) {

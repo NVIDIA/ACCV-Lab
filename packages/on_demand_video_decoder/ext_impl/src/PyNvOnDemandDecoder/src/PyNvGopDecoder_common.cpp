@@ -641,7 +641,7 @@ int PyNvGopDecoder::InitializeDecoders(const std::vector<int>& codec_ids) {
         if (i >= this->vdec.size()) {
             std::unique_ptr<NvDecoder> dec(new NvDecoder(this->cu_stream, this->cu_context, true,
                                                          static_cast<cudaVideoCodec>(codec_ids[i]), false,
-                                                         false, false));
+                                                         true, false));
             this->vdec.push_back(std::move(dec));
         }
         nvtxRangePop();  //Decoder creation

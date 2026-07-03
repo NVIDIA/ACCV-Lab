@@ -50,8 +50,6 @@ RGBFrame::RGBFrame() {
     typestr = "|u1";
     data = reinterpret_cast<CUdeviceptr>(nullptr);
     readOnly = true;
-    // RS TODO: Is "2" correct? It is the same as used in CAIMemoryView and
-    // coerceToCudaArrayView, but why 2?
     stream = (CUstream)2;
     isBGR = false;
 }

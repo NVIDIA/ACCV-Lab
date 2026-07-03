@@ -230,7 +230,7 @@ def SampleDecodeFromGopFiles():
 
             # Convert decoded frames to PyTorch tensors for ML applications
             print("Converting frames to PyTorch tensors...")
-            gop_decoded = [torch.unsqueeze(torch.as_tensor(df), 0) for df in decoded_frames]
+            gop_decoded = [torch.unsqueeze(torch.as_tensor(df).clone(), 0) for df in decoded_frames]
 
             # Display tensor information for first frame (representative of all frames)
             if gop_decoded:

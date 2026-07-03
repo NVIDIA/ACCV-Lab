@@ -71,7 +71,13 @@ class RGBFrame {
                 dict["shape"] = self->shape;
                 dict["strides"] = self->stride;
                 dict["typestr"] = self->typestr;
-                dict["stream"] = self->stream == 0 ? int(size_t(self->stream)) : 2;
+                // stream field per CAI v3 spec:
+                // https://nvidia.github.io/numba-cuda/user/cuda_array_interface.html#python-interface-specification
+                //   None  → data already ready, no sync needed
+                //   1 / 2 → legacy / per-thread default stream
+                //   other → cudaStream_t handle cast to Python int; consumer must sync before use
+                dict["stream"] =
+                    self->stream ? py::cast(reinterpret_cast<size_t>(self->stream)) : py::cast(2);
                 dict["data"] = std::make_pair(self->data, false);
                 dict["gpuIdx"] = 0;  // TODO
                 return dict;

@@ -81,7 +81,7 @@ def SampleRandomAccess():
     decoded_frames = nv_gop_dec.DecodeN12ToRGB(
         sample_files, [0] * len(os.listdir(path_bases[0])), as_bgr=True, fastStreamInfos=fast_stream_infos
     )
-    tensor_list = [torch.unsqueeze(torch.as_tensor(frame), 0) for frame in decoded_frames]
+    tensor_list = [torch.unsqueeze(torch.as_tensor(frame).clone(), 0) for frame in decoded_frames]
 
     '''
     Main processing loop: Decode random frames from multiple video clips
@@ -110,7 +110,7 @@ def SampleRandomAccess():
                 as_bgr=True,  # BGR format output (OpenCV compatible)
                 fastStreamInfos=fast_stream_infos,  # Cached stream optimization data
             )
-            tensor_list = [torch.unsqueeze(torch.as_tensor(frame), 0) for frame in decoded_frames]
+            tensor_list = [torch.unsqueeze(torch.as_tensor(frame).clone(), 0) for frame in decoded_frames]
 
             # Display detailed tensor information for the first camera frame
             first_tensor = tensor_list[0]

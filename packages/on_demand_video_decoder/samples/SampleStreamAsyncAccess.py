@@ -150,7 +150,7 @@ def SampleStreamAsyncAccess():
             # Then call DecodeN12ToRGBAsync again.
             # Otherwise, the zero-copy decoded frames will be recorvered by the next DecodeN12ToRGBAsync call.
             print("Converting frames to PyTorch tensors (GPU memory)...")
-            tensor_list = [torch.as_tensor(frame, device='cuda') for frame in decoded_frames]
+            tensor_list = [torch.as_tensor(frame, device='cuda').clone() for frame in decoded_frames]
 
             # Stack tensors for batch processing
             rgb_batch = torch.stack(tensor_list, dim=0)  # Shape: [N, H, W, 3]

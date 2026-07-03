@@ -245,7 +245,7 @@ def SampleSeparationAccessGOPListAPI():
             # Convert first decoded frame to PyTorch tensor for analysis
             if decoded_frames_all:
                 first_frame = decoded_frames_all[0]
-                tensor = torch.as_tensor(first_frame)
+                tensor = torch.as_tensor(first_frame).clone()
 
                 print(f"\n📊 First Decoded Frame Analysis:")
                 print(f"   Shape: {tensor.shape} (Height × Width × Channels)")

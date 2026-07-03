@@ -129,7 +129,7 @@ def SampleStreamAccess():
             # Convert decoded frames to PyTorch tensors for ML applications
             # This demonstrates integration with deep learning workflows
             print("Converting frames to PyTorch tensors...")
-            tensor_list = [torch.unsqueeze(torch.as_tensor(frame), 0) for frame in decoded_frames]
+            tensor_list = [torch.unsqueeze(torch.as_tensor(frame).clone(), 0) for frame in decoded_frames]
 
             # Display tensor information for first frame (representative of all frames)
             first_tensor = tensor_list[0]

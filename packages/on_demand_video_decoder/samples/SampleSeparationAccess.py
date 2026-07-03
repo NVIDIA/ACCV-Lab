@@ -180,7 +180,7 @@ def SampleSeparationAccess():
 
             # Convert decoded frames to PyTorch tensors for ML applications
             print("🔄 Converting frames to PyTorch tensors for ML pipeline integration...")
-            tensor_list = [torch.unsqueeze(torch.as_tensor(frame), 0) for frame in decoded_frames]
+            tensor_list = [torch.unsqueeze(torch.as_tensor(frame).clone(), 0) for frame in decoded_frames]
 
             # Display detailed analysis of the first decoded frame
             first_tensor = tensor_list[0]

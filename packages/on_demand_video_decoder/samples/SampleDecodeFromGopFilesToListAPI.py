@@ -218,7 +218,7 @@ def SampleDecodeFromGopFilesListAPI():
             print(f"✓ Successfully decoded {len(decoded_frames)} frames")
 
             # Convert to PyTorch tensors
-            gop_decoded = [torch.unsqueeze(torch.as_tensor(df), 0) for df in decoded_frames]
+            gop_decoded = [torch.unsqueeze(torch.as_tensor(df).clone(), 0) for df in decoded_frames]
 
             if gop_decoded:
                 first_tensor = gop_decoded[0]

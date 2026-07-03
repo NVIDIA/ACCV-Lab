@@ -74,7 +74,7 @@ for i in range(NUM_ITERS):
     frames, frame_ids_out = pipeline.run(torch_stream.cuda_stream)
 
     # ----- PROCESS RESULTS -----
-    frames = [torch.as_tensor(f, device="cuda") for f in frames]
+    frames = [torch.as_tensor(f, device="cuda").clone() for f in frames]
     # print(frames)
     frame_ids_out = frame_ids_out.as_array().tolist()
     print(f"Finished iteration {i} for frame IDs: {frame_ids_out}")

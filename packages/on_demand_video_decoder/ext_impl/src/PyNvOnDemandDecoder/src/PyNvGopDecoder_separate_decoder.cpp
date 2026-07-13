@@ -152,6 +152,112 @@ SerializedPacketBundle PyNvGopDecoder::get_gop(const std::vector<std::string>& f
     return result;
 }
 
+SerializedPacketBundle PyNvGopDecoder::get_gop_from_bytes(
+    std::shared_ptr<const std::vector<uint8_t>> data, const std::vector<int> frame_ids) {
+    nvtxRangePushA("GetGOPFromBytes");
+
+    if (!data || data->empty()) {
+        throw std::invalid_argument("[ERROR] video byte buffer is empty");
+    }
+    if (frame_ids.empty()) {
+        throw std::invalid_argument("[ERROR] frame_ids must not be empty");
+    }
+    if (frame_ids.size() > max_num_files) {
+        throw std::invalid_argument("[ERROR] frame_ids size is greater than max_num_files");
+    }
+
+    const size_t total_frames = frame_ids.size();
+
+    std::vector<std::unique_ptr<PyNvGopDemuxer>> demuxers;
+    std::vector<std::unique_ptr<ConcurrentQueue<std::tuple<uint8_t*, int, int>>>> vpacket_queue;
+    std::vector<std::vector<std::unique_ptr<uint8_t[]>>> vpacket_array;
+    std::vector<std::vector<int>> all_gop_lens(total_frames);
+    std::vector<std::vector<int>> all_first_frame_ids(total_frames);
+
+    demuxers.resize(total_frames);
+    vpacket_queue.reserve(total_frames);
+    vpacket_array.reserve(total_frames);
+    for (size_t i = 0; i < total_frames; ++i) {
+        vpacket_queue.emplace_back(std::make_unique<ConcurrentQueue<std::tuple<uint8_t*, int, int>>>());
+        vpacket_queue[i]->setSize(MAX_SIZE);
+        vpacket_array.emplace_back();
+    }
+
+    ensureDemuxRunnersInitialized();
+
+    nvtxRangePushA("Initialize memory demuxers");
+    for (size_t i = 0; i < total_frames; ++i) {
+        demuxers[i].reset(new PyNvGopDemuxer("memory://video", data));
+        if (!demuxers[i]->IsValid()) {
+            nvtxRangePop();  // Initialize memory demuxers
+            nvtxRangePop();  // GetGOPFromBytes
+            throw std::runtime_error("[ERROR] create memory demuxer failed");
+        }
+    }
+    nvtxRangePop();  // Initialize memory demuxers
+
+    nvtxRangePushA("Packet extraction from bytes");
+    for (int i = 0; i < static_cast<int>(total_frames); ++i) {
+        try {
+            std::vector<int> sorted_frame_ids = {frame_ids[i]};
+            if (demuxers[i]->IsVFRV2()) {
+                int st = ExtractAndProcessGopInfo(demuxers[i], sorted_frame_ids, all_first_frame_ids[i],
+                                                  all_gop_lens[i]);
+                if (st != 0) {
+                    throw std::runtime_error("[ERROR] extract and process gop info failed for bytes source");
+                }
+            }
+#ifdef PROCESS_SYNC
+            DemuxGopProc(demuxers[i].get(), vpacket_queue[i].get(), sorted_frame_ids,
+                         all_first_frame_ids[i], all_gop_lens[i], vpacket_array[i], true);
+#else
+            demux_runners[i].join();
+            demux_runners[i].start(PyNvGopDecoder::DemuxGopProc, demuxers[i].get(), vpacket_queue[i].get(),
+                                   sorted_frame_ids, std::ref(all_first_frame_ids[i]),
+                                   std::ref(all_gop_lens[i]), std::ref(vpacket_array[i]), true);
+#endif
+        } catch (const std::exception& e) {
+            this->force_join_all();
+            nvtxRangePop();  // Packet extraction from bytes
+            nvtxRangePop();  // GetGOPFromBytes
+            throw std::runtime_error(e.what());
+        }
+    }
+    nvtxRangePop();  // Packet extraction from bytes
+
+    nvtxRangePushA("Demux thread join");
+    try {
+        for (int i = 0; i < static_cast<int>(total_frames); ++i) {
+#ifndef PROCESS_SYNC
+            demux_runners[i].join();
+#endif
+        }
+    } catch (const std::exception& e) {
+        this->force_join_all();
+        nvtxRangePop();  // Demux thread join
+        nvtxRangePop();  // GetGOPFromBytes
+        throw std::runtime_error(e.what());
+    }
+
+    for (int i = 0; i < static_cast<int>(total_frames); i++) {
+        if (vpacket_array.at(i).empty()) {
+            this->force_join_all();
+            nvtxRangePop();  // Demux thread join
+            nvtxRangePop();  // GetGOPFromBytes
+            throw std::runtime_error("[ERROR] vpacket_array is empty for bytes source");
+        }
+    }
+    nvtxRangePop();  // Demux thread join
+
+    nvtxRangePushA("CreateSerializedPacketBundle");
+    SerializedPacketBundle result = createSerializedPacketBundle(
+        total_frames, demuxers, all_gop_lens, all_first_frame_ids, vpacket_queue, vpacket_array);
+    nvtxRangePop();  // CreateSerializedPacketBundle
+
+    nvtxRangePop();  // GetGOPFromBytes
+    return result;
+}
+
 std::vector<SerializedPacketBundle> PyNvGopDecoder::get_gop_list(const std::vector<std::string>& filepaths,
                                                                  const std::vector<int> frame_ids,
                                                                  const FastStreamInfo* fastStreamInfos) {

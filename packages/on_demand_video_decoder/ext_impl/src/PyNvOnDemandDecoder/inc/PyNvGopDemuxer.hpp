@@ -18,11 +18,13 @@
 
 #include "FFmpegDemuxer.h"
 #include <map>
+#include <memory>
 #include <pybind11/cast.h>
 #include <pybind11/embed.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <vector>
 extern "C" {
 #include <libavutil/frame.h>
 }
@@ -38,6 +40,8 @@ class PyNvGopDemuxer {
    public:
     explicit PyNvGopDemuxer(const std::string&);
     explicit PyNvGopDemuxer(const std::string& filePath, const FastStreamInfo* fastStreamInfo);
+    explicit PyNvGopDemuxer(const std::string& filePath,
+                            std::shared_ptr<const std::vector<uint8_t>> memoryData);
 
     uint32_t GetHeight() { return demuxer->GetHeight(); }
 

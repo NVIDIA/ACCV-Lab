@@ -48,7 +48,7 @@ import glob as glob_mod
 import hashlib
 import os
 from multiprocessing import shared_memory
-from typing import List, Optional
+from typing import Any, List, Optional
 
 import numpy as np
 
@@ -93,6 +93,31 @@ def _hash_video_path(video_path: str) -> np.uint64:
     """
     digest = hashlib.md5(video_path.encode()).digest()[:8]
     return np.uint64(int.from_bytes(digest, 'little'))
+
+
+def _as_byte_view(data: Any) -> memoryview:
+    """Return a C-contiguous uint8 memoryview over bytes-like GOP data."""
+    if isinstance(data, np.ndarray):
+        if not data.flags.c_contiguous:
+            data = np.ascontiguousarray(data)
+        view = memoryview(data)
+    else:
+        try:
+            view = memoryview(data)
+        except TypeError as exc:
+            raise TypeError("data must be a bytes-like object or numpy.ndarray") from exc
+        if not view.c_contiguous:
+            view = memoryview(view.tobytes())
+
+    if view.nbytes == 0:
+        raise ValueError("data must not be empty")
+
+    if view.ndim != 1 or view.itemsize != 1 or view.format not in ('B', 'b', 'c'):
+        try:
+            view = view.cast('B')
+        except TypeError as exc:
+            raise TypeError("data must expose a C-contiguous byte buffer") from exc
+    return view
 
 
 class SharedGopStore:
@@ -254,8 +279,12 @@ class SharedGopStore:
         self._misses += 1
         return None
 
-    def put(self, video_path: str, first_frame_id: int, gop_len: int, data: np.ndarray) -> GopRef:
+    def put(self, video_path: str, first_frame_id: int, gop_len: int, data: Any) -> GopRef:
         """Store GOP packet data and return a :class:`GopRef`.
+
+        ``data`` may be a ``uint8`` numpy array or any C-contiguous
+        bytes-like object, including ``bytes``, ``bytearray``, and
+        ``memoryview``.
 
         Holds ``flock`` during eviction + insertion to guarantee atomicity.
         Performs a double-check after acquiring the lock (another worker
@@ -282,17 +311,18 @@ class SharedGopStore:
                         gop_len=int(e['gop_len']),
                     )
 
+            data_view = _as_byte_view(data)
             slot_idx = self._find_free_or_evict()
 
             # Content-addressed naming -- same GOP always gets the same name.
             shm_name = f"{_SHM_PREFIX}_{self.store_id}_{vp_hash}_{first_frame_id}"
-            data_size = int(data.nbytes)
+            data_size = int(data_view.nbytes)
 
             # Clean up if same GOP was previously cached then evicted
             _cleanup_stale_shm(shm_name)
 
             shm = shared_memory.SharedMemory(name=shm_name, create=True, size=data_size)
-            shm.buf[:data_size] = data.tobytes()
+            shm.buf[:data_size] = data_view
             shm.close()  # close handle; shm persists until unlink
 
             # Write metadata entry

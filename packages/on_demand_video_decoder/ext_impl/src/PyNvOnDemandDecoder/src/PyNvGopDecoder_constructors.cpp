@@ -34,6 +34,34 @@
 
 namespace fs = std::filesystem;
 
+namespace {
+py::buffer_info RequestByteBuffer(const py::buffer& buffer, const std::string& arg_name) {
+    py::buffer_info info = buffer.request();
+    if (info.itemsize != 1) {
+        throw std::invalid_argument(arg_name + " must expose a byte-sized buffer");
+    }
+    if (info.ndim > 1) {
+        throw std::invalid_argument(arg_name + " must be a contiguous 1D bytes-like object");
+    }
+    if (info.ndim == 1 && !info.strides.empty() && info.strides[0] != 1) {
+        throw std::invalid_argument(arg_name + " must be contiguous");
+    }
+
+    const size_t data_size = static_cast<size_t>(info.size) * static_cast<size_t>(info.itemsize);
+    if (data_size == 0) {
+        throw std::invalid_argument(arg_name + " must not be empty");
+    }
+    return info;
+}
+
+std::shared_ptr<std::vector<uint8_t>> CopyByteBuffer(const py::buffer& buffer) {
+    py::buffer_info info = RequestByteBuffer(buffer, "video_bytes");
+    const auto* src = static_cast<const uint8_t*>(info.ptr);
+    auto data = std::make_shared<std::vector<uint8_t>>(src, src + info.size * info.itemsize);
+    return data;
+}
+}  // namespace
+
 std::vector<FastStreamInfo> GetFastInitInfo(const std::vector<std::string>& filepaths) {
     std::vector<FastStreamInfo> fast_stream_infos;
     fast_stream_infos.reserve(filepaths.size());
@@ -488,6 +516,34 @@ void Init_PyNvGopDecoder(py::module& m) {
                 >>> print(f"Decoded {len(rgb_frames)} RGB frames")
             )pbdoc")
         .def(
+            "DecodeN12ToRGBFromBytes",
+            [](std::shared_ptr<PyNvGopDecoder>& dec, const py::buffer& video_bytes,
+               const std::vector<int> frame_ids, bool as_bgr) {
+                try {
+                    auto data = CopyByteBuffer(video_bytes);
+                    SerializedPacketBundle serialized_data;
+                    std::vector<RGBFrame> result;
+                    std::vector<std::string> filepaths(frame_ids.size(), "memory://video");
+
+                    {
+                        py::gil_scoped_release release;
+                        serialized_data = dec->get_gop_from_bytes(data, frame_ids);
+                        dec->decode_from_gop(serialized_data.data.get(), serialized_data.size,
+                                             filepaths, frame_ids, true, as_bgr, nullptr, &result);
+                    }
+                    return result;
+                } catch (const std::exception& e) {
+                    throw std::runtime_error(e.what());
+                }
+            },
+            py::arg("video_bytes"), py::arg("frame_ids"), py::arg("as_bgr") = false,
+            R"pbdoc(
+            Decodes frames from a complete MP4 byte buffer into RGB/BGR data.
+
+            This method is a memory-input variant of DecodeN12ToRGB. The input must be
+            a complete seekable container byte buffer, not a live stream.
+            )pbdoc")
+        .def(
             "GetGOP",
             [](std::shared_ptr<PyNvGopDecoder>& dec, const std::vector<std::string>& filepaths,
                const std::vector<int> frame_ids, std::vector<FastStreamInfo> fastStreamInfos) {
@@ -555,6 +611,35 @@ void Init_PyNvGopDecoder(py::module& m) {
                 >>> decoder = PyNvGopDecoder(maxfiles=10)
                 >>> gop_data, first_ids, gop_lens = decoder.GetGOP(['video.mp4', 'video2.mp4'], [0, 10])
                 >>> print(f"Extracted GOP data for {len(first_ids)} GOPs")
+            )pbdoc")
+        .def(
+            "GetGOPFromBytes",
+            [](std::shared_ptr<PyNvGopDecoder>& dec, const py::buffer& video_bytes,
+               const std::vector<int> frame_ids) {
+                try {
+                    auto data = CopyByteBuffer(video_bytes);
+                    SerializedPacketBundle serialized_data;
+                    {
+                        py::gil_scoped_release release;
+                        serialized_data = dec->get_gop_from_bytes(data, frame_ids);
+                    }
+
+                    auto capsule = py::capsule(serialized_data.data.release(),
+                                               [](void* ptr) { delete[] static_cast<uint8_t*>(ptr); });
+                    py::array_t<uint8_t> numpy_data(serialized_data.size,
+                                                    static_cast<uint8_t*>(capsule.get_pointer()), capsule);
+                    return py::make_tuple(numpy_data, serialized_data.first_frame_ids,
+                                          serialized_data.gop_lens);
+                } catch (const std::exception& e) {
+                    throw std::runtime_error(e.what());
+                }
+            },
+            py::arg("video_bytes"), py::arg("frame_ids"),
+            R"pbdoc(
+            Extracts GOP packet data from a complete MP4 byte buffer.
+
+            This is the memory-input variant of GetGOP and is intended for sources
+            such as FFRecord records or mmap slices that contain complete MP4 bytes.
             )pbdoc")
         .def(
             "GetGOPList",

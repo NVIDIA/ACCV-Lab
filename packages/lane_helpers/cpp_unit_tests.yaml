@@ -1,0 +1,6 @@
+# Native C++/CUDA unit test target for lane_helpers.
+
+cmake_source_dir: ext_impl
+cuda_arch_strategy: torch
+test_option: ACCVLAB_LANE_HELPERS_BUILD_CPP_TESTS
+test_target: accvlab_lane_helpers_polyline_run_cpp_tests

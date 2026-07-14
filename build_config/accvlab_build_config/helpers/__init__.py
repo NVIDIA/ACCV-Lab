@@ -17,12 +17,9 @@ Build configuration helpers for accvlab packages
 """
 
 from .build_utils import (
-    CudaArchitectureSelection,
     load_config,
     detect_cuda_info,
     get_compile_flags,
-    select_cuda_architectures_for_nvcc,
-    run_external_build,
     get_abs_setup_dir,
 )
 from .cmake_args import (
@@ -31,17 +28,24 @@ from .cmake_args import (
     build_cmake_args,
     get_project_root,
 )
+from .cpp_unit_test_config import (
+    CppUnitTestPackage,
+    load_cpp_unit_test_package_configs,
+    select_cpp_unit_test_packages,
+)
+from .yaml_config import YamlConfigError
 
 __all__ = [
-    'CudaArchitectureSelection',
     'load_config',
     'detect_cuda_info',
     'get_compile_flags',
-    'select_cuda_architectures_for_nvcc',
-    'run_external_build',
     'get_abs_setup_dir',
     'CUDA_ARCH_STRATEGY_CMAKE',
     'CUDA_ARCH_STRATEGY_TORCH',
     'build_cmake_args',
     'get_project_root',
+    'CppUnitTestPackage',
+    'load_cpp_unit_test_package_configs',
+    'select_cpp_unit_test_packages',
+    'YamlConfigError',
 ]

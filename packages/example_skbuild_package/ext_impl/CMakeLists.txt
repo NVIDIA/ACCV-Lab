@@ -34,13 +34,14 @@ list(APPEND CMAKE_PREFIX_PATH "${TORCH_CMAKE_PATH}")
 find_package(CUDA REQUIRED)
 
 # PyTorch CMake ignores CMAKE_CUDA_ARCHITECTURES and uses TORCH_CUDA_ARCH_LIST.
-# setup.py passes cuda_arch_strategy=TORCH via build_cmake_args().
+# setup.py and cpp_unit_tests.yaml both select the "torch" CUDA architecture strategy.
 if(DEFINED ACCVLAB_TORCH_CUDA_ARCH_LIST)
   set(TORCH_CUDA_ARCH_LIST "${ACCVLAB_TORCH_CUDA_ARCH_LIST}")
 endif()
 
 # Find PyTorch
 find_package(Torch REQUIRED)
+separate_arguments(TORCH_CXX_FLAGS_LIST NATIVE_COMMAND "${TORCH_CXX_FLAGS}")
 
 # Find Python
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
@@ -74,7 +75,6 @@ pybind11_add_module(accvlab_example_skbuild_package_ext MODULE
 
 # Set CUDA properties and PyTorch compatibility
 set_target_properties(accvlab_example_skbuild_package_ext PROPERTIES
-    CUDA_SEPARABLE_COMPILATION ON
     CXX_STANDARD 17
     CUDA_STANDARD 17
     OUTPUT_NAME "_ext"
@@ -88,7 +88,7 @@ target_compile_definitions(accvlab_example_skbuild_package_ext PRIVATE
 )
 
 # Add PyTorch C++ compilation flags
-target_compile_definitions(accvlab_example_skbuild_package_ext PRIVATE ${TORCH_CXX_FLAGS})
+target_compile_options(accvlab_example_skbuild_package_ext PRIVATE ${TORCH_CXX_FLAGS_LIST})
 
 # Find torch_python library path
 find_library(TORCH_PYTHON_LIBRARY torch_python PATHS ${TORCH_INSTALL_PREFIX}/lib)
@@ -111,4 +111,15 @@ target_include_directories(accvlab_example_skbuild_package_ext PRIVATE
 install(TARGETS accvlab_example_skbuild_package_ext
     LIBRARY DESTINATION .
     RUNTIME DESTINATION .
-) 
+)
+
+option(
+    ACCVLAB_EXAMPLE_SKBUILD_PACKAGE_BUILD_CPP_TESTS
+    "Build example_skbuild_package native C++/CUDA tests"
+    OFF
+)
+
+if(ACCVLAB_EXAMPLE_SKBUILD_PACKAGE_BUILD_CPP_TESTS)
+    enable_testing()
+    add_subdirectory(utest)
+endif()

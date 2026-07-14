@@ -1,0 +1,6 @@
+# Native C++/CUDA unit test target for example_skbuild_package.
+
+cmake_source_dir: ext_impl
+cuda_arch_strategy: torch
+test_option: ACCVLAB_EXAMPLE_SKBUILD_PACKAGE_BUILD_CPP_TESTS
+test_target: accvlab_example_skbuild_package_run_cpp_tests

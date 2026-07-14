@@ -58,4 +58,10 @@ separate_arguments(TORCH_CXX_FLAGS_LIST NATIVE_COMMAND "${TORCH_CXX_FLAGS}")
 
 find_library(TORCH_PYTHON_LIBRARY torch_python PATHS ${TORCH_INSTALL_PREFIX}/lib)
 
+option(ACCVLAB_LANE_HELPERS_BUILD_CPP_TESTS "Build lane_helpers native C++/CUDA tests" OFF)
+
+if(ACCVLAB_LANE_HELPERS_BUILD_CPP_TESTS)
+  enable_testing()
+endif()
+
 add_subdirectory(polyline)

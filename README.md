@@ -95,7 +95,7 @@ documentation. The basic commands are:
 ./scripts/install_local.sh
 
 # Install in development mode (see "Important" note below)
-./scripts/install_local.sh -e
+./scripts/package_manager.sh install -e --optional
 
 # Build documentation. This needs to be done after installing the packages, as the generation of the API 
 # documentation relies on the installed packages.

@@ -48,3 +48,7 @@ install(TARGETS accvlab_lane_helpers_polyline_sampling
     LIBRARY DESTINATION .
     RUNTIME DESTINATION .
 )
+
+if(ACCVLAB_LANE_HELPERS_BUILD_CPP_TESTS)
+    add_subdirectory(utest)
+endif()

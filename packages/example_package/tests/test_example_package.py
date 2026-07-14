@@ -21,15 +21,6 @@ def test_examples_import():
     assert accvlab.example_package is not None
 
 
-def test_external_module_available():
-    try:
-        import accvlab.example_package.accvlab_example_package_ext
-
-        assert accvlab.example_package.accvlab_example_package_ext is not None
-    except ImportError:
-        pytest.fail("External module accvlab_examples_ext not found.")
-
-
 def test_cpp_extension_available():
     import accvlab.example_package._cpp
 

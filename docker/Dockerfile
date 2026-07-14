@@ -99,7 +99,8 @@ RUN pip install sphinx==8.1.3 \
     sphinxcontrib-spelling==8.0.2
 
 RUN pip install ninja \
-    scikit-build
+    scikit-build \
+    PyYAML==6.0.3
 
 RUN pip install pycuda==2025.1.2 \
     pybind11==3.0.0 \

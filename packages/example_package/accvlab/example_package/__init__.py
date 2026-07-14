@@ -14,7 +14,7 @@
 
 """
 ACCV-Lab Examples Module
-Demonstrates manual build configuration with C++/CUDA extensions.
+Demonstrates PyTorch C++/CUDA extensions.
 """
 
 from importlib.metadata import PackageNotFoundError, version
@@ -24,26 +24,14 @@ try:
 except PackageNotFoundError:
     __version__ = "0.0.0"
 
-from typing import Callable
-
-from torch import Tensor
-
 from .functions import (
-    cpp_vector_sum,
     cpp_matrix_transpose,
-    cuda_vector_multiply,
+    cpp_print_build_info,
+    cpp_vector_multiply,
+    cpp_vector_sum,
     cuda_reduce_sum,
+    cuda_vector_multiply,
 )
-
-# Import the external module
-from accvlab.example_package.accvlab_example_package_ext import (
-    external_vector_add_cuda,
-    external_vector_scale_cuda,
-)
-
-# Type annotations for externally provided CUDA functions
-external_vector_add_cuda: Callable[[Tensor, Tensor], Tensor]
-external_vector_scale_cuda: Callable[[Tensor, float], Tensor]
 
 
 def hello_examples() -> str:
@@ -54,10 +42,10 @@ def hello_examples() -> str:
 __all__ = [
     '__version__',
     'hello_examples',
-    'cpp_vector_sum',
     'cpp_matrix_transpose',
-    'cuda_vector_multiply',
+    'cpp_print_build_info',
+    'cpp_vector_multiply',
+    'cpp_vector_sum',
     'cuda_reduce_sum',
-    'external_vector_add_cuda',
-    'external_vector_scale_cuda',
+    'cuda_vector_multiply',
 ]

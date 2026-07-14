@@ -14,7 +14,6 @@
 
 from setuptools import setup
 from torch.utils.cpp_extension import BuildExtension, CppExtension, CUDAExtension
-import sys
 from pathlib import Path
 
 _ACCVLAB_BUILD_CONFIG_IMPORT_ERROR = """
@@ -39,7 +38,6 @@ try:
         detect_cuda_info,
         get_compile_flags,
     )
-    from accvlab_build_config import run_external_build
 except ModuleNotFoundError as exc:
     if exc.name != "accvlab_build_config":
         raise
@@ -101,9 +99,6 @@ def get_extensions():
 
     return extensions
 
-
-# Run external build before setup
-run_external_build(str(Path(__file__).parent))
 
 setup(
     name="accvlab.batching_helpers",

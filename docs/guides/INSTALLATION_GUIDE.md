@@ -14,16 +14,20 @@ environment.
 
 ### Submodules
 
-ACCV-Lab uses submodules in some of the packages (currently only the `on_demand_video_decoder` package).
+ACCV-Lab uses git submodules in some of the contained packages.
 To clone the repository with the submodules, you can use the following command:
 ```bash
 git clone --recurse-submodules https://github.com/NVIDIA/ACCV-Lab.git
 ```
-If you have already cloned the repository without the submodules, you can add them later with the following 
+If you have already cloned the repository without the submodules, you can add them later with the following
 command:
 ```bash
 git submodule update --init --recursive
 ```
+
+Native C++/CUDA tests typically use package-local GoogleTest submodules under
+`ext_impl/external/googletest`. For packages using this setup, an uninitialized submodule causes the
+native-test CMake configuration to fail with an initialization instruction.
 
 ## Installation Methods
 
@@ -32,8 +36,8 @@ git submodule update --init --recursive
 #### Overview
 
 > **⚠️ Important**: The editable installation (`-e`) is not supported for scikit-build based packages
-> (e.g. `on_demand_video_decoder` or `dali_pipeline_framework`). This can lead to missing binaries
-> and import errors.
+> (currently `on_demand_video_decoder`, `dali_pipeline_framework`, `lane_helpers`, and `optim_test_tools`).
+> This can lead to missing binaries and import errors.
 
 The standard way to install ACCV-Lab is using the unified installer script that handles all namespace packages 
 automatically. By default it installs packages with their **basic** dependencies only; to also install optional
@@ -147,30 +151,26 @@ The examples below use `--no-build-isolation`, matching the package manager's de
 builds, omit `--no-build-isolation` when calling `pip` directly; see
 [Installing with Build Isolation](#installing-with-build-isolation) for the required precautions when building in this way.
 
-> **ℹ️ Note**: `{-e}` means that the `-e` (editable) option is optional.
+> **ℹ️ Note**: The `-e` option is not supported for scikit-build based packages (e.g.
+> `dali_pipeline_framework`, `lane_helpers`, `on_demand_video_decoder`, and `optim_test_tools`).
 
-> **ℹ️ Note**: The `-e` option is not supported for scikit-build based packages (e.g. 
-> `dali_pipeline_framework`, `on_demand_video_decoder`).
+Examples:
 
-```bash
-# Install individual packages
-cd packages/optim_test_tools && pip install {-e} . --no-build-isolation
-cd packages/batching_helpers && pip install {-e} . --no-build-isolation
-cd packages/dali_pipeline_framework && pip install . --no-build-isolation
-cd packages/on_demand_video_decoder && pip install . --no-build-isolation
-```
+- Install a setuptools-based package in editable mode:
+  `pip install -e ./packages/batching_helpers --no-build-isolation`
+- Install the same package non-editably by omitting `-e`:
+  `pip install ./packages/batching_helpers --no-build-isolation`
+- Install a scikit-build package, which must be installed non-editably:
+  `pip install ./packages/lane_helpers --no-build-isolation`
 
 #### Installing with Optional Dependencies
 
-For individual package installation with optional dependencies:
+Add the `optional` extra to the package path. For example:
 
-```bash
-# Install individual packages with optional dependencies
-cd packages/optim_test_tools && pip install {-e} .[optional] --no-build-isolation
-cd packages/batching_helpers && pip install {-e} .[optional] --no-build-isolation
-cd packages/dali_pipeline_framework && pip install .[optional] --no-build-isolation
-cd packages/on_demand_video_decoder && pip install .[optional] --no-build-isolation
-```
+- Editable setuptools package:
+  `pip install -e "./packages/batching_helpers[optional]" --no-build-isolation`
+- Non-editable scikit-build package:
+  `pip install "./packages/lane_helpers[optional]" --no-build-isolation`
 
 ## Installing with Build Isolation
 
@@ -244,6 +244,7 @@ Also pin the `torch` entry in `build_config/pyproject.toml` under `[project].dep
 dependencies = [
     "torch==2.6.0",  # Original: "torch>=2.0.0"
     "setuptools-scm>=8",
+    "PyYAML>=6.0",
 ]
 # ... rest of the file remains unchanged
 ```
@@ -331,7 +332,10 @@ python -c "import accvlab; print('ACCV-Lab loaded successfully')"
 # Test specific namespace packages
 python -c "import accvlab.optim_test_tools; print('Optim test tools loaded successfully')"
 python -c "import accvlab.batching_helpers; print('Batching helpers loaded successfully')"
+python -c "import accvlab.multi_tensor_copier; print('Multi-tensor copier loaded successfully')"
 python -c "import accvlab.dali_pipeline_framework; print('DALI pipeline framework loaded successfully')"
+python -c "import accvlab.lane_helpers; print('Lane helpers loaded successfully')"
+python -c "import accvlab.draw_heatmap; print('Draw heatmap loaded successfully')"
 python -c "import accvlab.on_demand_video_decoder; print('On-demand video decoder loaded successfully')"
 ```
 
@@ -363,6 +367,20 @@ The repository provides a convenience script to run pytest for all configured na
 ```bash
 ./scripts/run_tests.sh
 ```
+
+### Running Native C++/CUDA Unit Tests
+
+Packages with a `cpp_unit_tests.yaml` file can also provide native C++/CUDA tests. The configured package
+`lane_helpers` can be run directly, or `all` can be used to run every discovered native-test package:
+
+```bash
+./scripts/run_cpp_unit_tests.sh lane_helpers
+./scripts/run_cpp_unit_tests.sh all
+```
+
+The native runner requires initialized submodules and the `accvlab-build-config` package, both of which are
+set up by the standard repository installation workflow. See
+[Native Tests](DEVELOPMENT_GUIDE.md#native-tests) for package configuration and additional runner options.
 
 > **⚠️ Important**: If you want to run the tests, please make sure to install the packages with optional 
 > dependencies, as they may be required for the tests.
@@ -396,8 +414,8 @@ CUSTOM_CUDA_ARCHS="70,75,80" ./scripts/package_manager.sh install
 ENABLE_PROFILING=1 ./scripts/package_manager.sh install
 ```
 
-> **ℹ️ Note**: These build variables are honored across all build types in ACCV-Lab: setuptools (PyTorch 
-> extensions), external CMake builds (via the provided helper script), and scikit-build packages.
+> **ℹ️ Note**: These build variables are honored across all supported build types in ACCV-Lab: setuptools
+> packages with PyTorch extensions and scikit-build packages with CMake projects.
 
 ### Available Build Variables
 

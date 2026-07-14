@@ -14,15 +14,12 @@
 
 """
 ACCV-Lab Examples Functions
-Wrapper functions for C++ and CUDA extensions
+Wrapper functions for C++ and CUDA extensions.
 """
 
-# Import extensions (assuming they are installed correctly)
-# Note that torch needs to be imported for the extensions import to work
+# Import torch before loading the extension so its shared libraries are available.
 import torch
 
-# Extension availability flags
-HAS_CPP_EXTENSIONS = False
 HAS_CUDA_EXTENSIONS = False
 
 try:
@@ -34,7 +31,7 @@ except ImportError:
     _ext = None
 
 
-def vector_add(a, b):
+def vector_add(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
     """
     Element-wise vector addition using the CUDA extension.
 
@@ -52,7 +49,7 @@ def vector_add(a, b):
     return _ext.external_vector_add_cuda(a, b)
 
 
-def vector_scale(a, scale):
+def vector_scale(a: torch.Tensor, scale: float) -> torch.Tensor:
     """
     Element-wise vector scaling using the CUDA extension.
 

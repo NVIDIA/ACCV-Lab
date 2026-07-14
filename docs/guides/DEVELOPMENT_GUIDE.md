@@ -23,11 +23,13 @@ The project uses a shared configuration system where namespace packages are expl
 #   they will appear in the documentation.
 NAMESPACE_PACKAGES = [
     # The commented out packages below this line are examples (see the development guide):
-    #'accvlab.example_package',
-    #'accvlab.example_skbuild_package',
+    # 'accvlab.example_package',
+    # 'accvlab.example_skbuild_package',
     'accvlab.on_demand_video_decoder',
     'accvlab.batching_helpers',
+    'accvlab.multi_tensor_copier',
     'accvlab.dali_pipeline_framework',
+    'accvlab.lane_helpers',
     'accvlab.draw_heatmap',
     'accvlab.optim_test_tools',
     # Add new namespace packages in the same way as above
@@ -44,19 +46,15 @@ utilities inside the package's `setup.py` file.
 
 ## Package Structure Overview & Adding new Packages
 
-There are two example projects which showcase how a namespace package is structured. These are
-- `packages/example_package`: Showcases a package containing PyTorch extensions built using
-  `CppExtension` and `CUDAExtension` provided by PyTorch as well as an external implementation (see
-  [External Implementations](#external-implementations) section for more details on external implementations)
-  as described below. It also includes a package-local documentation asset hook that generates a simple plot
-  from committed CSV data under `evaluation_results/` during the docs build.
-- `packages/example_skbuild_package`: Showcases a package using `scikit-build` for C++/CUDA implementation 
-  (see the [Alternative: SKBuild-Based Packages](#alternative-skbuild-based-packages) section for more 
-  details on this approach).
+There are two example projects which showcase supported package patterns:
+- `packages/example_package`: Shows a setuptools package with PyTorch C++/CUDA extensions built using
+  `CppExtension` and `CUDAExtension`. It also includes a package-local documentation asset hook that
+  generates a simple plot from committed CSV data under `evaluation_results/` during the docs build.
+- `packages/example_skbuild_package`: Shows the supported CMake-based package pattern using `scikit-build`.
+  See [CMake-Based Packages with SKBuild](#cmake-based-packages-with-skbuild) for details.
 
-First, we will focus on the `example_package`, and explain how to set it up from scratch.
-For `scikit-build` based packages, the setup is similar. The SKBuild-based approach is described in the 
-[Alternative: SKBuild-Based Packages](#alternative-skbuild-based-packages) section.
+First, we will focus on `example_package` and explain how to set up a setuptools/PyTorch-extension package
+from scratch. For CMake-based packages, use the SKBuild pattern described later in this guide.
 
 ### Overview
 
@@ -65,9 +63,9 @@ To add a new namespace package (e.g., `example_package`), you need to create:
 | Component | Directory | Purpose |
 |-----------|-----------|---------|
 | **Implementation** | `packages/example_package/accvlab/example_package/` | Python package with your actual code |
-| **External Implementation** | `packages/example_package/ext_impl/` | Parts of the package which are built externally (e.g. using CMake) and then copied to the main package |
+| **Native extension sources** | `packages/example_package/accvlab/example_package/csrc/` and `packages/example_package/accvlab/example_package/include/` | C++/CUDA sources and headers used by PyTorch `CppExtension`/`CUDAExtension` packages |
 | **Documentation** | `packages/example_package/docs/` | API reference and user guides (template will be auto-generated) |
-| **Tests** | `packages/example_package/tests/` | Unit tests (will be automatically picked up by the test runner) |
+| **Tests** | `packages/example_package/tests/` | Python-based unit tests (will be automatically picked up by the test runner) |
 | **Setup** | `packages/example_package/setup.py` | Package build configuration |
 | **Project Config** | `packages/example_package/pyproject.toml` | Modern Python project configuration and authoritative dependency definition |
 | **Documentation include list (optional)** | `packages/example_package/docu_referenced_dirs.txt` | List additional directories referenced by the docs (besides `docs/`). See [Documentation Setup Guide](DOCUMENTATION_SETUP_GUIDE.md) for more details.|
@@ -96,10 +94,8 @@ accvlab/
 │       │       ├── __init__.py
 │       │       ├── csrc/             # ← C++/CUDA sources
 │       │       └── include/          # ← Headers
-│       ├── ext_impl/                 # ← Optional: external implementation
-│       │   ├── build_and_copy.sh
-│       │   └── ...
 │       ├── tests/                    # ← Tests for "example_package" package
+│       ├── examples/                 # ← Optional runnable examples referenced by the docs
 │       ├── evaluation_results/       # ← Optional committed inputs for generated docs assets
 │       ├── docs/                     # ← Documentation for "example_package" package
 │       │   ├── _on_doc_generation.py # ← Optional docs asset hook
@@ -130,9 +126,6 @@ mkdir -p packages/example_package/accvlab/example_package           # For the im
 mkdir -p packages/example_package/accvlab/example_package/csrc      # For C++/CUDA sources
 mkdir -p packages/example_package/accvlab/example_package/include   # For headers
 
-# External implementation directory (optional - see External Implementations section)
-mkdir -p packages/example_package/ext_impl
-
 # Documentation include list file (optional - see Documentation Setup Guide)
 touch packages/example_package/docu_referenced_dirs.txt
 
@@ -152,50 +145,19 @@ Add your implementation in the `packages/example_package/accvlab/example_package
 package's Python code and native extensions using the `CppExtension` and `CUDAExtension` approach if 
 applicable).
 
-If more complex C++/CUDA implementations are used, an external implementation can be added in 
-`packages/example_package/ext_impl`.
-
-> **ℹ️ Note**: For complex C++/CUDA implementations that require custom build procedures, third-party libraries, 
-> or CMake-based builds, there are two alternatives:
-
-1. **External Implementations** - Uses custom build scripts and CMake (used in this example)
-2. **SKBuild-based packages** - Uses `scikit-build` for CMake integration
-
-Both approaches are described in detail later in this guide. The `example_package` uses the External 
-Implementations approach. For more details, see:
-- [External Implementations](#external-implementations) section for the approach used in this example
-- [Alternative: SKBuild-Based Packages](#alternative-skbuild-based-packages) section for the SKBuild approach
-- [Comparison: External Implementations vs. SKBuild](#comparison-external-implementations-vs-skbuild) section 
-  for a detailed comparison of both approaches
+For CMake-based native implementations, use an SKBuild package instead. The supported pattern is documented in
+[CMake-Based Packages with SKBuild](#cmake-based-packages-with-skbuild) and demonstrated by
+`packages/example_skbuild_package`.
 
 #### 3. Create `setup.py`
 
-Create the setup configuration file that defines how to compile C++/CUDA extensions and configure any external builds. See 
-`packages/example_package/setup.py` for a complete working example. Do not hardcode `version=` in `setup()`; ACCV-Lab packages 
-derive the package version from SCM metadata, with `pyproject.toml` configuring `setuptools-scm` (see below).
+Create the setup configuration file that defines how to compile PyTorch C++/CUDA extensions. See
+`packages/example_package/setup.py` for a complete working example. Do not hardcode `version=` in `setup()`;
+ACCV-Lab packages derive the package version from SCM metadata, with `pyproject.toml` configuring
+`setuptools-scm` (see below).
 
-> **⚠️ Important**: If your package uses external builds (see [External Implementations](#external-implementations) 
-> section), you need to:
-> - Call `run_external_build()` before calling `setup()` to ensure that the external binaries are included in 
->   the resulting package.
-> - Include the parameters as shown below to the call to `setup()` (with `example_package` replaced by your 
->   package's name).
-
-```python
-...
-run_external_build(str(Path(__file__).parent))
-setup(
-    ...
-    include_package_data=True,
-    package_data={
-        'accvlab.example_package': ['*.so'],
-    },
-    zip_safe=False,
-    ....
-)
-```
-The first 2 arguments ensure that the external binaries are included, while the last argument ensures that the 
-package is not stored as a zip-file, which would prevent the external binaries from being imported correctly.
+The setuptools/PyTorch-extension pattern imports the shared build helpers, loads the build configuration, and
+passes the generated compile flags into `CppExtension` and `CUDAExtension` definitions.
 
 #### 4. Create `pyproject.toml`
 
@@ -229,6 +191,7 @@ dependencies = [
 
 [project.optional-dependencies]
 optional = [
+    "matplotlib",
     "pytest",
 ]
 
@@ -279,10 +242,13 @@ This ensures that your package is included in various places, e.g.
 ```python
 # In namespace_packages_config.py
 NAMESPACE_PACKAGES = [
-    'accvlab.optim_test_tools',
-    'accvlab.batching_helpers',
-    'accvlab.dali_pipeline_framework',
     'accvlab.on_demand_video_decoder',
+    'accvlab.batching_helpers',
+    'accvlab.multi_tensor_copier',
+    'accvlab.dali_pipeline_framework',
+    'accvlab.lane_helpers',
+    'accvlab.draw_heatmap',
+    'accvlab.optim_test_tools',
     'accvlab.example_package',  # Add your new namespace package here
 ]
 ```
@@ -291,9 +257,8 @@ NAMESPACE_PACKAGES = [
 
 Create test files for your namespace package. See `packages/example_package/tests/` for examples.
 
-Note that this includes only tests for the Python functionality. If you use C++ tests, please ensure
-that they are performed during the build and in case of external implementation, that 
-the `build_and_copy.sh` script returns an error code (e.g. a value != 0) if tests fail.
+> **ℹ️ Note**: This covers Python-based tests. For native C++/CUDA tests in SKBuild-based packages, see
+> [Native Tests](#native-tests).
 
 #### 7. Set Up Documentation
 
@@ -316,16 +281,16 @@ This creates:
 
 **Customize the introduction:**
 Edit `packages/example_package/docs/intro.rst` to add
-- Package overview and purpose  
+- Package overview and purpose
 - Basic usage examples
 - Performance characteristics
 - Integration notes
 
-Note that you are mostly free to modify, add, or remove the files & their contents of the documentation. 
+Note that you are mostly free to modify, add, or remove the files & their contents of the documentation.
 However, `index.rst` serves as the "entry point" for the documentation and needs to be present.
 
-Most of the contained packages extend this basic structure considerably to provide more detailed 
-documentation. Please see the [Documentation Setup Guide](DOCUMENTATION_SETUP_GUIDE.md) for more details on 
+Most of the contained packages extend this basic structure considerably to provide more detailed
+documentation. Please see the [Documentation Setup Guide](DOCUMENTATION_SETUP_GUIDE.md) for more details on
 the documentation system and how to set it up.
 
 If your package needs generated docs assets, add `packages/<package_name>/docs/_on_doc_generation.py`. The
@@ -345,12 +310,12 @@ data tables as standalone documentation pages.
 ```bash
 # 1. Install the package with your new namespace package
 cd packages/example_package
-# IMPORTANT: Do not use  editable installation (`-e`) for SKBuild-based packages (e.g. 
-# `on_demand_video_decoder` or `dali_pipeline_framework`), as it would lead to missing binaries and import 
-# errors. 
-# It is ok to use `-e` for other packages. However, keep in mind that for any changes in C++ code to take 
+# IMPORTANT: Do not use  editable installation (`-e`) for SKBuild-based packages (e.g.
+# `on_demand_video_decoder` or `dali_pipeline_framework`), as it would lead to missing binaries and import
+# errors.
+# It is ok to use `-e` for other packages. However, keep in mind that for any changes in C++ code to take
 # effect, the package needs to be re-installed regardless of whether it is installed in editable mode or not.
-pip install . --no-build-isolation 
+pip install . --no-build-isolation
 
 # 2. Run tests
 pytest tests/ -v
@@ -359,21 +324,21 @@ pytest tests/ -v
 #### 9. Build the Documentation
 
 > **⚠️ Important**: Ensure all configured namespace packages are installed before building the docs.
-> For detailed instructions (commands and development targets), see the 
+> For detailed instructions (commands and development targets), see the
 > [Documentation Setup Guide](DOCUMENTATION_SETUP_GUIDE.md#building-documentation-locally).
 
 ### Summary Checklist
 
 When adding a new namespace package, ensure you have:
 
-- [ ] **Implementation**: `packages/<package_name>/accvlab/<package_name>/` with `__init__.py` and source 
+- [ ] **Implementation**: `packages/<package_name>/accvlab/<package_name>/` with `__init__.py` and source
   code
 - [ ] **Setup**: `packages/<package_name>/setup.py` with build configuration
 - [ ] **Project Config**: `packages/<package_name>/pyproject.toml` with project metadata
 - [ ] **Configuration**: Added to `namespace_packages_config.py`
 - [ ] **Tests**: `packages/<package_name>/tests/` with test files
 - [ ] **Documentation**: Generated with docs scripts and customized intro
-- [ ] **Documentation include list (optional)**: `docu_referenced_dirs.txt` created and populated if extra 
+- [ ] **Documentation include list (optional)**: `docu_referenced_dirs.txt` created and populated if extra
   folders (e.g. `examples/`) are referenced and are needed to build the documentation
 - [ ] **Documentation asset hook (optional)**: `_on_doc_generation.py` added if the package needs generated
   documentation assets
@@ -381,164 +346,22 @@ When adding a new namespace package, ensure you have:
   inputs for generated docs assets if needed
 - [ ] **Examples (optional)**: `packages/<package_name>/examples/` created and referenced from docs if used
 - [ ] **Dependencies**: Declared runtime and optional dependencies in `pyproject.toml`
-- [ ] **External implementation**: (Optional) `packages/<package_name>/ext_impl/` for external builds
-- [ ] **External build binaries**: (If using external builds) `include_package_data=True` and `package_data` 
-  configuration in `setup.py`
 - [ ] **Verification**: Package installs, tests pass, docs build
 
-## External Implementations
+## CMake-Based Packages with SKBuild
 
-External implementations provide a way to build complex components outside of the standard Python/pybind11 
-workflow and then integrate them into your namespace package. This is particularly useful for:
+Use **SKBuild** (`scikit-build`) for namespace packages whose native implementation is built with CMake. The
+canonical example is `packages/example_skbuild_package/`.
 
-- **Complex CMake projects** with multiple dependencies
-- **Third-party libraries** that need specific build configurations
-- **Other cases with the need for flexible manual setups**
-
-For relatively small and self-contained C++/CUDA implementations, consider using PyTorch's `CppExtension` and 
-`CUDAExtension` instead.
-
-> **ℹ️ Note**: This section describes the External Implementations approach used in the `example_package`. For an 
-> alternative approach using `scikit-build`, see the 
-> [Alternative: SKBuild-Based Packages](#alternative-skbuild-based-packages) section. A detailed comparison of 
-> both approaches is available in the 
-> [Comparison: External Implementations vs. SKBuild](#comparison-external-implementations-vs-skbuild) section.
-
-### External Implementation Structure
-
-External implementations are located in the `packages/<package_name>/ext_impl/` directory. An example is 
-shown below (for the `example_package` package).
-
-```
-accvlab/
-├── packages/
-│   └── example_package/
-│       ├── ...
-│       ├── setup.py
-│       ├── pyproject.toml
-│       └── ext_impl/
-│           ├── build_and_copy.sh
-│           ├── CMakeLists.txt
-│           ├── src/
-│           │   ├── external_algo.cpp
-│           │   └── external_algo.cu
-│           ├── include/
-│           │   └── external_algo.h
-│           ├── third_party/
-│           └── (build/)     <-- auto-generated when building 
-```
-
-### Required Components
-
-#### 1. Build and Copy Script (`build_and_copy.sh`)
-
-Every external implementation must have this script,
-which handles the external build process and copies results to the main package. See 
-`packages/example_package/ext_impl/build_and_copy.sh` for a complete working example.
-
-> **⚠️ Important**: It is the responsibility of this script to copy the resulting binaries into the 
-> main Python package directory (e.g. `packages/example_package/accvlab/example_package/`), 
-> placing it in the location that is expected when importing the binaries 
-> inside the Python implementation. The Python implementation itself imports the binaries
-> as if they were already present.
-
-#### 2. Build Configuration (`CMakeLists.txt`)
-
-Typically, the external build is performed using `CMake` (although this is not strictly necessary).
-See `packages/example_package/ext_impl/CMakeLists.txt` for a complete working example.
-
-### Integration with Build System
-
-External implementations are integrated through the package's `setup.py` through the `run_external_build(...)` helper. 
-The setup process works as follows:
-
-1. **Explicit Trigger in `setup.py`**: The package's `setup.py` calls `run_external_build(...)` before `setup()`. That helper 
-   checks whether `ext_impl/build_and_copy.sh` exists for the package and executes it if present.
-2. **Standard Processing**: The `build_and_copy.sh` script builds the external implementation and copies its binaries into the 
-   Python package directory. After that, the normal `setup()` call can package those files, provided `include_package_data=True`, 
-   `package_data=...`, and `zip_safe=False` are configured correctly (see the [setup.py configuration](#3-create-setuppy) section 
-   above).
-
-**Key Points:**
-- External implementations are only built for namespace packages listed in `namespace_packages_config.py` (as installation is only 
-  triggered for those).
-- External builds are executed **before** each namespace package's call to `setup()`, i.e. before potential extension processing.
-- The external build script copies its outputs to the main package directory.
-- **External implementations can coexist with standard extensions** - you can have both in the same namespace package.
-- No special external build logic is needed in `setup.py`, only ensure to call `run_external_build(...)` and ensure the resulting 
-  files are included in the package by `build_and_copy.sh` (see [setup.py configuration](#3-create-setuppy)).
-
-> **ℹ️ Note**: The fact that external builds are performed before calls to `setup()` and are copied 
-> into the package means that it is possible to use the external builds alongside, or inside, 
-> standard PyTorch extensions built with `CppExtension` and `CUDAExtension`. For example you can 
-> use external implementations for complex components, while still having standard PyTorch 
-> extensions for simpler functionality.
-
-> **ℹ️ Note**: The shared ACCV-Lab build configuration can also be forwarded to external CMake 
-> builds. In practice, this is typically done in `build_and_copy.sh` via 
-> `accvlab_build_config.helpers.cmake_args.build_cmake_args()`, which generates the `cmake -D` 
-> arguments from the configured build variables (and the package version info). See the 
-> [Build Configuration System](#the-build-configuration-system) section below for details.
-
-
-### External Implementation Best Practices
-
-#### Error Handling
-- Use `set -e` in build scripts to fail fast on errors
-- Provide clear error messages for build failures
-- Check for required tools and dependencies before building
-
-#### Path Management
-- Make scripts work from any working directory
-- Use variables for commonly referenced paths
-
-#### Build Reproducibility
-- Pin dependency versions where possible
-- Use consistent compiler flags and options (also see the [Build Configuration System](#the-build-configuration-system) section 
-  below)
-- Clean build directories before building
-
-#### Including External Build Binaries
-
-When using external builds, you must configure `setup.py` to include the built binaries in the installed 
-package:
-
-```python
-setup(
-    # ... other configuration ...
-    
-    # `include_package_data` and `package_data` are needed for the binaries created by the external build
-    # to be included in the package.
-    include_package_data=True,
-    package_data={
-        'accvlab.example_package': ['*.so'],  # Include all .so files in the package
-    },
-    zip_safe=False,
-
-    # ... rest of configuration ...
-)
-```
-
-> **⚠️ Important**: Without this configuration, the binaries created by external builds will not be included in the 
-> installed package, causing import errors when users try to use your package.
-
-**Pattern matching**: The `package_data` configuration uses glob patterns to match files. Common patterns:
-- `['*.so']` - Include all shared object files
-- `['lib/*.so']` - Include .so files in a lib subdirectory
-
-## Alternative: SKBuild-Based Packages
-
-You can also use **SKBuild** (scikit-build) instead of the external implementation approach discussed above. 
-See `packages/example_skbuild_package/` for a complete example. Note that SKBuild-based packages cannot be 
-used in combination with PyTorch's `CppExtension` and `CUDAExtension` in `setup.py`. All PyTorch extensions 
-must be set up as targets in the `CMakeLists.txt` instead.
+SKBuild packages cannot combine CMake targets with PyTorch's `CppExtension` or `CUDAExtension` declarations in
+`setup.py`. If a CMake package needs PyTorch integration, define those targets in `CMakeLists.txt` instead.
 
 SKBuild packages:
-- Use `from skbuild import setup` instead of `from setuptools import setup`
-- Include `cmake_source_dir` and `cmake_install_dir` parameters in `setup.py` (see below for details)
 - Use CMake for building C++/CUDA extensions
-- Don't require additional `build_and_copy.sh` scripts (and calls to `run_external_build()`), simplifying 
-  the setup
+- Install built extension modules through CMake install targets
+- In `setup.py`
+  - Use `from skbuild import setup` instead of `from setuptools import setup`
+  - Include `cmake_source_dir` and `cmake_install_dir` parameters
 
 ### SKBuild Package Structure
 
@@ -547,16 +370,24 @@ An SKBuild-based package follows this structure:
 ```
 packages/example_skbuild_package/
 ├── ...
+├── cpp_unit_tests.yaml             # Optional: repository native-test runner configuration
 ├── setup.py
 ├── pyproject.toml
 └── ext_impl/
     ├── CMakeLists.txt
+    ├── external/                   # Optional third-party dependencies, often added as git submodules
+    │   └── googletest/             # Native-test dependency used by this example
     ├── src/
     │   ├── external_cuda_ops.cpp
     │   └── external_cuda_ops.cu
-    └── include/
-        └── external_cuda_ops.h
+    ├── include/
+    │   └── external_cuda_ops.h
+    └── utest/                      # Optional: native C++/CUDA tests
+        └── ...
 ```
+
+> **ℹ️ Note**: The `utest/` directory is optional and only needed if native C++/CUDA tests are implemented. See
+> [Native Tests](#native-tests) for more details.
 
 ### SKBuild Setup Configuration
 
@@ -564,34 +395,34 @@ packages/example_skbuild_package/
 
 See `packages/example_skbuild_package/setup.py` for a complete working example.
 
-**Key Differences from the external implementation-based approach**:
-- No `run_external_build()` calls
-- No `package_data` configuration (SKBuild handles this automatically)
+The SKBuild setup:
 - Uses `cmake_source_dir` and `cmake_install_dir` parameters in `setup.py`. Please see the 
   [important note for cmake install configuration](#important-note-for-cmake-install-configuration) 
   section below for details on how these parameters need to be configured.
 - Cannot be used in combination with PyTorch's `CppExtension` and `CUDAExtension` in `setup.py`. The
   extensions must be set up as targets in the `CMakeLists.txt`.
 
-> **ℹ️ Note**: The shared ACCV-Lab build configuration can be forwarded to SKBuild-based CMake builds. In this case, `setup.py` 
-> typically calls `build_cmake_args()` and passes the result to `setup()` via the `cmake_args` parameter. See the 
+> **ℹ️ Note**: The shared ACCV-Lab build configuration can be forwarded to SKBuild-based CMake builds. In this case, `setup.py`
+> typically calls `build_cmake_args(cuda_arch_strategy=...)` and passes the result to `setup()` via the
+> `cmake_args` parameter. See the
 > [Build Configuration System](#the-build-configuration-system) section below for details.
+
+SKBuild-based packages can also define opt-in native C++/CUDA test targets in their CMake project. These tests can e.g. be used
+for implementation details which are not exposed by the Python API and therefore cannot be tested from Python. See
+[Native Tests](#native-tests) for the repository runner and the example in `packages/example_skbuild_package/ext_impl/utest`.
 
 #### 2. CMakeLists.txt Configuration
 
 See `packages/example_skbuild_package/ext_impl/CMakeLists.txt` for a complete working example.
 
-**Key Differences from External Implementations**: 
-- The overall setup is simpler - no need for `build_and_copy.sh`, i.e. no manual path calculations or copying 
-  of files
-- Install target needs to be set up (see the 
-  [important note for cmake install configuration](#important-note-for-cmake-install-configuration)).
+The CMake project needs an install target that places the built extension under the package directory. See the
+[important note for CMake install configuration](#important-note-for-cmake-install-configuration).
 
 #### 3. Setting up `pyproject.toml` with SKBuild
 
 See `packages/example_skbuild_package/pyproject.toml` for a complete working example.
 
-**Key Difference from External Implementations**: Includes `scikit-build` and `pybind11` as additional build requirements.
+SKBuild packages include `scikit-build` and `pybind11` as additional build requirements.
 
 #### 4. Python Package Structure
 
@@ -599,11 +430,14 @@ See `packages/example_skbuild_package/accvlab/example_skbuild_package/__init__.p
 `packages/example_skbuild_package/accvlab/example_skbuild_package/functions/functions.py` for complete working 
 examples.
 
-This is similar to the external implementation-based case in that a binary is present in the final package, 
-which can be imported in Python and exposes relevant functionality as defined in the C++ implementation using 
-`pybind11`.
+The built extension module is installed into the final Python package, where it can be imported by Python
+wrappers and expose functionality defined in the C++ implementation using `pybind11`.
 
 ### SKBuild Best Practices
+
+The CMake snippets in this section are adapted from
+`packages/example_skbuild_package/ext_impl/CMakeLists.txt`, which is the complete reference implementation for
+the example SKBuild package.
 
 #### 1. Package Discovery Configuration & CMake Install Configuration
 
@@ -621,7 +455,7 @@ setup(
 
 ##### CMake Install Configuration
 
-The CMake install target must match the `cmake_install_dir`. Note that this directory is the working as used
+The CMake install target must match the `cmake_install_dir`. Note that this directory is the working directory as used
 when setting up the `install` target in the `CMakeLists.txt`, so that the path needs to be set to `.`:
 
 ```cmake
@@ -661,81 +495,58 @@ set_target_properties(accvlab_example_skbuild_package_ext PROPERTIES
 
 #### 3. PyTorch Integration
 
-For PyTorch extensions, ensure proper CMake configuration:
+For CMake-built PyTorch extensions, the CMake project needs three pieces of PyTorch-specific configuration.
+
+First, point CMake at the PyTorch CMake files installed inside the active Python environment, then call
+`find_package(Torch REQUIRED)`. PyTorch wheels usually install their CMake package under
+`torch/share/cmake`, which is not always on `CMAKE_PREFIX_PATH` by default:
 
 ```cmake
 # Find PyTorch CMake files
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 execute_process(
-    COMMAND "python3" -c "import torch; import os; print(os.path.join(os.path.dirname(torch.__file__), 'share', 'cmake'))"
+    COMMAND "${Python3_EXECUTABLE}" -c
+            "import os; import torch; print(os.path.join(os.path.dirname(torch.__file__), 'share', 'cmake'))"
     OUTPUT_VARIABLE TORCH_CMAKE_PATH
     OUTPUT_STRIP_TRAILING_WHITESPACE
+    COMMAND_ERROR_IS_FATAL ANY
 )
 list(APPEND CMAKE_PREFIX_PATH "${TORCH_CMAKE_PATH}")
+find_package(Torch REQUIRED)
+```
+
+Second, apply the compile flags exported by Torch to every target that includes or links against Torch. Parse
+the string with `separate_arguments()` so CMake passes each option as a separate compiler argument:
+
+```cmake
+separate_arguments(TORCH_CXX_FLAGS_LIST NATIVE_COMMAND "${TORCH_CXX_FLAGS}")
+target_compile_options(accvlab_example_skbuild_package_ext PRIVATE ${TORCH_CXX_FLAGS_LIST})
+```
+
+This includes settings such as PyTorch's C++ ABI selection. Omitting these flags can produce build or runtime
+incompatibilities even when `target_link_libraries(... ${TORCH_LIBRARIES})` succeeds. Apply the same pattern to
+native test and benchmark executables that consume Torch.
+
+Third, define the extension module name expected by the C++ binding code:
+
+```cmake
+# The CMake target name can be descriptive; OUTPUT_NAME controls the Python module filename.
+set_target_properties(accvlab_example_skbuild_package_ext PROPERTIES
+    OUTPUT_NAME "_ext"
+    PREFIX ""
+)
 
 # Add PyTorch extension definitions
-target_compile_definitions(accvlab_example_skbuild_package_ext PRIVATE 
+target_compile_definitions(accvlab_example_skbuild_package_ext PRIVATE
     TORCH_EXTENSION_NAME=_ext
     TORCH_API_INCLUDE_EXTENSION_H
 )
 ```
 
-## Comparison: External Implementations vs. SKBuild
-
-Both External Implementations and SKBuild use CMake for building C++/CUDA extensions, but they differ 
-significantly in how they integrate with Python packaging:
-
-### SKBuild vs. External Implementations (CMake-Based)
-
-| Aspect | External Implementations | SKBuild |
-|--------|-------------------------|---------|
-| **Build Integration** | Automated via `build_and_copy.sh` called by setup.py | Integrated with pip/setuptools |
-| **Package Discovery** | Automated file copying via build script | Automatic package inclusion |
-| **Development Workflow** | Single `pip install` command (build script runs automatically) | Single `pip install` command |
-| **Complexity** | Medium to High (automated build script + setup.py integration) | Medium (CMake + Python integration) |
-| **Use Case** | Complex external projects with custom build procedures | CMake-based Python extensions |
-| **Build Scripts** | Required custom `build_and_copy.sh` | No custom scripts needed |
-| **File Management** | Copying of `.so` files via build script | Automatic placement in package |
-
-### SKBuild vs. External Implementations: Workflow Comparison
-
-#### External Implementations Workflow:
-```bash
-# Single step - setup.py automatically calls build_and_copy.sh
-cd packages/example_package
-pip install {-e} . --no-build-isolation
-```
-
-#### SKBuild Workflow:
-```bash
-# Single step - SKBuild handles everything
-cd packages/example_skbuild_package
-pip install . --no-build-isolation
-```
-
-> **ℹ️ Note**: `{-e}` means that this argument is optional. It is not present in the SKBuild-based example as 
-> SKBuild does not support editable installs.
-
-> **ℹ️ Note**: Both approaches use a single `pip install` command. The difference is that external implementations 
-> automatically execute the `build_and_copy.sh` script during the setup process, while SKBuild handles the CMake 
-> build process internally.
-
-### When to Use SKBuild vs. External Implementations
-
-**Use SKBuild when:**
-- You have CMake-based C++/CUDA code that you want to integrate as Python extensions
-- You want to avoid writing custom build scripts and rely on SKBuild's built-in CMake integration
-- You prefer a more standardized approach to CMake-based Python packaging
-- You want to leverage CMake's features while maintaining Python packaging standards
-
-**Use External Implementations when:**
-- You want to use CMakeLists for parts of the implementation while defining PyTorch extensions directly in 
-  `setup.py`
-- You have very complex external projects with their own build systems
-- You need to integrate with third-party libraries that require specific build procedures
-- You want maximum flexibility in build configuration and file placement
-- You have existing build scripts that you want to preserve and integrate
-- You need to build components that exist outside the Python package structure
-- You require custom build steps that go beyond standard CMake workflows
+`TORCH_EXTENSION_NAME=_ext` must match the installed module name because the binding source uses
+`PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)`. In the example package this expands to `PYBIND11_MODULE(_ext, m)`,
+matching the `_ext` module imported by the Python package. `TORCH_API_INCLUDE_EXTENSION_H` enables the Torch
+extension API declarations expected by PyTorch/pybind11 extension builds.
 
 
 ## The Build Configuration System
@@ -777,7 +588,7 @@ The `accvlab_build_config` package provides the following shared build & configu
 - `get_compile_flags()` - Generates compiler flags for PyTorch extensions; based on the variable values obtained from 
   `load_config()`. The generated flags can then be passed to the PyTorch extensions (see example below).
 - `build_cmake_args(cuda_arch_strategy)` - Produces the full CMake `-D` argument list for CMake-based builds.
-  Each CMake package, whether manual or scikit-build, must pass `CUDA_ARCH_STRATEGY_CMAKE` or
+  Each CMake-based package must pass `CUDA_ARCH_STRATEGY_CMAKE` or
   `CUDA_ARCH_STRATEGY_TORCH` depending on whether its `CMakeLists.txt` uses native CMake CUDA targets or
   `find_package(Torch)`. It contains two parts:
   - **Environment-derived build settings**: Converts ACCV-Lab build variables into CMake cache entries:
@@ -793,9 +604,6 @@ The `accvlab_build_config` package provides the following shared build & configu
     `-DACCVLAB_PACKAGE_CMAKE_VERSION=<major>.<minor>.<patch>` (digits only, e.g. `0.1.0`), as derived from the version obtained 
     using `setuptools-scm`. CMake projects may read this variable if they need a repo-aligned numeric version; others can ignore 
     it.
-- `run_external_build()` - Executes `build_and_copy.sh` build script (used in external implementations, see 
-  [External Implementations](#external-implementations) section for more details).
-
 > **ℹ️ Note**: The authoritative list of supported build variables, defaults, and CUDA 
 > architecture handling is in the 
 > [Available Build Variables](INSTALLATION_GUIDE.md#available-build-variables) section of the 
@@ -813,6 +621,7 @@ from torch.utils.cpp_extension import BuildExtension, CppExtension, CUDAExtensio
 from accvlab_build_config import (
     load_config,
     detect_cuda_info,
+    get_abs_setup_dir,
     get_compile_flags,
 )
 
@@ -820,22 +629,23 @@ from accvlab_build_config import (
 config = load_config()
 cuda_info = detect_cuda_info()
 compile_flags = get_compile_flags(config, cuda_info)
+source_dir = "accvlab/<pkg>"
+include_dirs = [str(get_abs_setup_dir(__file__) / source_dir / "include")]
 
 # Example: wire flags into extensions
 ext_modules = [
     CppExtension(
         name="accvlab.<pkg>._cpp",
         sources=["accvlab/<pkg>/csrc/cpp_functions.cpp"],
+        include_dirs=include_dirs,
         extra_compile_args=compile_flags['cxx'],
         language="c++",
         verbose=config["VERBOSE_BUILD"],
     ),
     CUDAExtension(
         name="accvlab.<pkg>._cuda",
-        sources=[
-            "accvlab/<pkg>/csrc/cuda_functions.cpp",
-            "accvlab/<pkg>/csrc/cuda_functions.cu",
-        ],
+        sources=["accvlab/<pkg>/csrc/cuda_functions.cu"],
+        include_dirs=include_dirs,
         extra_compile_args={"cxx": compile_flags["cxx"], "nvcc": compile_flags["nvcc"]},
         language="c++",
         verbose=config["VERBOSE_BUILD"],
@@ -880,34 +690,6 @@ Depending on the package type, build variables are consumed as follows:
   ```
   - This forwards `DEBUG_BUILD`, `OPTIMIZE_LEVEL`, `CPP_STANDARD`, `VERBOSE_BUILD`, `CUSTOM_CUDA_ARCHS`, 
     `USE_FAST_MATH`, and `ENABLE_PROFILING` to host and device compilers.
-
-- External implementation (manual CMake):
-  - In `ext_impl/build_and_copy.sh`, forward variables using the helper to produce `cmake -D` args. Use
-    `CUDA_ARCH_STRATEGY_CMAKE` for native CMake CUDA targets, or `CUDA_ARCH_STRATEGY_TORCH` when
-    `CMakeLists.txt` calls `find_package(Torch)`:
-  ```bash
-  readarray -t CMAKE_ARGS < <(python -c "from accvlab_build_config.helpers.cmake_args import build_cmake_args, CUDA_ARCH_STRATEGY_CMAKE; print('\n'.join(build_cmake_args(CUDA_ARCH_STRATEGY_CMAKE)))")
-  cmake .. "${CMAKE_ARGS[@]}" ...
-  cmake --build . --parallel
-  ```
-  - For Torch CMake projects, replace `CUDA_ARCH_STRATEGY_CMAKE` in the import and call with
-    `CUDA_ARCH_STRATEGY_TORCH`.
-  - In `CMakeLists.txt`, avoid hardcoding and guard defaults so passed values win:
-  ```cmake
-  if(NOT DEFINED CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 17)
-  endif()
-  if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
-    set(CMAKE_CUDA_ARCHITECTURES native)
-  endif()
-  ```
-  - If the CMake project calls `find_package(Torch)`, set the Torch architecture list before that call:
-  ```cmake
-  if(DEFINED ACCVLAB_TORCH_CUDA_ARCH_LIST)
-    set(TORCH_CUDA_ARCH_LIST "${ACCVLAB_TORCH_CUDA_ARCH_LIST}")
-  endif()
-  find_package(Torch REQUIRED)
-  ```
 
 - Scikit-build packages:
   - In `setup.py`, pass CMake arguments from the helper. Use `CUDA_ARCH_STRATEGY_CMAKE` for native CMake CUDA
@@ -966,12 +748,147 @@ pytest .
 
 > **⚠️ Important**: Note that the tests do not necessarily need to be run from within the `tests` directory.
 > However, it is advised to not run tests from the root directory of a namespace package (i.e.
-> not from `packages/<package_name>`, as in this way, importing the package is ambiguous.
+> not from `packages/<package_name>`), as in this way, importing the package is ambiguous.
 > For example, the import `import accvlab.<package_name>` could mean either refer to the installed package, 
-> or to the original source files inside the current directory).
+> or to the original source files inside the current directory.
 
 > **ℹ️ Note**: See the section [Repository test runner](#repository-test-runner-scriptsrun_testssh) for how to run 
 > tests across all packages in the repository.
+
+#### Native Tests
+
+Native C++/CUDA tests are CMake/CTest targets for implementation details that are not naturally covered by the
+Python test suite. They are opt-in and are not part of a normal `pip install` package build. They can e.g. be used to test
+implementation details which are not exposed by the Python API.
+
+> **ℹ️ Note**: The `packages/example_skbuild_package` package provides a complete example of how to implement
+> native tests. Useful reference files are:
+> - `packages/example_skbuild_package/cpp_unit_tests.yaml`: repository runner configuration.
+> - `packages/example_skbuild_package/ext_impl/CMakeLists.txt`: package-level CMake option and `utest/`
+>   subdirectory wiring.
+> - `packages/example_skbuild_package/ext_impl/utest/CMakeLists.txt`: GoogleTest setup, CTest registration,
+>   and aggregate test target.
+> - `packages/example_skbuild_package/ext_impl/utest/dummy_native_test.cpp`: minimal native test executable.
+>
+> The production `lane_helpers` package demonstrates a component-level layout under
+> `packages/lane_helpers/ext_impl/polyline/utest/`.
+
+The following conventions are recommended when adding native tests:
+
+- Put native tests under an opt-in CMake subdirectory. Common locations are `ext_impl/utest/` for a
+  package-level test suite or `ext_impl/<component>/utest/` for a component-level test suite.
+- Gate the test subdirectory with a package-specific CMake option, such as
+  `ACCVLAB_EXAMPLE_SKBUILD_PACKAGE_BUILD_CPP_TESTS`.
+- Call `enable_testing()` in the root `CMakeLists.txt`, for example in 
+  `packages/<package_name>/ext_impl/CMakeLists.txt`, when the native test option is enabled. This creates the top-level
+  CTest metadata used by the runner.
+- Define test executables with `EXCLUDE_FROM_ALL` so they are not built with the package target.
+- Register each executable with CTest using `add_test(...)`.
+- Add an explicit aggregate target, such as `accvlab_example_skbuild_package_run_cpp_tests`, that depends on
+  the test executables and runs `ctest --output-on-failure`.
+
+To run native tests with the repository runner:
+
+- A `cpp_unit_tests.yaml` config must be present for the package. See below for the expected fields.
+- A single aggregate CMake target must build the native test executables and run CTest; this is the target
+  referenced by the YAML config.
+- The configured test target must return a nonzero exit code when tests fail.
+
+> **ℹ️ Note**: Native tests typically use GoogleTest, added as a git submodule under the package's
+> `ext_impl/external/` directory and included from CMake with `add_subdirectory(...)`. The example package uses
+> this pattern at `packages/example_skbuild_package/ext_impl/external/googletest`. GoogleTest is not strictly
+> required: any native executable can be registered with CTest as long as it returns a nonzero exit code on
+> failure.
+
+The runner reads `namespace_packages_config.py` and checks only those configured packages for package-local
+native test configuration files named `cpp_unit_tests.yaml` in the package root directory. Packages not listed there must
+be supplied explicitly with `--config packages/<package_name>/cpp_unit_tests.yaml`. For example, the SKBuild
+example package is not configured by default, and its config lives at
+`packages/example_skbuild_package/cpp_unit_tests.yaml`. The config looks like this:
+
+```yaml
+cmake_source_dir: ext_impl
+cuda_arch_strategy: torch
+test_option: ACCVLAB_EXAMPLE_SKBUILD_PACKAGE_BUILD_CPP_TESTS
+test_target: accvlab_example_skbuild_package_run_cpp_tests
+```
+
+The fields have the following meaning:
+
+- `cmake_source_dir`: CMake project to configure, relative to the package root. For SKBuild packages, this is
+  usually `ext_impl`.
+- `cuda_arch_strategy`: Required CUDA architecture strategy for the CMake project. Use `torch` when the
+  project calls `find_package(Torch)`, or `cmake` for native CMake CUDA targets.
+- `test_option`: Package-specific CMake option that enables the otherwise opt-in native test subdirectory. The
+  runner automatically forwards it as `-D<test_option>=ON`.
+- `test_target`: Explicit aggregate target that builds the native test executables and runs CTest.
+- `cmake_args`: Optional additional CMake arguments for package-specific needs.
+
+(native-test-cuda-architecture-strategy)=
+##### CUDA Architecture Strategy
+
+The runner passes `cuda_arch_strategy` to `build_cmake_args(...)`, so the value controls how the shared
+`CUSTOM_CUDA_ARCHS` setting reaches the package's CMake project:
+
+- Use `torch` when the package CMake project calls `find_package(Torch)`. The shared helper then provides
+  `ACCVLAB_TORCH_CUDA_ARCH_LIST`, which the project must assign to `TORCH_CUDA_ARCH_LIST` before finding Torch.
+- Use `cmake` for CMake projects that compile native CUDA targets without Torch architecture handling. The
+  shared helper then sets `CMAKE_CUDA_ARCHITECTURES`.
+
+Select the strategy for the package's root CMake project, even when an individual test target contains only
+C++. The value in `cpp_unit_tests.yaml` must match the strategy passed by the package's `setup.py`.
+
+Choose a `test_option` name that includes the package name to avoid collisions when several package CMake
+projects are configured by the same repository tooling. A good pattern is
+`ACCVLAB_<PACKAGE_NAME>_BUILD_CPP_TESTS`, for example
+`ACCVLAB_EXAMPLE_SKBUILD_PACKAGE_BUILD_CPP_TESTS`.
+
+The package name and build directory are derived by the runner from the config location. For the example above,
+the package name becomes `example_skbuild_package` and the build directory becomes
+`build/cpp_unit_tests/example_skbuild_package`.
+
+The example package is not enabled in `namespace_packages_config.py` by default, so it is not picked up by
+`all`. To run the example directly, pass its config explicitly:
+
+```bash
+./scripts/run_cpp_unit_tests.sh --config packages/example_skbuild_package/cpp_unit_tests.yaml example_skbuild_package
+```
+
+Or enable the package in `namespace_packages_config.py` and run it as:
+
+```bash
+./scripts/run_cpp_unit_tests.sh example_skbuild_package
+```
+
+The runner also forwards the shared ACCV-Lab CMake build arguments before package-specific arguments.
+That means the native test targets use the same build variables as package builds, including build type,
+compiler flags, CUDA architecture selection, verbosity, and the configured C++/CUDA standard. See
+[Shared Build & Configuration Utilities](#shared-build--configuration-utilities) for how the arguments are
+created and [Available Build Variables](INSTALLATION_GUIDE.md#available-build-variables) for the supported
+environment variables. The test option from the YAML config is added automatically after those shared
+arguments. Test targets should avoid overriding these settings unless they have a specific reason to do so.
+
+The runner requires the `accvlab-build-config` package in the active environment. It is installed by the
+repository package manager, or can be installed directly with `pip install build_config/`.
+
+Use the repository-level runner for native tests, e.g.:
+
+```bash
+# List native test packages discovered from namespace_packages_config.py.
+./scripts/run_cpp_unit_tests.sh --list
+
+# Run native tests for one configured package.
+./scripts/run_cpp_unit_tests.sh lane_helpers
+
+# Run native tests for all configured packages with native test configs.
+./scripts/run_cpp_unit_tests.sh all
+
+# Configure one package without building or running its tests.
+./scripts/run_cpp_unit_tests.sh --configure-only lane_helpers
+```
+
+When adding native tests to another configured SKBuild package, follow the same structure and add a
+package-local `cpp_unit_tests.yaml`.
 
 
 #### Install in Development Mode
@@ -983,9 +900,8 @@ pip install -e . --no-build-isolation
 
 Note that
 - The editable mode refers to the Python code. For any changes in C++ code to take effect, the package
-  needs to be re-installed regardless whether it is installed in editable mode or not.
-- SKBuild does not support editable installs, and instead, the SKBuild-based packages need to be
-  always be installed without the `-e` flag.
+  needs to be re-installed regardless of whether it is installed in editable mode or not.
+- SKBuild does not support editable installs. SKBuild-based packages need to always be installed without the `-e` flag.
 
 ### Documentation Development
 
@@ -1053,6 +969,9 @@ The repository provides a convenience script to run pytest for all configured na
 ./scripts/run_tests.sh -- -k smoke  # pass arguments after -- directly to pytest (`-k smoke` used as an example)
 ```
 
+> **ℹ️ Note**: This script only runs Python-based tests under `packages/<package_name>/tests`. For native
+> C++/CUDA tests, use the native test runner described in [Native Tests](#native-tests).
+
 How it discovers and runs tests:
 - Discovers package names from `namespace_packages_config.py` (function `get_package_names()`).
 - For each package `<name>`, looks for `packages/<name>/tests`. If missing, it warns and skips.
@@ -1086,9 +1005,9 @@ For example:
 - `packages/example_package/accvlab/example_package/` → `accvlab.example_package`
 - `packages/batching_helpers/accvlab/batching_helpers/` → `accvlab.batching_helpers`
 
-Note that e.g. the directory `packages/example_package/` is the root directory of the package, containing 
-the `pyproject.toml` & `setup.py` files, external C++ implementations or CMake projects as used by SKBuild, 
-documentation, etc. The remainder of the path (i.e. `[...]/accvlab/example_package/`) reflects the package 
+Note that e.g. the directory `packages/example_package/` is the root directory of the package, containing
+the `pyproject.toml` & `setup.py` files, native sources, documentation, and related package files. The
+remainder of the path (i.e. `[...]/accvlab/example_package/`) reflects the package
 name as installed (`accvlab.example_package` in this case) and contains the actual Python package 
 implementation as will be included in the installation.
 

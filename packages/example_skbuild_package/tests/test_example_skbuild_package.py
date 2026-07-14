@@ -33,7 +33,8 @@ def test_external_module_available():
 def test_cuda_vector_add():
     a = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float32).cuda()
     b = torch.tensor([2.0, 3.0, 4.0], dtype=torch.float32).cuda()
-    result = accvlab.example_skbuild_package.external_vector_add_cuda(a, b)
+    # Use the public wrapper function; it calls `_ext.external_vector_add_cuda` internally.
+    result = accvlab.example_skbuild_package.vector_add(a, b)
     expected = torch.tensor([3.0, 5.0, 7.0], dtype=torch.float32).cuda()
     assert torch.allclose(result, expected)
 
@@ -41,6 +42,7 @@ def test_cuda_vector_add():
 def test_cuda_vector_scale():
     a = torch.tensor([1.0, 2.0, 3.0], dtype=torch.float32).cuda()
     scale = 2.5
-    result = accvlab.example_skbuild_package.external_vector_scale_cuda(a, scale)
+    # Use the public wrapper function; it calls `_ext.external_vector_scale_cuda` internally.
+    result = accvlab.example_skbuild_package.vector_scale(a, scale)
     expected = torch.tensor([2.5, 5.0, 7.5], dtype=torch.float32).cuda()
     assert torch.allclose(result, expected)

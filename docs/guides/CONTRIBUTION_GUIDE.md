@@ -46,15 +46,25 @@ e.g. be achieved by applying another function to the output of the function to t
 
 ### Test Structure
 
-- For Python
-  - Place tests in `packages/<package_name>/tests/` directory (will be automatically discovered by the 
-    repository test runner)
-  - Use pytest
-- For C++/CUDA tests, ensure your build scripts return appropriate error codes on test failure
+Python-based tests are the main test approach and should cover the public behavior of the package whenever
+practical. Setting up the tests is straightforward and can be done as follows:
+- Place tests in `packages/<package_name>/tests/` directory (will be automatically discovered by the
+  repository test runner)
+- Use the pytest framework for testing.
+
+For a more in-depth description of the Python-based repository test runner, see
+[Repository Test Runner (`scripts/run_tests.sh`)](DEVELOPMENT_GUIDE.md#repository-test-runner-scriptsrun_testssh)
+in the [Development Guide](DEVELOPMENT_GUIDE.md).
+
+Native C++/CUDA tests are optional supplements which can be used in SKBuild-based packages. They can be useful
+to test implementation details which are not directly exposed to the Python API. For more information on
+setting up native tests, see [Native Tests](DEVELOPMENT_GUIDE.md#native-tests) in the
+[Development Guide](DEVELOPMENT_GUIDE.md).
 
 > **ℹ️ Note**: If you would like to include "manual" tests (i.e. tests which one can run during development but
-> which are not part of the unit tests), you can place them in a different directory (not `tests/`). This will
-> prevent them from being automatically run by the repository test runner.
+> which are not part of the unit tests e.g. because the results need to be inspected manually), you can place
+> them in a different directory (not `tests/`). This prevents them from being automatically run by the
+> repository test runner.
 
 ## Documentation Requirements
 
@@ -233,8 +243,10 @@ Before submitting your contribution, please consider the following checklist:
 - [ ] **Demos Available**: Real-world showcases of key features (where relevant)
 - [ ] **Code Formatted**: Following project formatting standards
 - [ ] **Dependencies Managed**: Properly configured in `pyproject.toml`
-- [ ] **Repository Test Runner Passing**: Verified functionality and integration across all namespace 
-  packages (scripts/run_tests.sh). Note that this will be automated in the future
+- [ ] **Python Test Runner Passing**: Verified functionality and integration across all namespace packages
+  with `scripts/run_tests.sh`. Note that this will be automated in the future
+- [ ] **Native Test Runner Passing**: For packages with native C++/CUDA tests, verified the package with
+  `scripts/run_cpp_unit_tests.sh <package_name>` (or using `all` to run all packages).
 - [ ] **Documentation Build Checked**: Documentation building successful and the checks outlined in the 
   [Documentation Checks](#documentation-checks) section above are performed.
 - [ ] **Signed-Off Commits**: All contained commits are signed-off

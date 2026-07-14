@@ -510,29 +510,6 @@ def get_compile_flags(config, cuda_info, include_dirs=None):
     return flags
 
 
-def run_external_build(
-    package_dir: str, ext_impl_dir: str = 'ext_impl', build_script_name: str = 'build_and_copy.sh'
-):
-    """
-    Run the external build script if it exists.
-
-    Args:
-        package_dir (str): Path to the package directory.
-        ext_impl_dir (str): Path to the external implementation directory (relative to `package_dir`).
-        build_script_name (str): Name of the build script.
-    """
-
-    build_script = Path(package_dir) / ext_impl_dir / build_script_name
-    if build_script.exists():
-        try:
-            subprocess.run(['bash', str(build_script)], check=True)
-        except subprocess.CalledProcessError as e:
-            print(f"Error running external build script: {e}")
-            raise
-    else:
-        print(f"No external build script found at {build_script}")
-
-
 def get_abs_setup_dir(filename: str) -> Path:
     """
     Get the absolute path of the setup.py file's parent directory.

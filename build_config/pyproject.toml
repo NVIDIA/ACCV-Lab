@@ -17,6 +17,7 @@ authors = [
 dependencies = [
     "torch>=2.0.0",
     "setuptools-scm>=8",
+    "PyYAML>=6.0",
 ]
 
 [project.optional-dependencies]

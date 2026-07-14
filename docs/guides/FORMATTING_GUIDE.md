@@ -85,20 +85,20 @@ For more granular control, you can also use the individual formatting scripts di
 ./scripts/formatting/format_subpackage.sh <package_name>
 ```
 
-### External Implementation Support
+### Native Source Support
 
-The formatting scripts automatically include external implementation files located in 
-`packages/<package>/ext_impl/`. These directories contain namespace package-specific external implementations 
-(e.g., custom CUDA kernels) and are formatted alongside the corresponding namespace package code:
+The formatting scripts automatically include package-local native source files anywhere under
+`packages/<package>/`. Common locations are:
 
-- When formatting a specific namespace package, its external implementation in `packages/<package>/ext_impl/` 
-  is also formatted
-- When using `--include-packages`, all external implementations are formatted along with their respective 
-  namespace packages
-- Both C++/CUDA and Python files in external implementations are supported
+- PyTorch extension sources under `packages/<package>/accvlab/<package>/csrc/` and
+  `packages/<package>/accvlab/<package>/include/`
+- SKBuild/CMake sources under `packages/<package>/ext_impl/`
 
-> **ℹ️ Note**: Git submodules under external implementation directories are excluded from formatting (based on the declarations 
-> in the `.gitmodules` file).
+When formatting a specific namespace package, matching native source files under that package directory are
+formatted alongside the corresponding namespace package code. When using `--include-packages`, native sources
+for all configured namespace packages are formatted.
+
+> **ℹ️ Note**: Git submodules are excluded from formatting (based on the declarations in the `.gitmodules` file).
 
 ## Style Configuration
 

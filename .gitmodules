@@ -13,3 +13,10 @@
 [submodule "packages/on_demand_video_decoder/ext_impl/external/pybind11"]
 	path = packages/on_demand_video_decoder/ext_impl/external/pybind11
 	url = https://github.com/pybind/pybind11.git
+
+[submodule "packages/lane_helpers/ext_impl/external/googletest"]
+	path = packages/lane_helpers/ext_impl/external/googletest
+	url = https://github.com/google/googletest.git
+[submodule "packages/example_skbuild_package/ext_impl/external/googletest"]
+	path = packages/example_skbuild_package/ext_impl/external/googletest
+	url = https://github.com/google/googletest.git

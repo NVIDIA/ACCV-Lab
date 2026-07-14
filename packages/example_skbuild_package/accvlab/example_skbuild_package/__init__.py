@@ -12,10 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-ACCV-Lab Examples Module
-Demonstrates manual build configuration with C++/CUDA extensions
-"""
+"""Reference ACCV-Lab package built with CMake and scikit-build."""
 
 from importlib.metadata import PackageNotFoundError, version
 
@@ -29,12 +26,9 @@ from .functions import (
     vector_scale,
 )
 
-# Import the external module
-from ._ext import external_vector_add_cuda, external_vector_scale_cuda
 
-
-def hello_examples():
-    """Simple function to test the examples module"""
+def hello_examples() -> str:
+    """Return a greeting from the SKBuild example package."""
     return "Hello from ACCV-Lab SKBuild Example Package!"
 
 

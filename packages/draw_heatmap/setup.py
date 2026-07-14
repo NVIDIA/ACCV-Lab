@@ -14,7 +14,6 @@
 
 from setuptools import setup
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
-import sys
 from pathlib import Path
 
 _ACCVLAB_BUILD_CONFIG_IMPORT_ERROR = """
@@ -40,7 +39,6 @@ try:
         get_compile_flags,
         get_abs_setup_dir,
     )
-    from accvlab_build_config import run_external_build
 except ModuleNotFoundError as exc:
     if exc.name != "accvlab_build_config":
         raise
@@ -81,9 +79,6 @@ def get_extensions():
 
     return extensions
 
-
-# Run external build before setup
-run_external_build(str(Path(__file__).parent))
 
 setup(
     name="accvlab.draw_heatmap",

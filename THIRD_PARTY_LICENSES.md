@@ -9,9 +9,10 @@
 | NVIDIA DALI | [1.51.2](https://github.com/NVIDIA/DALI/tree/v1.51.2) | [Apache 2.0](#nvidia-dali) |
 | PyTorch | [2.6](https://github.com/pytorch/pytorch/tree/v2.6.0) | [3-Clause BSD](#pytorch) |
 | [NVIDIA Video Codec SDK (partial)](https://developer.nvidia.com/video-codec-sdk) | 11.1.5 | [MIT](#nvidia-video-codec-sdk-partial) for the contained parts |
-| [PyNvVideoCodec](https://pypi.org/project/PyNvVideoCodec/) | 1.0.2 | [MIT](#pynvvideocodec)
+| [PyNvVideoCodec](https://pypi.org/project/PyNvVideoCodec/) | 1.0.2 | [MIT](#pynvvideocodec) |
 | CV-CUDA | [da51fc96](https://github.com/CVCUDA/CV-CUDA/tree/da51fc96c1494c5e43e136978a2acb99138824af) | [Apache 2.0](#cv_cuda) |
-| mmdetection3d | [1.4.0](https://github.com/open-mmlab/mmdetection3d/tree/v1.4.0) | [Apache 2.0](#mmdetection3d)
+| mmdetection3d | [1.4.0](https://github.com/open-mmlab/mmdetection3d/tree/v1.4.0) | [Apache 2.0](#mmdetection3d) |
+| GoogleTest | [v1.17.0](https://github.com/google/googletest/tree/v1.17.0) | [BSD 3-Clause](#googletest) |
 
 # Individual Licenses
 
@@ -1794,4 +1795,37 @@ Copyright 2018-2019 Open-MMLab. All rights reserved.
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+```
+
+## GoogleTest
+
+```
+Copyright 2008, Google Inc.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+    * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```

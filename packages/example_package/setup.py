@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from setuptools import setup, find_namespace_packages
-from torch.utils.cpp_extension import BuildExtension, CppExtension, CUDAExtension
-import sys
 from pathlib import Path
+
+from setuptools import setup
+from torch.utils.cpp_extension import BuildExtension, CppExtension, CUDAExtension
 
 _ACCVLAB_BUILD_CONFIG_IMPORT_ERROR = """
 #########################################################################################
@@ -40,7 +40,6 @@ try:
         get_compile_flags,
         get_abs_setup_dir,
     )
-    from accvlab_build_config import run_external_build
 except ModuleNotFoundError as exc:
     if exc.name != "accvlab_build_config":
         raise
@@ -91,21 +90,12 @@ def get_extensions():
     return extensions
 
 
-# Run external build before setup
-run_external_build(str(Path(__file__).parent))
-
 setup(
     name="accvlab.example_package",
     description="ACCV-Lab Example Package",
     ext_modules=get_extensions(),
     cmdclass={"build_ext": BuildExtension},
     python_requires=">=3.8",
-    # `include_package_data` and `package_data` are needed for the binaries created by the external build
-    # to be included in the package.
-    include_package_data=True,
-    package_data={
-        'accvlab.example_package': ['*.so'],
-    },
     zip_safe=False,
     options={
         'build_ext': {

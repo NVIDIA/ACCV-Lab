@@ -25,7 +25,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <thread>
 #include <tuple>
 #include <vector>
 
@@ -35,44 +34,6 @@
 #include "nvtx3/nvtx3.hpp"
 
 namespace py = pybind11;
-
-namespace {
-// Parallel per-file fanout, mirroring PyNvSampleReader.cpp's local helper.
-// Each filepath/frame_id pair is processed in its own thread; first exception
-// captured rethrows after join.
-template <typename T, typename Func>
-std::vector<T> process_frames_in_parallel(const std::vector<std::string>& filepaths,
-                                          const std::vector<int>& frame_ids,
-                                          const std::vector<PyNvVideoReader*>& video_readers,
-                                          Func process_frame) {
-    nvtxRangePushA("Process Frames in Parallel (2D worker)");
-    std::vector<T> res(filepaths.size());
-    std::exception_ptr eptr = nullptr;
-    std::mutex mutex;
-
-    std::vector<std::thread> threads;
-    threads.reserve(filepaths.size());
-
-    for (size_t i = 0; i < filepaths.size(); ++i) {
-        threads.emplace_back([&, i]() {
-            try {
-                res[i] = process_frame(video_readers[i], frame_ids[i]);
-            } catch (const std::exception&) {
-                std::lock_guard<std::mutex> lock(mutex);
-                if (!eptr) eptr = std::current_exception();
-            }
-        });
-    }
-    for (auto& t : threads) t.join();
-
-    if (eptr) {
-        nvtxRangePop();
-        std::rethrow_exception(eptr);
-    }
-    nvtxRangePop();
-    return res;
-}
-}  // namespace
 
 namespace frame_output = accvlab::on_demand_video_decoder::internal::frame_output;
 
@@ -319,10 +280,18 @@ std::vector<RGBFrame> PyNvBatchAsyncStreamReader::run_rgb_out_1d(const std::vect
     }
     nvtxRangePop();
 
-    return process_frames_in_parallel<RGBFrame>(filepaths, frame_ids, video_readers,
-                                                [as_bgr](PyNvVideoReader* reader, int frame_id) {
-                                                    return reader->run_single_rgb_out(frame_id, as_bgr);
-                                                });
+    std::vector<RGBFrame> result(filepaths.size());
+    nvtxRangePushA("Process Frames in Parallel (2D worker)");
+    try {
+        frame_pool.run_indexed(filepaths.size(), [&](size_t index) {
+            result[index] = video_readers[index]->run_single_rgb_out(frame_ids[index], as_bgr);
+        });
+    } catch (...) {
+        nvtxRangePop();
+        throw;
+    }
+    nvtxRangePop();
+    return result;
 }
 
 void PyNvBatchAsyncStreamReader::Decode(const std::vector<std::string>& filepaths,

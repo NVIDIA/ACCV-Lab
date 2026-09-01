@@ -61,9 +61,6 @@ void PyNvGopDecoder::get_gop_internal(
         vpacket_array.emplace_back();
     }
 
-    // lazy loading
-    ensureDemuxRunnersInitialized(total_frames);
-
     // Initialize demuxers
     st = InitializeDemuxers(filepaths, demuxers, fastStreamInfos);
     if (st != 0) {
@@ -73,6 +70,7 @@ void PyNvGopDecoder::get_gop_internal(
     // Initialize GOP metadata containers
     all_gop_lens.resize(total_frames);
     all_first_frame_ids.resize(total_frames);
+    std::vector<std::vector<int>> all_sorted_frame_ids(total_frames);
 
     // Extract packets for each video
     nvtxRangePushA("Packet extraction");
@@ -88,31 +86,29 @@ void PyNvGopDecoder::get_gop_internal(
                                              filepaths[i]);
                 }
             }
-#ifdef PROCESS_SYNC
-            DemuxGopProc(demuxers[i].get(), vpacket_queue[i].get(), sorted_frame_ids, all_first_frame_ids[i],
-                         all_gop_lens[i], vpacket_array[i], true);
-#else
-            demux_runners[i].join();
-            demux_runners[i].start(PyNvGopDecoder::DemuxGopProc, demuxers[i].get(), vpacket_queue[i].get(),
-                                   sorted_frame_ids, std::ref(all_first_frame_ids[i]),
-                                   std::ref(all_gop_lens[i]), std::ref(vpacket_array[i]), true);
-#endif
+            all_sorted_frame_ids[i] = std::move(sorted_frame_ids);
         } catch (const std::exception& e) {
             this->force_join_all();
             LOG(ERROR) << "Packet extraction failed: " << e.what();
             throw std::runtime_error(e.what());
         }
     }
+    try {
+        demux_pool.submit_indexed(total_frames, [&](size_t index) {
+            DemuxGopProc(demuxers[index].get(), vpacket_queue[index].get(), all_sorted_frame_ids[index],
+                         all_first_frame_ids[index], all_gop_lens[index], vpacket_array[index], true);
+        });
+    } catch (const std::exception& e) {
+        this->force_join_all();
+        LOG(ERROR) << "Packet extraction failed: " << e.what();
+        throw std::runtime_error(e.what());
+    }
     nvtxRangePop();  // Packet extraction
 
     // Wait for all demux threads to complete
     nvtxRangePushA("Demux thread join");
     try {
-        for (int i = 0; i < total_frames; ++i) {
-#ifndef PROCESS_SYNC
-            demux_runners[i].join();
-#endif
-        }
+        demux_pool.wait_all();
     } catch (const std::exception& e) {
         this->force_join_all();
         throw std::runtime_error(e.what());
@@ -321,8 +317,6 @@ void PyNvGopDecoder::decode_from_packet_list(std::vector<std::vector<int>> packe
     std::vector<int> dummp;
 
     ensureCudaContextInitialized();
-    // ensureDemuxRunnersInitialized();
-    ensureDecodeRunnersInitialized();
 
     st = InitGpuMemPool(heights, widths, dummp, true);
     if (st != 0) {
@@ -759,7 +753,6 @@ int PyNvGopDecoder::main_decode_groups(
     std::vector<std::unique_ptr<ConcurrentQueue<std::tuple<uint8_t*, int, int>>>>& vpacket_queue,
     std::vector<RGBFrame>& output) {
     ensureCudaContextInitialized();
-    ensureDecodeRunnersInitialized();
 
     const size_t num_groups = frame_id_groups.size();
     if (decoder_configs.size() != num_groups || decoder_slots.size() != num_groups) {
@@ -810,23 +803,9 @@ int PyNvGopDecoder::main_decode_groups(
 
     for (size_t group_idx = 0; group_idx < num_groups; ++group_idx) {
         try {
-            const size_t slot_idx = decoder_slots[group_idx];
             const AVColorRange color_range = static_cast<AVColorRange>(color_ranges[group_idx]);
             WarnIfColorRangeUnspecified(color_range, source_names[group_idx]);
             rgb_frames[group_idx].reserve(frame_id_groups[group_idx].size());
-#ifdef PROCESS_SYNC
-            DecProc<RGBFrame>(color_range, vdec[slot_idx].get(), rgb_frames[group_idx],
-                              group_frame_buffers[group_idx], vpacket_queue[group_idx].get(),
-                              frame_id_groups[group_idx], as_bgr, source_names[group_idx],
-                              last_decoded_frame_infos[slot_idx]);
-#else
-            decode_runners[slot_idx].join();
-            decode_runners[slot_idx].start(PyNvGopDecoder::DecProc<RGBFrame>, color_range,
-                                           vdec[slot_idx].get(), std::ref(rgb_frames[group_idx]),
-                                           group_frame_buffers[group_idx], vpacket_queue[group_idx].get(),
-                                           frame_id_groups[group_idx], as_bgr, source_names[group_idx],
-                                           std::ref(last_decoded_frame_infos[slot_idx]));
-#endif
         } catch (const std::exception& error) {
             force_join_all();
             LOG(ERROR) << "Grouped DecProc failed: " << error.what();
@@ -834,17 +813,20 @@ int PyNvGopDecoder::main_decode_groups(
         }
     }
 
-#ifndef PROCESS_SYNC
     try {
-        for (size_t group_idx = 0; group_idx < num_groups; ++group_idx) {
-            decode_runners[decoder_slots[group_idx]].join();
-        }
+        decode_pool.run_indexed(num_groups, [&](size_t group_idx) {
+            const size_t slot_idx = decoder_slots[group_idx];
+            const AVColorRange color_range = static_cast<AVColorRange>(color_ranges[group_idx]);
+            DecProc<RGBFrame>(color_range, vdec[slot_idx].get(), rgb_frames[group_idx],
+                              group_frame_buffers[group_idx], vpacket_queue[group_idx].get(),
+                              frame_id_groups[group_idx], as_bgr, source_names[group_idx],
+                              last_decoded_frame_infos[slot_idx]);
+        });
     } catch (const std::exception& error) {
         force_join_all();
-        LOG(ERROR) << "Grouped decode thread join failed: " << error.what();
+        LOG(ERROR) << "Grouped DecProc failed: " << error.what();
         return -1;
     }
-#endif
 
     output.clear();
     output.reserve(total_output_frames);
@@ -861,7 +843,7 @@ int PyNvGopDecoder::main_decode_groups(
         }
     }
 
-    // DecProc queues color conversion on cu_stream. Joining its CPU runner only
+    // DecProc queues color conversion on cu_stream. Waiting for its CPU worker only
     // guarantees that the work was submitted; the output frames are ready when
     // this public synchronous API returns only after the stream is synchronized.
     CUDA_DRVAPI_CALL(cuStreamSynchronize(this->cu_stream));
@@ -880,7 +862,6 @@ int PyNvGopDecoder::main_decode(
 
     // lazy loading
     ensureCudaContextInitialized();
-    ensureDecodeRunnersInitialized();
 
     st = InitGpuMemPool(heights, widths, frame_sizes, convert_to_rgb);
     if (st != 0) {
@@ -923,34 +904,6 @@ int PyNvGopDecoder::main_decode(
             } else {
                 decodedFrames[i].reserve(sorted_frame_ids.size());
             }
-            auto& packet_queue = vpacket_queue[i];
-            auto& frame_buffers = per_file_frame_buffers[i];
-            AVColorRange color_range = static_cast<AVColorRange>(color_ranges[i]);
-#ifdef PROCESS_SYNC
-            if (convert_to_rgb) {
-                DecProc<RGBFrame>(color_range, this->vdec[i].get(), rgb_frames[i], frame_buffers,
-                                  packet_queue.get(), sorted_frame_ids, as_bgr, filepaths[i],
-                                  this->last_decoded_frame_infos[i]);
-            } else {
-                DecProc<DecodedFrameExt>(color_range, this->vdec[i].get(), decodedFrames[i], frame_buffers,
-                                         packet_queue.get(), sorted_frame_ids, false, filepaths[i],
-                                         this->last_decoded_frame_infos[i]);
-            }
-#else
-            if (convert_to_rgb) {
-                decode_runners[i].join();
-                decode_runners[i].start(PyNvGopDecoder::DecProc<RGBFrame>, color_range, this->vdec[i].get(),
-                                        std::ref(rgb_frames[i]), frame_buffers, packet_queue.get(),
-                                        sorted_frame_ids, as_bgr, filepaths[i],
-                                        std::ref(this->last_decoded_frame_infos[i]));
-            } else {
-                decode_runners[i].join();
-                decode_runners[i].start(PyNvGopDecoder::DecProc<DecodedFrameExt>, color_range,
-                                        this->vdec[i].get(), std::ref(decodedFrames[i]), frame_buffers,
-                                        packet_queue.get(), sorted_frame_ids, false, filepaths[i],
-                                        std::ref(this->last_decoded_frame_infos[i]));
-            }
-#endif
         } catch (const std::exception& e) {
             this->force_join_all();
             LOG(ERROR) << "DecProc failed: " << e.what();
@@ -958,18 +911,26 @@ int PyNvGopDecoder::main_decode(
         }
     }
 
-#ifndef PROCESS_SYNC
-    // Join all runners first; exceptions trigger force_join_all() before propagating.
-    for (int j = 0; j < total_frames; ++j) {
-        try {
-            decode_runners[j].join();
-        } catch (const std::exception& e) {
-            this->force_join_all();
-            LOG(ERROR) << "decode_runners[" << j << "].join() failed: " << e.what();
-            return -1;
-        }
+    try {
+        decode_pool.run_indexed(total_frames, [&](size_t index) {
+            std::vector<int> sorted_frame_ids = {frame_ids[index]};
+            AVColorRange color_range = static_cast<AVColorRange>(color_ranges[index]);
+            if (convert_to_rgb) {
+                DecProc<RGBFrame>(color_range, this->vdec[index].get(), rgb_frames[index],
+                                  per_file_frame_buffers[index], vpacket_queue[index].get(), sorted_frame_ids,
+                                  as_bgr, filepaths[index], this->last_decoded_frame_infos[index]);
+            } else {
+                DecProc<DecodedFrameExt>(color_range, this->vdec[index].get(), decodedFrames[index],
+                                         per_file_frame_buffers[index], vpacket_queue[index].get(),
+                                         sorted_frame_ids, false, filepaths[index],
+                                         this->last_decoded_frame_infos[index]);
+            }
+        });
+    } catch (const std::exception& e) {
+        this->force_join_all();
+        LOG(ERROR) << "DecProc failed: " << e.what();
+        return -1;
     }
-#endif
 
     for (int i = 0; i < total_frames; ++i) {
         if (convert_to_rgb) {
@@ -1475,90 +1436,59 @@ void PyNvGopDecoder::LoadGOPFromFiles(const std::vector<std::string>& file_paths
         throw std::invalid_argument("[ERROR] file_paths is empty");
     }
 
-    // Ensure merge thread pool is initialized
-    ensureMergeRunnersInitialized();
-
-    // Calculate number of threads to use
-    size_t num_threads = std::min(file_paths.size(), merge_runners.size());
-
-    // Helper lambda for parallel execution with exception handling
-    auto executeInParallel = [&](const std::function<void(size_t)>& task_func) {
-        std::vector<std::exception_ptr> exceptions(num_threads);
-
-        // Start parallel tasks
-        for (size_t i = 0; i < num_threads; ++i) {
-            merge_runners[i].start([&, i]() {
-                try {
-                    task_func(i);
-                } catch (...) {
-                    exceptions[i] = std::current_exception();
-                }
-            });
-        }
-
-        // Wait for all tasks to complete
-        for (size_t i = 0; i < num_threads; ++i) {
-            merge_runners[i].join();
-        }
-
-        // Check for exceptions
-        for (auto& ex : exceptions) {
-            if (ex) {
-                std::rethrow_exception(ex);
-            }
-        }
-    };
-
     // Read all binary files in parallel
     file_data_buffers.resize(file_paths.size());
 
-    executeInParallel([&](size_t thread_id) {
-        // Process files assigned to this thread
-        for (size_t file_idx = thread_id; file_idx < file_paths.size(); file_idx += num_threads) {
-            const auto& file_path = file_paths[file_idx];
+    parallel_pool.run_indexed(file_paths.size(), [&](size_t file_idx) {
+        const auto& file_path = file_paths[file_idx];
 
-            // Check if file exists
-            if (!std::filesystem::exists(file_path)) {
-                throw std::runtime_error("[ERROR] File does not exist: " + file_path);
-            }
-
-            // Read entire file into memory
-            std::ifstream file(file_path, std::ios::binary | std::ios::ate);
-            if (!file.is_open()) {
-                throw std::runtime_error("[ERROR] Failed to open file: " + file_path);
-            }
-
-            size_t file_size = file.tellg();
-            file.seekg(0, std::ios::beg);
-
-            std::vector<uint8_t> file_buffer(file_size);
-            file.read(reinterpret_cast<char*>(file_buffer.data()), file_size);
-            if (file.fail()) {
-                throw std::runtime_error("[ERROR] Failed to read file: " + file_path);
-            }
-            file.close();
-
-            // Validate file header
-            if (file_size < sizeof(uint32_t)) {
-                throw std::invalid_argument("[ERROR] File too small: " + file_path);
-            }
-
-            const uint8_t* data_ptr = file_buffer.data();
-            uint32_t frame_count = *reinterpret_cast<const uint32_t*>(data_ptr);
-
-            if (frame_count == 0) {
-                throw std::invalid_argument("[ERROR] File contains no frames: " + file_path);
-            }
-
-            // Validate header size
-            size_t expected_header_size = sizeof(uint32_t) + frame_count * sizeof(size_t);
-            if (file_size < expected_header_size) {
-                throw std::invalid_argument("[ERROR] File header invalid: " + file_path);
-            }
-
-            // Store file data
-            file_data_buffers[file_idx] = std::move(file_buffer);
+        // Check if file exists
+        if (!std::filesystem::exists(file_path)) {
+            throw std::runtime_error("[ERROR] File does not exist: " + file_path);
         }
+
+        // Read entire file into memory
+        std::ifstream file(file_path, std::ios::binary | std::ios::ate);
+        if (!file.is_open()) {
+            throw std::runtime_error("[ERROR] Failed to open file: " + file_path);
+        }
+
+        const std::streampos end_position = file.tellg();
+        if (end_position < 0) {
+            throw std::runtime_error("[ERROR] Failed to determine file size: " + file_path);
+        }
+        const size_t file_size = static_cast<size_t>(end_position);
+        file.seekg(0, std::ios::beg);
+
+        std::vector<uint8_t> file_buffer(file_size);
+        file.read(reinterpret_cast<char*>(file_buffer.data()), file_size);
+        if (file.fail()) {
+            throw std::runtime_error("[ERROR] Failed to read file: " + file_path);
+        }
+        file.close();
+
+        // Validate the complete bundle before exposing it to Python.
+        std::vector<int> color_ranges;
+        std::vector<int> codec_ids;
+        std::vector<int> widths;
+        std::vector<int> heights;
+        std::vector<int> frame_sizes;
+        std::vector<int> gop_lens;
+        std::vector<int> first_frame_ids;
+        std::vector<std::vector<int>> packets_bytes;
+        std::vector<std::vector<int>> decode_idxs;
+        std::vector<const uint8_t*> packet_binary_data_ptrs;
+        std::vector<size_t> packet_binary_data_sizes;
+        const uint32_t frame_count =
+            parseSerializedPacketData(file_buffer.data(), file_buffer.size(), color_ranges, codec_ids, widths,
+                                      heights, frame_sizes, gop_lens, first_frame_ids, packets_bytes,
+                                      decode_idxs, packet_binary_data_ptrs, packet_binary_data_sizes);
+        if (frame_count == 0) {
+            throw std::invalid_argument("[ERROR] File contains no frames: " + file_path);
+        }
+
+        // Store file data
+        file_data_buffers[file_idx] = std::move(file_buffer);
     });
 
     nvtxRangePop();

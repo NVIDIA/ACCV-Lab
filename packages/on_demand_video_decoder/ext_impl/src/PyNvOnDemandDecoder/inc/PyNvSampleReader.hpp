@@ -174,6 +174,7 @@ class PyNvSampleReader {
     int num_of_set = 0;
 
     std::vector<FixedSizeVideoReaderMap> VideoReaderMap;
+    ThreadPool frame_pool;
 
     // Async decode related members
     ConcurrentQueue<DecodeResult> decode_result_queue;  // Buffer size = 1

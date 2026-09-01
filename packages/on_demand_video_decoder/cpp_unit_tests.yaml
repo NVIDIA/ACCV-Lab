@@ -1,0 +1,6 @@
+# Native C++ unit test target for on_demand_video_decoder.
+
+cmake_source_dir: ext_impl
+cuda_arch_strategy: cmake
+test_option: ACCVLAB_ON_DEMAND_VIDEO_DECODER_BUILD_CPP_TESTS
+test_target: accvlab_on_demand_video_decoder_run_cpp_tests

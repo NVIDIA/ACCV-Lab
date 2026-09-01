@@ -21,7 +21,6 @@
 #include <map>
 #include <mutex>
 #include <string>
-#include <thread>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -126,43 +125,6 @@ void PyNvSampleReader::clearAllReaders() {
     }
 }
 
-// Helper function to process video frames in parallel
-template <typename T, typename Func>
-std::vector<T> process_frames_in_parallel(const std::vector<std::string>& filepaths,
-                                          const std::vector<int>& frame_ids,
-                                          const std::vector<PyNvVideoReader*>& video_readers,
-                                          Func process_frame) {
-    nvtxRangePushA("Process Frames in Parallel");
-    std::vector<T> res(filepaths.size());
-    std::exception_ptr eptr = nullptr;
-    std::mutex mutex;
-
-    std::vector<std::thread> threads;
-    threads.reserve(filepaths.size());
-
-    for (int i = 0; i < filepaths.size(); i++) {
-        threads.emplace_back([&, i]() {
-            try {
-                res[i] = process_frame(video_readers[i], frame_ids[i]);
-            } catch (const std::exception& e) {
-                std::lock_guard<std::mutex> lock(mutex);
-                eptr = std::current_exception();
-            }
-        });
-    }
-
-    for (auto& thread : threads) {
-        thread.join();
-    }
-
-    if (eptr) {
-        nvtxRangePop();
-        std::rethrow_exception(eptr);
-    }
-    nvtxRangePop();
-    return res;
-}
-
 std::vector<RGBFrame> PyNvSampleReader::run_rgb_out(const std::vector<std::string>& filepaths,
                                                     const std::vector<int> frame_ids, bool as_bgr) {
     // NOTE: Do NOT call waitForPendingAsyncTask() here!
@@ -203,10 +165,18 @@ std::vector<RGBFrame> PyNvSampleReader::run_rgb_out(const std::vector<std::strin
     }
     nvtxRangePop();
 
-    return process_frames_in_parallel<RGBFrame>(filepaths, frame_ids, video_readers,
-                                                [as_bgr](PyNvVideoReader* reader, int frame_id) {
-                                                    return reader->run_single_rgb_out(frame_id, as_bgr);
-                                                });
+    std::vector<RGBFrame> result(filepaths.size());
+    nvtxRangePushA("Process Frames in Parallel");
+    try {
+        frame_pool.run_indexed(filepaths.size(), [&](size_t index) {
+            result[index] = video_readers[index]->run_single_rgb_out(frame_ids[index], as_bgr);
+        });
+    } catch (...) {
+        nvtxRangePop();
+        throw;
+    }
+    nvtxRangePop();
+    return result;
 }
 
 std::vector<DecodedFrameExt> PyNvSampleReader::run(const std::vector<std::string>& filepaths,
@@ -246,9 +216,18 @@ std::vector<DecodedFrameExt> PyNvSampleReader::run(const std::vector<std::string
         video_readers[i] = cur_video_reader;
     }
 
-    return process_frames_in_parallel<DecodedFrameExt>(
-        filepaths, frame_ids, video_readers,
-        [](PyNvVideoReader* reader, int frame_id) { return reader->run_single(frame_id); });
+    std::vector<DecodedFrameExt> result(filepaths.size());
+    nvtxRangePushA("Process Frames in Parallel");
+    try {
+        frame_pool.run_indexed(filepaths.size(), [&](size_t index) {
+            result[index] = video_readers[index]->run_single(frame_ids[index]);
+        });
+    } catch (...) {
+        nvtxRangePop();
+        throw;
+    }
+    nvtxRangePop();
+    return result;
 }
 
 void Init_PyNvSampleReader(py::module& m) {

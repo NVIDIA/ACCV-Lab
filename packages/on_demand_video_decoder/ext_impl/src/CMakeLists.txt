@@ -25,14 +25,6 @@ if(WIN32)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif(WIN32)
 
-option(PROCESS_SYNC "Run the demuxer and decoder in synchornous" OFF)
-set(PROCESS_SYNC $ENV{PROCESS_SYNC})
-if (PROCESS_SYNC)
-  add_compile_definitions(PROCESS_SYNC)
-endif()
-
-message("PROCESS_SYNC environment variable: $ENV{PROCESS_SYNC}")
-
 option(USE_NVTX "enable nvtx support" FALSE)
 set(USE_NVTX $ENV{USE_NVTX})
 

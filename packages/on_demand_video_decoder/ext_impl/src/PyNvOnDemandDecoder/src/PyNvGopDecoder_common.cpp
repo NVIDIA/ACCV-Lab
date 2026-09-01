@@ -399,53 +399,25 @@ int PyNvGopDecoder::InitializeDemuxers(const std::vector<std::string>& filepaths
     int num_of_files = filepaths.size();
     demuxers.resize(num_of_files);
 
-#ifdef PROCESS_SYNC
-    for (int i = 0; i < num_of_files; ++i) {
-        nvtxRangePushA((std::string("Demuxer creation : ") + std::to_string(i)).c_str());
-        if (fastStreamInfos) {
-            CreateDemuxer(demuxers[i], filepaths[i], fastStreamInfos + i);
-        } else {
-            CreateDemuxer(demuxers[i], filepaths[i], nullptr);
+    demux_pool.run_indexed(num_of_files, [&](size_t index) {
+        nvtxRangePushA((std::string("Demuxer creation: ") + std::to_string(index)).c_str());
+        try {
+            const FastStreamInfo* fast_stream_info = fastStreamInfos ? fastStreamInfos + index : nullptr;
+            CreateDemuxer(demuxers[index], filepaths[index], fast_stream_info);
+        } catch (...) {
+            nvtxRangePop();
+            throw;
         }
-        if (!demuxers[i]->IsValid()) {
-            LOG(ERROR) << "create demuxer failed with video files: " << filepaths[i];
-            nvtxRangePop();  // Demuxer creation
-            nvtxRangePop();  // Initialize Demuxers
-            return -1;
-        }
-        nvtxRangePop();  // Demuxer creation
-    }
-#endif
-
-#ifndef PROCESS_SYNC
-    for (int i = 0; i < num_of_files; ++i) {
-        nvtxRangePushA((std::string("Demuxer creation thread start: ") + std::to_string(i)).c_str());
-        demux_runners[i].join();
-        if (fastStreamInfos) {
-            demux_runners[i].start(PyNvGopDecoder::CreateDemuxer, std::ref(demuxers[i]), filepaths[i],
-                                   fastStreamInfos + i);
-        } else {
-            demux_runners[i].start(PyNvGopDecoder::CreateDemuxer, std::ref(demuxers[i]), filepaths[i],
-                                   nullptr);
-        }
-        nvtxRangePop();  // Demuxer creation thread start
-    }
-
-    for (int i = 0; i < num_of_files; ++i) {
-        nvtxRangePushA((std::string("Demuxer creation thread join: ") + std::to_string(i)).c_str());
-        demux_runners[i].join();
         nvtxRangePop();
+    });
+
+    for (int i = 0; i < num_of_files; ++i) {
         if (!demuxers[i]->IsValid()) {
-            for (int index = i; index < num_of_files; index++) {
-                demux_runners[index].join();
-            }
             LOG(ERROR) << "create demuxer failed with video files " << filepaths[i];
-            nvtxRangePop();  // Demuxer creation thread join
             nvtxRangePop();  // Initialize Demuxers
             return -1;
         }
     }
-#endif
 
     // check decoder and demuxer must have the same resolution
     for (int i = 0; i < num_of_files; ++i) {
@@ -498,8 +470,6 @@ int PyNvGopDecoder::InitializeDecoders(const std::vector<int>& codec_ids) {
     const int num_of_files = static_cast<int>(codec_ids.size());
 
     ensureCudaContextInitialized();
-    ensureDecodeRunnersInitialized();
-
     // Temporarily push context for decoder creation
     ck(cuCtxPushCurrent(this->cu_context));
 
@@ -548,8 +518,6 @@ int PyNvGopDecoder::AssignGroupedDecoderSlots(const std::vector<GroupedDecoderCo
     }
 
     ensureCudaContextInitialized();
-    ensureDecodeRunnersInitialized();
-
     // Build a transient dictionary over the persistent decoder vector.  The
     // dictionary is rebuilt each call so it cannot become stale when a slot is
     // replaced.  Each key maps to multiple slots to support concurrent GOPs
@@ -626,7 +594,6 @@ int PyNvGopDecoder::AssignGroupedDecoderSlots(const std::vector<GroupedDecoderCo
             vdec.push_back(std::move(decoder));
             slot_in_use.push_back(true);
         } else {
-            decode_runners[slot_idx].join();
             vdec[slot_idx] = std::move(decoder);
             reset_last_decoded_frame_info(last_decoded_frame_infos[slot_idx]);
             slot_in_use[slot_idx] = true;

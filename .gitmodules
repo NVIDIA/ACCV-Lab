@@ -20,3 +20,6 @@
 [submodule "packages/example_skbuild_package/ext_impl/external/googletest"]
 	path = packages/example_skbuild_package/ext_impl/external/googletest
 	url = https://github.com/google/googletest.git
+[submodule "packages/on_demand_video_decoder/ext_impl/external/googletest"]
+	path = packages/on_demand_video_decoder/ext_impl/external/googletest
+	url = https://github.com/google/googletest.git

@@ -34,6 +34,16 @@
 
 namespace fs = std::filesystem;
 
+namespace {
+
+size_t WorkerCountForCpuBudget(int max_num_files, size_t budget_divisor) {
+    const size_t file_limit = max_num_files > 0 ? static_cast<size_t>(max_num_files) : 1;
+    const size_t cpu_budget = std::max<size_t>(1, ThreadPool::available_cpu_count() / budget_divisor);
+    return std::min(file_limit, cpu_budget);
+}
+
+}  // namespace
+
 std::vector<FastStreamInfo> GetFastInitInfo(const std::vector<std::string>& filepaths) {
     std::vector<FastStreamInfo> fast_stream_infos;
     fast_stream_infos.reserve(filepaths.size());
@@ -139,46 +149,14 @@ void PyNvGopDecoder::ensureCudaContextInitialized() {
     }
 }
 
-void PyNvGopDecoder::ensureDemuxRunnersInitialized(size_t required_count) {
-    if (required_count > static_cast<size_t>(max_num_files)) {
-        throw std::invalid_argument("required demux runners exceed max_num_files");
-    }
-
-    // max_num_files is a request-capacity limit, not an eager thread count.
-    demux_runners.reserve(max_num_files);
-    while (demux_runners.size() < required_count) {
-        demux_runners.emplace_back();
-    }
-}
-
-void PyNvGopDecoder::ensureDecodeRunnersInitialized() {
-    if (!decode_runners.empty()) {
-        return;  // Already initialized
-    }
-
-    decode_runners.reserve(max_num_files);
-    for (size_t i = 0; i < max_num_files; ++i) {
-        decode_runners.emplace_back();
-    }
-}
-
-void PyNvGopDecoder::ensureMergeRunnersInitialized() {
-    if (!merge_runners.empty()) {
-        return;  // Already initialized
-    }
-
-    // Initialize merge thread pool with max_num_files threads for parallel file processing
-    merge_runners.reserve(max_num_files);
-    for (size_t i = 0; i < max_num_files; ++i) {
-        merge_runners.emplace_back();
-    }
-}
-
 PyNvGopDecoder::PyNvGopDecoder(int iMaxFileNum, int iGpu, bool bSuppressNoColorRangeWarning,
                                CUstream external_stream)
     : max_num_files(iMaxFileNum),
       gpu_id(iGpu),
-      suppress_no_color_range_given_warning(bSuppressNoColorRangeWarning) {
+      suppress_no_color_range_given_warning(bSuppressNoColorRangeWarning),
+      demux_pool(WorkerCountForCpuBudget(iMaxFileNum, 2)),
+      decode_pool(WorkerCountForCpuBudget(iMaxFileNum, 2)),
+      parallel_pool(WorkerCountForCpuBudget(iMaxFileNum, 1)) {
 #ifdef IS_DEBUG_BUILD
     std::cout << "New PyNvGopDecoder object" << std::endl;
 #endif
@@ -193,26 +171,17 @@ PyNvGopDecoder::PyNvGopDecoder(int iMaxFileNum, int iGpu, bool bSuppressNoColorR
 }
 
 void PyNvGopDecoder::force_join_all() {
-    // Force join all demux runners
-    for (auto& runner : demux_runners) {
-        runner.force_join();
-    }
-
-    // Force join all decode runners
-    for (auto& runner : decode_runners) {
-        runner.force_join();
-    }
-
-    // Force join all merge runners
-    for (auto& runner : merge_runners) {
-        runner.force_join();
-    }
+    demux_pool.force_join();
+    decode_pool.force_join();
+    parallel_pool.force_join();
 }
 
 PyNvGopDecoder::~PyNvGopDecoder() {
 #ifdef IS_DEBUG_BUILD
     std::cout << "Delete PyNvGopDecoder object" << std::endl;
 #endif
+
+    force_join_all();
 
     // Temporarily push context for GPU resource cleanup.
     // This ensures the destructor works correctly on any thread.
@@ -240,17 +209,6 @@ PyNvGopDecoder::~PyNvGopDecoder() {
         // Only release the primary context reference.
         // No need to pop - we use temporary push/pop pattern instead.
         ck(cuDevicePrimaryCtxRelease(this->gpu_id));
-    }
-
-    // Clean up thread runners
-    for (auto& runner : demux_runners) {
-        runner.join();
-    }
-    for (auto& runner : decode_runners) {
-        runner.join();
-    }
-    for (auto& runner : merge_runners) {
-        runner.join();
     }
 }
 

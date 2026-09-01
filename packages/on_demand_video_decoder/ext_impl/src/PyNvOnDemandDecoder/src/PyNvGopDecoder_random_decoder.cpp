@@ -56,6 +56,9 @@ void PyNvGopDecoder::decode_from_video(const std::vector<std::string>& filepaths
     if (filepaths.size() != frame_ids.size()) {
         throw std::invalid_argument("[ERROR] filepaths and frame_ids must have the same length");
     }
+    if (filepaths.size() > max_num_files) {
+        throw std::invalid_argument("[ERROR] filepaths size is greater than max_num_files");
+    }
 
     nvtxRangePushA("Decode");
     const size_t total_frames = frame_ids.size();
@@ -73,8 +76,6 @@ void PyNvGopDecoder::decode_from_video(const std::vector<std::string>& filepaths
 
     // lazy loading
     ensureCudaContextInitialized();
-    ensureDemuxRunnersInitialized(total_frames);
-    ensureDecodeRunnersInitialized();
 
     // reset last decoded frame infos
     reset_last_decoded_frame_infos(this->last_decoded_frame_infos);
@@ -132,6 +133,8 @@ void PyNvGopDecoder::decode_from_video(const std::vector<std::string>& filepaths
     std::vector<std::vector<int>> all_first_frame_ids;
     all_gop_lens.resize(total_frames);
     all_first_frame_ids.resize(total_frames);
+    std::vector<std::vector<int>> all_sorted_frame_ids(total_frames);
+    std::vector<char> process_frame(total_frames, true);
 
     nvtxRangePushA("Frame processing");
     for (int i = 0; i < total_frames; ++i) {
@@ -155,43 +158,40 @@ void PyNvGopDecoder::decode_from_video(const std::vector<std::string>& filepaths
                 decodedFrames[i].reserve(1);
             }
 
-#ifdef PROCESS_SYNC
-            DemuxGopProc(demuxers[i].get(), vpacket_queue[i].get(), sorted_frame_ids, first_frame_ids,
-                         gop_length, vpacket_array[i], false);
-            if (convert_to_rgb) {
-                DecProc<RGBFrame>(demuxers[i]->GetColorRange(), this->vdec[i].get(), rgb_frames[i],
-                                  per_file_frame_buffers[i], vpacket_queue[i].get(), sorted_frame_ids, as_bgr,
-                                  filepaths[i], this->last_decoded_frame_infos[i]);
-            } else {
-                DecProc<DecodedFrameExt>(demuxers[i]->GetColorRange(), this->vdec[i].get(), decodedFrames[i],
-                                         per_file_frame_buffers[i], vpacket_queue[i].get(), sorted_frame_ids,
-                                         false, filepaths[i], this->last_decoded_frame_infos[i]);
-            }
-#else
-            demux_runners[i].join();
-            demux_runners[i].start(PyNvGopDecoder::DemuxGopProc, demuxers[i].get(), vpacket_queue[i].get(),
-                                   sorted_frame_ids, std::ref(first_frame_ids), std::ref(gop_length),
-                                   std::ref(vpacket_array[i]), false);
-
-            if (convert_to_rgb) {
-                decode_runners[i].join();
-                decode_runners[i].start(PyNvGopDecoder::DecProc<RGBFrame>, demuxers[i]->GetColorRange(),
-                                        this->vdec[i].get(), std::ref(rgb_frames[i]),
-                                        per_file_frame_buffers[i], vpacket_queue[i].get(), sorted_frame_ids,
-                                        as_bgr, filepaths[i], std::ref(this->last_decoded_frame_infos[i]));
-            } else {
-                decode_runners[i].join();
-                decode_runners[i].start(PyNvGopDecoder::DecProc<DecodedFrameExt>,
-                                        demuxers[i]->GetColorRange(), this->vdec[i].get(),
-                                        std::ref(decodedFrames[i]), per_file_frame_buffers[i],
-                                        vpacket_queue[i].get(), sorted_frame_ids, false, filepaths[i],
-                                        std::ref(this->last_decoded_frame_infos[i]));
-            }
-#endif
+            all_sorted_frame_ids[i] = std::move(sorted_frame_ids);
         } catch (const std::exception& e) {
+            process_frame[i] = false;
             this->force_join_all();
             std::cerr << "[ERROR] " << e.what() << std::endl;
         }
+    }
+    try {
+        demux_pool.submit_indexed(total_frames, [&](size_t index) {
+            if (!process_frame[index]) {
+                return;
+            }
+            DemuxGopProc(demuxers[index].get(), vpacket_queue[index].get(), all_sorted_frame_ids[index],
+                         all_first_frame_ids[index], all_gop_lens[index], vpacket_array[index], false);
+        });
+        decode_pool.submit_indexed(total_frames, [&](size_t index) {
+            if (!process_frame[index]) {
+                return;
+            }
+            if (convert_to_rgb) {
+                DecProc<RGBFrame>(demuxers[index]->GetColorRange(), this->vdec[index].get(),
+                                  rgb_frames[index], per_file_frame_buffers[index],
+                                  vpacket_queue[index].get(), all_sorted_frame_ids[index], as_bgr,
+                                  filepaths[index], this->last_decoded_frame_infos[index]);
+            } else {
+                DecProc<DecodedFrameExt>(demuxers[index]->GetColorRange(), this->vdec[index].get(),
+                                         decodedFrames[index], per_file_frame_buffers[index],
+                                         vpacket_queue[index].get(), all_sorted_frame_ids[index], false,
+                                         filepaths[index], this->last_decoded_frame_infos[index]);
+            }
+        });
+    } catch (...) {
+        this->force_join_all();
+        throw;
     }
     nvtxRangePop();  //Frame processing
 
@@ -202,12 +202,8 @@ void PyNvGopDecoder::decode_from_video(const std::vector<std::string>& filepaths
         out_if_no_color_conversion->resize(total_frames);
     }
     try {
+        wait_all(demux_pool, decode_pool);
         for (int i = 0; i < total_frames; ++i) {
-#ifndef PROCESS_SYNC
-            demux_runners[i].join();
-            decode_runners[i].join();
-#endif
-
             if (convert_to_rgb) {
                 if (rgb_frames[i].empty()) {
                     this->force_join_all();

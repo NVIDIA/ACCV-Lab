@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+#include <atomic>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -21,6 +23,15 @@
 #include <functional>
 #include <exception>
 #include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <type_traits>
+#include <utility>
+#include <vector>
+
+#if defined(__linux__)
+#include <sched.h>
+#endif
 
 class ThreadRunner {
    public:
@@ -166,3 +177,146 @@ class ThreadRunner {
     bool hasException;
     std::exception_ptr exceptionPtr;  // Store original exception for rethrow
 };
+
+class ThreadPool {
+   public:
+    ThreadPool() : ThreadPool(available_cpu_count()) {}
+    explicit ThreadPool(size_t max_worker_count) : max_worker_count(std::max<size_t>(1, max_worker_count)) {}
+
+    static size_t available_cpu_count() {
+#if defined(__linux__)
+        cpu_set_t cpu_set;
+        CPU_ZERO(&cpu_set);
+        if (sched_getaffinity(0, sizeof(cpu_set), &cpu_set) == 0) {
+            const size_t cpu_count = CPU_COUNT(&cpu_set);
+            if (cpu_count > 0) {
+                return cpu_count;
+            }
+        }
+#endif
+        const size_t cpu_count = std::thread::hardware_concurrency();
+        return cpu_count == 0 ? 1 : cpu_count;
+    }
+
+    ThreadPool(const ThreadPool&) = delete;
+    ThreadPool& operator=(const ThreadPool&) = delete;
+    ThreadPool(ThreadPool&&) = delete;
+    ThreadPool& operator=(ThreadPool&&) = delete;
+
+    template <typename Func>
+    void submit_indexed(size_t task_count, Func&& task) {
+        wait_all();
+        if (task_count == 0) {
+            return;
+        }
+
+        const size_t worker_count = std::min(task_count, max_worker_count);
+        while (workers.size() < worker_count) {
+            workers.emplace_back(std::make_unique<ThreadRunner>());
+        }
+
+        using Task = typename std::decay<Func>::type;
+        auto task_ptr = std::make_shared<Task>(std::forward<Func>(task));
+        auto next_index = std::make_shared<std::atomic<size_t>>(0);
+        active_state = std::make_shared<TaskState>(task_count);
+        active_worker_count = 0;
+
+        try {
+            for (; active_worker_count < worker_count; ++active_worker_count) {
+                workers[active_worker_count]->start(
+                    [task_ptr, next_index, state = active_state, task_count]() {
+                        while (true) {
+                            const size_t index = next_index->fetch_add(1);
+                            if (index >= task_count) {
+                                return;
+                            }
+                            try {
+                                (*task_ptr)(index);
+                            } catch (...) {
+                                state->exceptions[index] = std::current_exception();
+                            }
+                        }
+                    });
+            }
+        } catch (...) {
+            active_state->submission_exception = std::current_exception();
+            wait_all();
+        }
+    }
+
+    template <typename Func>
+    void run_indexed(size_t task_count, Func&& task) {
+        submit_indexed(task_count, std::forward<Func>(task));
+        wait_all();
+    }
+
+    void wait_all() {
+        std::exception_ptr first_exception;
+        for (size_t index = 0; index < active_worker_count; ++index) {
+            try {
+                workers[index]->join();
+            } catch (...) {
+                if (!first_exception) {
+                    first_exception = std::current_exception();
+                }
+            }
+        }
+
+        auto state = std::move(active_state);
+        active_worker_count = 0;
+        if (state) {
+            if (!first_exception) {
+                first_exception = state->submission_exception;
+            }
+            for (const auto& exception : state->exceptions) {
+                if (!first_exception && exception) {
+                    first_exception = exception;
+                }
+            }
+        }
+
+        if (first_exception) {
+            std::rethrow_exception(first_exception);
+        }
+    }
+
+    void force_join() {
+        for (auto& worker : workers) {
+            worker->force_join();
+        }
+        active_worker_count = 0;
+        active_state.reset();
+    }
+
+   private:
+    struct TaskState {
+        explicit TaskState(size_t task_count) : exceptions(task_count) {}
+
+        std::vector<std::exception_ptr> exceptions;
+        std::exception_ptr submission_exception;
+    };
+
+    const size_t max_worker_count;
+    std::vector<std::unique_ptr<ThreadRunner>> workers;
+    size_t active_worker_count = 0;
+    std::shared_ptr<TaskState> active_state;
+};
+
+inline void wait_all(ThreadPool& first, ThreadPool& second) {
+    std::exception_ptr first_exception;
+    try {
+        first.wait_all();
+    } catch (...) {
+        first_exception = std::current_exception();
+    }
+    try {
+        second.wait_all();
+    } catch (...) {
+        if (!first_exception) {
+            first_exception = std::current_exception();
+        }
+    }
+    if (first_exception) {
+        std::rethrow_exception(first_exception);
+    }
+}

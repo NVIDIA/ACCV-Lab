@@ -93,6 +93,17 @@ endif()
 
 add_subdirectory(src)
 
+option(
+    ACCVLAB_ON_DEMAND_VIDEO_DECODER_BUILD_CPP_TESTS
+    "Build on_demand_video_decoder native C++ tests"
+    OFF
+)
+
+if(ACCVLAB_ON_DEMAND_VIDEO_DECODER_BUILD_CPP_TESTS)
+    enable_testing()
+    add_subdirectory(utest)
+endif()
+
 #If we need to run with santizer, the way is ASAN_OPTIONS=protect_shadow_gap=0:replace_intrin=0:detect_leaks=1 ./cpp_samples/run_decoding
 #set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")
 #set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=address")

@@ -84,7 +84,7 @@ class PyNvGopDecoder {
     ~PyNvGopDecoder();
 
     /**
-     * Force all thread runners to synchronously terminate their tasks
+     * Force all thread pools to synchronously terminate their tasks
      * 
      * This method provides a way to forcefully stop all running threads in case of
      * exceptions or when immediate termination is needed. It clears all pending tasks
@@ -182,8 +182,8 @@ class PyNvGopDecoder {
      * - Frame data blocks follow the header
      * 
      * Performance:
-     * - Files are read in parallel using internal thread pool (merge_runners)
-     * - Number of threads = min(file_paths.size(), merge_runners.size())
+     * - Files are read in parallel using the internal thread pool
+     * - Worker count is managed by the internal thread pool
      * - Each file is validated for correct GOP format
      * 
      * @param file_paths Vector of file paths to GOP binary files
@@ -714,16 +714,13 @@ class PyNvGopDecoder {
 
     GPUMemoryPool gpu_mem_pool;
 
-    // Thread runners for reuse
-    std::vector<ThreadRunner> demux_runners;
-    std::vector<ThreadRunner> decode_runners;
-    std::vector<ThreadRunner> merge_runners;
+    // Thread pools for reuse
+    ThreadPool demux_pool;
+    ThreadPool decode_pool;
+    ThreadPool parallel_pool;
 
     // Lazy loading functions
     void ensureCudaContextInitialized();
-    void ensureDemuxRunnersInitialized(size_t required_count);
-    void ensureDecodeRunnersInitialized();
-    void ensureMergeRunnersInitialized();
 
     /**
      * Internal implementation for GOP extraction

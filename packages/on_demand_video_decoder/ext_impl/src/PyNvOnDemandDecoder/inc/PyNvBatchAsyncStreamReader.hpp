@@ -154,6 +154,7 @@ class PyNvBatchAsyncStreamReader {
     int max_frames_per_decode_call = 0;
 
     std::vector<FixedSizeVideoReaderMap> VideoReaderMap;
+    ThreadPool frame_pool;
 
     // 2D-specific aggregator pools, one per video slot. Each pool holds the
     // F frames decoded for that slot in a single Decode() call. Per-video

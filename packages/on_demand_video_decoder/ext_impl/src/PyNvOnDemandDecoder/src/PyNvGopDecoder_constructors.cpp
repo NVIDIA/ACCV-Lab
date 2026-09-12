@@ -452,14 +452,16 @@ void Init_PyNvGopDecoder(py::module& m) {
         .def(
             "GetGOPList",
             [](std::shared_ptr<PyNvGopDecoder>& dec, const std::vector<std::string>& filepaths,
-               const std::vector<int> frame_ids, std::vector<FastStreamInfo> fastStreamInfos) {
+               const std::vector<int> frame_ids, std::vector<FastStreamInfo> fastStreamInfos,
+               bool enable_gop_dependency_graph_optimization) {
                 try {
                     std::vector<SerializedPacketBundle> bundles;
                     // Release GIL for file I/O and demuxing
                     {
                         py::gil_scoped_release release;
                         bundles = dec->get_gop_list(
-                            filepaths, frame_ids, fastStreamInfos.empty() ? nullptr : fastStreamInfos.data());
+                            filepaths, frame_ids, fastStreamInfos.empty() ? nullptr : fastStreamInfos.data(),
+                            enable_gop_dependency_graph_optimization);
                     }
                     // GIL is re-acquired here for creating Python objects
 
@@ -490,6 +492,7 @@ void Init_PyNvGopDecoder(py::module& m) {
             },
             py::arg("filepaths"), py::arg("frame_ids"),
             py::arg("fastStreamInfos") = std::vector<FastStreamInfo>{},
+            py::arg("enable_gop_dependency_graph_optimization") = false,
             R"pbdoc(
             For each video, extracts the GOP(Group of Pictures) containing the requested frame and returns
             it as one serialized GOP bundle (numpy object) per video.
@@ -505,11 +508,15 @@ void Init_PyNvGopDecoder(py::module& m) {
                 fastStreamInfos: Optional list of FastStreamInfo objects containing pre-extracted
                                 stream information by :func:`GetFastInitInfo`. If provided, this can
                                 improve performance by avoiding stream analysis.
+                enable_gop_dependency_graph_optimization: Enable GOP dependency optimization
+                    and write the GOP dependency graph into the returned GOP data. Defaults to
+                    False. Only applies to HEVC inputs.
 
             Returns:
                 List of tuples, one per video file, each containing
 
-                - serialized GOP bundle (numpy object) for that video
+                - serialized GOP bundle (numpy object) for that video; when dependency
+                  optimization is enabled for HEVC, the bundle includes the GOP dependency graph
                 - list with the first frame ID of the extracted GOP
                 - list with the length (frame count) of the extracted GOP
 
@@ -537,7 +544,8 @@ void Init_PyNvGopDecoder(py::module& m) {
             )pbdoc")
         .def(
             "GetGOPGroups",
-            [](std::shared_ptr<PyNvGopDecoder>& dec, const py::list& requests) {
+            [](std::shared_ptr<PyNvGopDecoder>& dec, const py::list& requests,
+               bool enable_gop_dependency_graph_optimization) {
                 struct SourceRequest {
                     std::string filepath;
                     // Sorted, unique decode targets. The original request order and
@@ -622,7 +630,8 @@ void Init_PyNvGopDecoder(py::module& m) {
                                 source_request.frame_ids[next_frame_indices[source_idx]]);
                         }
 
-                        auto bundles = dec->get_gop_list(pending_filepaths, representative_ids);
+                        auto bundles = dec->get_gop_list(pending_filepaths, representative_ids, nullptr,
+                                                         enable_gop_dependency_graph_optimization);
                         // get_gop_list promises one result per input path in the same
                         // order. Check that contract before mapping round-local results
                         // back to their original request indices.
@@ -700,7 +709,7 @@ void Init_PyNvGopDecoder(py::module& m) {
                 }
                 return result;
             },
-            py::arg("requests"),
+            py::arg("requests"), py::arg("enable_gop_dependency_graph_optimization") = false,
             R"pbdoc(
             Extract one serialized payload for each unique source/GOP.
 
@@ -709,6 +718,9 @@ void Init_PyNvGopDecoder(py::module& m) {
                     ``filepath`` and ``frame_ids``. Decode targets are sorted and
                     de-duplicated per request, while every original position is
                     retained in ``frame_positions``.
+                enable_gop_dependency_graph_optimization: Enable GOP dependency optimization
+                    and write the GOP dependency graph into the returned GOP data. Defaults to
+                    False. Only applies to HEVC inputs.
 
             Returns:
                 A source-major list of group dictionaries. Requests spanning GOP
@@ -719,7 +731,8 @@ void Init_PyNvGopDecoder(py::module& m) {
                 number of unique requested frames contained in that source/GOP,
                 rather than a conventional batch dimension.
 
-                - ``gop_data``: encoded packets and packet metadata for one GOP.
+                - ``gop_data``: encoded packets and packet metadata for one GOP. When dependency
+                  optimization is enabled for HEVC, it also includes the GOP dependency graph.
                 - ``source_index``: zero-based index of the originating item in
                   ``requests``; groups split from one request share this value.
                 - ``source_name``: the request's filepath.
@@ -870,7 +883,8 @@ void Init_PyNvGopDecoder(py::module& m) {
             [](std::shared_ptr<PyNvGopDecoder>& dec,
                const std::vector<py::array_t<uint8_t, py::array::c_style | py::array::forcecast>>&
                    numpy_datas,
-               const std::vector<std::string>& filepaths, const std::vector<int>& frame_ids, bool as_bgr) {
+               const std::vector<std::string>& filepaths, const std::vector<int>& frame_ids, bool as_bgr,
+               bool enable_gop_dependency_graph_optimization) {
                 try {
                     // Convert numpy arrays to pointers and sizes (requires GIL)
                     std::vector<const uint8_t*> datas;
@@ -888,7 +902,8 @@ void Init_PyNvGopDecoder(py::module& m) {
                     {
                         py::gil_scoped_release release;
                         dec->decode_from_gop_list(datas, sizes, filepaths, frame_ids, true, as_bgr, nullptr,
-                                                  &result);
+                                                  &result, /*skip_final_sync=*/false,
+                                                  enable_gop_dependency_graph_optimization);
                     }
                     return result;
                 } catch (const std::exception& e) {
@@ -896,6 +911,7 @@ void Init_PyNvGopDecoder(py::module& m) {
                 }
             },
             py::arg("numpy_datas"), py::arg("filepaths"), py::arg("frame_ids"), py::arg("as_bgr") = false,
+            py::arg("enable_gop_dependency_graph_optimization") = false,
             R"pbdoc(
             Decodes multiple serialized GOP bundles into RGB/BGR frames.
 
@@ -905,6 +921,9 @@ void Init_PyNvGopDecoder(py::module& m) {
                 filepaths: List of source file paths, one for each requested frame
                 frame_ids: List of target frame IDs, one for each requested frame
                 as_bgr: Whether to output in BGR format (True) or RGB format (False)
+                enable_gop_dependency_graph_optimization: Use the dependency graph contained
+                    in a GOP to reduce the decoding work required to produce requested frames;
+                    defaults to False, and GOPs without a graph use normal decoding.
 
             Returns:
                 List of :class:`RGBFrame` objects containing the decoded RGB/BGR frames
@@ -927,7 +946,8 @@ void Init_PyNvGopDecoder(py::module& m) {
             )pbdoc")
         .def(
             "DecodeFromGOPGroupsRGB",
-            [](std::shared_ptr<PyNvGopDecoder>& dec, const py::list& groups, bool as_bgr) {
+            [](std::shared_ptr<PyNvGopDecoder>& dec, const py::list& groups, bool as_bgr,
+               bool enable_gop_dependency_graph_optimization) {
                 try {
                     using ByteArray = py::array_t<uint8_t, py::array::c_style | py::array::forcecast>;
                     struct GroupLayout {
@@ -997,7 +1017,7 @@ void Init_PyNvGopDecoder(py::module& m) {
                     {
                         py::gil_scoped_release release;
                         dec->decode_from_gop_groups(datas, sizes, source_names, frame_id_groups, as_bgr,
-                                                    result);
+                                                    enable_gop_dependency_graph_optimization, result);
                     }
 
                     py::list decoded_groups;
@@ -1031,6 +1051,7 @@ void Init_PyNvGopDecoder(py::module& m) {
                 }
             },
             py::arg("groups"), py::arg("as_bgr") = false,
+            py::arg("enable_gop_dependency_graph_optimization") = false,
             R"pbdoc(
             Decode several target frames from each unique source/GOP bundle.
 
@@ -1048,6 +1069,9 @@ void Init_PyNvGopDecoder(py::module& m) {
                     dictionary carries one serialized GOP, its unique target frame
                     IDs, and every target's original positions.
                 as_bgr: Return BGR when true, RGB when false.
+                enable_gop_dependency_graph_optimization: Use the dependency graph contained
+                    in a GOP to reduce the decoding work required to produce requested frames;
+                    defaults to False, and GOPs without a graph use normal decoding.
 
             Returns:
                 One dictionary per input group. Metadata and ``frame_positions`` are
@@ -1065,7 +1089,8 @@ void Init_PyNvGopDecoder(py::module& m) {
             [](std::shared_ptr<PyNvGopDecoder>& dec,
                const std::vector<py::array_t<uint8_t, py::array::c_style | py::array::forcecast>>&
                    numpy_datas,
-               const std::vector<std::string>& filepaths, const std::vector<int>& frame_ids) {
+               const std::vector<std::string>& filepaths, const std::vector<int>& frame_ids,
+               bool enable_gop_dependency_graph_optimization) {
                 try {
                     // Convert numpy arrays to pointers and sizes (requires GIL)
                     std::vector<const uint8_t*> datas;
@@ -1083,7 +1108,8 @@ void Init_PyNvGopDecoder(py::module& m) {
                     {
                         py::gil_scoped_release release;
                         dec->decode_from_gop_list(datas, sizes, filepaths, frame_ids, false, false, &result,
-                                                  nullptr);
+                                                  nullptr, /*skip_final_sync=*/false,
+                                                  enable_gop_dependency_graph_optimization);
                     }
                     return result;
                 } catch (const std::exception& e) {
@@ -1091,6 +1117,7 @@ void Init_PyNvGopDecoder(py::module& m) {
                 }
             },
             py::arg("numpy_datas"), py::arg("filepaths"), py::arg("frame_ids"),
+            py::arg("enable_gop_dependency_graph_optimization") = false,
             R"pbdoc(
             Decodes multiple serialized GOP bundles into native YUV frames.
 
@@ -1101,6 +1128,9 @@ void Init_PyNvGopDecoder(py::module& m) {
                              from :meth:`GetGOPList` or :meth:`LoadGopsToList` (one per video)
                 filepaths: List of source file paths, one for each requested frame
                 frame_ids: List of target frame IDs, one for each requested frame
+                enable_gop_dependency_graph_optimization: Use the dependency graph contained
+                    in a GOP to reduce the decoding work required to produce requested frames;
+                    defaults to False, and GOPs without a graph use normal decoding.
 
             Returns:
                 List of :class:`DecodedFrameExt` objects containing decoded native YUV frame data

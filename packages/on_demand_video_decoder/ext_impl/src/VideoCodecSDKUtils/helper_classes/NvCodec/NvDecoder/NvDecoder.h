@@ -17,8 +17,11 @@
 #pragma once
 
 #include <assert.h>
+#include <deque>
 #include <stdint.h>
+#include <map>
 #include <mutex>
+#include <unordered_set>
 #include <vector>
 #include <string>
 #include <iostream>
@@ -139,6 +142,25 @@ public:
     cudaVideoCodec GetCodec() const { return m_eCodec; }
     int GetCurrentWidth() const { return static_cast<int>(m_nWidth); }
     int GetCurrentHeight() const { return static_cast<int>(m_nLumaHeight); }
+
+    /**
+    *  @brief Configure parser-through selective hardware decoding.
+    *
+    *  Every access unit still goes through cuvidParseVideoData. The decode
+    *  callback calls cuvidDecodePicture only for hardwareFrameIds, while the
+    *  display callback maps only outputFrameIds. When reuseState is true, the
+    *  hardware set may only grow; callers must reset/replay before adding a
+    *  frame whose access unit has already passed the parser cursor.
+    */
+    void ConfigureSelectiveDecode(const std::vector<int>& hardwareFrameIds,
+                                  const std::vector<int>& outputFrameIds,
+                                  bool reuseState = false);
+
+    /** Disable selective decoding after the old parser state has been flushed. */
+    void DisableSelectiveDecode();
+
+    bool IsSelectiveDecodeEnabled() const { return m_bSelectiveDecodeEnabled; }
+    bool CanReuseSelectiveDecode(const std::vector<int>& hardwareFrameIds) const;
 
     /**
     *  @brief  This function is used to get the output frame width.
@@ -353,6 +375,16 @@ private:
 
 
 private:
+    struct SelectivePictureDecision {
+        int64_t frame_id = -1;
+        bool submit_to_hardware = false;
+    };
+
+    struct SelectiveSurfaceState {
+        int64_t frame_id = -1;
+        bool submitted_to_hardware = false;
+    };
+
     CUcontext m_cuContext = NULL;
     CUvideoctxlock m_ctxLock;
     CUvideoparser m_hParser = NULL;
@@ -404,6 +436,14 @@ private:
     // the display callback immediately after the decode callback.
     bool m_bForce_zero_latency = false;
     bool m_bExtractSEIMessage = false;
+    bool m_bSelectiveDecodeEnabled = false;
+    std::unordered_set<int64_t> m_selectiveHardwareFrameIds;
+    std::unordered_set<int64_t> m_selectiveOutputFrameIds;
+    // Persists across continuation calls so a newly requested historical
+    // dependency cannot be silently submitted after its callback has passed.
+    std::unordered_set<int64_t> m_selectiveSkippedFrameIds;
+    std::deque<SelectivePictureDecision> m_pendingPictureDecisions;
+    std::map<int, SelectiveSurfaceState> m_selectiveSurfaceStates;
     CuvidFunctions m_api{};
     CUevent m_bCUEvent = NULL;
     bool m_bEnableAsyncAllocations = false;

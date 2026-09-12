@@ -16,12 +16,14 @@
 
 #include "PyNvGopDecoder.hpp"
 #include "FrameOutput.hpp"
+#include "GopDependencyGraph.hpp"
 
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <functional>
 #include <map>
+#include <optional>
 #include <string>
 #include <unordered_set>
 #include <utility>
@@ -35,6 +37,7 @@
 #include "ColorConvertKernels.cuh"
 
 namespace frame_output = accvlab::on_demand_video_decoder::internal::frame_output;
+namespace gop_dependency = accvlab::on_demand_video_decoder::internal;
 
 void PyNvGopDecoder::get_gop_internal(
     const std::vector<std::string>& filepaths, const std::vector<int> frame_ids,
@@ -125,9 +128,9 @@ void PyNvGopDecoder::get_gop_internal(
     nvtxRangePop();  // Demux thread join
 }
 
-std::vector<SerializedPacketBundle> PyNvGopDecoder::get_gop_list(const std::vector<std::string>& filepaths,
-                                                                 const std::vector<int> frame_ids,
-                                                                 const FastStreamInfo* fastStreamInfos) {
+std::vector<SerializedPacketBundle> PyNvGopDecoder::get_gop_list(
+    const std::vector<std::string>& filepaths, const std::vector<int> frame_ids,
+    const FastStreamInfo* fastStreamInfos, bool enable_gop_dependency_graph_optimization) {
     nvtxRangePushA("GetGOPList");
     const size_t total_videos = frame_ids.size();
 
@@ -163,7 +166,8 @@ std::vector<SerializedPacketBundle> PyNvGopDecoder::get_gop_list(const std::vect
         // Create bundle for this single video
         SerializedPacketBundle bundle = createSerializedPacketBundle(
             1,  // Only one frame per video
-            single_demuxer, single_gop_lens, single_first_frame_ids, single_queue, single_array);
+            single_demuxer, single_gop_lens, single_first_frame_ids, single_queue, single_array,
+            enable_gop_dependency_graph_optimization);
 
         // Restore demuxer for proper cleanup (moved it back from single_demuxer)
         demuxers[i] = std::move(single_demuxer[0]);
@@ -406,13 +410,14 @@ void PyNvGopDecoder::decode_from_packet_list(std::vector<std::vector<int>> packe
     nvtxRangePop();
 }
 
-void PyNvGopDecoder::decode_from_gop_list(const std::vector<const uint8_t*>& datas,
-                                          const std::vector<size_t>& sizes,
-                                          const std::vector<std::string>& filepaths,
-                                          const std::vector<int>& frame_ids, bool convert_to_rgb, bool as_bgr,
-                                          std::vector<DecodedFrameExt>* out_if_no_color_conversion,
-                                          std::vector<RGBFrame>* out_if_color_converted,
-                                          bool skip_final_sync) {
+void PyNvGopDecoder::decode_from_gop_list(
+    const std::vector<const uint8_t*>& datas, const std::vector<size_t>& sizes,
+    const std::vector<std::string>& filepaths, const std::vector<int>& frame_ids, bool convert_to_rgb,
+    bool as_bgr, std::vector<DecodedFrameExt>* out_if_no_color_conversion,
+    std::vector<RGBFrame>* out_if_color_converted, bool skip_final_sync,
+    bool enable_gop_dependency_graph_optimization,
+    const std::vector<std::vector<int>>* dependency_graph_target_frame_ids) {
+    // Stage 1: Validate the public decode mode and its matching output container.
     if (convert_to_rgb) {
         if (out_if_color_converted == nullptr || out_if_no_color_conversion != nullptr) {
             throw std::invalid_argument(
@@ -433,7 +438,8 @@ void PyNvGopDecoder::decode_from_gop_list(const std::vector<const uint8_t*>& dat
         throw std::invalid_argument("[ERROR] datas and sizes must have the same length");
     }
 
-    // Aggregated containers across all input bundles
+    // Stage 2: Deserialize every input bundle and aggregate its GOP metadata,
+    // packet views, and optional dependency graph into per-task arrays.
     std::vector<int> color_ranges_all;
     std::vector<int> codec_ids_all;
     std::vector<int> widths_all;
@@ -445,8 +451,10 @@ void PyNvGopDecoder::decode_from_gop_list(const std::vector<const uint8_t*>& dat
     std::vector<std::vector<int>> decode_idxs_all;
     std::vector<const uint8_t*> packet_binary_data_ptrs_all;
     std::vector<size_t> packet_binary_data_sizes_all;
+    std::vector<std::optional<gop_dependency::GopDependencyGraph>> embedded_dependency_graphs;
+    bool found_embedded_dependency_graph = false;
+    const bool inspect_embedded_dependency_graph = enable_gop_dependency_graph_optimization;
 
-    // First pass: parse each bundle and aggregate
     uint32_t aggregated_frames = 0;
     for (size_t b = 0; b < datas.size(); ++b) {
         const uint8_t* data_ptr = datas[b];
@@ -468,7 +476,23 @@ void PyNvGopDecoder::decode_from_gop_list(const std::vector<const uint8_t*>& dat
             data_ptr, data_size, color_ranges, codec_ids, widths, heights, frame_sizes, gop_lens,
             first_frame_ids, packets_bytes, decode_idxs, packet_binary_data_ptrs, packet_binary_data_sizes);
 
-        // Append to aggregated containers
+        std::vector<std::optional<gop_dependency::GopDependencyGraph>> bundle_dependency_graphs(
+            frames_in_bundle);
+        if (inspect_embedded_dependency_graph && frames_in_bundle == 1) {
+            const uint8_t* payload_end = packet_binary_data_ptrs[0] + packet_binary_data_sizes[0];
+            const uint8_t* bundle_end = data_ptr + data_size;
+            if (payload_end > bundle_end) {
+                nvtxRangePop();
+                throw std::invalid_argument("[ERROR] serialized GOP payload exceeds bundle size");
+            }
+            const size_t trailer_size = static_cast<size_t>(bundle_end - payload_end);
+            bundle_dependency_graphs[0] = gop_dependency::ParseGopDependencyGraph(
+                payload_end, trailer_size, static_cast<uint32_t>(gop_lens[0]));
+            if (bundle_dependency_graphs[0]) {
+                found_embedded_dependency_graph = true;
+            }
+        }
+
         for (uint32_t i = 0; i < frames_in_bundle; ++i) {
             color_ranges_all.push_back(color_ranges[i]);
             codec_ids_all.push_back(codec_ids[i]);
@@ -481,10 +505,13 @@ void PyNvGopDecoder::decode_from_gop_list(const std::vector<const uint8_t*>& dat
             decode_idxs_all.push_back(std::move(decode_idxs[i]));
             packet_binary_data_ptrs_all.push_back(packet_binary_data_ptrs[i]);
             packet_binary_data_sizes_all.push_back(packet_binary_data_sizes[i]);
+            embedded_dependency_graphs.push_back(std::move(bundle_dependency_graphs[i]));
         }
         aggregated_frames += frames_in_bundle;
     }
 
+    // Stage 3: Validate request metadata that can only be checked after the
+    // serialized GOP ranges have been recovered.
     if (aggregated_frames != frame_ids.size()) {
         nvtxRangePop();
         throw std::invalid_argument(
@@ -513,22 +540,84 @@ void PyNvGopDecoder::decode_from_gop_list(const std::vector<const uint8_t*>& dat
         throw std::invalid_argument("[ERROR] total frames exceed max_num_files");
     }
 
-    // Reconstruct packet queues per frame
+    // Stage 4: For each GOP that carries a dependency graph, expand the target
+    // frame(s) to their transitive dependency set. A graphless GOP remains on
+    // the legacy decode path even when the optimization was requested.
+    std::vector<std::vector<uint8_t>> needed_nodes(total_frames);
+    if (found_embedded_dependency_graph) {
+        if (embedded_dependency_graphs.size() != aggregated_frames) {
+            nvtxRangePop();
+            throw std::invalid_argument("[ERROR] dependency graph count must match aggregated frame count");
+        }
+        if (dependency_graph_target_frame_ids != nullptr &&
+            dependency_graph_target_frame_ids->size() != aggregated_frames) {
+            nvtxRangePop();
+            throw std::invalid_argument(
+                "[ERROR] dependency graph target count must match aggregated frame count");
+        }
+
+        for (int i = 0; i < total_frames; ++i) {
+            const auto& graph = embedded_dependency_graphs[i];
+            // A missing graph means this item follows the untouched legacy path.
+            if (!graph) continue;
+
+            const int gop_len = gop_lens_all[i];
+
+            std::vector<uint32_t> root_nodes;
+            if (dependency_graph_target_frame_ids == nullptr) {
+                root_nodes.push_back(static_cast<uint32_t>(frame_ids[i] - first_frame_ids_all[i]));
+            } else {
+                bool contains_current_target = false;
+                for (int planned_frame_id : dependency_graph_target_frame_ids->at(i)) {
+                    if (planned_frame_id < first_frame_ids_all[i] ||
+                        planned_frame_id >= first_frame_ids_all[i] + gop_len) {
+                        nvtxRangePop();
+                        throw std::invalid_argument("[ERROR] planned dependency target is outside the GOP");
+                    }
+                    contains_current_target = contains_current_target || planned_frame_id == frame_ids[i];
+                    root_nodes.push_back(static_cast<uint32_t>(planned_frame_id - first_frame_ids_all[i]));
+                }
+                if (!contains_current_target) {
+                    nvtxRangePop();
+                    throw std::invalid_argument(
+                        "[ERROR] planned dependency targets do not contain the current frame");
+                }
+            }
+            needed_nodes[i] = gop_dependency::BuildGopDependencyDecodeMask(*graph, root_nodes);
+        }
+    }
+
+    std::vector<std::vector<int>> hardware_decode_frame_ids;
+    if (found_embedded_dependency_graph) {
+        hardware_decode_frame_ids.resize(total_frames);
+    }
+
+    // Stage 5: Prepare each task's packet queue and continuation candidate.
+    // Selective queues retain the complete GOP: every access unit advances the
+    // CUVID parser, while hardware_decode_frame_ids controls which pictures are
+    // reconstructed by NVDEC. Keeping the prefix also permits reset + replay if
+    // DecProc later determines that the previous decoder state cannot be reused.
     std::vector<std::unique_ptr<ConcurrentQueue<std::tuple<uint8_t*, int, int>>>> vpacket_queue;
     vpacket_queue.resize(total_frames);
 
     for (int i = 0; i < total_frames; ++i) {
+        const bool item_uses_selective_decode = embedded_dependency_graphs[i].has_value();
         int skip_packets = 0;
-        const int last_frame_id = this->last_decoded_frame_infos[i].frame_id;
-        if (this->last_decoded_frame_infos[i].filename != filepaths[i]) {
-            skip_packets = 0;
-        } else if (last_frame_id < first_frame_ids_all[i] ||
-                   last_frame_id >= first_frame_ids_all[i] + gop_lens_all[i]) {
-            skip_packets = 0;
-        } else if (last_frame_id >= frame_ids[i]) {
-            skip_packets = 0;
-        } else {
-            skip_packets = this->last_decoded_frame_infos[i].packet_id;
+        const bool decoder_mode_changes =
+            i < static_cast<int>(this->vdec.size()) && this->vdec[i] &&
+            this->vdec[i]->IsSelectiveDecodeEnabled() != item_uses_selective_decode;
+        if (!decoder_mode_changes) {
+            const int last_frame_id = this->last_decoded_frame_infos[i].frame_id;
+            if (this->last_decoded_frame_infos[i].filename != filepaths[i]) {
+                skip_packets = 0;
+            } else if (last_frame_id < first_frame_ids_all[i] ||
+                       last_frame_id >= first_frame_ids_all[i] + gop_lens_all[i]) {
+                skip_packets = 0;
+            } else if (last_frame_id >= frame_ids[i]) {
+                skip_packets = 0;
+            } else {
+                skip_packets = this->last_decoded_frame_infos[i].packet_id;
+            }
         }
         if (skip_packets == 0) {
             reset_last_decoded_frame_info(this->last_decoded_frame_infos[i]);
@@ -543,11 +632,29 @@ void PyNvGopDecoder::decode_from_gop_list(const std::vector<const uint8_t*>& dat
             const int packet_bytes = packets_bytes_all[i][j];
             int decode_idx = decode_idxs_all[i][j];
 
-            if (skip_packets > 0) {
-                skip_packets--;
-                if (packet_bytes > 0) {
-                    offset += packet_bytes;
+            uint8_t* pVideo = nullptr;
+            if (packet_bytes > 0) {
+                pVideo = const_cast<uint8_t*>(packet_binary_data_ptrs_all[i] + offset);
+                offset += packet_bytes;
+
+                if (item_uses_selective_decode) {
+                    const int node = decode_idx - first_frame_ids_all[i];
+                    const bool is_valid_gop_node = node >= 0 && node < gop_lens_all[i];
+                    const bool submit_to_hardware = !is_valid_gop_node || needed_nodes[i][node];
+                    if (submit_to_hardware) {
+                        hardware_decode_frame_ids[i].push_back(decode_idx);
+                    }
                 }
+            }
+
+            // DecProc's cursor is now always a position in the original GOP
+            // packet sequence, independent of the hardware submission set.
+            // Selective queues retain the complete original packet sequence;
+            // DecProc applies the absolute coded cursor only after deciding
+            // whether state reuse is safe. Legacy queues keep their old suffix
+            // construction behavior.
+            if (!item_uses_selective_decode && skip_packets > 0) {
+                --skip_packets;
                 continue;
             }
 
@@ -556,19 +663,33 @@ void PyNvGopDecoder::decode_from_gop_list(const std::vector<const uint8_t*>& dat
             } else if (packet_bytes == 0) {
                 vpacket_queue[i]->push_back(std::make_tuple(nullptr, 0, 0));
             } else {
-                uint8_t* pVideo = const_cast<uint8_t*>(packet_binary_data_ptrs_all[i] + offset);
-                offset += packet_bytes;
-
                 // Timestamp encoding: keep consistent with existing logic
                 decode_idx = decode_idx * 2;
                 vpacket_queue[i]->push_back(std::make_tuple(pVideo, packet_bytes, decode_idx));
             }
         }
+
+        if (!item_uses_selective_decode && skip_packets != 0) {
+            nvtxRangePop();
+            throw std::invalid_argument("[ERROR] decoder packet cursor is outside the GOP bundle");
+        }
+        if (item_uses_selective_decode) {
+            auto& selected = hardware_decode_frame_ids[i];
+            std::sort(selected.begin(), selected.end());
+            selected.erase(std::unique(selected.begin(), selected.end()), selected.end());
+            if (selected.empty() || !std::binary_search(selected.begin(), selected.end(), frame_ids[i])) {
+                nvtxRangePop();
+                throw std::runtime_error("[ERROR] dependency decode plan does not contain target frame " +
+                                         std::to_string(frame_ids[i]) + " for file " + filepaths[i]);
+            }
+        }
     }
 
+    // Stage 6: Execute the prepared tasks in the existing parallel decode path.
     int st = main_decode(color_ranges_all, codec_ids_all, widths_all, heights_all, frame_sizes_all, filepaths,
                          frame_ids, convert_to_rgb, as_bgr, vpacket_queue, out_if_no_color_conversion,
-                         out_if_color_converted, skip_final_sync);
+                         out_if_color_converted, skip_final_sync,
+                         found_embedded_dependency_graph ? &hardware_decode_frame_ids : nullptr);
     if (st != 0) {
         nvtxRangePop();
         throw std::runtime_error("[ERROR] main_decode failed.");
@@ -581,6 +702,7 @@ void PyNvGopDecoder::decode_from_gop_groups(const std::vector<const uint8_t*>& d
                                             const std::vector<size_t>& sizes,
                                             const std::vector<std::string>& source_names,
                                             const std::vector<std::vector<int>>& frame_id_groups, bool as_bgr,
+                                            bool enable_gop_dependency_graph_optimization,
                                             std::vector<RGBFrame>& output) {
     nvtxRangePushA("DecodeFromGOPGroups");
 
@@ -610,6 +732,9 @@ void PyNvGopDecoder::decode_from_gop_groups(const std::vector<const uint8_t*>& d
     std::vector<std::vector<int>> decode_idxs;
     std::vector<const uint8_t*> packet_binary_data_ptrs;
     std::vector<size_t> packet_binary_data_sizes;
+    std::vector<std::vector<uint8_t>> needed_nodes(num_groups);
+    std::vector<bool> groups_using_dependency_graph(num_groups, false);
+    bool found_embedded_dependency_graph = false;
 
     color_ranges.reserve(num_groups);
     decoder_configs.reserve(num_groups);
@@ -665,6 +790,31 @@ void PyNvGopDecoder::decode_from_gop_groups(const std::vector<const uint8_t*>& d
             throw std::invalid_argument("[ERROR] grouped GOP payload does not contain every target frame");
         }
 
+        if (enable_gop_dependency_graph_optimization) {
+            const uint8_t* payload_end =
+                bundle_packet_binary_data_ptrs[0] + bundle_packet_binary_data_sizes[0];
+            const uint8_t* bundle_end = datas[group_idx] + sizes[group_idx];
+            if (payload_end > bundle_end) {
+                nvtxRangePop();
+                throw std::invalid_argument("[ERROR] serialized GOP payload exceeds bundle size");
+            }
+
+            const size_t trailer_size = static_cast<size_t>(bundle_end - payload_end);
+            const auto dependency_graph = gop_dependency::ParseGopDependencyGraph(
+                payload_end, trailer_size, static_cast<uint32_t>(bundle_gop_lens[0]));
+            if (dependency_graph) {
+                std::vector<uint32_t> target_nodes;
+                target_nodes.reserve(target_ids.size());
+                for (const int target_id : target_ids) {
+                    target_nodes.push_back(static_cast<uint32_t>(target_id - first));
+                }
+                needed_nodes[group_idx] =
+                    gop_dependency::BuildGopDependencyDecodeMask(*dependency_graph, target_nodes);
+                groups_using_dependency_graph[group_idx] = true;
+                found_embedded_dependency_graph = true;
+            }
+        }
+
         color_ranges.push_back(bundle_color_ranges[0]);
         decoder_configs.push_back(
             {bundle_codec_ids[0], bundle_widths[0], bundle_heights[0], bundle_frame_sizes[0]});
@@ -683,18 +833,29 @@ void PyNvGopDecoder::decode_from_gop_groups(const std::vector<const uint8_t*>& d
         throw std::runtime_error("[ERROR] AssignGroupedDecoderSlots failed");
     }
 
+    std::vector<std::vector<int>> hardware_decode_frame_ids;
+    if (found_embedded_dependency_graph) {
+        hardware_decode_frame_ids.resize(num_groups);
+    }
+
+    // Keep the complete packet sequence for dependency-aware groups. DecProc
+    // advances the CUVID parser through every access unit and uses the planned
+    // frame IDs only to decide which pictures are reconstructed by NVDEC.
     std::vector<std::unique_ptr<ConcurrentQueue<std::tuple<uint8_t*, int, int>>>> vpacket_queue(num_groups);
     for (size_t group_idx = 0; group_idx < num_groups; ++group_idx) {
         const size_t slot_idx = decoder_slots[group_idx];
+        const bool group_uses_dependency_graph = groups_using_dependency_graph[group_idx];
         int skip_packets = 0;
-        const int last_frame_id = last_decoded_frame_infos[slot_idx].frame_id;
-        if (last_decoded_frame_infos[slot_idx].filename != source_names[group_idx] ||
-            last_frame_id < first_frame_ids[group_idx] ||
-            last_frame_id >= first_frame_ids[group_idx] + gop_lens[group_idx] ||
-            last_frame_id >= frame_id_groups[group_idx].front()) {
-            skip_packets = 0;
-        } else {
-            skip_packets = last_decoded_frame_infos[slot_idx].packet_id;
+        const bool decoder_mode_changes =
+            vdec[slot_idx]->IsSelectiveDecodeEnabled() != group_uses_dependency_graph;
+        if (!decoder_mode_changes) {
+            const int last_frame_id = last_decoded_frame_infos[slot_idx].frame_id;
+            if (last_decoded_frame_infos[slot_idx].filename == source_names[group_idx] &&
+                last_frame_id >= first_frame_ids[group_idx] &&
+                last_frame_id < first_frame_ids[group_idx] + gop_lens[group_idx] &&
+                last_frame_id < frame_id_groups[group_idx].front()) {
+                skip_packets = last_decoded_frame_infos[slot_idx].packet_id;
+            }
         }
         if (skip_packets == 0) {
             reset_last_decoded_frame_info(last_decoded_frame_infos[slot_idx]);
@@ -707,12 +868,32 @@ void PyNvGopDecoder::decode_from_gop_groups(const std::vector<const uint8_t*>& d
         for (size_t packet_idx = 0; packet_idx < packets_bytes[group_idx].size(); ++packet_idx) {
             const int packet_bytes = packets_bytes[group_idx][packet_idx];
             int decode_idx = decode_idxs[group_idx][packet_idx];
+            uint8_t* video_data = nullptr;
 
-            if (skip_packets > 0) {
-                --skip_packets;
-                if (packet_bytes > 0) {
-                    offset += static_cast<size_t>(packet_bytes);
+            if (packet_bytes > 0) {
+                if (offset + static_cast<size_t>(packet_bytes) > packet_binary_data_sizes[group_idx]) {
+                    nvtxRangePop();
+                    throw std::invalid_argument("[ERROR] GOP packet data is truncated");
                 }
+                video_data = const_cast<uint8_t*>(packet_binary_data_ptrs[group_idx] + offset);
+                offset += static_cast<size_t>(packet_bytes);
+
+                if (group_uses_dependency_graph) {
+                    const int node = decode_idx - first_frame_ids[group_idx];
+                    const bool is_valid_gop_node = node >= 0 && node < gop_lens[group_idx];
+                    const bool submit_to_hardware =
+                        !is_valid_gop_node || needed_nodes[group_idx][static_cast<size_t>(node)];
+                    if (submit_to_hardware) {
+                        hardware_decode_frame_ids[group_idx].push_back(decode_idx);
+                    }
+                }
+            }
+
+            // Legacy groups retain their original suffix-queue continuation.
+            // Dependency-aware groups retain the prefix so DecProc can replay
+            // it if the previous selective state cannot satisfy this plan.
+            if (!group_uses_dependency_graph && skip_packets > 0) {
+                --skip_packets;
                 continue;
             }
 
@@ -721,12 +902,6 @@ void PyNvGopDecoder::decode_from_gop_groups(const std::vector<const uint8_t*>& d
             } else if (packet_bytes == 0) {
                 vpacket_queue[group_idx]->push_back(std::make_tuple(nullptr, 0, 0));
             } else if (packet_bytes > 0) {
-                if (offset + static_cast<size_t>(packet_bytes) > packet_binary_data_sizes[group_idx]) {
-                    nvtxRangePop();
-                    throw std::invalid_argument("[ERROR] GOP packet data is truncated");
-                }
-                uint8_t* video_data = const_cast<uint8_t*>(packet_binary_data_ptrs[group_idx] + offset);
-                offset += static_cast<size_t>(packet_bytes);
                 vpacket_queue[group_idx]->push_back(
                     std::make_tuple(video_data, packet_bytes, decode_idx * 2));
             } else {
@@ -734,10 +909,29 @@ void PyNvGopDecoder::decode_from_gop_groups(const std::vector<const uint8_t*>& d
                 throw std::invalid_argument("[ERROR] invalid negative GOP packet size");
             }
         }
+
+        if (!group_uses_dependency_graph && skip_packets != 0) {
+            nvtxRangePop();
+            throw std::invalid_argument("[ERROR] decoder packet cursor is outside the GOP bundle");
+        }
+        if (group_uses_dependency_graph) {
+            auto& selected = hardware_decode_frame_ids[group_idx];
+            std::sort(selected.begin(), selected.end());
+            selected.erase(std::unique(selected.begin(), selected.end()), selected.end());
+            for (const int target_id : frame_id_groups[group_idx]) {
+                if (!std::binary_search(selected.begin(), selected.end(), target_id)) {
+                    nvtxRangePop();
+                    throw std::runtime_error("[ERROR] dependency decode plan does not contain target frame " +
+                                             std::to_string(target_id) + " for source " +
+                                             source_names[group_idx]);
+                }
+            }
+        }
     }
 
     status = main_decode_groups(color_ranges, decoder_configs, source_names, frame_id_groups, decoder_slots,
-                                as_bgr, vpacket_queue, output);
+                                as_bgr, vpacket_queue, output,
+                                found_embedded_dependency_graph ? &hardware_decode_frame_ids : nullptr);
     if (status != 0) {
         nvtxRangePop();
         throw std::runtime_error("[ERROR] main_decode_groups failed");
@@ -751,12 +945,16 @@ int PyNvGopDecoder::main_decode_groups(
     const std::vector<std::string>& source_names, const std::vector<std::vector<int>>& frame_id_groups,
     const std::vector<size_t>& decoder_slots, bool as_bgr,
     std::vector<std::unique_ptr<ConcurrentQueue<std::tuple<uint8_t*, int, int>>>>& vpacket_queue,
-    std::vector<RGBFrame>& output) {
+    std::vector<RGBFrame>& output, const std::vector<std::vector<int>>* hardware_decode_frame_ids) {
     ensureCudaContextInitialized();
 
     const size_t num_groups = frame_id_groups.size();
     if (decoder_configs.size() != num_groups || decoder_slots.size() != num_groups) {
         LOG(ERROR) << "Grouped decoder configuration or slot mapping size does not match group count";
+        return -1;
+    }
+    if (hardware_decode_frame_ids != nullptr && hardware_decode_frame_ids->size() != num_groups) {
+        LOG(ERROR) << "Grouped selective decode configuration count does not match group count";
         return -1;
     }
     std::unordered_set<size_t> unique_slots;
@@ -817,10 +1015,14 @@ int PyNvGopDecoder::main_decode_groups(
         decode_pool.run_indexed(num_groups, [&](size_t group_idx) {
             const size_t slot_idx = decoder_slots[group_idx];
             const AVColorRange color_range = static_cast<AVColorRange>(color_ranges[group_idx]);
+            const std::vector<int>* selected_hardware_frames =
+                hardware_decode_frame_ids && !hardware_decode_frame_ids->at(group_idx).empty()
+                    ? &hardware_decode_frame_ids->at(group_idx)
+                    : nullptr;
             DecProc<RGBFrame>(color_range, vdec[slot_idx].get(), rgb_frames[group_idx],
                               group_frame_buffers[group_idx], vpacket_queue[group_idx].get(),
                               frame_id_groups[group_idx], as_bgr, source_names[group_idx],
-                              last_decoded_frame_infos[slot_idx]);
+                              last_decoded_frame_infos[slot_idx], selected_hardware_frames);
         });
     } catch (const std::exception& error) {
         force_join_all();
@@ -856,7 +1058,7 @@ int PyNvGopDecoder::main_decode(
     const std::vector<int>& frame_ids, bool convert_to_rgb, bool as_bgr,
     std::vector<std::unique_ptr<ConcurrentQueue<std::tuple<uint8_t*, int, int>>>>& vpacket_queue,
     std::vector<DecodedFrameExt>* out_if_no_color_conversion, std::vector<RGBFrame>* out_if_color_converted,
-    bool skip_final_sync) {
+    bool skip_final_sync, const std::vector<std::vector<int>>* hardware_decode_frame_ids) {
     // start decoding process
     int st = 0;
 
@@ -876,6 +1078,11 @@ int PyNvGopDecoder::main_decode(
     }
 
     const int total_frames = static_cast<int>(frame_ids.size());
+    if (hardware_decode_frame_ids != nullptr &&
+        hardware_decode_frame_ids->size() != static_cast<size_t>(total_frames)) {
+        LOG(ERROR) << "Selective decode configuration count does not match frame count";
+        return -1;
+    }
 
     std::vector<std::vector<uint8_t*>> per_file_frame_buffers;
     st = GetFileFrameBuffers(&widths, &heights, &frame_sizes, convert_to_rgb, per_file_frame_buffers);
@@ -915,15 +1122,20 @@ int PyNvGopDecoder::main_decode(
         decode_pool.run_indexed(total_frames, [&](size_t index) {
             std::vector<int> sorted_frame_ids = {frame_ids[index]};
             AVColorRange color_range = static_cast<AVColorRange>(color_ranges[index]);
+            const std::vector<int>* selected_hardware_frames =
+                hardware_decode_frame_ids && !hardware_decode_frame_ids->at(index).empty()
+                    ? &hardware_decode_frame_ids->at(index)
+                    : nullptr;
             if (convert_to_rgb) {
                 DecProc<RGBFrame>(color_range, this->vdec[index].get(), rgb_frames[index],
                                   per_file_frame_buffers[index], vpacket_queue[index].get(), sorted_frame_ids,
-                                  as_bgr, filepaths[index], this->last_decoded_frame_infos[index]);
+                                  as_bgr, filepaths[index], this->last_decoded_frame_infos[index],
+                                  selected_hardware_frames);
             } else {
                 DecProc<DecodedFrameExt>(color_range, this->vdec[index].get(), decodedFrames[index],
                                          per_file_frame_buffers[index], vpacket_queue[index].get(),
                                          sorted_frame_ids, false, filepaths[index],
-                                         this->last_decoded_frame_infos[index]);
+                                         this->last_decoded_frame_infos[index], selected_hardware_frames);
             }
         });
     } catch (const std::exception& e) {
@@ -965,7 +1177,8 @@ SerializedPacketBundle PyNvGopDecoder::createSerializedPacketBundle(
     const std::vector<std::vector<int>>& all_gop_lens,
     const std::vector<std::vector<int>>& all_first_frame_ids,
     const std::vector<std::unique_ptr<ConcurrentQueue<std::tuple<uint8_t*, int, int>>>>& vpacket_queue,
-    const std::vector<std::vector<std::unique_ptr<uint8_t[]>>>& vpacket_array) {
+    const std::vector<std::vector<std::unique_ptr<uint8_t[]>>>& vpacket_array,
+    bool enable_gop_dependency_graph_optimization) {
     nvtxRangePushA("Direct Serialization");
 
     /*
@@ -1056,6 +1269,30 @@ SerializedPacketBundle PyNvGopDecoder::createSerializedPacketBundle(
         total_size += sizeof(uint64_t) + packet_binary_data_temp[i].size();             // binary_data block
     }
 
+    // Dependency analysis is opt-in because it adds a parser pass during GOP
+    // extraction and extends the serialized bundle. When enabled, a graph is
+    // attached only if a lightweight CUVID parser can prove that the whole
+    // GOP is self-contained. Codecs without a dependency extractor and unsafe
+    // streams keep the legacy bundle layout.
+    std::vector<uint8_t> dependency_graph_trailer;
+    if (enable_gop_dependency_graph_optimization && total_frames == 1 && !all_gop_lens[0].empty() &&
+        !all_first_frame_ids[0].empty()) {
+        try {
+            const auto graph = gop_dependency::BuildGopDependencyGraph(
+                demuxers[0]->GetNvCodecId(), all_first_frame_ids[0][0], all_gop_lens[0][0],
+                packets_bytes_temp[0], decode_idxs_temp[0], packet_binary_data_temp[0]);
+            if (graph) {
+                dependency_graph_trailer = gop_dependency::SerializeGopDependencyGraph(*graph);
+                total_size += dependency_graph_trailer.size();
+            }
+        } catch (const std::exception& error) {
+            // Graph generation is an optimization. GOP extraction and legacy
+            // decode remain available for every unsupported/unsafe stream.
+            LOG(WARNING) << "GOP dependency graph omitted: " << error.what();
+            dependency_graph_trailer.clear();
+        }
+    }
+
     // Step 2: Allocate memory buffer and serialize data
     SerializedPacketBundle result;
     result.data = std::make_unique<uint8_t[]>(total_size);
@@ -1136,6 +1373,11 @@ SerializedPacketBundle PyNvGopDecoder::createSerializedPacketBundle(
             std::memcpy(ptr, binary_data.data(), binary_data.size());  // binary data
             ptr += binary_data.size();
         }
+    }
+
+    if (!dependency_graph_trailer.empty()) {
+        std::memcpy(ptr, dependency_graph_trailer.data(), dependency_graph_trailer.size());
+        ptr += dependency_graph_trailer.size();
     }
 
 #ifdef IS_DEBUG_BUILD

@@ -840,7 +840,7 @@ if frame_id < first_frame_id or frame_id >= first_frame_id + gop_len:
 1. Demux once, decode multiple times with different frame selections
 2. CPU-bound demuxing and GPU-bound decoding can be scheduled and scaled independently
 3. Decode any subset of the extracted videos
-4. The serialized GOP bundle is a portable intermediate: cache it in memory (Section 3.3.4),
+4. The serialized GOP bundle is a portable intermediate: cache it in memory (Section 3.3.5),
    share it across processes (Section 3.5), or persist it to disk (Section 3.4)
 
 **Running the Sample**
@@ -850,7 +850,43 @@ cd packages/on_demand_video_decoder/samples
 python SampleDemuxerDecoderSeparationAccess.py
 ```
 
-#### 3.3.4 GOP Caching Feature
+#### 3.3.4 GOP Dependency Graph Optimization
+
+By default, decoding a target frame may require decoding every preceding frame in
+the same GOP. For HEVC videos, the optional GOP dependency graph optimization
+records the relationships between frames during Stage 1. Stage 2 can then avoid
+hardware decoding frames that are not required to produce the requested frame.
+
+Enable the optimization in both stages:
+
+```python
+gop_list = nv_gop_dec1.GetGOPList(
+    file_path_list,
+    frame_id_list,
+    enable_gop_dependency_graph_optimization=True,
+)
+
+decoded_frames = nv_gop_dec2.DecodeFromGOPListRGB(
+    [packets for packets, _, _ in gop_list],
+    file_path_list,
+    frame_id_list,
+    as_bgr=True,
+    enable_gop_dependency_graph_optimization=True,
+)
+```
+
+The option defaults to `False`. Building the dependency information remains a
+CPU-only operation and does not create a CUDA context. Currently, dependency
+information is generated only for HEVC inputs. Older serialized GOP bundles,
+bundles without dependency information, and non-HEVC inputs continue to use the
+normal decoding path.
+
+The serialized GOP bundle should be treated as opaque data regardless of whether
+the optimization is enabled. Pass it directly between `GetGOPList` and
+`DecodeFromGOPListRGB`, or store and reload it using the existing GOP persistence
+APIs.
+
+#### 3.3.5 GOP Caching Feature
 
 The GOP caching feature automatically stores extracted serialized GOP bundles in Python memory, eliminating the need for 
 manual cache management by the user. When enabled, subsequent calls to {py:meth}`~accvlab.on_demand_video_decoder.CachedGopDecoder.GetGOPList` with the same 

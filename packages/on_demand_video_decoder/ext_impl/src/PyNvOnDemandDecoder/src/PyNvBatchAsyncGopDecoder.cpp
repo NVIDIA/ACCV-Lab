@@ -234,7 +234,7 @@ void PyNvBatchAsyncGopDecoder::validate_decode_input(
 void PyNvBatchAsyncGopDecoder::submit_work(std::vector<std::vector<std::vector<uint8_t>>> numpy_datas,
                                            std::vector<std::string> filepaths,
                                            std::vector<std::vector<int>> frame_ids_2d, bool as_bgr,
-                                           bool is_rgb) {
+                                           bool is_rgb, bool enable_gop_dependency_graph_optimization) {
     std::unique_lock<std::mutex> lock(async_mutex_);
 
     if (has_pending_task_) {
@@ -250,7 +250,8 @@ void PyNvBatchAsyncGopDecoder::submit_work(std::vector<std::vector<std::vector<u
 
     has_pending_task_ = true;
     decode_worker_.start([this, numpy_datas = std::move(numpy_datas), filepaths = std::move(filepaths),
-                          frame_ids_2d = std::move(frame_ids_2d), as_bgr, is_rgb]() mutable {
+                          frame_ids_2d = std::move(frame_ids_2d), as_bgr, is_rgb,
+                          enable_gop_dependency_graph_optimization]() mutable {
         DecodeResultGOP result;
         result.file_path_list = filepaths;
         result.frame_id_list_2d = frame_ids_2d;
@@ -299,6 +300,8 @@ void PyNvBatchAsyncGopDecoder::submit_work(std::vector<std::vector<std::vector<u
             std::vector<std::vector<int>> sorted_fids_2d(V);       // [v][f] ascending frame id
             std::vector<std::vector<const uint8_t*>> datas_2d(V);  // [v][f] covering bundle ptr
             std::vector<std::vector<size_t>> sizes_2d(V);          // [v][f] covering bundle size
+            std::vector<std::vector<size_t>> gop_indices_2d(V);    // [v][f] covering GOP index
+            std::vector<std::vector<std::vector<int>>> target_fids_by_gop_2d(V);
 
             struct GopRange {
                 int first_frame_id;
@@ -333,14 +336,19 @@ void PyNvBatchAsyncGopDecoder::submit_work(std::vector<std::vector<std::vector<u
                 sorted_fids_2d[v].resize(F);
                 datas_2d[v].resize(F);
                 sizes_2d[v].resize(F);
+                gop_indices_2d[v].resize(F);
+                target_fids_by_gop_2d[v].resize(gop_ranges.size());
                 for (int f = 0; f < F; ++f) {
                     const int fid = fids_v[perm[f]];
                     sorted_fids_2d[v][f] = fid;
                     bool found = false;
-                    for (const auto& gr : gop_ranges) {
+                    for (size_t g = 0; g < gop_ranges.size(); ++g) {
+                        const auto& gr = gop_ranges[g];
                         if (fid >= gr.first_frame_id && fid < gr.first_frame_id + gr.gop_len) {
                             datas_2d[v][f] = gr.data;
                             sizes_2d[v][f] = gr.size;
+                            gop_indices_2d[v][f] = g;
+                            target_fids_by_gop_2d[v][g].push_back(fid);
                             found = true;
                             break;
                         }
@@ -378,19 +386,26 @@ void PyNvBatchAsyncGopDecoder::submit_work(std::vector<std::vector<std::vector<u
             std::vector<const uint8_t*> datas_f(V);
             std::vector<size_t> sizes_f(V);
             std::vector<int> frame_ids_f(V);
+            std::vector<std::vector<int>> planned_target_frame_ids_f(V);
 
             for (int f = 0; f < F; ++f) {
                 for (int v = 0; v < V; ++v) {
                     datas_f[v] = datas_2d[v][f];
                     sizes_f[v] = sizes_2d[v][f];
                     frame_ids_f[v] = sorted_fids_2d[v][f];
+                    planned_target_frame_ids_f[v] = target_fids_by_gop_2d[v][gop_indices_2d[v][f]];
                 }
+
+                const auto* dependency_graph_target_frame_ids =
+                    enable_gop_dependency_graph_optimization ? &planned_target_frame_ids_f : nullptr;
 
                 if (is_rgb) {
                     std::vector<RGBFrame> frames_f;
                     gop_dec_->decode_from_gop_list(datas_f, sizes_f, filepaths, frame_ids_f,
                                                    /*convert_to_rgb=*/true, as_bgr, nullptr, &frames_f,
-                                                   /*skip_final_sync=*/true);
+                                                   /*skip_final_sync=*/true,
+                                                   enable_gop_dependency_graph_optimization,
+                                                   dependency_graph_target_frame_ids);
                     if (static_cast<int>(frames_f.size()) != V) {
                         std::ostringstream oss;
                         oss << "PyNvBatchAsyncGopDecoder: frame-slot " << f
@@ -419,10 +434,11 @@ void PyNvBatchAsyncGopDecoder::submit_work(std::vector<std::vector<std::vector<u
 
                 } else {
                     std::vector<DecodedFrameExt> frames_f;
-                    gop_dec_->decode_from_gop_list(datas_f, sizes_f, filepaths, frame_ids_f,
-                                                   /*convert_to_rgb=*/false,
-                                                   /*as_bgr=*/false, &frames_f, nullptr,
-                                                   /*skip_final_sync=*/true);
+                    gop_dec_->decode_from_gop_list(
+                        datas_f, sizes_f, filepaths, frame_ids_f,
+                        /*convert_to_rgb=*/false, /*as_bgr=*/false, &frames_f, nullptr,
+                        /*skip_final_sync=*/true, enable_gop_dependency_graph_optimization,
+                        dependency_graph_target_frame_ids);
                     if (static_cast<int>(frames_f.size()) != V) {
                         std::ostringstream oss;
                         oss << "PyNvBatchAsyncGopDecoder: frame-slot " << f
@@ -487,9 +503,11 @@ void PyNvBatchAsyncGopDecoder::submit_work(std::vector<std::vector<std::vector<u
 
 void PyNvBatchAsyncGopDecoder::DecodeFromGOPListRGB(
     std::vector<std::vector<std::vector<uint8_t>>> numpy_datas, const std::vector<std::string>& filepaths,
-    const std::vector<std::vector<int>>& frame_ids_2d, bool as_bgr) {
+    const std::vector<std::vector<int>>& frame_ids_2d, bool as_bgr,
+    bool enable_gop_dependency_graph_optimization) {
     validate_decode_input(filepaths, frame_ids_2d, numpy_datas);
-    submit_work(std::move(numpy_datas), filepaths, frame_ids_2d, as_bgr, /*is_rgb=*/true);
+    submit_work(std::move(numpy_datas), filepaths, frame_ids_2d, as_bgr, /*is_rgb=*/true,
+                enable_gop_dependency_graph_optimization);
 }
 
 std::vector<std::vector<RGBFrame>> PyNvBatchAsyncGopDecoder::DecodeFromGOPListRGBGetBuffer(
@@ -550,10 +568,11 @@ std::vector<std::vector<RGBFrame>> PyNvBatchAsyncGopDecoder::DecodeFromGOPListRG
 
 void PyNvBatchAsyncGopDecoder::DecodeFromGOPList(std::vector<std::vector<std::vector<uint8_t>>> numpy_datas,
                                                  const std::vector<std::string>& filepaths,
-                                                 const std::vector<std::vector<int>>& frame_ids_2d) {
+                                                 const std::vector<std::vector<int>>& frame_ids_2d,
+                                                 bool enable_gop_dependency_graph_optimization) {
     validate_decode_input(filepaths, frame_ids_2d, numpy_datas);
     submit_work(std::move(numpy_datas), filepaths, frame_ids_2d, /*as_bgr=*/false,
-                /*is_rgb=*/false);
+                /*is_rgb=*/false, enable_gop_dependency_graph_optimization);
 }
 
 std::vector<std::vector<DecodedFrameExt>> PyNvBatchAsyncGopDecoder::DecodeFromGOPListGetBuffer(
@@ -661,7 +680,7 @@ void Init_PyNvBatchAsyncGopDecoder(py::module& m) {
             [](std::shared_ptr<PyNvBatchAsyncGopDecoder>& dec,
                const std::vector<std::vector<py::array_t<uint8_t>>>& numpy_data_arrays,
                const std::vector<std::string>& filepaths, const std::vector<std::vector<int>>& frame_ids_2d,
-               bool as_bgr) {
+               bool as_bgr, bool enable_gop_dependency_graph_optimization) {
                 // Copy bundle data while GIL is held (numpy buffer access requires GIL).
                 std::vector<std::vector<std::vector<uint8_t>>> bundle_copies;
                 bundle_copies.reserve(numpy_data_arrays.size());
@@ -677,13 +696,15 @@ void Init_PyNvBatchAsyncGopDecoder(py::module& m) {
                 {
                     py::gil_scoped_release release;
                     try {
-                        dec->DecodeFromGOPListRGB(std::move(bundle_copies), filepaths, frame_ids_2d, as_bgr);
+                        dec->DecodeFromGOPListRGB(std::move(bundle_copies), filepaths, frame_ids_2d, as_bgr,
+                                                  enable_gop_dependency_graph_optimization);
                     } catch (const std::exception& e) {
                         throw std::runtime_error(e.what());
                     }
                 }
             },
             py::arg("numpy_datas"), py::arg("filepaths"), py::arg("frame_ids"), py::arg("as_bgr") = false,
+            py::arg("enable_gop_dependency_graph_optimization") = false,
             R"pbdoc(
             Submit an async 2D RGB decode from serialized GOP bundles. Returns immediately.
 
@@ -698,6 +719,9 @@ void Init_PyNvBatchAsyncGopDecoder(py::module& m) {
                     must have the same length.  Order is preserved in the output
                     (output ``[v][f]`` corresponds to ``frame_ids[v][f]``).
                 as_bgr: Output BGR (True) or RGB (False).
+                enable_gop_dependency_graph_optimization: Use the dependency graph contained
+                    in a GOP to reduce the decoding work required to produce requested frames;
+                    defaults to False, and GOPs without a graph use normal decoding.
 
             .. warning::
                 **Lifetime contract.** Frames returned by the previous
@@ -742,7 +766,8 @@ void Init_PyNvBatchAsyncGopDecoder(py::module& m) {
             "DecodeFromGOPList",
             [](std::shared_ptr<PyNvBatchAsyncGopDecoder>& dec,
                const std::vector<std::vector<py::array_t<uint8_t>>>& numpy_data_arrays,
-               const std::vector<std::string>& filepaths, const std::vector<std::vector<int>>& frame_ids_2d) {
+               const std::vector<std::string>& filepaths, const std::vector<std::vector<int>>& frame_ids_2d,
+               bool enable_gop_dependency_graph_optimization) {
                 std::vector<std::vector<std::vector<uint8_t>>> bundle_copies;
                 bundle_copies.reserve(numpy_data_arrays.size());
                 for (const auto& bundles_v : numpy_data_arrays) {
@@ -757,18 +782,24 @@ void Init_PyNvBatchAsyncGopDecoder(py::module& m) {
                 {
                     py::gil_scoped_release release;
                     try {
-                        dec->DecodeFromGOPList(std::move(bundle_copies), filepaths, frame_ids_2d);
+                        dec->DecodeFromGOPList(std::move(bundle_copies), filepaths, frame_ids_2d,
+                                               enable_gop_dependency_graph_optimization);
                     } catch (const std::exception& e) {
                         throw std::runtime_error(e.what());
                     }
                 }
             },
             py::arg("numpy_datas"), py::arg("filepaths"), py::arg("frame_ids"),
+            py::arg("enable_gop_dependency_graph_optimization") = false,
             R"pbdoc(
             Submit an async 2D YUV decode from serialized GOP bundles. Returns immediately.
 
             Same numpy_datas/filepath/frame_ids semantics as ``DecodeFromGOPListRGB``.
             Output is :class:`DecodedFrameExt` (NV12 / P016 / YUV444).
+            ``enable_gop_dependency_graph_optimization`` uses the dependency graph
+            contained in a GOP to reduce the decoding work required to produce
+            requested frames; it defaults to False, and GOPs without a graph use
+            normal decoding.
             )pbdoc")
         .def(
             "DecodeFromGOPListGetBuffer",

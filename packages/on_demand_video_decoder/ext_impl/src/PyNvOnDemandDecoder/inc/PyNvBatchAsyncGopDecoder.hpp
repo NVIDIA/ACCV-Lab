@@ -64,7 +64,8 @@ class PyNvBatchAsyncGopDecoder {
      */
     void DecodeFromGOPListRGB(std::vector<std::vector<std::vector<uint8_t>>> numpy_datas,
                               const std::vector<std::string>& filepaths,
-                              const std::vector<std::vector<int>>& frame_ids_2d, bool as_bgr);
+                              const std::vector<std::vector<int>>& frame_ids_2d, bool as_bgr,
+                              bool enable_gop_dependency_graph_optimization = false);
 
     /**
      * Block until the pending RGB task completes and return decoded frames.
@@ -86,7 +87,8 @@ class PyNvBatchAsyncGopDecoder {
      */
     void DecodeFromGOPList(std::vector<std::vector<std::vector<uint8_t>>> numpy_datas,
                            const std::vector<std::string>& filepaths,
-                           const std::vector<std::vector<int>>& frame_ids_2d);
+                           const std::vector<std::vector<int>>& frame_ids_2d,
+                           bool enable_gop_dependency_graph_optimization = false);
 
     /**
      * Block until the pending YUV task completes and return decoded frames.
@@ -138,7 +140,7 @@ class PyNvBatchAsyncGopDecoder {
     // Common submission path shared by RGB and YUV decode calls.
     void submit_work(std::vector<std::vector<std::vector<uint8_t>>> numpy_datas,
                      std::vector<std::string> filepaths, std::vector<std::vector<int>> frame_ids_2d,
-                     bool as_bgr, bool is_rgb);
+                     bool as_bgr, bool is_rgb, bool enable_gop_dependency_graph_optimization);
 
    private:
     bool suppress_no_color_range_warning_ = false;

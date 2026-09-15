@@ -16,6 +16,7 @@
 
 #include "GopDependencyGraph.hpp"
 
+#include "NvDecoder/SelectiveDecodeParserConfig.h"
 #include "cuvid_dlopen.h"
 #include "nvcuvid.h"
 
@@ -35,8 +36,9 @@ namespace accvlab::on_demand_video_decoder::internal {
 namespace {
 
 constexpr char kGraphMagic[] = "GCSR";
-constexpr uint16_t kGraphVersion = 1;
+constexpr uint16_t kGraphVersion = 2;
 constexpr size_t kGraphHeaderSize = 16;
+constexpr uint32_t kEndOfStreamDisplayFrontier = UINT32_MAX;
 
 const char* ParserLibraryName() {
 #ifdef _WIN32
@@ -82,6 +84,10 @@ void ValidateGopDependencyGraph(const GopDependencyGraph& graph, uint32_t expect
         graph.row_offsets.back() != graph.parent_nodes.size()) {
         throw std::invalid_argument("[ERROR] dependency CSR row offsets are invalid");
     }
+    if (graph.display_frontier_positions.size() != node_count) {
+        throw std::invalid_argument(
+            "[ERROR] dependency graph display frontier count does not match GOP length");
+    }
 
     std::vector<uint8_t> seen_coded_positions(node_count, 0);
     for (uint32_t position : graph.coded_positions) {
@@ -89,6 +95,13 @@ void ValidateGopDependencyGraph(const GopDependencyGraph& graph, uint32_t expect
             throw std::invalid_argument("[ERROR] dependency CSR coded positions are invalid");
         }
         seen_coded_positions[position] = 1;
+    }
+    for (size_t node = 0; node < node_count; ++node) {
+        const uint32_t frontier = graph.display_frontier_positions[node];
+        if (frontier != kEndOfStreamDisplayFrontier &&
+            (frontier >= node_count || frontier < graph.coded_positions[node])) {
+            throw std::invalid_argument("[ERROR] dependency graph display frontier is invalid");
+        }
     }
 
     for (size_t row = 1; row < graph.row_offsets.size(); ++row) {
@@ -116,7 +129,9 @@ class CuvidDependencyParserSession final {
         }
         parents_.resize(static_cast<size_t>(gop_length));
         coded_positions_.assign(static_cast<size_t>(gop_length), UINT32_MAX);
+        display_frontier_positions_.assign(static_cast<size_t>(gop_length), UINT32_MAX);
         seen_nodes_.assign(static_cast<size_t>(gop_length), 0);
+        displayed_nodes_.assign(static_cast<size_t>(gop_length), 0);
 
         try {
             LoadParserApi();
@@ -124,7 +139,7 @@ class CuvidDependencyParserSession final {
             CUVIDPARSERPARAMS parameters{};
             parameters.CodecType = codec_;
             parameters.ulMaxNumDecodeSurfaces = 1;
-            parameters.ulMaxDisplayDelay = 1;
+            parameters.ulMaxDisplayDelay = selective_decode_parser::kMaxDisplayDelay;
             parameters.pUserData = this;
             parameters.pfnSequenceCallback = HandleSequence;
             parameters.pfnDecodePicture = HandlePicture;
@@ -156,11 +171,12 @@ class CuvidDependencyParserSession final {
             throw std::overflow_error("access unit is too large for the CUVID dependency parser");
         }
 
+        current_access_unit_position_ = next_access_unit_position_++;
         pending_frame_ids_.push_back(frame_id);
         CUVIDSOURCEDATAPACKET packet{};
         packet.payload = data;
         packet.payload_size = static_cast<unsigned long>(size);
-        packet.flags = CUVID_PKT_TIMESTAMP;
+        packet.flags = selective_decode_parser::kAccessUnitFlags;
         packet.timestamp = frame_id;
         ParsePacket(packet);
     }
@@ -170,8 +186,9 @@ class CuvidDependencyParserSession final {
             throw std::logic_error("dependency parser has already been finished");
         }
 
+        current_access_unit_position_ = kEndOfStreamDisplayFrontier;
         CUVIDSOURCEDATAPACKET end_of_stream{};
-        end_of_stream.flags = CUVID_PKT_ENDOFSTREAM;
+        end_of_stream.flags = selective_decode_parser::kEndOfStreamFlags;
         ParsePacket(end_of_stream);
         finished_ = true;
 
@@ -181,10 +198,20 @@ class CuvidDependencyParserSession final {
         }
         if (!valid_) return std::nullopt;
 
+        size_t display_callback_count = displayed_nodes_.size();
+        while (display_callback_count > 0 && !displayed_nodes_[display_callback_count - 1]) {
+            --display_callback_count;
+        }
+        if (display_callback_count == 0) return std::nullopt;
+
         for (size_t node = 0; node < seen_nodes_.size(); ++node) {
             if (!seen_nodes_[node] || coded_positions_[node] == UINT32_MAX) {
                 return std::nullopt;
             }
+            // Some streams do not produce parser-only display callbacks for a
+            // terminal display-order suffix, even after EOS. Treat only that
+            // suffix as EOS-drained; an interior gap remains unsafe.
+            if (node < display_callback_count && !displayed_nodes_[node]) return std::nullopt;
         }
 
         GopDependencyGraph graph;
@@ -195,6 +222,7 @@ class CuvidDependencyParserSession final {
             graph.row_offsets.push_back(static_cast<uint32_t>(graph.parent_nodes.size()));
         }
         graph.coded_positions = std::move(coded_positions_);
+        graph.display_frontier_positions = std::move(display_frontier_positions_);
         return graph;
     }
 
@@ -225,7 +253,18 @@ class CuvidDependencyParserSession final {
         }
     }
 
-    static int CUDAAPI HandleDisplay(void*, CUVIDPARSERDISPINFO*) { return 1; }
+    static int CUDAAPI HandleDisplay(void* opaque, CUVIDPARSERDISPINFO* display) {
+        auto* session = static_cast<CuvidDependencyParserSession*>(opaque);
+        try {
+            return session->OnDisplay(display);
+        } catch (const std::exception& error) {
+            session->RecordCallbackFailure(error.what());
+            return 0;
+        } catch (...) {
+            session->RecordCallbackFailure("unknown exception in dependency display callback");
+            return 0;
+        }
+    }
 
     int OnSequence(CUVIDEOFORMAT* format) {
         if (!format || format->codec != codec_) {
@@ -272,6 +311,25 @@ class CuvidDependencyParserSession final {
         parents_[node] = std::move(parent_nodes);
         coded_positions_[node] = next_coded_position_++;
         seen_nodes_[node] = 1;
+        return 1;
+    }
+
+    int OnDisplay(CUVIDPARSERDISPINFO* display) {
+        if (!display) {
+            throw std::runtime_error("dependency parser received an empty display callback");
+        }
+
+        const int64_t node_value = display->timestamp - first_frame_id_;
+        if (node_value < 0 || node_value >= gop_length_) {
+            throw std::runtime_error("dependency parser displayed a picture outside the GOP");
+        }
+
+        const size_t node = static_cast<size_t>(node_value);
+        if (displayed_nodes_[node]) {
+            throw std::runtime_error("dependency parser displayed a GOP picture more than once");
+        }
+        display_frontier_positions_[node] = current_access_unit_position_;
+        displayed_nodes_[node] = 1;
         return 1;
     }
 
@@ -376,6 +434,8 @@ class CuvidDependencyParserSession final {
     int first_frame_id_ = 0;
     int gop_length_ = 0;
     uint32_t next_coded_position_ = 0;
+    uint32_t next_access_unit_position_ = 0;
+    uint32_t current_access_unit_position_ = kEndOfStreamDisplayFrontier;
     bool valid_ = true;
     bool finished_ = false;
     std::string callback_error_;
@@ -383,7 +443,9 @@ class CuvidDependencyParserSession final {
     std::unordered_map<int, int64_t> hevc_poc_to_frame_id_;
     std::vector<std::vector<uint32_t>> parents_;
     std::vector<uint32_t> coded_positions_;
+    std::vector<uint32_t> display_frontier_positions_;
     std::vector<uint8_t> seen_nodes_;
+    std::vector<uint8_t> displayed_nodes_;
 };
 
 std::optional<GopDependencyGraph> BuildGraphWithCuvidParser(cudaVideoCodec codec, int first_frame_id,
@@ -451,7 +513,8 @@ std::vector<uint8_t> SerializeGopDependencyGraph(const GopDependencyGraph& graph
     std::vector<uint8_t> bytes;
     bytes.reserve(kGraphHeaderSize +
                   sizeof(uint32_t) *
-                      (graph.row_offsets.size() + graph.parent_nodes.size() + graph.coded_positions.size()));
+                      (graph.row_offsets.size() + graph.parent_nodes.size() + graph.coded_positions.size() +
+                       graph.display_frontier_positions.size()));
     bytes.insert(bytes.end(), kGraphMagic, kGraphMagic + 4);
     AppendU16Le(bytes, kGraphVersion);
     AppendU16Le(bytes, 0);  // flags
@@ -460,6 +523,7 @@ std::vector<uint8_t> SerializeGopDependencyGraph(const GopDependencyGraph& graph
     for (uint32_t value : graph.row_offsets) AppendU32Le(bytes, value);
     for (uint32_t value : graph.parent_nodes) AppendU32Le(bytes, value);
     for (uint32_t value : graph.coded_positions) AppendU32Le(bytes, value);
+    for (uint32_t value : graph.display_frontier_positions) AppendU32Le(bytes, value);
     return bytes;
 }
 
@@ -481,7 +545,7 @@ std::optional<GopDependencyGraph> ParseGopDependencyGraph(const uint8_t* bytes, 
         throw std::invalid_argument("[ERROR] dependency CSR node count does not match GOP length");
     }
 
-    const uint64_t word_count = static_cast<uint64_t>(node_count) + 1 + edge_count + node_count;
+    const uint64_t word_count = static_cast<uint64_t>(node_count) + 1 + edge_count + node_count + node_count;
     const uint64_t expected_size = kGraphHeaderSize + word_count * sizeof(uint32_t);
     if (expected_size != size) {
         throw std::invalid_argument("[ERROR] dependency CSR trailer size is invalid");
@@ -504,6 +568,11 @@ std::optional<GopDependencyGraph> ParseGopDependencyGraph(const uint8_t* bytes, 
         value = ReadU32Le(cursor);
         cursor += sizeof(uint32_t);
     }
+    graph.display_frontier_positions.resize(node_count);
+    for (uint32_t& value : graph.display_frontier_positions) {
+        value = ReadU32Le(cursor);
+        cursor += sizeof(uint32_t);
+    }
 
     ValidateGopDependencyGraph(graph, expected_node_count);
     return graph;
@@ -518,6 +587,11 @@ std::vector<uint8_t> BuildGopDependencyDecodeMask(const GopDependencyGraph& grap
     ValidateGopDependencyGraph(graph, node_count);
 
     std::vector<uint8_t> needed_nodes(node_count, 0);
+    std::vector<uint32_t> nodes_by_coded_position(node_count);
+    for (uint32_t node = 0; node < node_count; ++node) {
+        nodes_by_coded_position[graph.coded_positions[node]] = node;
+    }
+
     std::vector<uint32_t> stack;
     stack.reserve(target_nodes.size());
     for (uint32_t node : target_nodes) {
@@ -527,6 +601,26 @@ std::vector<uint8_t> BuildGopDependencyDecodeMask(const GopDependencyGraph& grap
         if (!needed_nodes[node]) {
             needed_nodes[node] = 1;
             stack.push_back(node);
+        }
+    }
+
+    if (!target_nodes.empty()) {
+        const uint32_t last_output_node = *std::max_element(target_nodes.begin(), target_nodes.end());
+        const uint32_t display_frontier = graph.display_frontier_positions[last_output_node];
+        if (display_frontier != kEndOfStreamDisplayFrontier &&
+            display_frontier > graph.coded_positions[last_output_node]) {
+            // The parser must consume every access unit through the display
+            // frontier before it can return the last requested picture. Decode
+            // that interval as well, so a later request never discovers that
+            // one of those already-consumed pictures was skipped in hardware.
+            for (uint32_t position = graph.coded_positions[last_output_node] + 1;
+                 position <= display_frontier; ++position) {
+                const uint32_t continuation_node = nodes_by_coded_position[position];
+                if (!needed_nodes[continuation_node]) {
+                    needed_nodes[continuation_node] = 1;
+                    stack.push_back(continuation_node);
+                }
+            }
         }
     }
 

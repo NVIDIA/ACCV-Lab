@@ -29,6 +29,7 @@ struct GopDependencyGraph {
     std::vector<uint32_t> row_offsets;
     std::vector<uint32_t> parent_nodes;
     std::vector<uint32_t> coded_positions;
+    std::vector<uint32_t> display_frontier_positions;
 };
 
 /**

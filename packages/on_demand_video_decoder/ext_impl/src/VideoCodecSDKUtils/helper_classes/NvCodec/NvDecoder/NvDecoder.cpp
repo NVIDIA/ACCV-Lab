@@ -22,6 +22,7 @@
 
 #include "../../../Interface/nvcuvid.h"
 #include "NvDecoder/NvDecoder.h"
+#include "NvDecoder/SelectiveDecodeParserConfig.h"
 
 simplelogger::Logger *logger = simplelogger::LoggerFactory::CreateConsoleLogger();
 
@@ -685,17 +686,18 @@ bool NvDecoder::CanReuseSelectiveDecode(const std::vector<int>& hardwareFrameIds
 
     const std::unordered_set<int64_t> hardwareIds(
         hardwareFrameIds.begin(), hardwareFrameIds.end());
-    for (int64_t existingId : m_selectiveHardwareFrameIds)
-    {
-        if (hardwareIds.count(existingId) == 0)
-        {
-            return false;
-        }
-    }
     for (int64_t hardwareId : hardwareIds)
     {
         if (m_selectiveHardwareFrameIds.count(hardwareId) == 0 &&
             m_selectiveSkippedFrameIds.count(hardwareId) != 0)
+        {
+            return false;
+        }
+    }
+    for (const SelectivePictureDecision& pendingDecision : m_pendingPictureDecisions)
+    {
+        if (!pendingDecision.submit_to_hardware &&
+            hardwareIds.count(pendingDecision.frame_id) != 0)
         {
             return false;
         }
@@ -1051,7 +1053,8 @@ NvDecoder::NvDecoder(CUstream cuStream,CUcontext cuContext, bool bUseDeviceFrame
     videoParserParameters.CodecType = eCodec;
     videoParserParameters.ulMaxNumDecodeSurfaces = 1;
     videoParserParameters.ulClockRate = clkRate;
-    videoParserParameters.ulMaxDisplayDelay = bLowLatency ? 0 : 1;
+    videoParserParameters.ulMaxDisplayDelay =
+        bLowLatency ? 0 : selective_decode_parser::kMaxDisplayDelay;
     videoParserParameters.pUserData = this;
     videoParserParameters.pfnSequenceCallback = HandleVideoSequenceProc;
     videoParserParameters.pfnDecodePicture = HandlePictureDecodeProc;
@@ -1148,7 +1151,7 @@ int NvDecoder::Decode(const uint8_t *pData, int nSize, int nFlags, int64_t nTime
     CUVIDSOURCEDATAPACKET packet = { 0 };
     packet.payload = pData;
     packet.payload_size = nSize;
-    packet.flags = nFlags | CUVID_PKT_TIMESTAMP;
+    packet.flags = nFlags | selective_decode_parser::kAccessUnitFlags;
     packet.timestamp = nTimestamp;
     if (m_bSelectiveDecodeEnabled && pData && nSize > 0)
     {
@@ -1158,7 +1161,7 @@ int NvDecoder::Decode(const uint8_t *pData, int nSize, int nFlags, int64_t nTime
             m_bSelectiveDecodeEnabled && m_selectiveHardwareFrameIds.count(frameId) != 0});
     }
     if (!pData || nSize == 0) {
-        packet.flags |= CUVID_PKT_ENDOFSTREAM;
+        packet.flags |= selective_decode_parser::kEndOfStreamFlags;
     }
     NVDEC_API_CALL(m_api.cuvidParseVideoData(m_hParser, &packet));
 

@@ -238,6 +238,7 @@ class RaggedBatch:
         device: Union[torch.device, str],
         num_batch_dims: Optional[int] = None,
         batch_shape: Optional[Union[Sequence[int], int]] = None,
+        dtype: torch.dtype = torch.float32,
     ) -> RaggedBatch:
         """Create an empty instance.
 
@@ -255,6 +256,7 @@ class RaggedBatch:
             batch_shape: Shape of the batch (can be a sequence of ints or a single int in case of a single batch dimension).
                 If not provided, the batch shape is (0,) * num_batch_dims. If provided, `num_batch_dims` cannot be set
                 and the number of batch dimensions is inferred from the shape.
+            dtype: Data type of the tensor. Default: ``torch.float32``
 
         Returns:
             The resulting empty :class:`RaggedBatch` instance
@@ -267,10 +269,14 @@ class RaggedBatch:
         if num_batch_dims is None and batch_shape is None:
             num_batch_dims = 1
             batch_shape = (0,)
-        elif batch_shape is not None:
+        elif batch_shape is None:
             assert num_batch_dims > 0, "Number of batch dimensions needs to be greater than 0"
-            batch_shape = (0,) * len(num_batch_dims)
+            batch_shape = (0,) * num_batch_dims
         else:
+            if isinstance(batch_shape, int):
+                batch_shape = (batch_shape,)
+            else:
+                batch_shape = tuple(batch_shape)
             assert len(batch_shape) > 0, "Batch shape needs to be a non-empty sequence"
             num_batch_dims = len(batch_shape)
 
@@ -285,7 +291,7 @@ class RaggedBatch:
         sample_sizes_shape = batch_shape
         mask_shape = batch_shape + (0,)
         tensor_shape = batch_shape + (0,) * (num_dims - len(batch_shape))
-        tensor = torch.zeros(tensor_shape, dtype=torch.float32, device=device)
+        tensor = torch.zeros(tensor_shape, dtype=dtype, device=device)
         mask = torch.zeros(mask_shape, dtype=torch.bool, device=device)
         sizes = torch.zeros(sample_sizes_shape, dtype=torch.int64, device=device)
         res = RaggedBatch(tensor, mask, sizes, non_uniform_dim)
@@ -714,7 +720,9 @@ class RaggedBatch:
         Note:
             This operation is not performed in-place, i.e. `this.tensor` is not changed.
         """
-        res = self.reshape_batch_dims(-1)
+        # Specify the flattened size explicitly: PyTorch cannot infer ``-1``
+        # when another dimension is zero and the tensor has no elements.
+        res = self.reshape_batch_dims(self.total_num_samples_in_batch)
         return res
 
     def broadcast_batch_dims_to_shape(self, new_batch_shape: Sequence[int,]) -> RaggedBatch:

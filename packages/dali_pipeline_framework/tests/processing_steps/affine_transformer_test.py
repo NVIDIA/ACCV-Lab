@@ -549,6 +549,59 @@ def test_affine_transformer_scaling_points_and_matrix(sx, sy, image_tolerance):
     )
 
 
+def test_probabilistic_first_affine_transformation_has_consistent_branch_layouts():
+    """A skipped first affine step must be mergeable with its applied branch."""
+    orig_points = np.array([[15, 50], [40, 30], [80, 70]], dtype=np.float32)
+    provider = PointImageProvider(IN_H, IN_W, orig_points)
+    batch_size = provider.get_number_of_samples()
+    input_callable = ShuffledShardedInputCallable(
+        provider,
+        batch_size=batch_size,
+        num_shards=1,
+        shard_id=0,
+        shuffle=False,
+    )
+
+    step = AffineTransformer(
+        output_hw=[IN_H, IN_W],
+        resizing_mode=AffineTransformer.ResizingMode.PAD,
+        resizing_anchor=AffineTransformer.ResizingAnchor.CENTER,
+        image_field_names="image",
+        projection_matrix_field_names="projection_matrix",
+        point_field_names="points",
+        transformation_steps=[AffineTransformer.NonUniformScaling(0.5, [0.8, 1.2])],
+        transform_image_on_gpu=False,
+    )
+    pipeline_def = PipelineDefinition(
+        data_loading_callable_iterable=input_callable,
+        preprocess_functors=[step],
+        print_sample_data_group_format=False,
+    )
+    out_struct = pipeline_def.check_and_get_output_data_structure()
+    pipeline = pipeline_def.get_dali_pipeline(
+        enable_conditionals=True,
+        batch_size=batch_size,
+        num_threads=1,
+        device_id=0,
+        seed=123,
+        prefetch_queue_depth=1,
+        py_start_method="spawn",
+    )
+    pipeline.build()
+
+    iterator = DALIStructuredOutputIterator(
+        num_batches_in_epoch=1,
+        pipeline=pipeline,
+        sample_data_structure_blueprint=out_struct,
+        convert_sample_data_group_to_dict=False,
+    )
+    batch = next(iter(iterator))
+
+    assert len(batch["image"]) == batch_size
+    assert np.all(np.isfinite(_to_numpy(batch["points"])))
+    assert np.all(np.isfinite(_to_numpy(batch["projection_matrix"])))
+
+
 @pytest.mark.parametrize(
     "shx,shy,image_tolerance",
     [

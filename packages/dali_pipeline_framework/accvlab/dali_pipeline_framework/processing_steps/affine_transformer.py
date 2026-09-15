@@ -117,9 +117,7 @@ class AffineTransformer(PipelineStepBase):
             # '''
 
             if prior_trafo is None:
-                trafo = fn.constant(
-                    fdata=[1.0, 0.0, 0.0, 0.0, 1.0, 0.0], shape=[2, 3], dtype=types.DALIDataType.FLOAT
-                )
+                trafo = fn.transforms.translation(offset=[0.0, 0.0])
             else:
                 trafo = prior_trafo
             # trafo = fn.cast([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0]], dtype=types.)

@@ -72,7 +72,8 @@ class NuScenesReader:
             add_image_annotations: Whether to add image annotations (as generated using the
                 ``export_2d_annotations_as_json`` script from the NuScenes DevKit). Note that they can
                 be generated using the `prepare_dataset.py` convenience script in the DALI pipeline framework
-                examples.
+                examples. Set to ``False`` if exported image annotations are not needed;
+                this does not disable generation of projected bounding boxes.
             add_projected_bboxes_annotations: Whether to add projected bounding boxes annotations. The
                 projection is done using the ``BboxProjector`` defined in ``bbox_projector.py``. (used in the
                 StreamPETR example)
@@ -112,7 +113,8 @@ class NuScenesReader:
             nuscenes_version: NuScenes version to load
             can_bus_root_path: Root path of the CAN bus data. Needs to be set is any CAN bus messages should be added
             can_messages_to_add: Name or names of CAN bus messages to include in the data
-            add_image_annotations: Whether to add image annotations
+            add_image_annotations: Whether to add exported image annotations from
+                ``<base_dir>/<nuscenes_version>/image_annotations.json``.
             add_projected_bboxes_annotations: Whether to add projected bounding boxes annotations
             image_size: Size of the images. It is needed if ``add_projected_bboxes_annotations`` is set to
                 ``True``. Otherwise, it is not needed (and ignored).
@@ -129,9 +131,9 @@ class NuScenesReader:
             # The annotations are expected to be created using the `prepare_dataset.py` script in the
             # DALI pipeline framework examples, which calls the NuScenes DevKit script
             # `export_2d_annotations_as_json` and stores the result as `image_annotations.json`
-            # in the NuScenes dataset root directory.
+            # in the version subdirectory of the NuScenes dataset root.
             if add_image_annotations:
-                annotations_path = os.path.join(base_dir, "image_annotations.json")
+                annotations_path = os.path.join(base_dir, nuscenes_version, "image_annotations.json")
                 if not os.path.exists(annotations_path):
                     raise RuntimeError(
                         "2D image annotations not found.\n"
@@ -202,9 +204,11 @@ class NuScenesReader:
         # Get the individual driving sequences
         sequences_of_samples_in = self._get_sequences_of_samples(data_in)
 
-        # Get the image annotations mapped, i.e. stored as a dict with
-        # with the sample data token tokens (i.e. each token corresponds to data from a specific camera (sensor) for a specific sample)
-        image_annotations_mapped = self._build_image_annotations_map(data_in)
+        # Exported image annotations are optional. Projected bounding boxes are
+        # generated separately below and do not require this annotation table.
+        image_annotations_mapped = (
+            self._build_image_annotations_map(data_in) if add_image_annotations else None
+        )
 
         # If needed, read the CAN bus
         can_bus_in = NuScenesCanBus(can_bus_root_path) if can_bus_root_path is not None else None

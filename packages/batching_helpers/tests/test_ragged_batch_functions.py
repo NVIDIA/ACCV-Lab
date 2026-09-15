@@ -105,6 +105,51 @@ def test_ragged_batch_properties(capsys):
         assert ragged_batch.dim() == data.dim()
 
 
+@pytest.mark.parametrize(
+    ("kwargs", "expected_batch_shape", "expected_tensor_shape", "expected_dtype"),
+    [
+        ({}, (0,), (0, 0), torch.float32),
+        ({"num_batch_dims": 2}, (0, 0), (0, 0, 0), torch.float32),
+        ({"batch_shape": 4}, (4,), (4, 0), torch.float32),
+        ({"batch_shape": [2, 3], "dtype": torch.int64}, (2, 3), (2, 3, 0), torch.int64),
+    ],
+)
+def test_ragged_batch_empty(kwargs, expected_batch_shape, expected_tensor_shape, expected_dtype):
+    num_dims = len(expected_tensor_shape)
+    non_uniform_dim = len(expected_batch_shape)
+    ragged_batch = RaggedBatch.Empty(
+        num_dims=num_dims,
+        non_uniform_dim=non_uniform_dim,
+        device="cpu",
+        **kwargs,
+    )
+
+    assert ragged_batch.batch_shape == expected_batch_shape
+    assert ragged_batch.num_batch_dims == len(expected_batch_shape)
+    assert ragged_batch.tensor.shape == expected_tensor_shape
+    assert ragged_batch.tensor.dtype == expected_dtype
+    assert ragged_batch.mask.shape == (*expected_batch_shape, 0)
+    assert ragged_batch.sample_sizes.shape == expected_batch_shape
+    assert torch.count_nonzero(ragged_batch.sample_sizes) == 0
+
+
+def test_ragged_batch_flatten_empty_data_batch():
+    batch_shape = (2, 3)
+    data = torch.empty((*batch_shape, 0, 9))
+    sample_sizes = torch.zeros(batch_shape, dtype=torch.int64)
+    ragged_batch = RaggedBatch(data, sample_sizes=sample_sizes)
+
+    flattened = ragged_batch.flatten_batch_dims()
+
+    assert flattened.batch_shape == (6,)
+    assert flattened.num_batch_dims == 1
+    assert flattened.non_uniform_dim == 1
+    assert flattened.tensor.shape == (6, 0, 9)
+    assert flattened.mask.shape == (6, 0)
+    assert flattened.sample_sizes.shape == (6,)
+    assert torch.count_nonzero(flattened.sample_sizes) == 0
+
+
 def test_ragged_batch_type_conversion(capsys):
     """Test type conversion methods of RaggedBatch"""
     batch_size = 3

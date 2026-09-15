@@ -261,8 +261,7 @@ def setup_dali_pipeline_stream_petr_train(
         there are no real epochs. However, an epoch length is still used to define
         how often certain actions are performed (e.g. print out training info, store checkpoint etc.)
     config
-        Configuration for the DALI pipeline. See example configuration files for details.
-        Example file: "projects/configs/StreamPETR/stream_petr_r50_flash_704_bs2_seq_24e_playground_dali.py"
+        Configuration for the DALI pipeline.
     device_id : int = 0
         GPU device ID used for the pipeline (and the training)
     rank : int = 0
@@ -295,6 +294,8 @@ def setup_dali_pipeline_stream_petr_train(
         nuscenes_root_dir,
         nuscenes_preproc_file_name,
         nuscenes_version,
+        # StreamPETR uses BboxProjector outputs, not the exported image_annotations.json.
+        add_image_annotations=False,
         add_projected_bboxes_annotations=True,
         image_size=config.image_size,
     )

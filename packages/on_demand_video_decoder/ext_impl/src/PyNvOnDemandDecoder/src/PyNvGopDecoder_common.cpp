@@ -241,7 +241,8 @@ void PyNvGopDecoder::DecProc(AVColorRange color_range, NvDecoder* decoder,
                              std::vector<OutputFrame>& output_frames, std::vector<uint8_t*> p_frames,
                              ConcurrentQueue<std::tuple<uint8_t*, int, int>>* packet_queue,
                              const std::vector<int> sorted_frame_ids, bool use_bgr_format,
-                             const std::string& filename, LastDecodedFrameInfo& last_decoded_frame_info) {
+                             const std::string& filename, LastDecodedFrameInfo& last_decoded_frame_info,
+                             const std::vector<int>* hardware_decode_frame_ids) {
     if (sorted_frame_ids.empty()) {
         throw std::invalid_argument("[ERROR] DecProc requires at least one target frame");
     }
@@ -255,10 +256,35 @@ void PyNvGopDecoder::DecProc(AVColorRange color_range, NvDecoder* decoder,
 
     ck(cuCtxSetCurrent(decoder->GetContext()));
 
+    const bool wants_selective_decode = hardware_decode_frame_ids != nullptr;
+    const bool selective_mode_changed = decoder->IsSelectiveDecodeEnabled() != wants_selective_decode;
+    if (selective_mode_changed && !last_decoded_frame_info.filename.empty()) {
+        // A parser cursor created with a different callback policy cannot be
+        // continued safely. Flush it under its old policy, then reconfigure.
+        reset_last_decoded_frame_info(last_decoded_frame_info);
+    }
+
     // flush old decoder
     if (last_decoded_frame_info.filename == "") {
         // LOG(INFO) << "flush old decoder" << filename << " " << sorted_frame_ids[0];
         decoder->Decode(nullptr, 0, 0);
+    }
+
+    bool continue_selective_decode =
+        wants_selective_decode && !last_decoded_frame_info.filename.empty() && !selective_mode_changed;
+    if (continue_selective_decode && !decoder->CanReuseSelectiveDecode(*hardware_decode_frame_ids)) {
+        // The new plan needs a picture whose callback is already behind the
+        // parser cursor (or shrinks the old set). The complete original GOP is
+        // still in packet_queue, so safely fall back to reset + replay.
+        reset_last_decoded_frame_info(last_decoded_frame_info);
+        decoder->Decode(nullptr, 0, 0);
+        continue_selective_decode = false;
+    }
+    if (wants_selective_decode) {
+        decoder->ConfigureSelectiveDecode(*hardware_decode_frame_ids, sorted_frame_ids,
+                                          continue_selective_decode);
+    } else if (decoder->IsSelectiveDecodeEnabled()) {
+        decoder->DisableSelectiveDecode();
     }
 
     int nVideoBytes = 0, nFrameReturned = 0, frame_idx;
@@ -266,6 +292,7 @@ void PyNvGopDecoder::DecProc(AVColorRange color_range, NvDecoder* decoder,
     auto frame_id_iter = sorted_frame_ids.begin();
     auto pFrame_iter = p_frames.begin();
     int packet_id = 0;
+    const int selective_packets_to_skip = continue_selective_decode ? last_decoded_frame_info.packet_id : 0;
 
     do {
         std::tuple<uint8_t*, int, int> packet_to_decode = packet_queue->pop_front();
@@ -274,6 +301,13 @@ void PyNvGopDecoder::DecProc(AVColorRange color_range, NvDecoder* decoder,
         pVideo = std::get<0>(packet_to_decode);
         nVideoBytes = std::get<1>(packet_to_decode);
         frame_idx = std::get<2>(packet_to_decode);
+
+        // Selective queues always contain the complete original GOP so an
+        // unsafe continuation can become reset + replay without rebuilding the
+        // queue. A safe continuation skips to its absolute coded cursor here.
+        if (wants_selective_decode && packet_id <= selective_packets_to_skip) {
+            continue;
+        }
 
         nFrameReturned = decoder->Decode(pVideo, nVideoBytes, 2, frame_idx);
         // LOG(INFO) << "Decode!!!, frame_idx: " << frame_idx << " nVideoBytes: " << nVideoBytes << " nFrameReturned: " << nFrameReturned << " target frame_id: " << *frame_id_iter;
@@ -327,7 +361,11 @@ void PyNvGopDecoder::DecProc(AVColorRange color_range, NvDecoder* decoder,
             break;
         }
     } while ((nVideoBytes + 1));
-    last_decoded_frame_info.packet_id += packet_id;
+    if (wants_selective_decode) {
+        last_decoded_frame_info.packet_id = packet_id;
+    } else {
+        last_decoded_frame_info.packet_id += packet_id;
+    }
 
     // Frame count validation
     if (output_frames.size() != sorted_frame_ids.size()) {
@@ -668,19 +706,17 @@ int PyNvGopDecoder::ExtractAndProcessGopInfo(const std::unique_ptr<PyNvGopDemuxe
 }
 
 // Explicit template instantiations for DecProc
-template void PyNvGopDecoder::DecProc<RGBFrame>(AVColorRange color_range, NvDecoder* decoder,
-                                                std::vector<RGBFrame>& output_frames,
-                                                std::vector<uint8_t*> p_frames,
-                                                ConcurrentQueue<std::tuple<uint8_t*, int, int>>* packet_queue,
-                                                const std::vector<int> sorted_frame_ids, bool use_bgr_format,
-                                                const std::string& filename,
-                                                LastDecodedFrameInfo& last_decoded_frame_info);
+template void PyNvGopDecoder::DecProc<RGBFrame>(
+    AVColorRange color_range, NvDecoder* decoder, std::vector<RGBFrame>& output_frames,
+    std::vector<uint8_t*> p_frames, ConcurrentQueue<std::tuple<uint8_t*, int, int>>* packet_queue,
+    const std::vector<int> sorted_frame_ids, bool use_bgr_format, const std::string& filename,
+    LastDecodedFrameInfo& last_decoded_frame_info, const std::vector<int>* hardware_decode_frame_ids);
 
 template void PyNvGopDecoder::DecProc<DecodedFrameExt>(
     AVColorRange color_range, NvDecoder* decoder, std::vector<DecodedFrameExt>& output_frames,
     std::vector<uint8_t*> p_frames, ConcurrentQueue<std::tuple<uint8_t*, int, int>>* packet_queue,
     const std::vector<int> sorted_frame_ids, bool use_bgr_format, const std::string& filename,
-    LastDecodedFrameInfo& last_decoded_frame_info);
+    LastDecodedFrameInfo& last_decoded_frame_info, const std::vector<int>* hardware_decode_frame_ids);
 
 void PyNvGopDecoder::ReleaseMemPools() {
     // Temporarily push context for GPU memory release

@@ -69,7 +69,8 @@ class CachedGopDecoder:
         if cache_capacity < 1:
             raise ValueError("cache_capacity must be positive")
         self._decoder = decoder
-        # Cache structure: {filepath: (packets_numpy, first_frame_id, gop_len)}.
+        # Cache structure:
+        # {filepath: (packets_numpy, first_frame_id, gop_len, graph_optimization_enabled)}.
         # Each filepath stores only one GOP. The OrderedDict keeps LRU order and
         # is bounded by gopCacheCapacity from CreateGopDecoder().
         self._gop_cache = OrderedDict()
@@ -77,7 +78,12 @@ class CachedGopDecoder:
         # Track cache hit status for each file in the last GetGOPList call
         self._last_cache_hits = []
 
-    def _is_cache_hit(self, filepath: str, frame_id: int) -> bool:
+    def _is_cache_hit(
+        self,
+        filepath: str,
+        frame_id: int,
+        enable_gop_dependency_graph_optimization: bool,
+    ) -> bool:
         """
         Check if the requested frame_id is within the cached GOP range for the given filepath.
 
@@ -91,14 +97,29 @@ class CachedGopDecoder:
         entry = self._gop_cache.get(filepath)
         if entry is None:
             return False
-        _, first_frame_id, gop_len = entry
-        hit = first_frame_id <= frame_id < first_frame_id + gop_len
+        _, first_frame_id, gop_len, cached_with_dependency_graph = entry
+        hit = (
+            cached_with_dependency_graph == enable_gop_dependency_graph_optimization
+            and first_frame_id <= frame_id < first_frame_id + gop_len
+        )
         if hit:
             self._gop_cache.move_to_end(filepath)
         return hit
 
-    def _update_cache(self, filepath: str, packets: np.ndarray, first_frame_id: int, gop_len: int) -> None:
-        self._gop_cache[filepath] = (packets, first_frame_id, gop_len)
+    def _update_cache(
+        self,
+        filepath: str,
+        packets: np.ndarray,
+        first_frame_id: int,
+        gop_len: int,
+        enable_gop_dependency_graph_optimization: bool,
+    ) -> None:
+        self._gop_cache[filepath] = (
+            packets,
+            first_frame_id,
+            gop_len,
+            enable_gop_dependency_graph_optimization,
+        )
         self._gop_cache.move_to_end(filepath)
         while len(self._gop_cache) > self._cache_capacity:
             self._gop_cache.popitem(last=False)
@@ -123,12 +144,13 @@ class CachedGopDecoder:
             "cached_files_count": len(self._gop_cache),
             "cached_files": {},
         }
-        for filepath, (packets, first_fid, gop_len) in self._gop_cache.items():
+        for filepath, (packets, first_fid, gop_len, graph_enabled) in self._gop_cache.items():
             info["cached_files"][filepath] = {
                 "first_frame_id": first_fid,
                 "gop_len": gop_len,
                 "frame_range": (first_fid, first_fid + gop_len - 1),
                 "packets_size_bytes": packets.nbytes if hasattr(packets, "nbytes") else len(packets),
+                "enable_gop_dependency_graph_optimization": graph_enabled,
             }
         return info
 
@@ -160,6 +182,7 @@ class CachedGopDecoder:
         frame_ids: List[int],
         fastStreamInfos: List[Any] = [],
         useGOPCache: bool = False,
+        enable_gop_dependency_graph_optimization: bool = False,
     ) -> List[Tuple[np.ndarray, List[int], List[int]]]:
         """
         Extract serialized GOP bundles with optional caching support.
@@ -179,11 +202,16 @@ class CachedGopDecoder:
             frame_ids: List of frame IDs to extract GOP data for (one per file)
             fastStreamInfos: Optional list of FastStreamInfo objects for fast initialization
             useGOPCache: If True, enables GOP caching. Default is False.
+            enable_gop_dependency_graph_optimization: Enable GOP dependency
+                optimization and write the GOP dependency graph into the returned
+                GOP data. Defaults to False. Only applies to HEVC inputs.
 
         Returns:
             List of tuples, one per video file, each containing
 
-            - serialized GOP bundle (numpy array) for that video
+            - serialized GOP bundle (numpy array) for that video; when dependency
+              optimization is enabled for HEVC, the bundle includes the GOP
+              dependency graph
             - list with the first frame ID of the extracted GOP
             - list with the length (frame count) of the extracted GOP
 
@@ -207,10 +235,22 @@ class CachedGopDecoder:
         if not useGOPCache:
             # No caching, directly call C++ implementation
             self._last_cache_hits = [False] * len(filepaths)
-            return self._decoder.GetGOPList(filepaths, frame_ids, fastStreamInfos)
+            return self._decoder.GetGOPList(
+                filepaths,
+                frame_ids,
+                fastStreamInfos,
+                enable_gop_dependency_graph_optimization,
+            )
 
         # Check cache hits for each file
-        cache_hits = [self._is_cache_hit(fp, fid) for fp, fid in zip(filepaths, frame_ids)]
+        cache_hits = [
+            self._is_cache_hit(
+                filepath,
+                frame_id,
+                enable_gop_dependency_graph_optimization,
+            )
+            for filepath, frame_id in zip(filepaths, frame_ids)
+        ]
         self._last_cache_hits = cache_hits
 
         # Find indices of cache misses
@@ -222,19 +262,30 @@ class CachedGopDecoder:
             miss_frame_ids = [frame_ids[i] for i in miss_indices]
             miss_fast_infos = [fastStreamInfos[i] for i in miss_indices] if fastStreamInfos else []
 
-            miss_results = self._decoder.GetGOPList(miss_filepaths, miss_frame_ids, miss_fast_infos)
+            miss_results = self._decoder.GetGOPList(
+                miss_filepaths,
+                miss_frame_ids,
+                miss_fast_infos,
+                enable_gop_dependency_graph_optimization,
+            )
 
             # Update cache with new data
             for idx, (packets, first_frame_ids_list, gop_lens_list) in zip(miss_indices, miss_results):
                 filepath = filepaths[idx]
                 # Each result contains data for a single file
                 # first_frame_ids_list and gop_lens_list are lists with single element
-                self._update_cache(filepath, packets, first_frame_ids_list[0], gop_lens_list[0])
+                self._update_cache(
+                    filepath,
+                    packets,
+                    first_frame_ids_list[0],
+                    gop_lens_list[0],
+                    enable_gop_dependency_graph_optimization,
+                )
 
         # Build results from cache in original order
         results = []
         for filepath in filepaths:
-            packets, first_fid, gop_len = self._gop_cache[filepath]
+            packets, first_fid, gop_len, _ = self._gop_cache[filepath]
             # Return in GetGOPList format: (packets, [first_frame_id], [gop_len])
             results.append((packets, [first_fid], [gop_len]))
 

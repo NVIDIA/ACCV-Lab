@@ -148,6 +148,9 @@ weights2/
 !data/sample_clip/moving_shape_hexagon_h265.mp4
 !data/sample_clip/moving_shape_rect_h265.mp4
 !data/sample_clip/moving_shape_triangle_h265.mp4
+!data/selective_gop/closed_hier_b7_64f.mp4
+!data/selective_gop/closed_p_only_32f.mp4
+!data/selective_gop/single_gop_250f.mp4
 cache
 reference
 GopDecoderTest

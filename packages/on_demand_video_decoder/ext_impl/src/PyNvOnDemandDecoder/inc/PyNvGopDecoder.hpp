@@ -33,6 +33,7 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <queue>
@@ -114,11 +115,16 @@ class PyNvGopDecoder {
      * @param filepaths Vector of video file paths
      * @param frame_ids Vector of frame IDs corresponding to each filepath
      * @param fastStreamInfos Optional array of FastStreamInfo for performance optimization
-     * @return Vector of SerializedPacketBundle, one for each video file
+     * @param enable_gop_dependency_graph_optimization Enable GOP dependency optimization and write
+     *        the GOP dependency graph into the returned GOP data. Defaults to false. Only applies
+     *        to HEVC inputs.
+     * @return Vector of SerializedPacketBundle, one for each video file. When dependency
+     *         optimization is enabled for HEVC, each bundle includes the GOP dependency graph.
      */
     std::vector<SerializedPacketBundle> get_gop_list(const std::vector<std::string>& filepaths,
                                                      const std::vector<int> frame_ids,
-                                                     const FastStreamInfo* fastStreamInfos = nullptr);
+                                                     const FastStreamInfo* fastStreamInfos = nullptr,
+                                                     bool enable_gop_dependency_graph_optimization = false);
 
     void decode_from_gop(const uint8_t* data, size_t size, const std::vector<std::string>& filepaths,
                          const std::vector<int> frame_ids, bool convert_to_rgb, bool as_bgr,
@@ -143,12 +149,17 @@ class PyNvGopDecoder {
      * @param as_bgr Whether to output BGR (true) or RGB (false), only used for RGB output
      * @param out_if_no_color_conversion Output vector of DecodedFrameExt when convert_to_rgb is false
      * @param out_if_color_converted Output vector of RGBFrame when convert_to_rgb is true
+     * @param skip_final_sync Skip the final stream synchronization when the caller will synchronize later
+     * @param enable_gop_dependency_graph_optimization Use an embedded dependency graph when available
+     * @param dependency_graph_target_frame_ids Optional planned targets for each input GOP
      */
-    void decode_from_gop_list(const std::vector<const uint8_t*>& datas, const std::vector<size_t>& sizes,
-                              const std::vector<std::string>& filepaths, const std::vector<int>& frame_ids,
-                              bool convert_to_rgb, bool as_bgr,
-                              std::vector<DecodedFrameExt>* out_if_no_color_conversion,
-                              std::vector<RGBFrame>* out_if_color_converted, bool skip_final_sync = false);
+    void decode_from_gop_list(
+        const std::vector<const uint8_t*>& datas, const std::vector<size_t>& sizes,
+        const std::vector<std::string>& filepaths, const std::vector<int>& frame_ids, bool convert_to_rgb,
+        bool as_bgr, std::vector<DecodedFrameExt>* out_if_no_color_conversion,
+        std::vector<RGBFrame>* out_if_color_converted, bool skip_final_sync = false,
+        bool enable_gop_dependency_graph_optimization = false,
+        const std::vector<std::vector<int>>* dependency_graph_target_frame_ids = nullptr);
 
     /**
      * Decode multiple target frames from each serialized GOP bundle.
@@ -161,12 +172,13 @@ class PyNvGopDecoder {
      * @param source_names Stable source names, one per source/GOP group
      * @param frame_id_groups Target display frame IDs for each GOP group
      * @param as_bgr Whether RGB output should use BGR channel order
+     * @param enable_gop_dependency_graph_optimization Use an embedded dependency graph when available
      * @param output Flat RGB output in group order
      */
     void decode_from_gop_groups(const std::vector<const uint8_t*>& datas, const std::vector<size_t>& sizes,
                                 const std::vector<std::string>& source_names,
                                 const std::vector<std::vector<int>>& frame_id_groups, bool as_bgr,
-                                std::vector<RGBFrame>& output);
+                                bool enable_gop_dependency_graph_optimization, std::vector<RGBFrame>& output);
 
     /**
      * Load GOP data from multiple binary files in parallel
@@ -303,7 +315,8 @@ class PyNvGopDecoder {
         const std::vector<int>& frame_ids, bool convert_to_rgb, bool as_bgr,
         std::vector<std::unique_ptr<ConcurrentQueue<std::tuple<uint8_t*, int, int>>>>& vpacket_queue,
         std::vector<DecodedFrameExt>* out_if_no_color_conversion,
-        std::vector<RGBFrame>* out_if_color_converted, bool skip_final_sync = false);
+        std::vector<RGBFrame>* out_if_color_converted, bool skip_final_sync = false,
+        const std::vector<std::vector<int>>* hardware_decode_frame_ids = nullptr);
 
     /**
      * Match grouped decode requests to persistent decoder slots by decode
@@ -322,7 +335,8 @@ class PyNvGopDecoder {
         const std::vector<std::string>& source_names, const std::vector<std::vector<int>>& frame_id_groups,
         const std::vector<size_t>& decoder_slots, bool as_bgr,
         std::vector<std::unique_ptr<ConcurrentQueue<std::tuple<uint8_t*, int, int>>>>& vpacket_queue,
-        std::vector<RGBFrame>& output);
+        std::vector<RGBFrame>& output,
+        const std::vector<std::vector<int>>* hardware_decode_frame_ids = nullptr);
 
     /**
      * Perform GOP-based video demuxing and packet extraction for high-performance parallel decoding
@@ -601,7 +615,8 @@ class PyNvGopDecoder {
                         std::vector<uint8_t*> p_frames,
                         ConcurrentQueue<std::tuple<uint8_t*, int, int>>* packet_queue,
                         const std::vector<int> sorted_frame_ids, bool use_bgr_format,
-                        const std::string& filename, LastDecodedFrameInfo& last_decoded_frame_info);
+                        const std::string& filename, LastDecodedFrameInfo& last_decoded_frame_info,
+                        const std::vector<int>* hardware_decode_frame_ids = nullptr);
 
     /**
      * Create and initialize a video demuxer for GOP-based decoding
@@ -764,6 +779,9 @@ class PyNvGopDecoder {
      * @param demuxers Vector of demuxers containing video metadata (width, height, codec, etc.)
      * @param all_gop_lens Vector of GOP lengths for each frame
      * @param all_first_frame_ids Vector of first frame IDs for each frame
+     * @param enable_gop_dependency_graph_optimization Enable GOP dependency optimization and write
+     *        the GOP dependency graph into the returned GOP data. Defaults to false. Only applies
+     *        to HEVC inputs.
      * @return SerializedPacketBundle containing self-contained binary data with embedded offsets
      */
     SerializedPacketBundle createSerializedPacketBundle(
@@ -771,7 +789,8 @@ class PyNvGopDecoder {
         const std::vector<std::vector<int>>& all_gop_lens,
         const std::vector<std::vector<int>>& all_first_frame_ids,
         const std::vector<std::unique_ptr<ConcurrentQueue<std::tuple<uint8_t*, int, int>>>>& vpacket_queue,
-        const std::vector<std::vector<std::unique_ptr<uint8_t[]>>>& vpacket_array);
+        const std::vector<std::vector<std::unique_ptr<uint8_t[]>>>& vpacket_array,
+        bool enable_gop_dependency_graph_optimization);
 };
 
 /**

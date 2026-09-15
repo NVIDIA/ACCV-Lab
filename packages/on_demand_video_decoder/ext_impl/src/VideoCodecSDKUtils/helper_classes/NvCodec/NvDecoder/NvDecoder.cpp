@@ -635,6 +635,88 @@ int NvDecoder::setReconfigParams(const Rect *pCropRect, const Dim *pResizeDim)
     return 1;
 }
 
+void NvDecoder::ConfigureSelectiveDecode(const std::vector<int>& hardwareFrameIds,
+                                         const std::vector<int>& outputFrameIds,
+                                         bool reuseState)
+{
+    std::unordered_set<int64_t> hardwareIds(hardwareFrameIds.begin(), hardwareFrameIds.end());
+    std::unordered_set<int64_t> outputIds(outputFrameIds.begin(), outputFrameIds.end());
+
+    for (int64_t outputId : outputIds)
+    {
+        if (hardwareIds.count(outputId) == 0)
+        {
+            throw std::invalid_argument(
+                "Selective decode output frames must also be submitted to hardware");
+        }
+    }
+
+    if (reuseState)
+    {
+        if (!CanReuseSelectiveDecode(hardwareFrameIds))
+        {
+            throw std::invalid_argument(
+                "Selective decoder state is incompatible with the new hardware frame set; "
+                "reset and replay are required");
+        }
+    }
+    else
+    {
+        if (!m_pendingPictureDecisions.empty())
+        {
+            throw std::runtime_error(
+                "Selective decoder must be flushed before replacing its frame selection");
+        }
+        m_selectiveSurfaceStates.clear();
+        m_selectiveSkippedFrameIds.clear();
+    }
+
+    m_selectiveHardwareFrameIds = std::move(hardwareIds);
+    m_selectiveOutputFrameIds = std::move(outputIds);
+    m_bSelectiveDecodeEnabled = true;
+}
+
+bool NvDecoder::CanReuseSelectiveDecode(const std::vector<int>& hardwareFrameIds) const
+{
+    if (!m_bSelectiveDecodeEnabled)
+    {
+        return false;
+    }
+
+    const std::unordered_set<int64_t> hardwareIds(
+        hardwareFrameIds.begin(), hardwareFrameIds.end());
+    for (int64_t existingId : m_selectiveHardwareFrameIds)
+    {
+        if (hardwareIds.count(existingId) == 0)
+        {
+            return false;
+        }
+    }
+    for (int64_t hardwareId : hardwareIds)
+    {
+        if (m_selectiveHardwareFrameIds.count(hardwareId) == 0 &&
+            m_selectiveSkippedFrameIds.count(hardwareId) != 0)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+void NvDecoder::DisableSelectiveDecode()
+{
+    if (!m_pendingPictureDecisions.empty())
+    {
+        throw std::runtime_error(
+            "Selective decoder must be flushed before disabling frame selection");
+    }
+    m_bSelectiveDecodeEnabled = false;
+    m_selectiveHardwareFrameIds.clear();
+    m_selectiveOutputFrameIds.clear();
+    m_selectiveSurfaceStates.clear();
+    m_selectiveSkippedFrameIds.clear();
+}
+
 /* Return value from HandlePictureDecode() are interpreted as:
 *  0: fail, >=1: succeeded
 */
@@ -645,6 +727,27 @@ int NvDecoder::HandlePictureDecode(CUVIDPICPARAMS *pPicParams) {
         NVDEC_THROW_ERROR("Decoder not initialized.", CUDA_ERROR_NOT_INITIALIZED);
         return false;
     }
+
+    if (m_bSelectiveDecodeEnabled)
+    {
+        if (m_pendingPictureDecisions.empty())
+        {
+            NVDEC_THROW_ERROR(
+                "Selective decode callback has no matching input access unit",
+                CUDA_ERROR_INVALID_VALUE);
+        }
+
+        const SelectivePictureDecision decision = m_pendingPictureDecisions.front();
+        m_pendingPictureDecisions.pop_front();
+        m_selectiveSurfaceStates[pPicParams->CurrPicIdx] =
+            {decision.frame_id, decision.submit_to_hardware};
+        if (!decision.submit_to_hardware)
+        {
+            m_selectiveSkippedFrameIds.insert(decision.frame_id);
+            return 1;
+        }
+    }
+
     m_nPicNumInDecodeOrder[pPicParams->CurrPicIdx] = m_nDecodePicCnt++;
     CUDA_DRVAPI_CALL(cuCtxPushCurrent(m_cuContext));
     NVDEC_API_CALL(m_api.cuvidDecodePicture(m_hDecoder, pPicParams));
@@ -715,6 +818,25 @@ int NvDecoder::HandlePictureDisplay(CUVIDPARSERDISPINFO *pDispInfo) {
             }
             free(m_SEIMessagesDisplayOrder[pDispInfo->picture_index].pSEIData);
             free(m_SEIMessagesDisplayOrder[pDispInfo->picture_index].pSEIMessage);
+        }
+    }
+
+    if (m_bSelectiveDecodeEnabled)
+    {
+        const int64_t frameId = pDispInfo->timestamp / 2;
+        if (m_selectiveOutputFrameIds.count(frameId) == 0)
+        {
+            return 1;
+        }
+
+        const auto surfaceState = m_selectiveSurfaceStates.find(pDispInfo->picture_index);
+        if (surfaceState == m_selectiveSurfaceStates.end() ||
+            surfaceState->second.frame_id != frameId ||
+            !surfaceState->second.submitted_to_hardware)
+        {
+            NVDEC_THROW_ERROR(
+                "Selective display callback does not match a decoded surface generation",
+                CUDA_ERROR_INVALID_VALUE);
         }
     }
 
@@ -1028,10 +1150,25 @@ int NvDecoder::Decode(const uint8_t *pData, int nSize, int nFlags, int64_t nTime
     packet.payload_size = nSize;
     packet.flags = nFlags | CUVID_PKT_TIMESTAMP;
     packet.timestamp = nTimestamp;
+    if (m_bSelectiveDecodeEnabled && pData && nSize > 0)
+    {
+        const int64_t frameId = nTimestamp / 2;
+        m_pendingPictureDecisions.push_back({
+            frameId,
+            m_bSelectiveDecodeEnabled && m_selectiveHardwareFrameIds.count(frameId) != 0});
+    }
     if (!pData || nSize == 0) {
         packet.flags |= CUVID_PKT_ENDOFSTREAM;
     }
     NVDEC_API_CALL(m_api.cuvidParseVideoData(m_hParser, &packet));
+
+    if (m_bSelectiveDecodeEnabled && (!pData || nSize == 0) &&
+        !m_pendingPictureDecisions.empty())
+    {
+        NVDEC_THROW_ERROR(
+            "Selective decode access-unit decisions remain unmatched after EOS",
+            CUDA_ERROR_INVALID_VALUE);
+    }
 
     return m_nDecodedFrame;
 }

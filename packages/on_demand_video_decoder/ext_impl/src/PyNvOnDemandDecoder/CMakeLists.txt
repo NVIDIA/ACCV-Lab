@@ -47,6 +47,7 @@ message(STATUS "FFmpeg installed path:\"${FFMPEG_DIR}/")
 
 set(PY_SOURCES
       src/PyNvOnDemandDecoder.cpp
+      src/GopDependencyGraph.cpp
       src/PyCAIMemoryView.cpp
       src/PyDecodedFrameExt.cpp
       src/FrameOutput.cpp
@@ -128,4 +129,3 @@ else()
   	DESTINATION .)
 
 endif()
-

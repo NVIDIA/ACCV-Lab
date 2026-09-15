@@ -693,6 +693,42 @@ def test_open_gop_dependency_optimization_matches_complete_decode_at_boundaries(
         assert torch.equal(_tensor(complete), _tensor(selective))
 
 
+def test_open_gop_sequential_selective_decode_preserves_drained_output():
+    targets = [18, 19]
+    demuxer = nvc.CreateGopDecoder(1, 0, True)
+    ((bundle, _, _),) = demuxer.GetGOPList(
+        [OPEN_GOP_SAMPLE],
+        [targets[0]],
+        enable_gop_dependency_graph_optimization=True,
+    )
+
+    expected = []
+    for target in targets:
+        complete_decoder = nvc.CreateGopDecoder(1, 0, True)
+        (frame,) = complete_decoder.DecodeFromGOPListRGB(
+            [bundle],
+            [OPEN_GOP_SAMPLE],
+            [target],
+            as_bgr=False,
+            enable_gop_dependency_graph_optimization=False,
+        )
+        expected.append(_tensor(frame))
+
+    selective_decoder = nvc.CreateGopDecoder(1, 0, True)
+    actual = []
+    for target in targets:
+        (frame,) = selective_decoder.DecodeFromGOPListRGB(
+            [bundle],
+            [OPEN_GOP_SAMPLE],
+            [target],
+            as_bgr=False,
+            enable_gop_dependency_graph_optimization=True,
+        )
+        actual.append(_tensor(frame))
+
+    assert all(torch.equal(lhs, rhs) for lhs, rhs in zip(actual, expected))
+
+
 def test_complete_decode_after_optimized_call_flushes_callback_state():
     first_target, second_target = 0, 10
     demuxer = nvc.CreateGopDecoder(1, 0, True)

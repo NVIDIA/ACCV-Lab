@@ -149,8 +149,8 @@ public:
     *  Every access unit still goes through cuvidParseVideoData. The decode
     *  callback calls cuvidDecodePicture only for hardwareFrameIds, while the
     *  display callback maps only outputFrameIds. When reuseState is true, the
-    *  hardware set may only grow; callers must reset/replay before adding a
-    *  frame whose access unit has already passed the parser cursor.
+    *  caller must reset/replay before adding a hardware frame whose access
+    *  unit has already passed the parser cursor.
     */
     void ConfigureSelectiveDecode(const std::vector<int>& hardwareFrameIds,
                                   const std::vector<int>& outputFrameIds,

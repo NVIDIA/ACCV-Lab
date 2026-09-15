@@ -62,7 +62,7 @@ def _dependency_graph(bundle):
     if graph_offset + _GCSR_HEADER.size > len(data):
         raise ValueError("dependency graph trailer is truncated")
     magic, version, flags, node_count, edge_count = _GCSR_HEADER.unpack_from(data, graph_offset)
-    if magic != b"GCSR" or version != 1 or flags != 0 or node_count != gop_len:
+    if magic != b"GCSR" or version != 2 or flags != 0 or node_count != gop_len:
         raise ValueError("dependency graph trailer is invalid")
 
     offset = graph_offset + _GCSR_HEADER.size
@@ -71,6 +71,8 @@ def _dependency_graph(bundle):
     parent_nodes = struct.unpack_from(f"<{edge_count}I", data, offset)
     offset += edge_count * 4
     coded_positions = struct.unpack_from(f"<{node_count}I", data, offset)
+    offset += node_count * 4
+    display_frontier_positions = struct.unpack_from(f"<{node_count}I", data, offset)
     offset += node_count * 4
     if offset != len(data):
         raise ValueError("dependency graph trailer size is invalid")
@@ -81,6 +83,7 @@ def _dependency_graph(bundle):
         "row_offsets": row_offsets,
         "parent_nodes": parent_nodes,
         "coded_positions": coded_positions,
+        "display_frontier_positions": display_frontier_positions,
     }
 
 
@@ -124,6 +127,11 @@ def _with_unsupported_dependency_graph_version(bundle):
     assert bytes(corrupted[graph_offset : graph_offset + 4]) == b"GCSR"
     corrupted[graph_offset + 4] = 0xFF
     return corrupted
+
+
+def _without_display_frontier_positions(bundle):
+    data, _, gop_len = _single_bundle_graph_offset(bundle)
+    return np.frombuffer(data[: len(data) - gop_len * 4], dtype=np.uint8).copy()
 
 
 def test_prototype_and_diagnostic_entry_points_are_not_public():
@@ -183,6 +191,10 @@ def test_controlled_fixtures_have_expected_gop_dependency_topology(
         assert len(_dependency_closure(graph, closure_target)) == expected_closure_size
         reordered = graph["coded_positions"] != tuple(range(graph["node_count"]))
         assert reordered is expect_reordered
+        assert all(
+            frontier == 0xFFFFFFFF or frontier >= graph["coded_positions"][node]
+            for node, frontier in enumerate(graph["display_frontier_positions"])
+        )
 
 
 @pytest.mark.parametrize(
@@ -374,6 +386,26 @@ def test_group_decode_validates_dependency_graph_only_when_enabled():
         )
 
 
+def test_dependency_graph_requires_display_frontier_positions():
+    target = 10
+    demuxer = nvc.CreateGopDecoder(1, 0, True)
+    ((bundle, _, _),) = demuxer.GetGOPList(
+        [SAMPLE],
+        [target],
+        enable_gop_dependency_graph_optimization=True,
+    )
+
+    decoder = nvc.CreateGopDecoder(1, 0, True)
+    with pytest.raises(RuntimeError, match="dependency CSR trailer size is invalid"):
+        decoder.DecodeFromGOPListRGB(
+            [_without_display_frontier_positions(bundle)],
+            [SAMPLE],
+            [target],
+            as_bgr=False,
+            enable_gop_dependency_graph_optimization=True,
+        )
+
+
 def test_opt_in_get_gop_runs_without_a_visible_cuda_device():
     script = f"""
 import struct
@@ -457,11 +489,17 @@ def test_gop_cache_keeps_graph_generation_mode_consistent():
     assert demuxer.isCacheHit() == [True]
 
 
-def test_sequential_selective_decode_handles_continuation_and_replay():
-    targets = [2, 3, 1]
+@pytest.mark.parametrize(
+    ("video", "targets"),
+    [
+        (CLOSED_HIER_B7_64F, [2, 3, 1]),
+        (CLOSED_P_ONLY_32F, [10, 20, 29]),
+    ],
+)
+def test_sequential_selective_decode_handles_continuation_and_replay(video, targets):
     demuxer = nvc.CreateGopDecoder(1, 0, True)
     ((bundle, _, _),) = demuxer.GetGOPList(
-        [CLOSED_HIER_B7_64F],
+        [video],
         [targets[0]],
         enable_gop_dependency_graph_optimization=True,
     )
@@ -471,7 +509,7 @@ def test_sequential_selective_decode_handles_continuation_and_replay():
     for target in targets:
         (frame,) = decoder.DecodeFromGOPListRGB(
             [bundle],
-            [CLOSED_HIER_B7_64F],
+            [video],
             [target],
             as_bgr=False,
             enable_gop_dependency_graph_optimization=True,
@@ -483,7 +521,7 @@ def test_sequential_selective_decode_handles_continuation_and_replay():
         complete_decoder = nvc.CreateGopDecoder(1, 0, True)
         (frame,) = complete_decoder.DecodeFromGOPListRGB(
             [bundle],
-            [CLOSED_HIER_B7_64F],
+            [video],
             [target],
             as_bgr=False,
             enable_gop_dependency_graph_optimization=False,

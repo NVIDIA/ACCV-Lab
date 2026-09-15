@@ -540,9 +540,10 @@ void PyNvGopDecoder::decode_from_gop_list(
         throw std::invalid_argument("[ERROR] total frames exceed max_num_files");
     }
 
-    // Stage 4: For each GOP that carries a dependency graph, expand the target
-    // frame(s) to their transitive dependency set. A graphless GOP remains on
-    // the legacy decode path even when the optimization was requested.
+    // Stage 4: For each GOP that carries a dependency graph, build the hardware
+    // decode plan from the target dependencies and the access units needed to
+    // reach its display frontier. A graphless GOP remains on the legacy decode
+    // path even when the optimization was requested.
     std::vector<std::vector<uint8_t>> needed_nodes(total_frames);
     if (found_embedded_dependency_graph) {
         if (embedded_dependency_graphs.size() != aggregated_frames) {

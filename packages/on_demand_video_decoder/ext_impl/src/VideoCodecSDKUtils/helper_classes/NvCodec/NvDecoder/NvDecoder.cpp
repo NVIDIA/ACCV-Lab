@@ -410,17 +410,6 @@ int NvDecoder::HandleVideoSequence(CUVIDEOFORMAT *pVideoFormat)
     }
     
     CUDA_DRVAPI_CALL(cuCtxPopCurrent(NULL));
-    uint8_t* pFrame[8] = { NULL };
-    if (m_bUseDeviceFrame)
-        {
-            if (m_bEnableAsyncAllocations)
-            {
-                for (size_t i = 0; i < 8; i++)
-                {
-                    CUDA_DRVAPI_CALL(cuMemAllocAsync((CUdeviceptr*)&pFrame[i], GetFrameSize(), m_cuvidStream));
-                }
-            }
-        }
     // STOP_TIMER("Session Initialization Time: ");
     // NvDecoder::addDecoderSessionOverHead(getDecoderSessionID(), elapsedTime);
     return nDecodeSurface;
@@ -532,29 +521,28 @@ int NvDecoder::ReconfigureDecoder(CUVIDEOFORMAT *pVideoFormat)
     START_TIMER
     CUDA_DRVAPI_CALL(cuCtxPushCurrent(m_cuContext));
     NVDEC_API_CALL(m_api.cuvidReconfigureDecoder(m_hDecoder, &reconfigParams));
-    //deallocate earlier buffers
+    // Deallocate output buffers at the old dimensions. New buffers are
+    // allocated lazily by HandlePictureDisplay at the new dimensions.
     for (uint8_t* pFrame : m_vpFrame)
     {
         if (m_bUseDeviceFrame)
         {
             if (m_bEnableAsyncAllocations)
             {
-                CUDA_DRVAPI_CALL(cuMemFreeAsync((*(CUdeviceptr*)&pFrame), NULL));//sync on NULL stream to ensure that all work is completed before dtor
+                CUDA_DRVAPI_CALL(cuMemFreeAsync((*(CUdeviceptr*)&pFrame), NULL));
             }
+            else
+            {
+                CUDA_DRVAPI_CALL(cuMemFree((CUdeviceptr)pFrame));
+            }
+        }
+        else
+        {
+            delete[] pFrame;
         }
     }
-    //recreate new buffers
-    uint8_t* pFrame[8] = { NULL };
-    if (m_bUseDeviceFrame)
-        {
-            if (m_bEnableAsyncAllocations)
-            {
-                for (size_t i = 0; i < 8; i++)
-                {
-                    CUDA_DRVAPI_CALL(cuMemAllocAsync((CUdeviceptr*)&pFrame[i], GetFrameSize(), m_cuvidStream));
-                }
-            }
-        }
+    m_vpFrame.clear();
+    m_vTimestamp.clear();
     CUDA_DRVAPI_CALL(cuCtxPopCurrent(NULL));
     STOP_TIMER("Session Reconfigure Time: ");
 
@@ -1019,6 +1007,9 @@ NvDecoder::NvDecoder(CUstream cuStream,CUcontext cuContext, bool bUseDeviceFrame
             throw std::runtime_error(std::string(err) + "\n" + explanation);
         }
     }
+    ScopeExit unloadCuvidOnConstructionFailure(
+        [this] { (void)unloadCuvidSymbols(&m_api); });
+
     if (m_bEnableAsyncAllocations)
     {
         std::cout << "enabling stream aware allocations!" << std::endl;
@@ -1037,7 +1028,6 @@ NvDecoder::NvDecoder(CUstream cuStream,CUcontext cuContext, bool bUseDeviceFrame
     if (pResizeDim) m_resizeDim = *pResizeDim;
 
     NVDEC_API_CALL(m_api.cuvidCtxLockCreate(&m_ctxLock, cuContext));
-    createCudaStream(&cuStream, &cuContext, 0, 0);
 
     decoderSessionID = 0;
 
@@ -1059,6 +1049,7 @@ NvDecoder::NvDecoder(CUstream cuStream,CUcontext cuContext, bool bUseDeviceFrame
     videoParserParameters.pfnGetOperatingPoint = HandleOperatingPointProc;
     videoParserParameters.pfnGetSEIMsg = m_bExtractSEIMessage ? HandleSEIMessagesProc : NULL;
     NVDEC_API_CALL(m_api.cuvidCreateVideoParser(&m_hParser, &videoParserParameters));
+    unloadCuvidOnConstructionFailure.Dismiss();
 }
 
 NvDecoder::~NvDecoder() {
@@ -1114,6 +1105,7 @@ NvDecoder::~NvDecoder() {
     cuCtxPopCurrent(NULL);
 
     m_api.cuvidCtxLockDestroy(m_ctxLock);
+    unloadCuvidSymbols(&m_api);
 
     // STOP_TIMER("Session Deinitialization Time: ");
 

@@ -160,7 +160,8 @@ public:
     void DisableSelectiveDecode();
 
     bool IsSelectiveDecodeEnabled() const { return m_bSelectiveDecodeEnabled; }
-    bool CanReuseSelectiveDecode(const std::vector<int>& hardwareFrameIds) const;
+    bool CanReuseSelectiveDecode(const std::vector<int>& hardwareFrameIds,
+                                 const std::vector<int>& outputFrameIds) const;
 
     /**
     *  @brief  This function is used to get the output frame width.
@@ -442,8 +443,13 @@ private:
     // Persists across continuation calls so a newly requested historical
     // dependency cannot be silently submitted after its callback has passed.
     std::unordered_set<int64_t> m_selectiveSkippedFrameIds;
+    // Display callbacks cannot be replayed by continuing the same parser. Keep
+    // their frame ids so a future request can reset and replay instead of
+    // returning no frame or the wrong frame.
+    std::unordered_set<int64_t> m_selectiveDisplayedFrameIds;
     std::deque<SelectivePictureDecision> m_pendingPictureDecisions;
     std::map<int, SelectiveSurfaceState> m_selectiveSurfaceStates;
+    bool m_bSelectiveParserDrained = false;
     CuvidFunctions m_api{};
     CUevent m_bCUEvent = NULL;
     bool m_bEnableAsyncAllocations = false;

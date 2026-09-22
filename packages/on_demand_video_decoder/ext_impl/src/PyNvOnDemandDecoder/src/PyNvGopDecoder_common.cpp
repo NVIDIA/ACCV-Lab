@@ -272,9 +272,15 @@ void PyNvGopDecoder::DecProc(AVColorRange color_range, NvDecoder* decoder,
 
     bool continue_selective_decode =
         wants_selective_decode && !last_decoded_frame_info.filename.empty() && !selective_mode_changed;
-    if (continue_selective_decode && !decoder->CanReuseSelectiveDecode(*hardware_decode_frame_ids)) {
-        // The new plan needs a picture whose callback is already behind the
-        // parser cursor (or shrinks the old set). The complete original GOP is
+    if (continue_selective_decode &&
+        !decoder->CanReuseSelectiveDecode(*hardware_decode_frame_ids, sorted_frame_ids)) {
+        // TODO: Improve Open-GOP continuation without caching decoded frames.
+        // Near a GOP boundary, EOS may drain display callbacks for pictures
+        // beyond the current target. A later request for one of those pictures
+        // cannot continue from this parser state, so the correctness-preserving
+        // fallback below currently pays the cost of reset + replay.
+        // A required decode or display callback is already behind the parser
+        // cursor, or the parser has been drained. The complete original GOP is
         // still in packet_queue, so safely fall back to reset + replay.
         reset_last_decoded_frame_info(last_decoded_frame_info);
         decoder->Decode(nullptr, 0, 0);

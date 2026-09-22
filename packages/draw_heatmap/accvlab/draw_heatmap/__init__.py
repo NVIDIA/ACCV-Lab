@@ -19,6 +19,6 @@ try:
 except PackageNotFoundError:
     __version__ = "0.0.0"
 
-from .funtions import draw_heatmap, draw_heatmap_batched
+from .functions import draw_heatmap, draw_heatmap_batched
 
 __all__ = ["__version__", "draw_heatmap", "draw_heatmap_batched"]

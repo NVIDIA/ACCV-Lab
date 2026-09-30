@@ -142,50 +142,53 @@ void ExternalBuffer::Export(py::module& m) {
 
 int ExternalBuffer::LoadDLPack(std::vector<size_t> _shape, std::vector<size_t> _stride, std::string _typeStr,
                                size_t _streamid, CUdeviceptr _data, bool _readOnly) {
-    m_dlTensor->byte_offset = 0;
-
-    // TODO: infer the device type from the memory buffer
-    m_dlTensor->device.device_type = kDLCUDA;
-    // TODO: infer the device from the memory buffer
-    m_dlTensor->device.device_id = 0;
-
-    // Convert data
-
-    void* ptr = reinterpret_cast<void*>(_data);
-    CheckValidCUDABuffer(ptr);
-    m_dlTensor->data = ptr;
-
-    // Convert DataType
     if (_typeStr != "|u1" && _typeStr != "B")  // TODO: can also be other letters
     {
         throw std::runtime_error("Could not create DL Pack tensor! Invalid typstr: " + _typeStr);
-        return -1;
     }
-    int itemSizeDT = sizeof(uint8_t);  // dt.itemsize()
-
-    m_dlTensor->dtype.code = kDLUInt;
-    m_dlTensor->dtype.bits = 8;
-    m_dlTensor->dtype.lanes = 1;
-
-    // Convert ndim
-    m_dlTensor->ndim = _shape.size();
-
-    // Convert shape
-    m_dlTensor->shape = new int64_t[m_dlTensor->ndim];
-    for (int i = 0; i < m_dlTensor->ndim; ++i) {
-        m_dlTensor->shape[i] = _shape[i];
+    if (_shape.size() != _stride.size()) {
+        throw std::invalid_argument("Shape and strides must have the same rank");
     }
 
-    // Convert strides
-    m_dlTensor->strides = new int64_t[m_dlTensor->ndim];
-    for (int i = 0; i < m_dlTensor->ndim; ++i) {
-        m_dlTensor->strides[i] = _stride[i];
-        if (m_dlTensor->strides[i] % itemSizeDT != 0) {
-            throw std::runtime_error("Stride must be a multiple of the element size in bytes");
-            return -1;
+    void* ptr = reinterpret_cast<void*>(_data);
+    CheckValidCUDABuffer(ptr);
+
+    DLManagedTensor managedTensor{};
+    DLTensor& tensor = managedTensor.dl_tensor;
+    tensor.data = ptr;
+    tensor.byte_offset = 0;
+    // TODO: infer the device type and device ID from the memory buffer.
+    tensor.device.device_type = kDLCUDA;
+    tensor.device.device_id = 0;
+    tensor.dtype.code = kDLUInt;
+    tensor.dtype.bits = 8;
+    tensor.dtype.lanes = 1;
+    tensor.ndim = static_cast<int32_t>(_shape.size());
+
+    managedTensor.deleter = [](DLManagedTensor* self) {
+        delete[] self->dl_tensor.shape;
+        self->dl_tensor.shape = nullptr;
+        delete[] self->dl_tensor.strides;
+        self->dl_tensor.strides = nullptr;
+    };
+
+    const int itemSizeDT = sizeof(uint8_t);  // dt.itemsize()
+    try {
+        tensor.shape = new int64_t[tensor.ndim];
+        tensor.strides = new int64_t[tensor.ndim];
+        for (int i = 0; i < tensor.ndim; ++i) {
+            tensor.shape[i] = _shape[i];
+            tensor.strides[i] = _stride[i];
+            if (tensor.strides[i] % itemSizeDT != 0) {
+                throw std::runtime_error("Stride must be a multiple of the element size in bytes");
+            }
+            tensor.strides[i] /= itemSizeDT;
         }
-        m_dlTensor->strides[i] /= itemSizeDT;
+    } catch (...) {
+        managedTensor.deleter(&managedTensor);
+        throw;
     }
 
+    m_dlTensor = DLPackTensor(std::move(managedTensor));
     return 0;
 }

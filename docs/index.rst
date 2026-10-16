@@ -92,6 +92,7 @@ References
    :includehidden:
    
    release_notes_page
+   third_party_licenses
 
 
 Indices and Tables

@@ -188,3 +188,8 @@ Please also see the [Contribution Guide](docs/guides/CONTRIBUTION_GUIDE.md) for 
 ## License
 
 This project is licensed under the Apache License, Version 2.0. See the `LICENSE` file for details.
+
+Some files incorporate third-party code received under other permissive licenses (MIT,
+BSD-3-Clause). Those files carry the applicable terms in their headers, which take precedence
+over this statement for the code they cover. The license texts of all upstream projects are
+collected in [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md).

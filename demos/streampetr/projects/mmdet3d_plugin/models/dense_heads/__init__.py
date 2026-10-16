@@ -2,8 +2,10 @@
 # No copyright holder is named upstream; this does not imply the absence of
 # copyright.
 #
-# Changes by NVIDIA: Removed unused heads (PETRHeadDN, SparseHead,
-#                    YOLOXHeadCustom); these heads are not used in the demo.
+# Changes by NVIDIA: Added batched head imports (FocalHeadBatched,
+#                    StreamPETRHeadBatched). Removed unused heads:
+#                    PETRHeadDN, SparseHead, YOLOXHeadCustom; these heads
+#                    are not used in the demo.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,4 +20,6 @@
 # limitations under the License.
 
 from .focal_head import FocalHead
+from .focal_head_batched import FocalHeadBatched
 from .streampetr_head import StreamPETRHead
+from .streampetr_head_batched import StreamPETRHeadBatched

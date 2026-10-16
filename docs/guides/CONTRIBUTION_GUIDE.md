@@ -156,8 +156,6 @@ Develop comprehensive tutorials that guide users through your functionality:
 Create demonstrations for real-world scenarios that showcase the benefits of the contribution (for example
 faster run time, less memory consumption, ...).
 
-Note that demos for the contained packages will be added in the future.
-
 
 ## Code Quality Standards
 

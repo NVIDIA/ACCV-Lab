@@ -219,6 +219,10 @@ editably
 stderr
 stdout
 backend
+sharded
+subprocesses
+streampetr
+hungarian
 nerf
 pytorch
 dlpack

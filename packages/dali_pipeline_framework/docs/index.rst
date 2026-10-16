@@ -12,4 +12,4 @@ This documentation contains the following sections:
    api/main_api
    api/additional_api
    examples
-   evaluation
+   demo_evaluation

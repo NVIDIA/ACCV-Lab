@@ -4,6 +4,13 @@ Evaluation
 This page summarizes the performance impact of batching the loss computation using
 ``accvlab.batching_helpers`` in a StreamPETR training setup.
 
+.. seealso::
+
+   For the implementation changes behind these results, see the :doc:`Batching Helpers demo <index>`
+   and its tutorials on batching the matching and loss computations. The
+   :doc:`Optimization Testing Tools demo <../optim_test_tools/index>` explains the runtime measurements
+   and profiling support used in the evaluation.
+
 Setup
 -----
 
@@ -18,15 +25,27 @@ are as follows:
 
 - **HungarianAssigner3D & HungarianAssigner2D**: Original matchers operate on a per‑sample basis.
 
-  - Cost matrix computation (pre‑requisite for actual matching) → **Optimized** (following the approach outlined in the :doc:`example`)
+  - Cost matrix computation (pre‑requisite for actual matching) → **Optimized** (following the approach 
+    outlined in the 
+    :doc:`batching-helpers example <../../../contained_package_docs_mirror/batching_helpers/docs/example>`)
   - Matching itself (SciPy implementation on the CPU).
-  - `HungarianAssigner3D`: `nan_to_num()` was a bottleneck; moved to GPU → Changed in both reference & optimized.
+  - `HungarianAssigner3D`: `nan_to_num()` was a bottleneck; moved to GPU → Changed in both reference & 
+    optimized.
 
 - **StreamPETR Head**
 
-  - Loss computation is batched over samples → **Optimized**.
-  - Loss computation is also batched over the decoder layers → **Optimized** (using multiple batch dimensions).
-  - Can use a batched assigner → **Optimized**.
+  - The reference already concatenates the samples and calls each classification and bounding-box loss
+    function once per decoder layer. The loss functions themselves were therefore already batched over
+    samples.
+  - Target preparation around those loss calls is further batched → **Optimized**. The optimized head keeps
+    the sample dimension in ``RaggedBatch`` objects, computes the assignment cost matrices and performs
+    target indexing in batches instead of calling ``_get_target_single()`` for each sample, and computes
+    bounding-box loss only for matched pairs. The SciPy Hungarian solver itself still runs once for each
+    layer/sample entry.
+  - Loss computation is batched across decoder layers → **Optimized**. The reference calls
+    ``loss_single()`` and ``dn_loss_single()`` separately for each layer. The optimized head processes the
+    layer and sample dimensions together in one loss-function call, then reduces over samples and objects
+    while retaining separate loss values for each layer. This also applies to the DN losses.
 
 - **Focal Head**
 
@@ -42,18 +61,15 @@ are as follows:
 
 .. seealso::
   For a general overview on how to use the batching helpers to optimize the loss computation, please refer to 
-  the :doc:`example`.
+  the :doc:`example <../../../contained_package_docs_mirror/batching_helpers/docs/example>`.
 
 The evaluation is performed for a **batch size of 8** (in contrast to the original configuration of 2) to
 obtain a realistic setup and highlight the performance impact of the batching in this case.
 
-.. note::
-
-  We are planning to add a demo for the Batching Helpers package in the future, including the implementation 
-  of the experiments performed in this evaluation.
-
 Hardware Setup
 ~~~~~~~~~~~~~~
+
+The hardware setup used for the evaluation is as follows:
 
 .. list-table:: System Configuration
    :header-rows: 1
@@ -67,12 +83,16 @@ Hardware Setup
 Results
 -------
 
+The numbers below are averages over 950 measured iterations after 50 warm-up
+iterations.
+
 .. only:: html
 
   In the following table, the runtime breakdown of the training iteration is shown.
-  Note that the grayed out cells do not contain any optimized code. While theoretically, the ``Optimization``
-  step contains changes (due to the deifferent implementation of the loss, leading to different steps
-  in the packward propagation), the resulting runtime differences in this step are negligible.
+  Note that the grayed out cells do not contain any optimized code. While theoretically, the
+  ``Optimization (including Backward)``
+  step contains changes (due to the different implementation of the loss, leading to different steps
+  in the backward propagation), the resulting runtime differences in this step are negligible.
   The ``Remaining`` columns in the table show the runtime of the parts of the implementation for 
   which the runtime is not measured directly. For the ``Forward`` pass, this mostly corresponds to the forward 
   pass through the network itself (as opposed to the loss computation). For the ``Training Iteration``, this 
@@ -127,17 +147,17 @@ Results
            <th colspan="5" class="bh-pairA-title">Training Iteration</th>
          </tr>
          <tr>
-           <td colspan="5" class="bh-pairA-value">760 → 615 (× 1.24)</td>
+           <td colspan="5" class="bh-pairA-value">737 → 602 (× 1.22)</td>
          </tr>
          <tr>
            <th colspan="3" class="bh-pairB-title">Forward (including Loss)</th>
-           <th class="bh-gray-title">Optimization</th>
+           <th class="bh-gray-title">Optimization (including Backward)</th>
            <th class="bh-gray-title">Remaining</th>
          </tr>
          <tr>
-           <td colspan="3" class="bh-pairB-value">363 → 221 (× 1.64)</td>
-           <td class="bh-gray-value">318 → 314</td>
-           <td class="bh-gray-value">79 → 80</td>
+           <td colspan="3" class="bh-pairB-value">344 → 210 (× 1.64)</td>
+           <td class="bh-gray-value">311 → 307</td>
+           <td class="bh-gray-value">81 → 84</td>
          </tr>
          <tr>
            <th class="bh-gray-title">Remaining</th>
@@ -146,8 +166,8 @@ Results
            <td class="bh-ghost"></td>
          </tr>
          <tr>
-           <td class="bh-gray-value">180 → 180</td>
-           <td colspan="2" class="bh-pairA-value">183 → 41 (× 4.46)</td>
+           <td class="bh-gray-value">169 → 170</td>
+           <td colspan="2" class="bh-pairA-value">175 → 40 (× 4.35)</td>
            <td class="bh-ghost"></td>
            <td class="bh-ghost"></td>
          </tr>
@@ -160,8 +180,8 @@ Results
          </tr>
          <tr>
            <td class="bh-ghost"></td>
-           <td class="bh-pairB-value">82 → 25 (× 3.28)</td>
-           <td class="bh-pairB-value">100 → 16 (× 6.25)</td>
+           <td class="bh-pairB-value">79 → 24 (× 3.22)</td>
+           <td class="bh-pairB-value">96 → 15 (× 6.24)</td>
            <td class="bh-ghost"></td>
            <td class="bh-ghost"></td>
          </tr>
@@ -188,40 +208,107 @@ Results
        - Optimized [ms]
        - Speedup
      * - Training Iteration
-       - 760
-       - 615
-       - × 1.24
+       - 737
+       - 602
+       - × 1.22
      * - Forward (including Loss) [within Training Iteration]
-       - 363
-       - 221
+       - 344
+       - 210
        - × 1.64
-     * - Optimization [within Training Iteration]
-       - 318
-       - 314
+     * - Optimization (including Backward) [within Training Iteration]
+       - 311
+       - 307
        - —
      * - Remaining [within Training Iteration]
-       - 79
-       - 80
+       - 81
+       - 84
        - —
      * - Remaining [within Forward]
-       - 180
-       - 180
+       - 169
+       - 170
        - —
      * - Loss [within Forward]
-       - 183
-       - 41
-       - × 4.46
+       - 175
+       - 40
+       - × 4.35
      * - StreamPETR Head [within Loss]
-       - 82
-       - 25
-       - × 3.28
+       - 79
+       - 24
+       - × 3.22
      * - Focal Head [within Loss]
-       - 100
-       - 16
-       - × 6.25
+       - 96
+       - 15
+       - × 6.24
 
 
-The batching of the loss computation leads to a speedup of **× 4.46** for the loss computation itself, with
+The batching of the loss computation leads to a speedup of **× 4.35** for the loss computation itself, with
 different speedups achieved for the different types of loss. The loss optimization translates
-to an overall speedup of **× 1.64** for the forward pass and **× 1.24** for the training iteration. Note that 
+to an overall speedup of **× 1.64** for the forward pass and **× 1.22** for the training iteration. Note that
 the expected speedup strongly depends on the used batch size.
+
+How to Run
+----------
+
+Running the Evaluated Variants
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. note::
+  
+  This section assumes that you are running the evaluation in the Docker container set up as described in the
+  :doc:`StreamPETR Docker setup <../docker_setup>`, with the StreamPETR implementation
+  located at ``/streampetr``. Configuration paths below are relative to
+  ``demos/streampetr/projects/configs/StreamPETR/``.
+
+The evaluation was performed with these two configurations:
+
+.. list-table:: Evaluated Batching Helpers configurations
+   :header-rows: 1
+   :widths: 35 65
+
+   * - Configuration
+     - Purpose
+   * - ``Tests/batching_helpers_ref.py``
+     - Non-batched reference with the same GPU ``nan_to_num`` and custom heatmap
+       improvements as the optimized configuration.
+   * - ``Tests/batching_helpers_test.py``
+     - Batched assigners and loss computation. Comparing it with the reference
+       isolates the batching gains reported above.
+
+Run the configurations individually with:
+
+.. code-block:: bash
+
+    # Non-batched reference with the same unrelated optimizations as the test configuration.
+    # Comparing test against ref therefore isolates the performance gains from batching.
+    python /streampetr/tools/train.py --no-validate /streampetr/projects/configs/StreamPETR/Tests/batching_helpers_ref.py
+
+    # Batched implementation, including the same unrelated optimizations.
+    python /streampetr/tools/train.py --no-validate /streampetr/projects/configs/StreamPETR/Tests/batching_helpers_test.py
+
+Additional Variant
+~~~~~~~~~~~~~~~~~~
+
+``Tests/batching_helpers_orig_impl.py`` is a supplemental near-original variant that
+uses CPU ``nan_to_num`` and the original heatmap generation. Comparing the optimized
+configuration against this variant also includes gains unrelated to batching, so it is
+not the baseline for the batching speedups reported above.
+
+Run it with:
+
+.. code-block:: bash
+
+    python /streampetr/tools/train.py --no-validate /streampetr/projects/configs/StreamPETR/Tests/batching_helpers_orig_impl.py
+
+Running All Variants and Storing the Results
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``demos/streampetr/tools/run_batching_eval.sh`` script runs the two evaluated
+configurations and the supplemental near-original variant. Run it with:
+
+.. code-block:: bash
+
+    cd /streampetr/tools
+    bash run_batching_eval.sh
+
+The script stores the results in the ``res_batching_eval`` folder in the current working
+directory. Refer to the script for more details.

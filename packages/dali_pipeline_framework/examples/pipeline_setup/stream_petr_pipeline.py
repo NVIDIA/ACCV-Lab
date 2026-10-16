@@ -261,7 +261,10 @@ def setup_dali_pipeline_stream_petr_train(
         there are no real epochs. However, an epoch length is still used to define
         how often certain actions are performed (e.g. print out training info, store checkpoint etc.)
     config
-        Configuration for the DALI pipeline.
+        Configuration for the DALI pipeline. See the
+        :doc:`StreamPETR DALI integration guide
+        </demo_docs/streampetr/dali_pipeline_framework/replacing_data_loader>`
+        for the maintained configuration guidance.
     device_id : int = 0
         GPU device ID used for the pipeline (and the training)
     rank : int = 0

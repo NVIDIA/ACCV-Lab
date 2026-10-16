@@ -27,7 +27,7 @@ TARGET_README = TARGET_DIR / "README.md"
 
 def transform_links(text: str) -> str:
     """
-    Adjust guide and license links for the docs-local copy.
+    Adjust guide, demo and license links for the docs-local copy.
 
     Root README uses:
         docs/guides/XYZ.md
@@ -36,6 +36,7 @@ def transform_links(text: str) -> str:
         ../guides/XYZ.md
     """
     text = text.replace("](docs/guides/", "](../guides/")
+    text = text.replace("](docs/demo_docs/", "](../demo_docs/")
     return text.replace("](THIRD_PARTY_LICENSES.md)", "](../third_party_licenses.md)")
 
 

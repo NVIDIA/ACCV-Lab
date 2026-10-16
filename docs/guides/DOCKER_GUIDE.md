@@ -21,6 +21,7 @@ If these are not set, the root user will be used.
 
 The Dockerfile can be built as follows:
 ```bash
+cd docker  # From the repository root
 docker build -t accvlab .
 ```
 
@@ -31,14 +32,17 @@ be used to build the container for the current user.
 
 The container can be run as follows:
 ```bash
-docker run -it accvlab <...additional arguments...>
+docker run [OPTIONS] -it accvlab:latest
 ```
+
+Replace `[OPTIONS]` with the GPU, mount and other Docker options described below. All Docker options
+must appear before the image name.
 
 The following arguments are recommended to be used when running the container to ensure optimal performance:
 ``--gpus=all --cap-add SYS_NICE --privileged --shm-size=16g --ipc=host``.
 Note that the optimal shared memory size (`--shm-size`) may depend on the specific use case.
 
-To ensure that the the on-demand video decoder package can be used, the Nvidia container runtime needs to be 
+To ensure that the on-demand video decoder package can be used, the NVIDIA container runtime needs to be
 used. The runtime can be installed by following the instructions 
 [here](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
 

@@ -12,7 +12,7 @@ This documentation contains the following sections:
    introduction
    api
    example
-   evaluation
+   demo_evaluation
 
 
 ..

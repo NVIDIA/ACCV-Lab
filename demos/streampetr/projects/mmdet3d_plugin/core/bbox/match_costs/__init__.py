@@ -2,6 +2,10 @@
 # Copyright (c) 2021 Wang, Yue
 # ------------------------------------------------------------------------
 # Unchanged copy in StreamPETR (https://github.com/exiawsh/StreamPETR).
+# ------------------------------------------------------------------------
+# Changes by NVIDIA: Added batched cost imports (BBoxL1CostBatched,
+#                    FocalLossCostBatched, IoUCostBatched).
+#
 # MIT License
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,5 +28,6 @@
 
 from mmdet.core.bbox.match_costs import build_match_cost
 from .match_cost import BBox3DL1Cost
+from .match_cost_batched import BBoxL1CostBatched, FocalLossCostBatched, IoUCostBatched
 
-__all__ = ['build_match_cost', 'BBox3DL1Cost']
+__all__ = ['build_match_cost', 'BBox3DL1Cost', 'BBoxL1CostBatched', 'FocalLossCostBatched', 'IoUCostBatched']

@@ -8,6 +8,9 @@
 # (StreamPETR: https://github.com/exiawsh/StreamPETR)
 # ---------------------------------------------
 #
+# Copyright (c) 2026, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# Changes: Added `randomize` option to `InfiniteGroupEachSampleInBatchSampler` to optionally disable group-order shuffling.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -174,12 +177,16 @@ class InfiniteGroupEachSampleInBatchSampler(Sampler):
     Shuffling is only done for group order, not done within groups.
     """
 
+    # @MARK: Use randomize=False below to disable randomizations
     def __init__(self, 
                  dataset,
                  samples_per_gpu=1,
                  num_replicas=None,
                  rank=None,
-                 seed=0):
+                 seed=0,
+                 randomize=True):
+
+        self.randomize = randomize
 
         _rank, _num_replicas = get_dist_info()
         if num_replicas is None:
@@ -217,10 +224,14 @@ class InfiniteGroupEachSampleInBatchSampler(Sampler):
         self.buffer_per_local_sample = [[] for _ in range(self.batch_size)]
 
     def _infinite_group_indices(self):
-        g = torch.Generator()
-        g.manual_seed(self.seed)
-        while True:
-            yield from torch.randperm(self.groups_num, generator=g).tolist()
+        if self.randomize:
+            g = torch.Generator()
+            g.manual_seed(self.seed)
+            while True:
+                yield from torch.randperm(self.groups_num, generator=g).tolist()
+        else:
+            while True:
+                yield from list(range(self.groups_num))
 
     def _group_indices_per_global_sample_idx(self, global_sample_idx):
         yield from itertools.islice(self._infinite_group_indices(), 

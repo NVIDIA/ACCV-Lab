@@ -3,6 +3,10 @@
 # ------------------------------------------------------------------------
 # Modified in StreamPETR (https://github.com/exiawsh/StreamPETR).
 # ------------------------------------------------------------------------
+# Copyright (c) 2026, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# Changes: Added NVTX profiling instrumentation to normalize_bbox.
+#
+# ------------------------------------------------------------------------
 #
 # This file contains contributions made under each of the licenses below;
 # both apply to it. Each license governs the contributions made under it.
@@ -45,7 +49,15 @@
 
 import torch
 
+from accvlab.optim_test_tools import NVTXRangeWrapper
+nvtx_wrp = NVTXRangeWrapper()
+
 def normalize_bbox(bboxes, pc_range):
+    #@ NOTE: The normalization first splits the tensor and then re-assembbles it.
+    # While some of the processing is done for only parts of the tensor,
+    # it is unnecessarily split into more parts than needed. This should be avoided.
+    #@MARK
+    nvtx_wrp.range_push("normalize_bbox")
     cx = bboxes[..., 0:1]
     cy = bboxes[..., 1:2]
     cz = bboxes[..., 2:3]
@@ -64,6 +76,8 @@ def normalize_bbox(bboxes, pc_range):
         normalized_bboxes = torch.cat(
             (cx, cy, cz, w, l, h, rot.sin(), rot.cos()), dim=-1
         )
+    #@MARK
+    nvtx_wrp.range_pop()
     return normalized_bboxes
 
 def denormalize_bbox(normalized_bboxes, pc_range):

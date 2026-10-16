@@ -5,6 +5,12 @@
 # (StreamPETR: https://github.com/exiawsh/StreamPETR)
 # ---------------------------------------------
 #
+# Copyright (c) 2026, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# Changes: Added option to disable group-orderrandomizations from config by forwarding of `randomize` 
+#          parameter from the config when creating the `InfiniteGroupEachSampleInBatchSampler` instance.
+#          Select the sequence batch sampler by configuration for both training and load-only runners.
+#          Allow per-GPU dataset replication for performance evaluations.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -44,6 +50,7 @@ def build_dataloader(dataset,
                      shuffler_sampler=None,
                      nonshuffler_sampler=None,
                      runner_type=dict(type='EpochBasedRunner'),
+                     replicate_dataset_per_gpu=False,
                      **kwargs):
     """Build PyTorch DataLoader.
     In distributed training, each GPU/process has a dataloader.
@@ -58,11 +65,24 @@ def build_dataloader(dataset,
         dist (bool): Distributed training/test or not. Default: True.
         shuffle (bool): Whether to shuffle the data at every epoch.
             Default: True.
+        replicate_dataset_per_gpu (bool): Whether each training sequence sampler
+            uses the full dataset. Used for performance evaluations with NuScenes
+            mini, which has too few sequence groups for the multi-GPU batch size.
+            Worker seeding and validation still use the real distributed rank.
         kwargs: any keyword argument to be used to initialize DataLoader
     Returns:
         DataLoader: A PyTorch dataloader.
     """
     rank, world_size = get_dist_info()
+    # NuScenes mini has too few sequence groups for 8 GPUs x 8 samples. Replication
+    # uses an unsharded sampler on each GPU while keeping the real rank for worker
+    # seeding. Both sampler constructions below must use these sampling values.
+    replicate_training_data = (
+        replicate_dataset_per_gpu and shuffle and shuffler_sampler is not None
+        and shuffler_sampler.get('type') == 'InfiniteGroupEachSampleInBatchSampler'
+    )
+    sampling_rank = 0 if replicate_training_data else rank
+    sampling_world_size = 1 if replicate_training_data else world_size
 
     if dist:
         # DistributedGroupSampler will definitely shuffle the data to satisfy
@@ -72,8 +92,8 @@ def build_dataloader(dataset,
                                      dict(
                                          dataset=dataset,
                                          samples_per_gpu=samples_per_gpu,
-                                         num_replicas=world_size,
-                                         rank=rank,
+                                         num_replicas=sampling_world_size,
+                                         rank=sampling_rank,
                                          seed=seed)
                                      )
 
@@ -101,15 +121,23 @@ def build_dataloader(dataset,
         batch_sampler = None
 
 
-    if runner_type['type'] == 'IterBasedRunner' and shuffler_sampler['type'] =='InfiniteGroupEachSampleInBatchSampler':
+    # This sampler yields batches of indices, not individual indices. Select it
+    # from the sampler configuration rather than the runner's class name so that
+    # custom runners (e.g. load-only runs without out training for loading time evaluation) 
+    # use the same sequence sampling. Validation (shuffle=False) must keep its finite, 
+    # non-shuffling sampler.
+    if (shuffle and shuffler_sampler is not None
+            and shuffler_sampler.get('type') == 'InfiniteGroupEachSampleInBatchSampler'):
         # TODO: original has more options, but I'm not using them 
         # https://github.com/open-mmlab/mmdetection/blob/3b72b12fe9b14de906d1363982b9fba05e7d47c1/mmdet/datasets/builder.py#L145-L157
+        randomize = shuffler_sampler["randomize"] if "randomize" in shuffler_sampler else True
         batch_sampler = InfiniteGroupEachSampleInBatchSampler(
             dataset,
             samples_per_gpu,
-            world_size,
-            rank,
-            seed=seed)
+            sampling_world_size,
+            sampling_rank,
+            seed=seed,
+            randomize=randomize)
         batch_size = 1
         sampler = None
 

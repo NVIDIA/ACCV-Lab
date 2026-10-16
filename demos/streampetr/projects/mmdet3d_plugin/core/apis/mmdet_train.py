@@ -9,6 +9,12 @@
 # (StreamPETR: https://github.com/exiawsh/StreamPETR)
 # ---------------------------------------------
 #
+# Copyright (c) 2026, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# Changes: Added possiblity to pass a DALI pipeline as a dataset, and use it directly instead attempting to create a PyTorch
+#          DataLoader from it.
+#          Forward the training dataset replication option.
+#          Added validation-hook support for our custom iteration-based runner.
+# 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -43,6 +49,9 @@ import os.path as osp
 from projects.mmdet3d_plugin.datasets.builder import build_dataloader
 from projects.mmdet3d_plugin.core.evaluation.eval_hooks import CustomDistEvalHook
 from projects.mmdet3d_plugin.datasets import custom_build_dataset
+
+from accvlab.dali_pipeline_framework.pipeline import DALIStructuredOutputIterator
+
 def custom_train_detector(model,
                    dataset,
                    cfg,
@@ -71,20 +80,36 @@ def custom_train_detector(model,
                 f'{cfg.data.imgs_per_gpu} in this experiments')
         cfg.data.samples_per_gpu = cfg.data.imgs_per_gpu
 
-    data_loaders = [
-        build_dataloader(
-            ds,
-            cfg.data.samples_per_gpu,
-            cfg.data.workers_per_gpu,
-            # cfg.gpus will be ignored if distributed
-            len(cfg.gpu_ids),
-            dist=distributed,
-            seed=cfg.seed,
-            shuffler_sampler=cfg.data.shuffler_sampler,  # dict(type='DistributedGroupSampler'),
-            nonshuffler_sampler=cfg.data.nonshuffler_sampler,  # dict(type='DistributedSampler'),
-            runner_type=cfg.runner,
-        ) for ds in dataset
-    ]
+
+    # ===== Using the DALI Iterator Directly (if used) =====
+    #@NOTE 
+    # If the passed dataset is a `DALIStructuredOutputIterator` object, use it directly instead of creating a 
+    # PyTorch DataLoader from it.
+    #
+    # Note that the `else` branch is the original implementation. This means that if a PyTorch Dataset is
+    # input, the behavior of the original implementation is preserved.
+    if isinstance(dataset[0], DALIStructuredOutputIterator):
+        data_loaders = dataset
+    else:
+        data_loaders = [
+            build_dataloader(
+                ds,
+                cfg.data.samples_per_gpu,
+                cfg.data.workers_per_gpu,
+                # cfg.gpus will be ignored if distributed
+                len(cfg.gpu_ids),
+                dist=distributed,
+                seed=cfg.seed,
+                shuffler_sampler=cfg.data.shuffler_sampler,  # dict(type='DistributedGroupSampler'),
+                nonshuffler_sampler=cfg.data.nonshuffler_sampler,  # dict(type='DistributedSampler'),
+                runner_type=cfg.runner,
+                # Use unsharded mini-dataset sampling for the evaluation. This does not represent the real training use-case,
+                # but enables the use of the mini-dataset for performance evaluations.
+                replicate_dataset_per_gpu=cfg.get('data_loading_config', {}).get(
+                    'replicate_dataset_per_gpu', False),
+            ) for ds in dataset
+        ]
+    # ===== End of Using the DALI Iterator Directly (if used) =====
 
     # put model on gpus
     if distributed:
@@ -192,10 +217,12 @@ def custom_train_detector(model,
             nonshuffler_sampler=cfg.data.nonshuffler_sampler,  # dict(type='DistributedSampler'),
         )
         eval_cfg = cfg.get('evaluation', {})
-        eval_cfg['by_epoch'] = cfg.runner['type'] != 'IterBasedRunner'
+        # Use runner behavior (epoch-based or not) instead of checking for a specific type, since our iteration-based
+        # runner has a custom type.
+        eval_cfg['by_epoch'] = isinstance(runner, EpochBasedRunner)
         eval_cfg['jsonfile_prefix'] = osp.join('val', cfg.work_dir, time.ctime().replace(' ','_').replace(':','_'))
         eval_hook = CustomDistEvalHook if distributed else EvalHook
-        runner.register_hook(eval_hook(val_dataloader, **eval_cfg))
+        runner.register_hook(eval_hook(val_dataloader, **eval_cfg), priority="LOW")
 
     # user-defined hooks
     if cfg.get('custom_hooks', None):

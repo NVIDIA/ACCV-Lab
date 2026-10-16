@@ -7,8 +7,11 @@
 # Modified in StreamPETR (https://github.com/exiawsh/StreamPETR).
 # ---------------------------------------------
 # Copyright (c) 2026, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# Changes: Applied configured multiprocessing and OpenCV thread settings
-#          before creating workers.
+# Changes: - Added profiling / debug-dump helpers (NVTX/Stopwatch/TensorDumper) and use of related configuration.
+#          - Added option to use DALI pipeline for data loading and pre-processing.
+#          - Added extensive notes/comments throughout the file (code snippets used in documentation).
+#          - Added unsharded sampling for replicated mini-dataset evaluations.
+#          - Applied configured multiprocessing and OpenCV thread settings before creating workers.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,6 +34,50 @@ import os
 import time
 import torch
 import warnings
+import time
+
+# ===== Obtaining singleton instances =====
+
+#@NOTE: Obtaining the the (potentially) usedsingleton instances for classes from `optim_test_tools` package.
+from accvlab.optim_test_tools import Stopwatch, NVTXRangeWrapper, TensorDumper
+stopwatch = Stopwatch()
+nvtx_wrp = NVTXRangeWrapper()
+dumper = TensorDumper()
+
+# ===== End of Obtaining singleton instances =====
+
+
+# ===== Profiling and Dumping Configuration =====
+
+#@NOTE 
+# Set `enable_dumper` to `True` to enable the dumper. The number of iterations 
+# to dump is set by `dumper_iter_count`. Note that this is hard-coded here instead
+# of being part of the config because the dumper is only used for debugging purposes 
+# and should be kept disabled during actual training.
+ENABLE_DUMPER = False
+DUMPER_ITER_COUNT = 10
+
+#@NOTE 
+# If the dumper should be enabled, do so and also register custom converters for the non-standard 
+# types that need to be dumped.
+if ENABLE_DUMPER:
+    rank = os.environ['RANK'] if 'RANK' in os.environ else (
+        os.environ['LOCAL_RANK'] if 'LOCAL_RANK' in os.environ else 0
+    )
+    #@NOTE 
+    # Enable the dumper and set the dump directory according to the rank. This will allow dumping from all
+    # worker processes, without introducing conflicts.
+    dumper.enable(f"/streampetr/dumps/rank{rank}")
+    #@NOTE: Perform dumping for a fixed number of iterations and then exit.
+    dumper.perform_after_dump_count(DUMPER_ITER_COUNT, exit)
+    #@NOTE: Register custom converters for the non-standard types that need to be dumped.
+    from mmdet3d.models.detectors.base import DC
+    from mmdet3d.core.bbox.structures.lidar_box3d import LiDARInstance3DBoxes
+    dumper.register_custom_converter(LiDARInstance3DBoxes, lambda x: {"tensor": x.tensor})
+    dumper.register_custom_converter(DC, lambda x: {"data": x.data})
+
+# ===== End of Profiling and Dumping Configuration =====
+
 from mmcv import Config, DictAction
 from mmcv.runner import get_dist_info, init_dist, wrap_fp16_model
 from os import path as osp
@@ -44,6 +91,25 @@ from mmdet3d.utils import collect_env, get_root_logger, setup_multi_processes
 from mmdet.apis import set_random_seed
 from mmseg import __version__ as mmseg_version
 from mmcv.utils import TORCH_VERSION, digit_version
+
+# ===== Setting up the Python Path (including DALI pipeline) =====
+
+import sys
+sys.path.append("/streampetr")
+#@NOTE: Make the DALI pipeline example code available.
+sys.path.append("/ACCV-Lab/packages/dali_pipeline_framework/examples")
+
+# ===== End of Setting up the Python Path (including DALI pipeline) =====
+
+
+os.environ["CUDA_LAUNCH_BLOCKING"] = "0"
+
+#@NOTE 
+# The imported functionality is not used directly here. But the imports are needed so that the corrresponding 
+# classes are registered and can be found if configured to be used.
+import projects.mmdet3d_plugin.core.evaluation.data_pipeline_runtime_eval_runner
+import projects.mmdet3d_plugin.core.adjusted_impl.optimizer_with_time
+import projects.mmdet3d_plugin.core.adjusted_impl.iter_based_runner_with_time
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train a detector')
@@ -113,8 +179,53 @@ def parse_args():
 
     return args
 
+def get_and_print_rank_and_world_size_info():
+        if "RANK" in os.environ:
+            rank = int(os.environ["RANK"])
+        elif "LOCAL_RANK" in os.environ:
+            rank = int(os.environ["LOCAL_RANK"])
+            print(f"'RANK' environment variable not found; using 'LOCAL_RANK' (= {rank}) as rank instead")
+        else:
+            print("Neither 'RANK' nor 'LOCAL_RANK' environment variable not found; Setting `rank = 0`")
+            rank = 0
+
+        if "LOCAL_RANK" in os.environ:
+            local_rank = int(os.environ["LOCAL_RANK"])
+        else:
+            print("'LOCAL_RANK' environment variable not found; Setting `local_rank = 0`")
+            local_rank = 0
+
+        if "WORLD_SIZE" in os.environ:
+            world_size = int(os.environ["WORLD_SIZE"])
+        elif "LOCAL_WORLD_SIZE" in os.environ:
+            world_size = int(os.environ["LOCAL_WORLD_SIZE"])
+            print(f"'WORLD_SIZE' environment variable not found; using 'LOCAL_WORLD_SIZE' (= {world_size}) as world size instead")
+        else:
+            print("Neither 'WORLD_SIZE' nor 'LOCAL_WORLD_SIZE' environment variable not found; Setting `world_size = 1`")
+            world_size = 1
+
+        return local_rank, rank, world_size
+
+
+
+def get_dali_pipeline_distributed_args(local_rank, rank, world_size, replicate_dataset_per_gpu=False):
+    """Return the pipeline's GPU assignment and data-sharding arguments.
+
+    The replication option was added specifically for runtime evaluations with
+    NuScenes mini. Setting ``replicate_dataset_per_gpu=True`` lets each GPU sample
+    the full dataset, requiring only ``batch_size`` sequence groups per GPU.
+    GPU assignment is unchanged. With reproducible seeds enabled, ``rank=0`` also
+    gives every GPU the same augmentation seed.
+    """
+    return dict(
+        device_id=local_rank,
+        rank=0 if replicate_dataset_per_gpu else rank,
+        world_size=1 if replicate_dataset_per_gpu else world_size,
+    )
+
 
 def main():
+    
     args = parse_args()
 
     cfg = Config.fromfile(args.config)
@@ -155,6 +266,33 @@ def main():
                 plg_lib = importlib.import_module(_module_path)
 
             from projects.mmdet3d_plugin.core.apis.train import custom_train_model
+
+
+    # ===== Get rank and world size =====
+    #@NOTE 
+    # Get the rank and world size of the current process. This is needed for the following:
+    #   - The DALI pipeline, which relies on this information to correctly set up sharding, and selecting
+    #     the correct device ID for the pipeline.
+    #   - The stopwatch, which only runs for one process (`rank==0`).
+    local_rank, rank, world_size = get_and_print_rank_and_world_size_info()
+    # ===== End of Get rank and world size =====
+
+
+    # ===== Runtime Measurement & Profiling Configuration =====
+    #@NOTE
+    # Whether to use the runtime measurements and the nvtx ranges is configurable. Here, we read the
+    # configuration from the config file and enable the corresponding signletons if needed.
+    runtime_meas_cfg = cfg.get("runtime_meas_config", None)
+    if runtime_meas_cfg is not None:
+        stopwatch_cfg = runtime_meas_cfg.stopwatch
+        nvtx_rng_wrp_cfg = runtime_meas_cfg.nvtx_range_wrapper
+        if stopwatch_cfg.enable and rank == 0:
+            stopwatch.enable(stopwatch_cfg.num_warmup_iters, stopwatch_cfg.print_every_n_iters, stopwatch_cfg.do_cuda_sync)
+        if nvtx_rng_wrp_cfg.enable:
+            nvtx_wrp.enable(nvtx_rng_wrp_cfg.sync_on_push, nvtx_rng_wrp_cfg.sync_on_pop, nvtx_rng_wrp_cfg.keep_track_of_range_order)
+    # ===== End of Runtime Measurement & Profiling Configuration =====
+
+
     # set cudnn_benchmark
     if cfg.get('cudnn_benchmark', False):
         torch.backends.cudnn.benchmark = True
@@ -245,19 +383,90 @@ def main():
         logger.info("Using SyncBN")
         
     logger.info(f'Model:\n{model}')
-    datasets = [build_dataset(cfg.data.train)]
-    if len(cfg.workflow) == 2:
-        val_dataset = copy.deepcopy(cfg.data.val)
-        # in case we use a dataset wrapper
-        if 'dataset' in cfg.data.train:
-            val_dataset.pipeline = cfg.data.train.dataset.pipeline
-        else:
-            val_dataset.pipeline = cfg.data.train.pipeline
-        # set test_mode=False here in deep copied config
-        # which do not affect AP/AR calculation later
-        # refer to https://mmdetection3d.readthedocs.io/en/latest/tutorials/customize_runtime.html#customize-workflow  # noqa
-        val_dataset.test_mode = False
-        datasets.append(build_dataset(val_dataset))
+
+
+    # ===== Get Dataset or DALI Output Iterator =====
+    #@NOTE: The if-branch is for the DALI pipeline, the else-branch is for the original PyTorch Dataset.
+    if cfg.data_loading_config.use_dali_pipeline:
+
+        #@NOTE 
+        # Import the StreamPETR pipeline setup from the DALI pipeline example (and notify user if it is not 
+        # found).
+        try:
+            from pipeline_setup import stream_petr_pipeline
+        except ImportError:
+            raise ImportError(
+                "Could not import `stream_petr_pipeline` from `pipeline_setup`. When running with the DALI "
+                "pipeline, please make sure that the `pipeline_setup` module from the "
+                "dali_pipeline_framework example (packages/dali_pipeline_framework/examples) is in the python path, as "
+                "this demo re-uses the StreamPETR pipeline setup showcased there."
+            )
+
+        #@NOTE
+        # Use the same dataset root for DALI training and the PyTorch validation dataset. The NuScenes
+        # version is specified separately.
+        nuscenes_base_dir = cfg.data.train.data_root
+        nuscenes_version = cfg.data_loading_config.nuscenes_version
+
+        num_batches_in_epoch = cfg.num_iters_per_epoch
+
+        #@NOTE 
+        # Create the DALI pipeline. Note that the returned object is a 
+        # `dali_pipeline_framework.DALIStructuredOutputIterator` object, which can be used as a drop-in replacement for 
+        # a PyTorch DataLoader. This means that if DALI is used, one needs to skip the creation of a PyTorch 
+        # DataLoader from this object, and use it directly instead. This is done in 
+        # `projects/mmdet3d_plugin/core/apis/mmdet_train.py`.
+        dali_iterator = stream_petr_pipeline.setup_dali_pipeline_stream_petr_train(
+            nuscenes_base_dir, nuscenes_version, num_batches_in_epoch, config=cfg.dali_preproc_config, 
+            batch_size=cfg.data.samples_per_gpu,
+            **get_dali_pipeline_distributed_args(
+                local_rank, rank, world_size,
+                cfg.data_loading_config.get('replicate_dataset_per_gpu', False),
+            ),
+        )
+        
+        #@NOTE 
+        # Store as the only element in the `datasets` list. In case DALI is not used, the same variable will 
+        # contain the actual PyTorch Dataset (also as a single-element list), see else-branch below.
+        datasets = [dali_iterator]
+        
+        #@NOTE 
+        # The classes can be obtrained from the Dataset object if DALI is not used. Here, we manually
+        # set the classes instead. 
+        classes = [
+            'car', 'truck', 'construction_vehicle', 'bus', 'trailer', 'barrier', 'motorcycle', 'bicycle', 
+            'pedestrian', 'traffic_cone'
+        ]
+
+    else:
+
+        #@NOTE: This corresponds to the original implementation, where a PyTorch Dataset is created and used.
+
+        datasets = [build_dataset(cfg.data.train)]
+        if len(cfg.workflow) == 2:
+            val_dataset = copy.deepcopy(cfg.data.val)
+            # in case we use a dataset wrapper
+            if 'dataset' in cfg.data.train:
+                val_dataset.pipeline = cfg.data.train.dataset.pipeline
+            else:
+                val_dataset.pipeline = cfg.data.train.pipeline
+            # set test_mode=False here in deep copied config
+            # which do not affect AP/AR calculation later
+            # refer to https://mmdetection3d.readthedocs.io/en/latest/tutorials/customize_runtime.html#customize-workflow  # noqa
+            val_dataset.test_mode = False
+            datasets.append(build_dataset(val_dataset))
+        
+        #@NOTE 
+        # Extract the classes here, to obtain the `classes` variable, equivalent to the one created if using
+        # DALI. This is done to avoid calling `datasets[0].CLASSES` below, which would not work DALI is used.
+        classes = datasets[0].CLASSES
+    # ===== End of Getting Dataset or DALI Output Iterator =====
+
+
+    # ===== Checkpoint Configuration =====
+    #@NOTE
+    # Note that here, we use the previously obtained `classes` variable. In the original implementation, 
+    # `dataset[0].CLASSES` is used instead.
     if cfg.checkpoint_config is not None:
         # save mmdet version, config file content and class names in
         # checkpoints as meta data
@@ -266,11 +475,29 @@ def main():
             mmseg_version=mmseg_version,
             mmdet3d_version=mmdet3d_version,
             config=cfg.pretty_text,
-            CLASSES=datasets[0].CLASSES,
+            CLASSES=classes,
             PALETTE=datasets[0].PALETTE  # for segmentors
             if hasattr(datasets[0], 'PALETTE') else None)
     # add an attribute for visualization convenience
-    model.CLASSES = datasets[0].CLASSES
+    model.CLASSES = classes
+    # ===== End of Checkpoint Configuration =====
+
+
+    # ===== Start profiling (if running with nsys) =====
+    #@NOTE: Indicate that profiling should be started if the NVTX range wrapper is enabled.
+    if nvtx_wrp.is_enabled:
+        if "RANK" in os.environ and int(os.environ["RANK"]) == 0:
+            print("Starting profiling")
+            torch.cuda.cudart().cudaProfilerStart()
+    # ===== End of Start profiling (if running with nsys) =====
+
+
+    # ===== Train the model =====
+    #@NOTE
+    # Call the training function. Note that datasets is passed to the model. As this now may be a DALI 
+    # iterator, one needs to make sure that the training function is able to handle this (by using it directly
+    # as a drop-in replacement for a PyTorch DataLoader, instead of creating a PyTorch DataLoader from it). 
+    # This is done in `projects/mmdet3d_plugin/core/apis/mmdet_train.py`.
     custom_train_model(
         model,
         datasets,
@@ -279,6 +506,25 @@ def main():
         validate=(not args.no_validate),
         timestamp=timestamp,
         meta=meta)
+    # ===== End of Train the model =====
+
+
+    # ===== Stop profiling (if running with nsys) =====
+    #@NOTE: Indicate that profiling should be stopped if the NVTX range wrapper is enabled.
+    if nvtx_wrp.is_enabled:
+        if "RANK" in os.environ and int(os.environ["RANK"]) == 0:
+            print("Stopping profiling")
+            torch.cuda.cudart().cudaProfilerStop()
+    # ===== End of Stop profiling (if running with nsys) =====
+    
+
+    # ===== Stopwatch: Print eval times =====
+    #@NOTE
+    # Print the run-time measurements at the end of the training. Note that depending on the setup, the 
+    # measurements will also be printed periodically (e.g. every 50 iterations). Here, we ensure that the
+    # last printed measurement is for the complete training.
+    stopwatch.print_eval_times()
+    # ===== End of Stopwatch: Print eval times =====
 
 
 if __name__ == '__main__':

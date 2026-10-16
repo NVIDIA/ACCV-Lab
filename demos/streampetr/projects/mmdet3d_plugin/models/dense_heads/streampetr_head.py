@@ -10,6 +10,10 @@
 #  Modified by Shihao Wang
 #  (StreamPETR: https://github.com/exiawsh/StreamPETR)
 # ------------------------------------------------------------------------
+# Copyright (c) 2026, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# Changes: Added NVTX range-based profiling and runtime measurements.
+#
+# ------------------------------------------------------------------------
 #
 # This file contains contributions made under each of the licenses below;
 # both apply to it. Each license governs the contributions made under it.
@@ -50,6 +54,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
+'''
+  This file is the original implementation of the StreamPETRHead with small changes (documentation & nvtx
+markers).
+
+  Please note that there are also some changes to the assignment implementation to ensure a fair 
+comparison to the optimized version. Please see the notes in `hungarian_assigner3d.py` for more details.
+'''
+
+from typing import List, Optional, Tuple, Dict, Union, Sequence
+
 import torch
 import torch.nn as nn
 from mmcv.cnn import Linear, bias_init_with_prob
@@ -62,11 +77,17 @@ from mmdet.models import HEADS, build_loss
 from mmdet.models.dense_heads.anchor_free_head import AnchorFreeHead
 from mmdet.models.utils.transformer import inverse_sigmoid
 from mmdet3d.core.bbox.coders import build_bbox_coder
+from mmdet3d.core.bbox import LiDARInstance3DBoxes
+
 from projects.mmdet3d_plugin.core.bbox.util import normalize_bbox
 
 from mmdet.models.utils import NormedLinear
 from projects.mmdet3d_plugin.models.utils.positional_encoding import pos2posemb3d, pos2posemb1d, nerf_positional_encoding
 from projects.mmdet3d_plugin.models.utils.misc import MLN, topk_gather, transform_reference_points, memory_refresh, SELayer_Linear
+
+from accvlab.optim_test_tools import NVTXRangeWrapper, Stopwatch
+nvtx_wrp = NVTXRangeWrapper()
+stopwatch = Stopwatch()
 
 @HEADS.register_module()
 class StreamPETRHead(AnchorFreeHead):
@@ -441,7 +462,10 @@ class StreamPETRHead(AnchorFreeHead):
 
         coords = coords.unsqueeze(-1)
 
-        img2lidars = data['lidar2img'].inverse()
+        # @MARK: The commented out line below replaced as it does not work with the used config
+        #img2lidars = data['lidar2img'].inverse()
+        img2lidars = torch.inverse(data['lidar2img'].cpu()).cuda()
+
         img2lidars = img2lidars.view(BN, 1, 1, 4, 4).repeat(1, H*W, D, 1, 1).view(B, LEN, D, 4, 4)
         img2lidars = topk_gather(img2lidars, topk_indexes)
 
@@ -738,17 +762,23 @@ class StreamPETRHead(AnchorFreeHead):
                 - pos_inds (Tensor): Sampled positive indexes for each image.
                 - neg_inds (Tensor): Sampled negative indexes for each image.
         """
+        #@MARK
+        nvtx_wrp.range_push("StreamPETRHead._get_target_single")
 
         num_bboxes = bbox_pred.size(0)
         # assigner and sampler
-
+        #@NOTE: Assigner results contains gt-indices with filler values (0, seems indices are shifted by 1) 
+        # & labels with fillers (-1)
         assign_result = self.assigner.assign(bbox_pred, cls_score, gt_bboxes,
                                                 gt_labels, gt_bboxes_ignore, self.match_costs, self.match_with_velo)
+        nvtx_wrp.range_push("StreamPETRHead._get_target_single:sample")
         sampling_result = self.sampler.sample(assign_result, bbox_pred,
                                               gt_bboxes)
         pos_inds = sampling_result.pos_inds
         neg_inds = sampling_result.neg_inds
-
+        nvtx_wrp.range_pop()
+        #@MARK
+        nvtx_wrp.range_push("StreamPETRHead._get_target_single:prepare_gt")
         # label targets
         labels = gt_bboxes.new_full((num_bboxes, ),
                                     self.num_classes,
@@ -764,44 +794,51 @@ class StreamPETRHead(AnchorFreeHead):
         if sampling_result.num_gts > 0:
             bbox_targets[pos_inds] = sampling_result.pos_gt_bboxes
             bbox_weights[pos_inds] = 1.0
+            #@NOTE: Here, the filler value for the indices changes from -1 to 10 (or generally, num_classes)
             labels[pos_inds] = gt_labels[sampling_result.pos_assigned_gt_inds]
+
+        #@MARK
+        nvtx_wrp.range_pop()
+        nvtx_wrp.range_pop("StreamPETRHead._get_target_single")
+
         return (labels, label_weights, bbox_targets, bbox_weights, 
                 pos_inds, neg_inds)
 
     def get_targets(self,
-                    cls_scores_list,
-                    bbox_preds_list,
-                    gt_bboxes_list,
-                    gt_labels_list,
+                    cls_scores_list: Sequence[torch.Tensor],
+                    bbox_preds_list: Sequence[torch.Tensor],
+                    gt_bboxes_list: Sequence[torch.Tensor],
+                    gt_labels_list: Sequence[torch.Tensor],
                     gt_bboxes_ignore_list=None):
         """"Compute regression and classification targets for a batch image.
         Outputs from a single decoder layer of a single feature level are used.
         Args:
-            cls_scores_list (list[Tensor]): Box score logits from a single
+            cls_scores_list (Sequence[Tensor]): Box score logits from a single
                 decoder layer for each image with shape [num_query,
                 cls_out_channels].
-            bbox_preds_list (list[Tensor]): Sigmoid outputs from a single
+            bbox_preds_list (Sequence[Tensor]): Sigmoid outputs from a single
                 decoder layer for each image, with normalized coordinate
                 (cx, cy, w, h) and shape [num_query, 4].
-            gt_bboxes_list (list[Tensor]): Ground truth bboxes for each image
+            gt_bboxes_list (Sequence[Tensor]): Ground truth bboxes for each image
                 with shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format.
-            gt_labels_list (list[Tensor]): Ground truth class indexes for each
+            gt_labels_list (Sequence[Tensor]): Ground truth class indexes for each
                 image with shape (num_gts, ).
-            gt_bboxes_ignore_list (list[Tensor], optional): Bounding
+            gt_bboxes_ignore_list (Sequence[Tensor], optional): Bounding
                 boxes which can be ignored for each image. Default None.
         Returns:
             tuple: a tuple containing the following targets.
-                - labels_list (list[Tensor]): Labels for all images.
-                - label_weights_list (list[Tensor]): Label weights for all \
-                    images.
-                - bbox_targets_list (list[Tensor]): BBox targets for all \
-                    images.
-                - bbox_weights_list (list[Tensor]): BBox weights for all \
-                    images.
-                - num_total_pos (int): Number of positive samples in all \
-                    images.
-                - num_total_neg (int): Number of negative samples in all \
-                    images.
+                - labels_list (Sequence[Tensor]): Labels for all objects in all \
+                    samples.
+                - label_weights_list (Sequence[Tensor]): Label weights for all \
+                    objects in all samples.
+                - bbox_targets_list (Sequence[Tensor]): BBox targets for all \
+                    objects in all samples.
+                - bbox_weights_list (Sequence[Tensor]): BBox weights for all \
+                    objects in all samples.
+                - num_total_pos (int): Number of positive objects in all \
+                    samples.
+                - num_total_neg (int): Number of negative objects in all \
+                    samples.
         """
         assert gt_bboxes_ignore_list is None, \
             'Only supports for gt_bboxes_ignore setting to None.'
@@ -820,29 +857,32 @@ class StreamPETRHead(AnchorFreeHead):
                 bbox_weights_list, num_total_pos, num_total_neg)
 
     def loss_single(self,
-                    cls_scores,
-                    bbox_preds,
-                    gt_bboxes_list,
-                    gt_labels_list,
-                    gt_bboxes_ignore_list=None):
+                    cls_scores: torch.Tensor,
+                    bbox_preds: torch.Tensor,
+                    gt_bboxes_list: Sequence[torch.Tensor],
+                    gt_labels_list: Sequence[torch.Tensor],
+                    gt_bboxes_ignore_list: Optional[Sequence[torch.Tensor]] = None
+                    ) -> Tuple[torch.Tensor, torch.Tensor]:
         """"Loss function for outputs from a single decoder layer of a single
         feature level.
         Args:
             cls_scores (Tensor): Box score logits from a single decoder layer
-                for all images. Shape [bs, num_query, cls_out_channels].
+                for all samples. Shape [num_samples, num_query, cls_out_channels].
             bbox_preds (Tensor): Sigmoid outputs from a single decoder layer
-                for all images, with normalized coordinate (cx, cy, w, h) and
-                shape [bs, num_query, 4].
-            gt_bboxes_list (list[Tensor]): Ground truth bboxes for each image
-                with shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format.
-            gt_labels_list (list[Tensor]): Ground truth class indexes for each
-                image with shape (num_gts, ).
-            gt_bboxes_ignore_list (list[Tensor], optional): Bounding
-                boxes which can be ignored for each image. Default None.
+                for all samples. 
+                shape [num_samples, num_query, 10].
+            gt_bboxes_list (Sequence[Tensor]): Ground truth bboxes for all samples
+                with shape (num_gts, 9) each.
+            gt_labels_list (Sequence[Tensor]): Ground truth class indexes for all samples
+                with shape (num_gts, ) each.
+            gt_bboxes_ignore_list (Sequence[Tensor], optional): Bounding
+                boxes which can be ignored for each sample. Default None.
         Returns:
-            dict[str, Tensor]: A dictionary of loss components for outputs from
-                a single decoder layer.
+            loss_cls (Tensor): Classification loss (scalar).
+            loss_bbox (Tensor): Bounding box regression loss (scalar).
         """
+        #@MARK
+        nvtx_wrp.range_push("StreamPETRHead.loss_single")
         num_imgs = cls_scores.size(0)
         cls_scores_list = [cls_scores[i] for i in range(num_imgs)]
         bbox_preds_list = [bbox_preds[i] for i in range(num_imgs)]
@@ -851,11 +891,16 @@ class StreamPETRHead(AnchorFreeHead):
                                            gt_bboxes_ignore_list)
         (labels_list, label_weights_list, bbox_targets_list, bbox_weights_list,
          num_total_pos, num_total_neg) = cls_reg_targets
+        #@MARK
+        nvtx_wrp.range_push("concatenation samples [StreamPETRHead.loss_single]")
         labels = torch.cat(labels_list, 0)
         label_weights = torch.cat(label_weights_list, 0)
         bbox_targets = torch.cat(bbox_targets_list, 0)
         bbox_weights = torch.cat(bbox_weights_list, 0)
+        #@MARK
+        nvtx_wrp.range_pop()
 
+        nvtx_wrp.range_push("cls_avg_factor computation[StreamPETRHead.loss_single]")
         # classification loss
         cls_scores = cls_scores.reshape(-1, self.cls_out_channels)
         # construct weighted avg_factor to match with the official DETR repo
@@ -866,52 +911,70 @@ class StreamPETRHead(AnchorFreeHead):
                 cls_scores.new_tensor([cls_avg_factor]))
 
         cls_avg_factor = max(cls_avg_factor, 1)
+        nvtx_wrp.range_pop()
+        #@MARK
+        nvtx_wrp.range_push("loss_cls computation[StreamPETRHead.loss_single]")
         loss_cls = self.loss_cls(
             cls_scores, labels, label_weights, avg_factor=cls_avg_factor)
+        #@MARK
+        nvtx_wrp.range_pop()
 
         # Compute the average number of gt boxes accross all gpus, for
         # normalization purposes
+        nvtx_wrp.range_push("non_total_pos processing[StreamPETRHead.loss_single]")
         num_total_pos = loss_cls.new_tensor([num_total_pos])
         num_total_pos = torch.clamp(reduce_mean(num_total_pos), min=1).item()
+        nvtx_wrp.range_pop()
 
         # regression L1 loss
+        nvtx_wrp.range_push("bbox_weights[StreamPETRHead.loss_single]")
         bbox_preds = bbox_preds.reshape(-1, bbox_preds.size(-1))
+        nvtx_wrp.range_push("normalize_bbox[StreamPETRHead.loss_single]")
         normalized_bbox_targets = normalize_bbox(bbox_targets, self.pc_range)
+        nvtx_wrp.range_pop()
         isnotnan = torch.isfinite(normalized_bbox_targets).all(dim=-1)
         bbox_weights = bbox_weights * self.code_weights
+        nvtx_wrp.range_pop()
 
+        #@MARK
+        nvtx_wrp.range_push("loss_bbox computation[StreamPETRHead.loss_single]")
         loss_bbox = self.loss_bbox(
                 bbox_preds[isnotnan, :10], normalized_bbox_targets[isnotnan, :10], bbox_weights[isnotnan, :10], avg_factor=num_total_pos)
 
         loss_cls = torch.nan_to_num(loss_cls)
         loss_bbox = torch.nan_to_num(loss_bbox)
+        #@MARK
+        nvtx_wrp.range_pop()
+        nvtx_wrp.range_pop("StreamPETRHead.loss_single")
         return loss_cls, loss_bbox
 
    
     def dn_loss_single(self,
-                    cls_scores,
-                    bbox_preds,
-                    known_bboxs,
-                    known_labels,
-                    num_total_pos=None):
-        """"Loss function for outputs from a single decoder layer of a single
-        feature level.
+                    cls_scores: torch.Tensor,
+                    bbox_preds: torch.Tensor,
+                    known_bboxs: torch.Tensor,
+                    known_labels: torch.Tensor,
+                    num_total_pos: int
+                    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        ''' DN loss computation for a single decoder layer.
+
         Args:
-            cls_scores (Tensor): Box score logits from a single decoder layer
-                for all images. Shape [bs, num_query, cls_out_channels].
-            bbox_preds (Tensor): Sigmoid outputs from a single decoder layer
-                for all images, with normalized coordinate (cx, cy, w, h) and
-                shape [bs, num_query, 4].
-            gt_bboxes_list (list[Tensor]): Ground truth bboxes for each image
-                with shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format.
-            gt_labels_list (list[Tensor]): Ground truth class indexes for each
-                image with shape (num_gts, ).
-            gt_bboxes_ignore_list (list[Tensor], optional): Bounding
-                boxes which can be ignored for each image. Default None.
+            cls_scores (Tensor): Classification score logits from all decoder layer
+                for all images. Shape [num_entries, cls_out_channels].
+            bbox_preds (Tensor): Bbox regression outputs from all decoder layer
+                for all images.
+                shape [num_entries, 10].
+            known_bboxs (Tensor): Ground truth bboxes for each decoder layer and image
+                with shape (num_entries, 9).
+            known_labels (Tensor): Ground truth class indexes for each decoder layer and image
+                with shape (num_entries,).
+            num_total_pos (int): Number of positive samples for the decoder layer.
         Returns:
-            dict[str, Tensor]: A dictionary of loss components for outputs from
-                a single decoder layer.
-        """
+            loss_cls (Tensor): Classification loss (scalar).
+            loss_bbox (Tensor): Bounding box regression loss (scalar).
+        '''
+        #@MARK
+        nvtx_wrp.range_push("StreamPETRHead.dn_loss_single")
         # classification loss
         cls_scores = cls_scores.reshape(-1, self.cls_out_channels)
         # construct weighted avg_factor to match with the official DETR repo
@@ -944,40 +1007,42 @@ class StreamPETRHead(AnchorFreeHead):
         loss_cls = torch.nan_to_num(loss_cls)
         loss_bbox = torch.nan_to_num(loss_bbox)
         
-        return self.dn_weight * loss_cls, self.dn_weight * loss_bbox
+        res = self.dn_weight * loss_cls, self.dn_weight * loss_bbox
+
+        #@MARK
+        nvtx_wrp.range_pop("StreamPETRHead.dn_loss_single")
+
+        return res
     
     @force_fp32(apply_to=('preds_dicts'))
     def loss(self,
-             gt_bboxes_list,
-             gt_labels_list,
-             preds_dicts,
-             gt_bboxes_ignore=None):
-        """"Loss function.
+             gt_bboxes_list: Sequence[LiDARInstance3DBoxes],
+             gt_labels_list: Sequence[torch.Tensor],
+             preds_dicts: Dict[str, Union[torch.Tensor, dict]],
+             gt_bboxes_ignore: Optional[Sequence[torch.Tensor]] = None):
+        '''Loss computation.
+
         Args:
-            gt_bboxes_list (list[Tensor]): Ground truth bboxes for each image
-                with shape (num_gts, 4) in [tl_x, tl_y, br_x, br_y] format.
-            gt_labels_list (list[Tensor]): Ground truth class indexes for each
-                image with shape (num_gts, ).
+            gt_bboxes_list: Ground truth bboxes for each sample.
+            gt_labels_list: Ground truth class indexes for each sample.
+               Each entry is a tensor with shape (num_gts_i, ).
+               Note that `num_gts_i` is the number of ground truth objects for the `i`-th sample.
             preds_dicts:
-                all_cls_scores (Tensor): Classification score of all
-                    decoder layers, has shape
-                    [nb_dec, bs, num_query, cls_out_channels].
-                all_bbox_preds (Tensor): Sigmoid regression
-                    outputs of all decode layers. Each is a 4D-tensor with
-                    normalized coordinate format (cx, cy, w, h) and shape
-                    [nb_dec, bs, num_query, 4].
-                enc_cls_scores (Tensor): Classification scores of
-                    points on encode feature map , has shape
-                    (N, h*w, num_classes). Only be passed when as_two_stage is
-                    True, otherwise is None.
-                enc_bbox_preds (Tensor): Regression results of each points
-                    on the encode feature map, has shape (N, h*w, 4). Only be
-                    passed when as_two_stage is True, otherwise is None.
+                all_cls_scores (Tensor): Classification score from all decoder layers.
+                    Shape: [num_dec_layers, num_samples, num_query, cls_out_channels].
+                all_bbox_preds (Tensor): Bbox regression outputs from all decoder layers.
+                    Shape: [num_dec_layers, num_samples, num_query, 10].
+                dn_mask_dict (dict): DN mask dictionary
             gt_bboxes_ignore (list[Tensor], optional): Bounding boxes
                 which can be ignored for each image. Default None.
+                Not supported and needs to be set to `None`. This is consistent with the original 
+                implementation, where the HungarianAssigner3D does not support ignore lists.
         Returns:
             dict[str, Tensor]: A dictionary of loss components.
-        """
+        '''
+        #@MARK
+        nvtx_wrp.range_push("StreamPETRHead.loss")
+        stopwatch.start_meas("StreamPETRHead.loss")
         assert gt_bboxes_ignore is None, \
             f'{self.__class__.__name__} only supports ' \
             f'for gt_bboxes_ignore setting to None.'
@@ -987,20 +1052,28 @@ class StreamPETRHead(AnchorFreeHead):
 
         num_dec_layers = len(all_cls_scores)
         device = gt_labels_list[0].device
+        #@NOTE: A batched version of the following can be done by first creating a batched tensor on the CPU and then
+        # transfer to GPU. In this way, fewer  copies are needed, and the batching happens on the CPU.
         gt_bboxes_list = [torch.cat(
             (gt_bboxes.gravity_center, gt_bboxes.tensor[:, 3:]),
             dim=1).to(device) for gt_bboxes in gt_bboxes_list]
 
+        #@NOTE: Duplicating the GT for each layer. This is not strictly needed as for all intermediate results, 
+        # the same GT can be used. However, there are no data copies involved here, so likely this is fast.
         all_gt_bboxes_list = [gt_bboxes_list for _ in range(num_dec_layers)]
         all_gt_labels_list = [gt_labels_list for _ in range(num_dec_layers)]
         all_gt_bboxes_ignore_list = [
             gt_bboxes_ignore for _ in range(num_dec_layers)
         ]
 
+        #@MARK
+        nvtx_wrp.range_push("multi loss computation[StreamPETRHead.loss]")
         losses_cls, losses_bbox = multi_apply(
             self.loss_single, all_cls_scores, all_bbox_preds,
             all_gt_bboxes_list, all_gt_labels_list, 
             all_gt_bboxes_ignore_list)
+        #@MARK
+        nvtx_wrp.range_pop()
 
         loss_dict = dict()
 
@@ -1052,6 +1125,10 @@ class StreamPETRHead(AnchorFreeHead):
                 loss_dict[f'd{num_dec_layer}.dn_loss_bbox'] = loss_bbox_i.detach()     
                 num_dec_layer += 1
 
+        #@MARK
+        nvtx_wrp.range_pop("StreamPETRHead.loss")
+        stopwatch.end_meas("StreamPETRHead.loss")
+
         return loss_dict
 
 
@@ -1059,10 +1136,11 @@ class StreamPETRHead(AnchorFreeHead):
     def get_bboxes(self, preds_dicts, img_metas, rescale=False):
         """Generate bboxes from bbox head predictions.
         Args:
-            preds_dicts (tuple[list[dict]]): Prediction results.
-            img_metas (list[dict]): Point cloud and image's meta info.
+            preds_dicts: Prediction results.
+            img_metas: Point cloud and image's meta info.
+            rescale: Unused.
         Returns:
-            list[dict]: Decoded bbox, scores and labels after nms.
+            Decoded bbox, scores and labels after nms.
         """
         preds_dicts = self.bbox_coder.decode(preds_dicts)
         num_samples = len(preds_dicts)

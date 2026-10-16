@@ -11,8 +11,7 @@
 #  (StreamPETR: https://github.com/exiawsh/StreamPETR)
 # ------------------------------------------------------------------------
 # Copyright (c) 2026, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# Changes: Replaced GridMask with the independently implemented
-#          RandomGridOcclusion augmentation used by the demo.
+# Changes: Added NVTX profiling, TensorDumper instrumentation, comments/notes.
 #
 # ------------------------------------------------------------------------
 #
@@ -62,6 +61,11 @@ from mmdet3d.core import bbox3d2result
 from mmdet3d.models.detectors.mvx_two_stage import MVXTwoStageDetector
 from projects.mmdet3d_plugin.models.utils.random_grid_occlusion import RandomGridOcclusion
 from projects.mmdet3d_plugin.models.utils.misc import locations
+
+from accvlab.optim_test_tools import Stopwatch, NVTXRangeWrapper, TensorDumper
+stopwatch = Stopwatch()
+nvtx_wrp = NVTXRangeWrapper()
+dumper = TensorDumper()
 
 @DETECTORS.register_module()
 class Petr3D(MVXTwoStageDetector):
@@ -174,7 +178,7 @@ class Petr3D(MVXTwoStageDetector):
             return_losses = False
             data_t = dict()
             for key in data:
-                data_t[key] = data[key][:, i]
+                data_t[key] = data[key][:, i] 
 
             data_t['img_feats'] = data_t['img_feats']
             if i >= num_nograd_frames:
@@ -243,13 +247,18 @@ class Petr3D(MVXTwoStageDetector):
             outs = self.pts_bbox_head(location, img_metas, topk_indexes, **data)
 
         if return_losses:
+            #@MARK
+            nvtx_wrp.range_push("Loss computation [in Petr3D.forward_pts_train]")
+            stopwatch.start_meas("Loss")
             loss_inputs = [gt_bboxes_3d, gt_labels_3d, outs]
             losses = self.pts_bbox_head.loss(*loss_inputs)
             if self.with_img_roi_head:
                 loss2d_inputs = [gt_bboxes, gt_labels, centers2d, depths, outs_roi, img_metas]
                 losses2d = self.img_roi_head.loss(*loss2d_inputs)
-                losses.update(losses2d)
-
+                losses.update(losses2d) 
+            #@MARK
+            nvtx_wrp.range_pop()
+            stopwatch.end_meas("Loss")
             return losses
         else:
             return None
@@ -265,12 +274,47 @@ class Petr3D(MVXTwoStageDetector):
         list[list[dict]]), with the outer list indicating test time
         augmentations.
         """
+        #@MARK
+        nvtx_wrp.range_push("Forward [Petr3D.forward]")
+        stopwatch.start_meas("Forward")
         if return_loss:
             for key in ['gt_bboxes_3d', 'gt_labels_3d', 'gt_bboxes', 'gt_labels', 'centers2d', 'depths', 'img_metas']:
                 data[key] = list(zip(*data[key]))
-            return self.forward_train(**data)
+            
+            # ===== Data dumping =====
+            #@NOTE: Adding data and bounding boxes to be dumped
+            #@NOTE 
+            # First, add the data as-is. Note that we set up 'img' as a special case, as it should be dumped 
+            # as an image and needs to be permuted to be in the correct format (color channels last).
+            dumper.add_tensor_data(
+                "data", 
+                data, 
+                dump_type=TensorDumper.Type.JSON, 
+                #@NOTE 
+                # Set up 'img' as a special case, as it should be dumped as an image and needs to be permuted 
+                # to be in the correct format (color channels last).
+                dump_type_override={"img": TensorDumper.Type.IMAGE_BGR}, 
+                permute_axes_override={"img": (0, 1, 2, 4, 5, 3)}
+            )
+            # NOTE 
+            # Then, add the drawn bboxes to the dump. There is a custom implementation for drawing the 
+            # bboxes & centers into the image, and it is called here, but only if the dumper is enabled.
+            # Note that `add_drawn_bboxes_to_dump` creates the images and adds them to the dump. If
+            # dumping is not enabled, the function is not called, avoiding unnecessary overhead.
+            # Also note that as the function expects the current data as input, we use a lambda function 
+            # to pass that input and obtain a function without arguments, which is passed to `run_if_enabled`.
+            dumper.run_if_enabled(lambda: Petr3D.add_drawn_bboxes_to_dump(data))
+            # NOTE: Dump the data (if enabled, and at the location specified when enabling the dumper).
+            dumper.dump()
+            # ===== End of data dumping =====
+
+            res = self.forward_train(**data)
         else:
-            return self.forward_test(**data)
+            res = self.forward_test(**data)
+        #@MARK
+        nvtx_wrp.range_pop()
+        stopwatch.end_meas("Forward")
+        return res
 
     def forward_train(self,
                       img_metas=None,
@@ -329,8 +373,8 @@ class Petr3D(MVXTwoStageDetector):
                         gt_labels, img_metas, centers2d, depths, gt_bboxes_ignore, **data)
 
         return losses
-
-
+  
+  
     def forward_test(self, img_metas, rescale, **data):
         self.test_flag = True
         for var, name in [(img_metas, 'img_metas')]:
@@ -365,7 +409,7 @@ class Petr3D(MVXTwoStageDetector):
             for bboxes, scores, labels in bbox_list
         ]
         return bbox_results
-
+    
     def simple_test(self, img_metas, **data):
         """Test function without augmentaiton."""
         data['img_feats'] = self.extract_img_feat(data['img'], 1)
@@ -376,5 +420,51 @@ class Petr3D(MVXTwoStageDetector):
         for result_dict, pts_bbox in zip(bbox_list, bbox_pts):
             result_dict['pts_bbox'] = pts_bbox
         return bbox_list
+    
+    # ===== Custom code for dumping the bounding boxes =====
+    @staticmethod
+    def add_drawn_bboxes_to_dump(data_dict):
+        import cv2
+        import numpy as np
 
+        #@NOTE: This is a function that draws bouding boxed into an iamge.
+        def draw_bboxes_into_image(image, bboxes, centers):
+            img_min = image.min()
+            img_max = image.max()
+            image = (image - img_min) / max(img_max - img_min, 1e-6) * 255
+            image_np = np.ascontiguousarray(image.detach().cpu().numpy().astype(np.uint8))
+            for b in range(bboxes.shape[0]):
+                try:
+                    bboxes = np.array(bboxes)
+                except:
+                    bboxes = np.array(bboxes.cpu())
+                try:
+                    centers = np.array(centers)
+                except:
+                    centers = np.array(centers.cpu())
+                color = [np.random.randint(50, 255) for _ in range(3)]
+                image_np = cv2.rectangle(image_np, (bboxes[b, :2] + 0.5).astype(int), (bboxes[b, 2:] + 0.5).astype(int), color=color)
+                image_np = cv2.circle(image_np, (centers[b, :] + 0.5).astype(int), 2, color, -1)
+                image = torch.from_numpy(image_np)
+            return image
 
+        #@NOTE: Perform the drawing
+        img = data_dict["img"]
+        img_shape = img.shape
+        #@NOTE: Generate a nested list for the individual images
+        res = [[[None] * img_shape[2] for _ in range(img_shape[1])] for _ in range(img_shape[0])]
+        #@NOTE: Iterate over the individual images
+        for i in range(img_shape[0]):
+            for j in range(img_shape[1]):
+                for k in range(img_shape[2]):
+                    #@NOTE: Ensure the expected format (channels last)
+                    img_channels_last = img[i, j, k].permute(1, 2, 0)
+                    #@NOTE: Draw the bboxes into the image and store the result
+                    drawn_image = draw_bboxes_into_image(
+                        img_channels_last, data_dict["gt_bboxes"][j][i][k], data_dict["centers2d"][j][i][k]
+                    )
+                    res[i][j][k] = drawn_image
+
+        #@NOTE: Add the drawn images to the dump. Note that we can directly add the nested list.
+        dumper.add_tensor_data("data_dict.drawn_gt_bboxes", res, dump_type=TensorDumper.Type.IMAGE_BGR)
+        # ===== End of custom code for dumping the bounding boxes =====

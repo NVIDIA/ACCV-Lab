@@ -9,7 +9,7 @@ Canonical source:
 Generated target:
     /docs/project_overview/README.md
 
-This script rewrites guide links so they work from within the docs tree,
+This script rewrites documentation links so they work from within the docs tree,
 while keeping the root README clean for GitHub and local repo usage.
 """
 
@@ -27,7 +27,7 @@ TARGET_README = TARGET_DIR / "README.md"
 
 def transform_links(text: str) -> str:
     """
-    Adjust guide links so they are correct relative to the docs tree.
+    Adjust guide and license links for the docs-local copy.
 
     Root README uses:
         docs/guides/XYZ.md
@@ -35,7 +35,8 @@ def transform_links(text: str) -> str:
     Docs-local copy should use:
         ../guides/XYZ.md
     """
-    return text.replace("](docs/guides/", "](../guides/")
+    text = text.replace("](docs/guides/", "](../guides/")
+    return text.replace("](THIRD_PARTY_LICENSES.md)", "](../third_party_licenses.md)")
 
 
 def add_quick_start_label(text: str) -> str:

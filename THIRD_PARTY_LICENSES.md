@@ -6,8 +6,8 @@
 | PyBind11 | [aa304c9c](https://github.com/pybind/pybind11/tree/aa304c9c7d725ffb9d10af08a3b34cb372307020) | [3-Clause BSD](#pybind11) |
 | dlpack | [365b823c](https://github.com/dmlc/dlpack/tree/365b823cedb281cd0240ca601aba9b78771f91a3) | [Apache 2.0](#dlpack) |
 | NVTX | [e170594a](https://github.com/NVIDIA/NVTX/tree/e170594ac7cf1dac584da473d4ca9301087090c1) | [Apache 2.0 with LLVM Exceptions](#nvtx) |
-| NVIDIA DALI | [1.51.2](https://github.com/NVIDIA/DALI/tree/v1.51.2) | [Apache 2.0](#nvidia-dali) |
-| PyTorch | [2.6](https://github.com/pytorch/pytorch/tree/v2.6.0) | [3-Clause BSD](#pytorch) |
+| NVIDIA DALI | [2.3.0](https://github.com/NVIDIA/DALI/tree/v2.3.0) | [Apache 2.0](#nvidia-dali) |
+| PyTorch | [2.11.0](https://github.com/pytorch/pytorch/tree/v2.11.0) | [3-Clause BSD](#pytorch) |
 | [NVIDIA Video Codec SDK (partial)](https://developer.nvidia.com/video-codec-sdk) | 11.1.5 | [MIT](#nvidia-video-codec-sdk-partial) for the contained parts |
 | [PyNvVideoCodec](https://pypi.org/project/PyNvVideoCodec/) | 1.0.2 | [MIT](#pynvvideocodec) |
 | CV-CUDA | [da51fc96](https://github.com/CVCUDA/CV-CUDA/tree/da51fc96c1494c5e43e136978a2acb99138824af) | [Apache 2.0](#cv_cuda) |
@@ -1376,8 +1376,12 @@ All contributions by Cruise LLC:
 Copyright (c) 2022 Cruise LLC.
 All rights reserved.
 
+All contributions by Tri Dao:
+Copyright (c) 2024 Tri Dao.
+All rights reserved.
+
 All contributions by Arm:
-Copyright (c) 2021, 2023-2024 Arm Limited and/or its affiliates
+Copyright (c) 2021, 2023-2025 Arm Limited and/or its affiliates
 
 All contributions from Caffe:
 Copyright(c) 2013, 2014, 2015, the respective contributors

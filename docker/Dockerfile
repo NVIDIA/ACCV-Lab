@@ -108,7 +108,7 @@ RUN pip install pycuda==2025.1.2 \
 
 RUN pip install pandas==1.5.3 \
     IPython \
-    nvidia-dali-cuda120==1.53.0 \
+    nvidia-dali-cuda120==2.3.0 \
     nvtx \
     psutil \
     numba==0.59 \

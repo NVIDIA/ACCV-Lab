@@ -81,7 +81,14 @@ Please see the documentation of each namespace package for usage instructions (a
 Demos
 -----
 
-Demos for the individual packages will be added in the future.
+There are demos available for the individual namespace packages. Those are:
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Contained Demos
+   :includehidden:
+
+   demo_docs/demos
 
 References
 ----------
@@ -90,8 +97,9 @@ References
    :maxdepth: 2
    :caption: References
    :includehidden:
-   
+
    release_notes_page
+   third_party_licenses
 
 
 Indices and Tables

@@ -23,9 +23,9 @@ their functionality and usage, as well as the API reference for each package and
 usage of the packages. Evaluation results are also provided for some of the packages (On-Demand Video Decoder, 
 Batching Helpers, Multi-Tensor Copier, DALI Pipeline Framework).
 
-> **ℹ️ Note**: We are planning to add demos for packages contained in ACCV-Lab in the future. Apart from 
-> acting as tutorials show-casing real-world examples, they will include the implementation of the experiments 
-> which were used to obtain the evaluation results as shown in the documentation of the contained packages.
+The [StreamPETR demos](docs/demo_docs/demos.rst) show how to integrate Batching Helpers and the DALI Pipeline
+Framework into training code, and how to measure and profile performance with Optimization Testing Tools.
+The demo documentation includes tutorials, evaluation results and instructions for running the comparisons.
 
 The contained packages are:
 - **On-Demand Video Decoder**: Designed for efficiently obtaining video frames from video files. Focused on 
@@ -123,6 +123,7 @@ documentation. The basic commands are:
 - `scripts/` - Development and build scripts
 - `docs/guides/` - Guides on how to work with this repository (also included in the documentation)
 - `docker/` - Dockerfile for setting up a container able to run `ACCV-Lab`
+- `demos/` - Demos for the contained packages
 
 ## Available Guides
 
@@ -188,3 +189,8 @@ Please also see the [Contribution Guide](docs/guides/CONTRIBUTION_GUIDE.md) for 
 ## License
 
 This project is licensed under the Apache License, Version 2.0. See the `LICENSE` file for details.
+
+Some files incorporate third-party code received under other permissive licenses (MIT, 
+BSD-3-Clause). Those files carry the applicable terms in their headers, which take precedence 
+over this statement for the code they cover. The license texts of all upstream projects are 
+collected in [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md).

@@ -1,0 +1,7 @@
+*.pyc
+*.log
+*.pth
+*.0
+*.log.json
+*.txt
+val/

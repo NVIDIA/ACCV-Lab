@@ -28,9 +28,11 @@ Pipeline Setup Examples
        hierarchy level to the input data format), where no changes are needed in the pipeline implementation.
      - ``packages/dali_pipeline_framework/examples/example_pipeline_obj_det_2d.py``
    * - :doc:`examples/stream_petr/index`
-     - Demonstrates a pipeline for StreamPETR, a 3D object detection model which uses multi-camera data. Note
-       that this pipeline can be directly used as a drop-in replacement for a PyTorch DataLoader in 
-       StreamPETR training.
+     - Demonstrates a pipeline for StreamPETR, a 3D object detection model which uses multi-camera data.
+       The pipeline which is defined here is also used in the 
+       :doc:`../../../demo_docs/streampetr/dali_pipeline_framework/index`, where it is used as a drop-in 
+       replacement for the PyTorch DataLoader. As such, this example demonstrates the application of the 
+       pipeline framework to a real-world use-case.
      - ``packages/dali_pipeline_framework/examples/example_pipeline_stream_petr.py``
    * - :doc:`examples/flexible_step/index`
      - Demonstrates how to implement a flexible step which can be used to process data in a flexible way.

@@ -53,7 +53,7 @@ The documentation generation makes use of multiple scripts:
 - **`mirror_referenced_dirs.py`**: Mirrors (symlinks by default) the `docs` directory and other needed 
   directories from the individual packages
 - **`sync_root_readme_for_docs.py`**: Copies the project root `README.md` into 
-  `docs/project_overview/README.md`, adjusting guide links so that the same overview content works both when
+  `docs/project_overview/README.md`, adjusting documentation links so that the same overview content works both when
   viewing the original `README.md` file and inside the built documentation
 
 > **ℹ️ Note**: Documentation will only be generated for packages listed in the `NAMESPACE_PACKAGES` 

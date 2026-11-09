@@ -29,6 +29,9 @@ def transform_links(text: str) -> str:
     """
     Adjust guide, demo and license links for the docs-local copy.
 
+    Replace the published demo link with a local Sphinx document link so local
+    builds use their own documentation and do not require internet access.
+
     Root README uses:
         docs/guides/XYZ.md
 
@@ -37,6 +40,10 @@ def transform_links(text: str) -> str:
     """
     text = text.replace("](docs/guides/", "](../guides/")
     text = text.replace("](docs/demo_docs/", "](../demo_docs/")
+    text = text.replace(
+        "[documentation](https://NVIDIA.github.io/ACCV-Lab/demo_docs/demos.html)",
+        "[documentation](../demo_docs/demos.rst)",
+    )
     return text.replace("](THIRD_PARTY_LICENSES.md)", "](../third_party_licenses.md)")
 
 

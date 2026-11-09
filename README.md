@@ -23,7 +23,8 @@ their functionality and usage, as well as the API reference for each package and
 usage of the packages. Evaluation results are also provided for some of the packages (On-Demand Video Decoder, 
 Batching Helpers, Multi-Tensor Copier, DALI Pipeline Framework).
 
-The [StreamPETR demos](docs/demo_docs/demos.rst) show how to integrate Batching Helpers and the DALI Pipeline
+The StreamPETR demos (see the [documentation](https://NVIDIA.github.io/ACCV-Lab/demo_docs/demos.html))
+show how to integrate Batching Helpers and the DALI Pipeline
 Framework into training code, and how to measure and profile performance with Optimization Testing Tools.
 The demo documentation includes tutorials, evaluation results and instructions for running the comparisons.
 

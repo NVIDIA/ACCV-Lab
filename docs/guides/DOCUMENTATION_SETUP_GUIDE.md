@@ -54,7 +54,8 @@ The documentation generation makes use of multiple scripts:
   directories from the individual packages
 - **`sync_root_readme_for_docs.py`**: Copies the project root `README.md` into 
   `docs/project_overview/README.md`, adjusting documentation links so that the same overview content works both when
-  viewing the original `README.md` file and inside the built documentation
+  viewing the original `README.md` file and inside the built documentation. The published StreamPETR demo link
+  becomes a local document link in the docs copy, so local builds link to their own demo documentation.
 
 > **ℹ️ Note**: Documentation will only be generated for packages listed in the `NAMESPACE_PACKAGES` 
 > configuration. Packages not in this list will be ignored during the documentation build process (also see 

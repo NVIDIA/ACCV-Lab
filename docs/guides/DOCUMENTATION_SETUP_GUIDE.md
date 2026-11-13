@@ -244,6 +244,21 @@ dependencies in `pyproject.toml`. The default local installation path (`./script
 optional package dependencies. If you build docs after installing packages without optional dependencies,
 package-local asset hooks may fail when their optional plotting or parsing dependencies are missing.
 
+### Demo Generated Assets
+
+The `make generate` step also runs
+`demo_docs/auto_labeling/_on_doc_generation.py`. This reads committed measurements from
+`demos/auto_labeling/evaluation_results/throughput_by_bs.csv` and writes
+`demo_docs/auto_labeling/_generated/throughput_by_bs.svg` for the performance page.
+Matplotlib is included in `docs/requirements.txt`; the plotting step only reads existing data.
+
+The `_generated` directory is ignored by Git and removed by `make clean`. To regenerate only this
+demo's figure from the repository root, run:
+
+```bash
+python docs/demo_docs/auto_labeling/_on_doc_generation.py
+```
+
 ### Building Documentation Locally
 
 **Quick build using the script** (can be run from any directory, example shows running from the project 

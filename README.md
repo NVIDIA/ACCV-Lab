@@ -28,6 +28,9 @@ show how to integrate Batching Helpers and the DALI Pipeline
 Framework into training code, and how to measure and profile performance with Optimization Testing Tools.
 The demo documentation includes tutorials, evaluation results and instructions for running the comparisons.
 
+The [auto-labeling application](docs/application_docs/auto_labeling/index.rst) reuses the StreamPETR model
+for inference from calibrated multi-camera videos, with GPU decoding, JSON labels and visualization.
+
 The contained packages are:
 - **On-Demand Video Decoder**: Designed for efficiently obtaining video frames from video files. Focused on 
   the ADAS training domain, implementing access patterns typical for training workloads to ensure high 

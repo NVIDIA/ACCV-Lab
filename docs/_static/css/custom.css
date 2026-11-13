@@ -54,6 +54,21 @@ nav.contents ul ul ul ul {
     width: 100% !important;
 }
 
+/* Keep the widened sidebar off-canvas and the content visible on small screens. */
+@media screen and (max-width: 768px) {
+    :root {
+        --rtd-sidebar-width: 85vw;
+    }
+
+    .wy-nav-side {
+        left: calc(-1 * var(--rtd-sidebar-width));
+    }
+
+    .wy-nav-content-wrap {
+        margin-left: 0 !important;
+    }
+}
+
 /* ===== Tables: allow wrapping and avoid horizontal scroll for specific tables ===== */
 .wy-table-responsive table.no-scroll td,
 .wy-table-responsive table.no-scroll th {

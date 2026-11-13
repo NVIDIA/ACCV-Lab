@@ -90,6 +90,20 @@ There are demos available for the individual namespace packages. Those are:
 
    demo_docs/demos
 
+Applications
+------------
+
+Applications combine ACCV-Lab packages and models into end-to-end workflows.
+See :doc:`available applications <application_docs/applications>` for usage instructions.
+
+.. toctree::
+   :hidden:
+   :maxdepth: 3
+   :caption: Contained Applications
+   :includehidden:
+
+   application_docs/applications
+
 References
 ----------
 

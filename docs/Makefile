@@ -25,6 +25,7 @@ help:
 generate:
 	python3 generate_new_namespace_package_docs.py
 	python3 generate_package_docs_assets.py
+	python3 application_docs/auto_labeling/_on_doc_generation.py
 	python3 mirror_referenced_dirs.py
 	python3 update_docs_index.py
 
@@ -43,6 +44,7 @@ clean:
 	rm -rf $(BUILDDIR)/
 	rm -rf api/generated/
 	rm -rf ../packages/*/docs/_generated/
+	rm -rf application_docs/*/_generated/
 
 # Auto-build documentation (watches for changes)
 livehtml: sync-readme generate
@@ -51,4 +53,4 @@ livehtml: sync-readme generate
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) 
+	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)

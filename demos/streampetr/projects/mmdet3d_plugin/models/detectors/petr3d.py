@@ -394,13 +394,14 @@ class Petr3D(MVXTwoStageDetector):
         outs_roi = self.forward_roi_head(location, **data)
         topk_indexes = outs_roi['topk_indexes']
 
-        if img_metas[0]['scene_token'] != self.prev_scene_token:
-            self.prev_scene_token = img_metas[0]['scene_token']
-            data['prev_exists'] = data['img'].new_zeros(1)
-            self.pts_bbox_head.reset_memory()
-        else:
-            data['prev_exists'] = data['img'].new_ones(1)
-
+        # Batched callers explicitly reset temporal memory per sample.
+        if 'prev_exists' not in data:
+            if img_metas[0]['scene_token'] != self.prev_scene_token:
+                self.prev_scene_token = img_metas[0]['scene_token']
+                data['prev_exists'] = data['img'].new_zeros(1)
+                self.pts_bbox_head.reset_memory()
+            else:
+                data['prev_exists'] = data['img'].new_ones(1)
         outs = self.pts_bbox_head(location, img_metas, topk_indexes, **data)
         bbox_list = self.pts_bbox_head.get_bboxes(
             outs, img_metas)

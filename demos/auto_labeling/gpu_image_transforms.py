@@ -19,21 +19,25 @@ import math
 import torch
 import torch.nn.functional as F
 
+from . import add_streampetr_import_path
+
 
 class GPUImageTransforms:
     """Process a batch of owned HWC float32 GPU images; calibration is updated separately."""
 
     def __init__(self, img_norm_cfg, ida_aug_conf, device='cuda:0'):
+        add_streampetr_import_path()
+        from projects.mmdet3d_plugin.datasets.pipelines.transform_3d import ResizeCropFlipRotImage
+
         self.mean = torch.tensor(img_norm_cfg['mean'], dtype=torch.float32, device=device).view(1, 3, 1, 1)
         self.std = torch.tensor(img_norm_cfg['std'], dtype=torch.float32, device=device).view(1, 3, 1, 1)
         self.to_rgb = img_norm_cfg.get('to_rgb', True)
         self.final_dim = tuple(ida_aug_conf['final_dim'])
-        height, width = ida_aug_conf['H'], ida_aug_conf['W']
-        self.resize = max(self.final_dim[0] / height, self.final_dim[1] / width)
-        self.newH, self.newW = int(height * self.resize), int(width * self.resize)
-        bottom = sum(ida_aug_conf.get('bot_pct_lim', (0.0, 0.0))) / 2
-        self.crop_h = int((1 - bottom) * self.newH) - self.final_dim[0]
-        self.crop_w = max(0, self.newW - self.final_dim[1]) // 2
+        crop_config = {'bot_pct_lim': (0.0, 0.0), **ida_aug_conf}
+        self.resize, (self.newW, self.newH), crop, _, _ = ResizeCropFlipRotImage(
+            data_aug_conf=crop_config, training=False
+        )._sample_augmentation()
+        self.crop_w, self.crop_h = crop[:2]
         self.pad_h, self.pad_w = self.get_pad_shape()
 
     def __call__(self, images):

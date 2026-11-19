@@ -32,10 +32,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
-from demos.auto_labeling.data_index import (
-    convert_egopose_to_matrix_numpy,
-    invert_matrix_egopose_numpy,
-)
+from demos.auto_labeling.data_index import camera_matrices
 
 CLASS_COLORS = {
     'car': (0, 255, 0),
@@ -89,24 +86,7 @@ def get_lidar2img_from_info(info: Dict) -> List[np.ndarray]:
     Returns:
         List of lidar2img matrices, one for each camera
     """
-    lidar2img_list = []
-    for cam_type, cam_info in info['cams'].items():
-        # Camera to LiDAR transformation
-        cam2lidar_r = np.array(cam_info['sensor2lidar_rotation'], dtype=np.float32)
-        cam2lidar_t = np.array(cam_info['sensor2lidar_translation'], dtype=np.float32)
-        cam2lidar = convert_egopose_to_matrix_numpy(cam2lidar_r, cam2lidar_t)
-        lidar2cam = invert_matrix_egopose_numpy(cam2lidar)
-
-        # Camera intrinsic
-        intrinsic = np.array(cam_info['cam_intrinsic'], dtype=np.float32)
-        viewpad = np.eye(4, dtype=np.float32)
-        viewpad[: intrinsic.shape[0], : intrinsic.shape[1]] = intrinsic
-
-        # lidar2img = intrinsic @ lidar2cam
-        lidar2img = viewpad @ lidar2cam
-        lidar2img_list.append(lidar2img)
-
-    return lidar2img_list
+    return [camera_matrices(cam_info)[2] for cam_info in info['cams'].values()]
 
 
 def get_3d_box_corners(detection: Dict) -> np.ndarray:

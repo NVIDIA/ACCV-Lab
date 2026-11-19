@@ -1,4 +1,51 @@
+# ------------------------------------------------------------------------
+# Copyright (c) 2022 megvii-model. All Rights Reserved.
+# ------------------------------------------------------------------------
+# Modified from DETR3D (https://github.com/WangYueFt/detr3d)
+# Copyright (c) 2021 Wang, Yue
+# ------------------------------------------------------------------------
+# Modified from mmdetection3d (https://github.com/open-mmlab/mmdetection3d)
+# Copyright (c) OpenMMLab. All rights reserved.
+# ------------------------------------------------------------------------
+#  Modified by Shihao Wang
+#  (StreamPETR: https://github.com/exiawsh/StreamPETR)
+#
+# ------------------------------------------------------------------------
+#
+# The sample metadata and camera calibration in DataIndex.get_data_info and
+# camera_matrices adapt StreamPETR's datasets/nuscenes_dataset.py (95f6470).
+# The upstream dataset also credits SECOND.Pytorch for the metadata protocol.
+#
 # Copyright (c) 2026, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# Changes: Added standalone pickle indexing by scene, NumPy quaternion
+#          conversion, and per-camera video paths and frame IDs.
+#
+# This file contains contributions made under each of the licenses below;
+# both apply to it. Each license governs the contributions made under it.
+#
+# ........................................................................
+#
+# MIT License
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+# ........................................................................
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,42 +69,25 @@ import numpy as np
 from collections import defaultdict
 from typing import List, Dict, Any
 
-
-def invert_matrix_egopose_numpy(egopose: np.ndarray) -> np.ndarray:
-    """
-    Compute the inverse of a 4x4 egopose matrix.
-
-    Args:
-        egopose: 4x4 transformation matrix
-
-    Returns:
-        Inverse of the transformation matrix
-    """
-    inverse_matrix = np.zeros((4, 4), dtype=np.float32)
-    rotation = egopose[:3, :3]
-    translation = egopose[:3, 3]
-    inverse_matrix[:3, :3] = rotation.T
-    inverse_matrix[:3, 3] = -np.dot(rotation.T, translation)
-    inverse_matrix[3, 3] = 1.0
-    return inverse_matrix
+from . import add_streampetr_import_path
 
 
-def convert_egopose_to_matrix_numpy(rotation: np.ndarray, translation: np.ndarray) -> np.ndarray:
-    """
-    Convert rotation and translation to a 4x4 transformation matrix.
+def camera_matrices(cam_info):
+    """Build float32 camera calibration for inference and visualization."""
+    add_streampetr_import_path()
+    from projects.mmdet3d_plugin.datasets.nuscenes_dataset import (
+        convert_egopose_to_matrix_numpy,
+        invert_matrix_egopose_numpy,
+    )
 
-    Args:
-        rotation: 3x3 rotation matrix
-        translation: 3-element translation vector
-
-    Returns:
-        4x4 transformation matrix
-    """
-    transformation_matrix = np.zeros((4, 4), dtype=np.float32)
-    transformation_matrix[:3, :3] = rotation
-    transformation_matrix[:3, 3] = translation
-    transformation_matrix[3, 3] = 1.0
-    return transformation_matrix
+    cam2lidar = convert_egopose_to_matrix_numpy(
+        cam_info['sensor2lidar_rotation'], cam_info['sensor2lidar_translation']
+    )
+    lidar2cam = invert_matrix_egopose_numpy(cam2lidar)
+    intrinsic = np.asarray(cam_info['cam_intrinsic'], dtype=np.float32)
+    viewpad = np.eye(4, dtype=np.float32)
+    viewpad[: intrinsic.shape[0], : intrinsic.shape[1]] = intrinsic
+    return viewpad, lidar2cam, viewpad @ lidar2cam
 
 
 def quaternion_to_rotation_matrix(quaternion: List[float]) -> np.ndarray:
@@ -171,6 +201,12 @@ class DataIndex:
         Returns:
             Dictionary containing metadata
         """
+        add_streampetr_import_path()
+        from projects.mmdet3d_plugin.datasets.nuscenes_dataset import (
+            convert_egopose_to_matrix_numpy,
+            invert_matrix_egopose_numpy,
+        )
+
         info = self.data_infos[index]
 
         # Parse ego pose
@@ -206,7 +242,7 @@ class DataIndex:
         extrinsics = []
         img_timestamp = []
 
-        for cam_type, cam_info in info['cams'].items():
+        for cam_info in info['cams'].values():
             img_timestamp.append(cam_info['timestamp'] / 1e6)
             image_paths.append(cam_info['data_path'])
 
@@ -214,15 +250,7 @@ class DataIndex:
                 video_paths.append(cam_info['video_path'])
                 video_frame_ids.append(cam_info['video_frame_id'])
 
-            cam2lidar_r = np.array(cam_info['sensor2lidar_rotation'], dtype=np.float32)
-            cam2lidar_t = np.array(cam_info['sensor2lidar_translation'], dtype=np.float32)
-            cam2lidar_rt = convert_egopose_to_matrix_numpy(cam2lidar_r, cam2lidar_t)
-            lidar2cam_rt = invert_matrix_egopose_numpy(cam2lidar_rt)
-
-            intrinsic = np.array(cam_info['cam_intrinsic'], dtype=np.float32)
-            viewpad = np.eye(4, dtype=np.float32)
-            viewpad[: intrinsic.shape[0], : intrinsic.shape[1]] = intrinsic
-            lidar2img_rt = viewpad @ lidar2cam_rt
+            viewpad, lidar2cam_rt, lidar2img_rt = camera_matrices(cam_info)
 
             intrinsics.append(viewpad)
             extrinsics.append(lidar2cam_rt)

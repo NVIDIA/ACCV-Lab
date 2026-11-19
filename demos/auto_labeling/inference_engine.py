@@ -16,11 +16,11 @@
 
 from collections import OrderedDict
 import importlib
-from pathlib import Path
-import sys
 
 import torch
 from torch.nn.modules.utils import consume_prefix_in_state_dict_if_present
+
+from . import add_streampetr_import_path
 
 
 class InferenceEngine:
@@ -34,9 +34,7 @@ class InferenceEngine:
         from mmcv import Config
         from mmdet3d.models import build_model
 
-        demo_root = str(Path(__file__).resolve().parents[2] / 'demos' / 'streampetr')
-        if demo_root not in sys.path:
-            sys.path.insert(0, demo_root)
+        add_streampetr_import_path()
         importlib.import_module('projects.mmdet3d_plugin')
         cfg = Config.fromfile(config_path)
         cfg.model.pretrained = None
@@ -68,15 +66,28 @@ class InferenceEngine:
     def infer_multi_video(self, batch_data, is_first_frame):
         if len(batch_data['img_metas']) != self.batch_size or len(is_first_frame) != self.batch_size:
             raise ValueError('Batch size and temporal flags must match the configured batch size')
+        from mmdet3d.core import bbox3d2result
+
         batch = {
             key: value.to(self.device) if isinstance(value, torch.Tensor) else value
             for key, value in batch_data.items()
         }
+        img_metas = batch.pop('img_metas')
         batch['prev_exists'] = torch.tensor(
             [not first for first in is_first_frame], dtype=torch.float32, device=self.device
         )
         with torch.no_grad():
-            return self.model.simple_test(**batch)
+            # Petr3D.simple_test uses one temporal flag for the entire input.
+            # Run its existing stages with the sampler's flag for each slot.
+            batch['img_feats'] = self.model.extract_img_feat(batch['img'], 1)
+            location = self.model.prepare_location(img_metas, **batch)
+            topk = self.model.forward_roi_head(location, **batch)['topk_indexes']
+            head = self.model.pts_bbox_head
+            outputs = head(location, img_metas, topk, **batch)
+            return [
+                {'pts_bbox': bbox3d2result(boxes, scores, labels)}
+                for boxes, scores, labels in head.get_bboxes(outputs, img_metas)
+            ]
 
     def reset_multi_video_state(self):
         self.model.pts_bbox_head.reset_memory()

@@ -13,3 +13,14 @@
 # limitations under the License.
 
 """StreamPETR auto labeling with ACCV-Lab video decoding."""
+
+from pathlib import Path
+import sys
+
+_STREAMPETR_ROOT = str(Path(__file__).resolve().parents[1] / 'streampetr')
+
+
+def add_streampetr_import_path():
+    """Use the package path expected by StreamPETR's plugin and registry."""
+    if _STREAMPETR_ROOT not in sys.path:
+        sys.path.insert(0, _STREAMPETR_ROOT)

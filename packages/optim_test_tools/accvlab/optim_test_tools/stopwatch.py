@@ -320,7 +320,12 @@ class Stopwatch(SingletonBase):
             print(". " * 25)
             print(f"Average runtime per measured interval:")
             for time_name, time in self._times.items():
-                print(f"  `{time_name}`: {time.get_accum_time() / time.get_num_meas()}")
+                # A measurement may be registered (e.g. first seen during warm-up) without having been
+                # performed since the warm-up phase finished.
+                num_meas = time.get_num_meas()
+                print(
+                    f"  `{time_name}`: {time.get_accum_time() / num_meas if num_meas > 0 else 'not measured yet'}"
+                )
             # Total runtime
             print(". " * 25)
             print(f"Total runtime:")
@@ -329,8 +334,10 @@ class Stopwatch(SingletonBase):
             # Mean CPU usage
             print(". " * 25)
             if self._cpu_usage_meas_name is not None:
+                cpu_usage_meas = self._times[self._cpu_usage_meas_name]
                 print(
-                    f"Mean CPU usage during `{self._cpu_usage_meas_name}`: {self._times[self._cpu_usage_meas_name].get_mean_cpu_usage()}"
+                    f"Mean CPU usage during `{self._cpu_usage_meas_name}`: "
+                    f"{cpu_usage_meas.get_mean_cpu_usage() if cpu_usage_meas.get_accum_time() > 0 else 'not measured yet'}"
                 )
         if len(self._one_time_measurements) > 0:
             print("~" * 50)

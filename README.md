@@ -27,6 +27,7 @@ The StreamPETR demos (see the [documentation](https://NVIDIA.github.io/ACCV-Lab/
 show how to integrate Batching Helpers and the DALI Pipeline
 Framework into training code, and how to measure and profile performance with Optimization Testing Tools.
 The demo documentation includes tutorials, evaluation results and instructions for running the comparisons.
+See the [external materials notice](THIRD_PARTY_LICENSES.md#external-materials-streampetr-benchmark) before running the benchmark.
 
 The contained packages are:
 - **On-Demand Video Decoder**: Designed for efficiently obtaining video frames from video files. Focused on 
@@ -195,3 +196,5 @@ Some files incorporate third-party code received under other permissive licenses
 BSD-3-Clause). Those files carry the applicable terms in their headers, which take precedence 
 over this statement for the code they cover. The license texts of all upstream projects are 
 collected in [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md).
+
+For the StreamPETR benchmark, also see the [external materials notice](THIRD_PARTY_LICENSES.md#external-materials-streampetr-benchmark).

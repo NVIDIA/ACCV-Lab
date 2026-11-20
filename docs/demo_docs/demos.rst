@@ -142,6 +142,13 @@ guide.
 Running All Evaluations
 ^^^^^^^^^^^^^^^^^^^^^^^
 
+.. important::
+
+   The StreamPETR benchmarks download TorchVision's ResNet-50 weights
+   (``resnet50-0676ba61.pth``) from PyTorch if they are not already cached.
+
+   .. include:: streampetr/EXTERNAL_MATERIALS_NOTICE.txt
+
 The evaluation configurations are under ``projects/configs/StreamPETR/Evals/``.
 Follow the corresponding evaluation pages for the measured
 comparisons and commands. To run every configuration in that directory sequentially, including the

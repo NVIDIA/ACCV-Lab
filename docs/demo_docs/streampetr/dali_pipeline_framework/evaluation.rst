@@ -184,6 +184,13 @@ building took a further 5.8 seconds.
 How to Run
 ----------
 
+.. important::
+
+   This evaluation downloads TorchVision's ResNet-50 weights
+   (``resnet50-0676ba61.pth``) from PyTorch if they are not already cached.
+
+   .. include:: ../EXTERNAL_MATERIALS_NOTICE.txt
+
 .. note::
 
   This section assumes that you are running the evaluation in the Docker container set up as described in the

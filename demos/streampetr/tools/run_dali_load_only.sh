@@ -16,6 +16,10 @@
 
 set -euo pipefail
 
+printf '%s %s\n' \
+    "This benchmark may download TorchVision's ResNet-50 weights." \
+    "Separate terms apply; see docs/demo_docs/streampetr/EXTERNAL_MATERIALS_NOTICE.txt." >&2
+
 res_dir=eval_res_dali_load_only
 mkdir -p "$res_dir"
 

@@ -249,6 +249,13 @@ the expected speedup strongly depends on the used batch size.
 How to Run
 ----------
 
+.. important::
+
+   This benchmark downloads TorchVision's ResNet-50 weights
+   (``resnet50-0676ba61.pth``) from PyTorch if they are not already cached.
+
+   .. include:: ../EXTERNAL_MATERIALS_NOTICE.txt
+
 Running the Evaluated Variants
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

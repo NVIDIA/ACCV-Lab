@@ -47,6 +47,10 @@ if [ $skip_count -ge $total_configs ]; then
     exit 1
 fi
 
+printf '%s %s\n' \
+    "This benchmark may download TorchVision's ResNet-50 weights." \
+    "Separate terms apply; see docs/demo_docs/streampetr/EXTERNAL_MATERIALS_NOTICE.txt." >&2
+
 # Loop through configs starting from the skip_count
 for ((i=skip_count; i<total_configs; i++)); do
     config_file="${all_configs[$i]}"

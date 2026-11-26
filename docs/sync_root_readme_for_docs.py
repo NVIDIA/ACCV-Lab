@@ -40,17 +40,11 @@ TARGET_README = TARGET_DIR / "README.md"
 
 
 def transform_links(text: str) -> str:
-    """
-    Adjust guide, demo and license links for the docs-local copy.
+    """Rewrite root README links for the copy in ``docs/project_overview/``.
 
-    Replace the published demo link with a local Sphinx document link so local
-    builds use their own documentation and do not require internet access.
-
-    Root README uses:
-        docs/guides/XYZ.md
-
-    Docs-local copy should use:
-        ../guides/XYZ.md
+    Adjust relative links to guides, demo pages, and third-party licenses for
+    the copy's location, preserving section links in Third-Party Licenses.
+    Point the published StreamPETR demo link to the local Sphinx page.
     """
     text = text.replace("](docs/guides/", "](../guides/")
     text = text.replace("](docs/demo_docs/", "](../demo_docs/")
@@ -58,6 +52,7 @@ def transform_links(text: str) -> str:
         "[documentation](https://NVIDIA.github.io/ACCV-Lab/demo_docs/demos.html)",
         "[documentation](../demo_docs/demos.rst)",
     )
+    text = text.replace("](THIRD_PARTY_LICENSES.md#", "](../third_party_licenses.md#")
     return text.replace("](THIRD_PARTY_LICENSES.md)", "](../third_party_licenses.md)")
 
 

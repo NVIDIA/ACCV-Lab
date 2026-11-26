@@ -12,6 +12,7 @@
 #          - Added extensive notes/comments throughout the file (code snippets used in documentation).
 #          - Added unsharded sampling for replicated mini-dataset evaluations.
 #          - Applied configured multiprocessing and OpenCV thread settings before creating workers.
+#          - Added a notice about external pretrained weights (printed for rank 0).
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -276,6 +277,13 @@ def main():
     #   - The stopwatch, which only runs for one process (`rank==0`).
     local_rank, rank, world_size = get_and_print_rank_and_world_size_info()
     # ===== End of Get rank and world size =====
+
+    if rank == 0:
+        print(
+            "This benchmark may download TorchVision's ResNet-50 weights. "
+            "Separate terms apply; see docs/demo_docs/streampetr/EXTERNAL_MATERIALS_NOTICE.txt.",
+            flush=True,
+        )
 
 
     # ===== Runtime Measurement & Profiling Configuration =====

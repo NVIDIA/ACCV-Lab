@@ -1,7 +1,17 @@
 Demos
 =====
 
-These demos show how to integrate ACCV-Lab packages into training code and measure their performance.
+These demos show how to integrate ACCV-Lab packages into training and inference workflows and measure
+their performance.
+
+The :doc:`Auto Labeling demo <auto_labeling/index>` uses StreamPETR as an example of accelerating
+an auto-labeling pipeline with ACCV-Lab. It includes inference, visualization and performance comparisons.
+
+.. toctree::
+   :hidden:
+   :maxdepth: 1
+
+   auto_labeling/index
 
 StreamPETR
 ----------

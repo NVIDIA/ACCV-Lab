@@ -178,13 +178,7 @@ struct DecodedFrameExt {
                 py::arg("stream") = NULL, "Export the buffer as a DLPack tensor")
             .def(
                 "__dlpack_device__",
-                [](std::shared_ptr<DecodedFrameExt>& self) {
-                    // DLDevice ctx;
-                    // ctx.device_type = DLDeviceType::kDLCUDA;
-                    // ctx.device_id = 0;
-                    return py::make_tuple(py::int_(static_cast<int>(DLDeviceType::kDLCUDA)),
-                                          py::int_(static_cast<int>(0)));
-                },
+                [](std::shared_ptr<DecodedFrameExt>& self) { return self->extBuf->dlpackDevice(); },
                 "Get the device associated with the buffer")
 
             .def(

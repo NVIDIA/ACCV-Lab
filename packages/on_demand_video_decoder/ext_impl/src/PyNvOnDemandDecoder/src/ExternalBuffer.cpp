@@ -125,6 +125,9 @@ py::capsule ExternalBuffer::dlpack(py::object stream) const {
 }
 
 py::tuple ExternalBuffer::dlpackDevice() const {
+    if (m_dlTensor->device.device_type == 0) {
+        throw py::buffer_error("No DLPack tensor is available for this frame format");
+    }
     return py::make_tuple(py::int_(static_cast<int>(m_dlTensor->device.device_type)),
                           py::int_(static_cast<int>(m_dlTensor->device.device_id)));
 }
@@ -157,9 +160,11 @@ int ExternalBuffer::LoadDLPack(std::vector<size_t> _shape, std::vector<size_t> _
     DLTensor& tensor = managedTensor.dl_tensor;
     tensor.data = ptr;
     tensor.byte_offset = 0;
-    // TODO: infer the device type and device ID from the memory buffer.
     tensor.device.device_type = kDLCUDA;
-    tensor.device.device_id = 0;
+    if (cuPointerGetAttribute(&tensor.device.device_id, CU_POINTER_ATTRIBUTE_DEVICE_ORDINAL, _data) !=
+        CUDA_SUCCESS) {
+        throw std::runtime_error("Could not determine the CUDA device for the DLPack buffer");
+    }
     tensor.dtype.code = kDLUInt;
     tensor.dtype.bits = 8;
     tensor.dtype.lanes = 1;

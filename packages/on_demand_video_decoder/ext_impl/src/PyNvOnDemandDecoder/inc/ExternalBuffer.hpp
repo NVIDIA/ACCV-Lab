@@ -42,7 +42,10 @@ class ExternalBuffer final : public std::enable_shared_from_this<ExternalBuffer>
     explicit ExternalBuffer(DLPackTensor&& dlTensor);
 
     ExternalBuffer() = default;
+    // __dlpack__ implementation
     py::capsule dlpack(py::object stream) const;
+    // __dlpack_device__ implementation
+    py::tuple dlpackDevice() const;
     int LoadDLPack(std::vector<size_t> _shape, std::vector<size_t> _stride, std::string _typeStr,
                    size_t _streamid, CUdeviceptr _data, bool _readOnly);
 
@@ -50,11 +53,6 @@ class ExternalBuffer final : public std::enable_shared_from_this<ExternalBuffer>
     friend py::detail::type_caster<ExternalBuffer>;
 
     DLPackTensor m_dlTensor;
-
-    // __dlpack__ implementation
-
-    // __dlpack_device__ implementation
-    py::tuple dlpackDevice() const;
 };
 
 #endif  // EXTERNAL_BUFFER_HPP

@@ -24,7 +24,6 @@ import multiprocessing
 import os
 import pickle
 import sys
-import warnings
 
 import numpy as np
 import pytest
@@ -142,15 +141,38 @@ class TestLifecycle:
         view = store.read(ref)
         np.testing.assert_array_equal(view, data)
 
-    def test_cleanup_removes_all_shm(self, store_id):
+    @pytest.mark.parametrize("close_first", [False, True], ids=["open", "closed"])
+    def test_cleanup_removes_all_shm(self, store_id, close_first):
         """After cleanup(), no shm files remain for this store."""
         s = SharedGopStore.create(capacity=4, store_id=store_id)
         s.put("/v.mp4", 0, 30, _make_gop_data(512))
         s.put("/v.mp4", 30, 30, _make_gop_data(512, seed=2))
+        if close_first:
+            s.close()
         s.cleanup()
 
         remaining = _shm_files_for_store(store_id)
         assert remaining == [], f"Leaked shm files: {remaining}"
+
+    def test_repeated_worker_close(self, store):
+        worker = SharedGopStore.attach(store.capacity, store.store_id)
+        data = _make_gop_data(32)
+        ref = worker.put("/v.mp4", 0, 30, data)
+        worker.close()
+        worker.close()
+        np.testing.assert_array_equal(store.read(ref), data)
+
+    def test_repeated_cleanup_preserves_reused_store_id(self, store_id):
+        original = SharedGopStore.create(1, store_id)
+        original.cleanup()
+        replacement = SharedGopStore.create(1, store_id)
+        try:
+            replacement.put("/v.mp4", 0, 30, _make_gop_data(32))
+            files = set(_shm_files_for_store(store_id))
+            original.cleanup()
+            assert set(_shm_files_for_store(store_id)) == files
+        finally:
+            replacement.cleanup()
 
 
 # ---------------------------------------------------------------------------
@@ -227,16 +249,15 @@ class TestPutDoubleCheck:
         np.testing.assert_array_equal(store.read(ref_b), gop_b)
 
     def test_exact_match_dedup_on_first_frame_id_and_gop_len(self, store):
-        """Two puts with the same ``first_frame_id`` but different ``gop_len``
-        are stored as separate entries, and the latest payload is what
-        subsequent reads return.
-        """
+        """Queued GOPs with the same start and different lengths retain their own bytes."""
         gop_old = _make_gop_data(1024, seed=10)
         gop_new = _make_gop_data(2048, seed=11)
-        store.put("/v.mp4", first_frame_id=0, gop_len=20, data=gop_old)
-        ref_new = store.put("/v.mp4", first_frame_id=0, gop_len=30, data=gop_new)
-        assert ref_new.gop_len == 30
-        np.testing.assert_array_equal(store.read(ref_new), gop_new)
+        short = store.put("/v.mp4", first_frame_id=0, gop_len=20, data=gop_old)
+        long = store.put("/v.mp4", first_frame_id=0, gop_len=30, data=gop_new)
+        assert short.shm_name != long.shm_name
+        short_view, long_view = store.get_batch([short, long])
+        np.testing.assert_array_equal(short_view, gop_old)
+        np.testing.assert_array_equal(long_view, gop_new)
 
 
 # ---------------------------------------------------------------------------
@@ -312,7 +333,7 @@ class TestGetBatch:
         """After eviction + get_batch, orphaned shm blocks are unlinked."""
         store = SharedGopStore.create(capacity=2, store_id=store_id)
         try:
-            ref0 = store.put("/v0.mp4", 0, 30, _make_gop_data(256, seed=0))
+            ref0 = store.put("/v0.mp4", 0, 30, _make_gop_data(256, seed=0), pin=False)
             store.put("/v1.mp4", 0, 30, _make_gop_data(256, seed=1))
 
             # Evict v0 by inserting v2
@@ -336,88 +357,163 @@ class TestGetBatch:
 
 
 # ---------------------------------------------------------------------------
-# Capacity-too-small fallback (evicted before read)
+# Reads after eviction
 # ---------------------------------------------------------------------------
 
 
 class TestCapacityTooSmall:
-    """read() returns zeros + RuntimeWarning when shm block was evicted."""
+    """A stale reference must never be accepted as a serialized GOP."""
 
-    def test_read_evicted_returns_zeros_with_warning(self, store_id):
-        """When a GOP is evicted before main reads it, read() returns zeros."""
+    def test_read_evicted_raises(self, store_id):
         store = SharedGopStore.create(capacity=2, store_id=store_id)
         try:
             data0 = _make_gop_data(512, seed=0)
-            ref0 = store.put("/v0.mp4", 0, 30, data0)
+            ref0 = store.put("/v0.mp4", 0, 30, data0, pin=False)
             store.put("/v1.mp4", 0, 30, _make_gop_data(512, seed=1))
 
-            # Evict v0 by inserting v2
-            store.put("/v2.mp4", 0, 30, _make_gop_data(512, seed=2))
+            # An unrelated batch evicts v0 and cleans up its block.
+            ref2 = store.put("/v2.mp4", 0, 30, _make_gop_data(512, seed=2))
+            store.get_batch([ref2])
 
-            # Manually unlink the orphaned shm block (simulates _unlink_orphans)
-            orphan_path = f"/dev/shm/{ref0.shm_name}"
-            if os.path.exists(orphan_path):
-                from multiprocessing import shared_memory
-
-                shm = shared_memory.SharedMemory(name=ref0.shm_name, create=False)
-                shm.close()
-                shm.unlink()
-
-            assert not os.path.exists(orphan_path), "Orphan must be gone before test"
-
-            # read() should return zeros and emit RuntimeWarning
-            with warnings.catch_warnings(record=True) as w:
-                warnings.simplefilter("always")
-                result = store.read(ref0)
-
-                assert len(w) == 1
-                assert issubclass(w[0].category, RuntimeWarning)
-                assert "Increase store capacity" in str(w[0].message)
-                assert f"current: {store.capacity}" in str(w[0].message)
-                assert ref0.shm_name in str(w[0].message)
-
-            # Returned array should be zeros with correct size
-            assert result.shape == (ref0.data_size,)
-            assert result.dtype == np.uint8
-            np.testing.assert_array_equal(result, np.zeros(ref0.data_size, dtype=np.uint8))
+            with pytest.raises(FileNotFoundError, match=ref0.shm_name):
+                store.read(ref0)
         finally:
             store.cleanup()
 
     def test_get_batch_with_evicted_ref(self, store_id):
-        """get_batch() handles a mix of valid and evicted refs gracefully."""
+        """A missing block fails the batch and identifies the stale reference."""
         store = SharedGopStore.create(capacity=2, store_id=store_id)
         try:
             data0 = _make_gop_data(256, seed=0)
             data1 = _make_gop_data(256, seed=1)
-            ref0 = store.put("/v0.mp4", 0, 30, data0)
-            ref1 = store.put("/v1.mp4", 0, 30, data1)
+            ref0 = store.put("/v0.mp4", 0, 30, data0, pin=False)
+            store.put("/v1.mp4", 0, 30, data1)
 
             # Evict v0
             data2 = _make_gop_data(256, seed=2)
             ref2 = store.put("/v2.mp4", 0, 30, data2)
 
-            # Unlink orphan
-            orphan_path = f"/dev/shm/{ref0.shm_name}"
-            if os.path.exists(orphan_path):
-                from multiprocessing import shared_memory
+            store.get_batch([ref2])
+            with pytest.raises(FileNotFoundError, match=ref0.shm_name):
+                store.get_batch([ref2, ref0])
+            np.testing.assert_array_equal(store.get_batch([ref2])[0], data2)
+        finally:
+            store.cleanup()
 
-                shm = shared_memory.SharedMemory(name=ref0.shm_name, create=False)
-                shm.close()
-                shm.unlink()
 
-            # get_batch with [evicted_ref, valid_ref]
-            with warnings.catch_warnings(record=True) as w:
-                warnings.simplefilter("always")
-                arrays = store.get_batch([ref0, ref2])
+class TestPinnedBatch:
+    def test_get_batch_releases_independent_refs_and_preserves_views(self, store_id):
+        store = SharedGopStore.create(1, store_id)
+        try:
+            data = _make_gop_data(32)
+            first = store.put("/v.mp4", 0, 30, data)
+            second = store.lookup("/v.mp4", 10)
+            # DataLoader can reconstruct a NamedTuple from its original fields.
+            first_copy = GopRef(*first)
+            a, b = store.get_batch([first, first_copy])
+            with pytest.raises(BufferError, match="all slots"):
+                store.put("/other.mp4", 0, 30, data)
+            store.get_batch([second])
+            replacement = store.put("/other.mp4", 0, 30, data[::-1])
+            store.get_batch([replacement])
+            np.testing.assert_array_equal(a, data)
+            np.testing.assert_array_equal(b, data)
+        finally:
+            store.cleanup()
 
-                assert len(w) == 1
-                assert issubclass(w[0].category, RuntimeWarning)
+    def test_discarded_and_forwarded_queue_refs(self, store_id):
+        store = SharedGopStore.create(1, store_id)
+        worker = SharedGopStore.attach(1, store_id)
+        try:
+            data = _make_gop_data(32)
+            source = worker.put("/v.mp4", 0, 30, data)
+            first = pickle.loads(pickle.dumps(source))
+            second = pickle.loads(pickle.dumps(source))
+            # Reading the sender's copy or discarding the first delivery cannot release the second.
+            store.read(source)
+            del first
+            with pytest.raises(BufferError, match="all slots"):
+                worker.put("/other.mp4", 0, 30, data)
+            (view,) = store.get_batch([second])
+            worker.put("/other.mp4", 0, 30, data)
+            np.testing.assert_array_equal(view, data)
+        finally:
+            worker.close()
+            store.cleanup()
 
-            assert len(arrays) == 2
-            # First is zeros (evicted)
-            np.testing.assert_array_equal(arrays[0], np.zeros(ref0.data_size, dtype=np.uint8))
-            # Second is valid data
-            np.testing.assert_array_equal(arrays[1], data2)
+    def test_queued_duplicate_pins_survive_other_batch(self, store_id):
+        owner = SharedGopStore.create(2, store_id)
+        worker = SharedGopStore.attach(2, store_id)
+        try:
+            data = _make_gop_data(128, seed=140)
+            first = worker.put("/wrist.mp4", 120, 30, data)
+            hit = worker.lookup("/wrist.mp4", 140)
+            duplicate = worker.put("/wrist.mp4", 120, 30, data)
+            assert first == hit == duplicate
+            other_data = _make_gop_data(128, seed=0)
+            for frame in (0, 30, 60):
+                other = worker.put("/other.mp4", frame, 30, other_data)
+                owner.get_batch([other])
+
+            view, other_view, hit_view, repeated_view = owner.get_batch([first, other, hit, first])
+            np.testing.assert_array_equal(other_view, other_data)
+            assert np.shares_memory(view, hit_view)
+            assert np.shares_memory(view, repeated_view)
+            busy = worker.put("/other.mp4", 90, 30, other_data)
+            # Rereading a consumed ref or an unpinned probe must not release the third sample's pin.
+            probe = worker.lookup("/wrist.mp4", 140, pin=False)
+            owner.get_batch([first, first, probe])
+            with pytest.raises(BufferError, match="all slots"):
+                worker.put("/full.mp4", 0, 1, other_data)
+            owner.read(duplicate)
+
+            replacement = worker.put("/full.mp4", 0, 1, other_data)
+            owner.get_batch([replacement])
+            assert not os.path.exists(f"/dev/shm/{first.shm_name}")
+            np.testing.assert_array_equal(view, data)
+            owner.get_batch([busy])
+        finally:
+            worker.close()
+            owner.cleanup()
+
+    def test_failed_batch_preserves_all_pins(self, store, monkeypatch):
+        data = _make_gop_data(128)
+        first = store.put("/v.mp4", 0, 30, data)
+        second = store.put("/v.mp4", 30, 30, data[::-1])
+        refs = [first, second]
+        # Keep the other slots occupied so an early release would allow eviction.
+        held = [store.put("/other.mp4", i, 1, data) for i in range(store.capacity - 2)]
+
+        read = store._open_view
+
+        def fail_second_open(ref):
+            if ref == second:
+                raise FileNotFoundError(ref.shm_name)
+            return read(ref)
+
+        with monkeypatch.context() as patch:
+            patch.setattr(store, "_open_view", fail_second_open)
+            with pytest.raises(FileNotFoundError, match=second.shm_name):
+                store.get_batch(refs)
+
+        with pytest.raises(BufferError, match="all slots"):
+            store.put("/full.mp4", 0, 1, data)
+        second_view, first_view = store.get_batch([second, first])
+        np.testing.assert_array_equal(first_view, data)
+        np.testing.assert_array_equal(second_view, data[::-1])
+        store.get_batch(held)
+
+    def test_reinserted_gop_uses_a_fresh_handle(self, store_id):
+        store = SharedGopStore.create(1, store_id)
+        try:
+            data = _make_gop_data(128)
+            old = store.put("/v.mp4", 0, 30, data)
+            (old_view,) = store.get_batch([old])
+            store.put("/other.mp4", 0, 30, data)
+            new = store.put("/v.mp4", 0, 30, data[::-1])
+            (new_view,) = store.get_batch([new])
+            np.testing.assert_array_equal(new_view, data[::-1])
+            np.testing.assert_array_equal(old_view, data)
         finally:
             store.cleanup()
 
@@ -492,8 +588,102 @@ def _worker_fn(store_id, capacity, video_path, first_frame_id, gop_len, data_byt
     store.close()
 
 
+def _queue_wrist_gop(store_id, data, queue, issue_via):
+    worker = SharedGopStore.attach(capacity=2, store_id=store_id)
+    try:
+        if issue_via == "lookup":
+            ref = worker.lookup("/wrist.mp4", 140)
+        else:
+            ref = worker.put("/wrist.mp4", 120, 30, data)
+        queue.put(ref)
+    finally:
+        worker.close()
+
+
+def _use_forked_ref(store_id, refs, action, queue):
+    if action == "read":
+        worker = SharedGopStore.attach(1, store_id)
+        try:
+            queue.put(worker.read(refs[0]).tobytes())
+        finally:
+            worker.close()
+    elif action == "forward":
+        queue.put(refs[0])
+    refs.clear()  # Drop the child's copy while the parent still holds its reference.
+
+
 class TestCrossProcess:
-    """Verify SharedGopStore works across spawn'd processes."""
+    """Verify SharedGopStore works across processes."""
+
+    @pytest.mark.parametrize("action", ["discard", "read", "forward"])
+    @pytest.mark.parametrize("received", [False, True], ids=["issued", "received"])
+    def test_forked_ref_preserves_parent_pin(self, store_id, received, action):
+        store = SharedGopStore.create(1, store_id)
+        ctx = multiprocessing.get_context("fork")
+        queue = ctx.SimpleQueue()
+        data = _make_gop_data(32)
+        refs = [store.put("/v.mp4", 0, 30, data)]
+        if received:
+            queue.put(refs.pop())
+            refs.append(queue.get())
+        child = ctx.Process(target=_use_forked_ref, args=(store_id, refs, action, queue))
+        try:
+            child.start()
+            child.join(timeout=10)
+            assert child.exitcode == 0
+            if action == "read":
+                assert queue.get() == data.tobytes()
+
+            with pytest.raises(BufferError, match="all slots"):
+                store.put("/other.mp4", 0, 30, data)
+            np.testing.assert_array_equal(store.read(refs[0]), data)
+            if action == "forward":
+                # The queued delivery still owns a pin after the parent opens its own ref.
+                with pytest.raises(BufferError, match="all slots"):
+                    store.put("/other.mp4", 0, 30, data)
+                np.testing.assert_array_equal(store.read(queue.get()), data)
+            store.put("/other.mp4", 0, 30, data)
+        finally:
+            if child.is_alive():
+                child.terminate()
+                child.join()
+            queue.close()
+            store.cleanup()
+
+    @pytest.mark.parametrize("start_method", ["fork", "spawn"])
+    @pytest.mark.parametrize("issue_via", ["lookup", "put"])
+    def test_delayed_queue_consumer(self, store_id, start_method, issue_via):
+        """A queued GOP must retain the worker's bytes while other batches are consumed."""
+        store = SharedGopStore.create(2, store_id)
+        ctx = multiprocessing.get_context(start_method)
+        q = ctx.Queue()
+        data = np.array([1, 2, 3, 4], dtype=np.uint8)
+        worker = ctx.Process(target=_queue_wrist_gop, args=(store_id, data, q, issue_via))
+        try:
+            if issue_via == "lookup":
+                store.get_batch([store.put("/wrist.mp4", 120, 30, data)])
+            worker.start()
+            worker.join(timeout=30)
+            assert worker.exitcode == 0
+
+            # Leave the wrist reference in the queue until two other GOPs cycle through the store.
+            for first_frame_id in (0, 30):
+                other = store.put("/other.mp4", first_frame_id, 30, data[::-1])
+                store.get_batch([other])
+            ref = q.get(timeout=5)
+            assert ref is not None
+            (actual,) = store.get_batch([ref])
+            np.testing.assert_array_equal(actual, data)
+            # Once the queue reference is consumed, the wrist slot is reusable.
+            extra = store.put("/other.mp4", 60, 30, data)
+            store.get_batch([extra])
+            assert store.lookup("/wrist.mp4", 140) is None
+        finally:
+            if worker.is_alive():
+                worker.terminate()
+                worker.join()
+            q.close()
+            store.cleanup()
 
     def test_worker_put_main_lookup(self):
         sid = _BASE_STORE_ID + 950

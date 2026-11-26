@@ -78,7 +78,7 @@ Before diving into the samples, understanding these concepts will be helpful:
 
 - **GOP Caching**: A Python-side caching mechanism that stores extracted serialized GOP bundles in memory. When the same video file is requested with a `frame_id` that falls within an already cached GOP range, the cached bundle is returned directly without re-demuxing from the video file.
 
-- **SharedGopStore**: A cross-process shared memory cache for serialized GOP bundles, backed by POSIX SharedMemory (`/dev/shm`). Workers store bundles in shared memory and pass lightweight `GopRef` references through the DataLoader IPC queue. The main process reads the data as zero-copy numpy views via `get_batch()`. Uses file-based locking (`flock`) for cross-process safety and LRU eviction when capacity is exceeded.
+- **SharedGopStore** stores serialized GOP bundles in POSIX shared memory (`/dev/shm`). Workers pin bundles before passing lightweight `GopRef` references through the DataLoader IPC queue. The main process calls `get_batch()` to open zero-copy numpy views and release those pins.
 
 ## 2. Quick Start
 
@@ -1258,15 +1258,15 @@ SharedGopStore.create()
     │               lookup(video, frame_id)
     │                 ├─ HIT  → return GopRef
     │                 └─ MISS → demux from disk
-    │                          put(video, data) → GopRef
-    │               queue.put(GopRef)  ← tens of bytes
+    │                          put(video, first, length, data) → GopRef
+    │               queue.put(GopRef)
     │
     ├──spawn──> Worker 1: (same pattern)
     │               ...
     │
     ◄── queue.get() ── [GopRef, GopRef, ...]
     │
-    get_batch(refs)  ← zero-copy numpy views
+    get_batch(refs)  ← open views and release pins
     │
     DecodeFromGOPListRGB(...)  ← GPU decode
     │
@@ -1285,12 +1285,12 @@ SharedGopStore.create()
 - {py:class}`~accvlab.on_demand_video_decoder.SharedGopStore`: Cross-process shared memory GOP cache
   - {py:meth}`~accvlab.on_demand_video_decoder.SharedGopStore.create`: Allocate a new store (main process)
   - {py:meth}`~accvlab.on_demand_video_decoder.SharedGopStore.attach`: Attach to existing store (worker processes)
-  - {py:meth}`~accvlab.on_demand_video_decoder.SharedGopStore.lookup`: Lock-free cache lookup, returns
+  - {py:meth}`~accvlab.on_demand_video_decoder.SharedGopStore.lookup`: Look up the GOP containing a frame, returning
     {py:class}`~accvlab.on_demand_video_decoder.GopRef` or ``None``
   - {py:meth}`~accvlab.on_demand_video_decoder.SharedGopStore.put`: Store GOP data, returns
     {py:class}`~accvlab.on_demand_video_decoder.GopRef`
-  - {py:meth}`~accvlab.on_demand_video_decoder.SharedGopStore.get_batch`: Read a batch of
-    {py:class}`~accvlab.on_demand_video_decoder.GopRef` as zero-copy numpy views (main process)
+  - {py:meth}`~accvlab.on_demand_video_decoder.SharedGopStore.get_batch`: Open zero-copy views and
+    release the pins for the references received from workers
   - {py:meth}`~accvlab.on_demand_video_decoder.SharedGopStore.read`: Read a single
     {py:class}`~accvlab.on_demand_video_decoder.GopRef` as a zero-copy numpy view
   - {py:meth}`~accvlab.on_demand_video_decoder.SharedGopStore.cleanup`: Unlink all shared memory blocks
@@ -1308,7 +1308,7 @@ SharedGopStore.create()
 from accvlab.on_demand_video_decoder import SharedGopStore
 
 STORE_ID = 0       # typically LOCAL_RANK
-CAPACITY = 120     # must exceed in-flight GOPs (see sizing below)
+CAPACITY = 120     # allow one slot per distinct in-flight GOP
 
 store = SharedGopStore.create(capacity=CAPACITY, store_id=STORE_ID)
 ```
@@ -1321,7 +1321,6 @@ def worker_fn(store_id, capacity, tasks, result_queue):
 
     refs = []
     for video_path, frame_id, gop_first_frame, gop_len in tasks:
-        # Lock-free lookup
         ref = store.lookup(video_path, frame_id)
         if ref is None:
             # Cache miss: demux from disk (or simulate)
@@ -1329,7 +1328,7 @@ def worker_fn(store_id, capacity, tasks, result_queue):
             ref = store.put(video_path, gop_first_frame, gop_len, gop_data)
         refs.append(ref)
 
-    # Send lightweight refs (tens of bytes each) through IPC queue
+    # Send references through the IPC queue
     result_queue.put(refs)
     store.close()
 ```
@@ -1342,11 +1341,10 @@ def worker_fn(store_id, capacity, tasks, result_queue):
 # of GopRefs onto its own queue; the main process gathers them here.
 all_refs = queue_a.get() + queue_b.get()
 
-# Read shared memory blocks as zero-copy numpy views
+# Read every reference in queue order, including repeated GOPs.
 arrays = store.get_batch(all_refs)
-
-# Decode on GPU
-decoded_frames = decoder.DecodeFromGOPListRGB(arrays, file_paths, frame_ids, True)
+gops_by_video = [[array] for array in arrays]
+decoder.DecodeFromGOPListRGB(gops_by_video, file_paths, frame_ids, True)
 ```
 
 **Step 4: Cleanup on shutdown**
@@ -1357,52 +1355,40 @@ store.cleanup()  # unlinks all /dev/shm blocks for this store
 
 **Capacity Sizing**
 
-The `capacity` parameter must exceed the maximum number of GOPs that can be "in flight" (queued in the 
-DataLoader + being consumed by the training loop):
-
-```
-min_capacity > (prefetch_factor * num_workers + 1) * batch_size * num_cameras
-```
-
-A recommended formula is:
-
-```python
-capacity = batch_size * num_cameras * 10
-```
-
-If capacity is too small, GOPs may be evicted before the main process can read them. In this case,
-{py:meth}`~accvlab.on_demand_video_decoder.SharedGopStore.read` returns a zeros array and emits a
-`RuntimeWarning` with diagnostic information instead of crashing.
+Size the store for the peak number of distinct GOPs held by workers or waiting in the queue at once.
+Repeated references to the same GOP share one slot. When every slot is pinned, inserting a new GOP raises
+`BufferError`. Reading an unpinned reference after its block has been unlinked raises `FileNotFoundError`.
 
 **GopRef IPC Efficiency**
 
 {py:class}`~accvlab.on_demand_video_decoder.GopRef` is a `NamedTuple` with 4 fields (shm_name, data_size,
-first_frame_id, gop_len). It serializes to ~60 bytes via pickle, compared to ~4-40 KB for the actual serialized
-GOP bundle. This makes DataLoader IPC overhead negligible.
+first_frame_id, gop_len). Pickle transfers the pin along with references returned by the store.
+The sample serialized one reference in 215 bytes for a 4 KB GOP. The size depends on the shared-memory
+name and pickle protocol.
 
 ```python
 import pickle
 from accvlab.on_demand_video_decoder import GopRef
 
 ref = GopRef(shm_name="gs_0_12345_0", data_size=4096, first_frame_id=0, gop_len=30)
-print(len(pickle.dumps(ref)))  # ~60 bytes
+print(len(pickle.dumps(ref)))
 ```
 
 **LRU Eviction**
 
 When the store is full, {py:meth}`~accvlab.on_demand_video_decoder.SharedGopStore.put` evicts the
-least-recently-used entry (lowest `access_tick`). Both
+least-recently-used entry with zero pins (lowest `access_tick`). Both
 {py:meth}`~accvlab.on_demand_video_decoder.SharedGopStore.lookup` and
 {py:meth}`~accvlab.on_demand_video_decoder.SharedGopStore.put` refresh an entry's tick, so frequently
-accessed GOPs are retained. Evicted shm blocks are cleaned up during the next
-{py:meth}`~accvlab.on_demand_video_decoder.SharedGopStore.get_batch` call.
+accessed GOPs are retained. `get_batch()` also cleans up evicted shared-memory blocks.
 
 **Cross-Process Safety**
 
-- {py:meth}`~accvlab.on_demand_video_decoder.SharedGopStore.lookup` is lock-free (worst case: stale miss, one extra disk read)
-- {py:meth}`~accvlab.on_demand_video_decoder.SharedGopStore.put` acquires an `flock` for atomicity
-- {py:meth}`~accvlab.on_demand_video_decoder.SharedGopStore.get_batch` acquires an `flock` to prevent eviction while opening handles
-- Works with `spawn`'d DataLoader workers (unlike `multiprocessing.Lock`)
+Workers acquire pins under the same file lock (`flock`) used for eviction. The main process opens
+all requested views before releasing the pins. Pass the batch as received to
+`store.get_batch(refs)`: it returns one view per input in order, even when multiple
+references point to the same GOP. Those views share one mapping of the GOP data.
+The returned views keep their mappings alive through decoding. The store releases the lock before returning them.
 
 **Running the Sample**
 
@@ -1427,7 +1413,7 @@ SharedGopStore Demo
   ...
 
 [Main] Received 12 GopRef references from workers
-[Main] GopRef size: 60 bytes (vs ~4096 bytes of actual GOP data)
+[Main] GopRef size: 215 bytes (vs ~4096 bytes of actual GOP data)
 
 [Main] Got 12 zero-copy numpy views:
   [0] shape=(4096,), dtype=uint8, nbytes=4096

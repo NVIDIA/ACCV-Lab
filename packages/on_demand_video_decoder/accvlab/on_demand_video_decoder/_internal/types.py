@@ -23,7 +23,7 @@ from typing import NamedTuple
 class GopRef(NamedTuple):
     """Lightweight, picklable reference to GOP data in shared memory.
 
-    Designed to be passed through DataLoader IPC queues (tens of bytes)
+    Designed to be passed through DataLoader IPC queues
     instead of the actual serialized GOP bundle (tens of KB).  The main process
     calls :meth:`SharedGopStore.get_batch` to read the referenced shm blocks
     as zero-copy numpy views.

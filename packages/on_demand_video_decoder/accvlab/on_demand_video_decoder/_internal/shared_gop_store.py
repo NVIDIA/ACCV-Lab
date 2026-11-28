@@ -15,10 +15,10 @@
 """
 SharedGopStore: Cross-process shared GOP store backed by POSIX SharedMemory.
 
-Workers :meth:`SharedGopStore.put` serialized GOP bundles and pass lightweight
-:class:`GopRef` references through the DataLoader IPC queue.  The main
-process calls :meth:`SharedGopStore.get_batch` to read references as
-zero-copy numpy views.
+Workers pin serialized GOP bundles and pass lightweight :class:`GopRef`
+references through the DataLoader IPC queue. The main process calls
+:meth:`SharedGopStore.get_batch` to open zero-copy numpy views and
+release the corresponding pins.
 
 Synchronization uses file-based locking (``flock``) which works across
 ``spawn``'d DataLoader workers (unlike ``multiprocessing.Lock``).
@@ -36,7 +36,7 @@ Usage::
         ref = store.put(video_path, first_frame_id, gop_len, data)
     # Pass ``ref`` (lightweight) through DataLoader IPC queue
 
-    # Main process -- get batch of GOP data, then clean orphans
+    # Main process -- read the batch in input order
     arrays = store.get_batch(refs)
 
     # Main process -- shutdown
@@ -47,8 +47,13 @@ import fcntl
 import glob as glob_mod
 import hashlib
 import os
+import threading
+import time
+from collections import Counter
+from contextlib import contextmanager
 from multiprocessing import shared_memory
-from typing import List, Optional
+from multiprocessing.util import ForkAwareThreadLock
+from typing import List, Optional, Sequence
 
 import numpy as np
 
@@ -66,7 +71,8 @@ ENTRY_DTYPE = np.dtype(
         ('gop_len', np.int32),  # number of frames in this GOP
         ('data_size', np.int32),  # actual GOP data size in bytes
         ('state', np.uint8),  # 0=FREE, 1=USED
-        ('_pad', np.uint8, (3,)),  # alignment padding
+        ('_pad', np.uint8),
+        ('pins', np.uint16),  # outstanding queued references, protected by flock
         ('access_tick', np.int64),  # monotonic counter for LRU ordering
         ('shm_name', 'S64'),  # SharedMemory name for the data block
     ]
@@ -74,6 +80,7 @@ ENTRY_DTYPE = np.dtype(
 
 _STATE_FREE = np.uint8(0)
 _STATE_USED = np.uint8(1)
+_MAX_PINS = np.iinfo(ENTRY_DTYPE['pins']).max
 
 # SharedMemory name prefix used for GOP data blocks.
 _SHM_PREFIX = "gs"
@@ -81,6 +88,18 @@ _SHM_PREFIX = "gs"
 # Private key to prevent direct instantiation of SharedGopStore.
 # Mirrors the pattern used by ``CachedGopDecoder`` in ``_internal/decoder.py``.
 _CREATION_KEY = object()
+
+
+def _reset_process_state():
+    # A raw fork can inherit a pin lock held by a thread that only exists in the parent.
+    global _PROCESS_PID, _PIN_STATES, _HELD_LOCKS
+    _PROCESS_PID = os.getpid()
+    _PIN_STATES = threading.Lock()
+    _HELD_LOCKS = threading.local()
+
+
+_reset_process_state()
+os.register_at_fork(after_in_child=_reset_process_state)
 
 
 def _hash_video_path(video_path: str) -> np.uint64:
@@ -95,6 +114,63 @@ def _hash_video_path(video_path: str) -> np.uint64:
     return np.uint64(int.from_bytes(digest, 'little'))
 
 
+class _PinnedName(str):
+    """One hand-off pin. DataLoader may rebuild GopRef from its four fields."""
+
+    _state = "pending"
+    _issuer = None
+
+    def __new__(cls, value):
+        name = super().__new__(cls, value)
+        name._owner_pid = _PROCESS_PID  # Set on issuance and again on unpickle.
+        return name
+
+    def _owns_pending_pin(self) -> bool:
+        return self._owner_pid == _PROCESS_PID and self._state == "pending"
+
+    def __deepcopy__(self, memo):
+        # Copies of a GopRef in one batch share its single hand-off.
+        return self
+
+    def __reduce__(self):
+        # Only the owner can transfer its pin. Each additional or fork-inherited
+        # delivery needs a new pin of its own.
+        with _PIN_STATES:
+            if self._state == "opened":
+                return str, (str(self),)
+            transfer_pin = self._owns_pending_pin()
+            if transfer_pin:
+                self._state = "sent"
+        if not transfer_pin:
+            self._adjust_pin(1)
+        return type(self), (str(self),), {"_location": self._location}
+
+    def __del__(self):
+        # Cache warm-ups and references discarded during batch deduplication.
+        if hasattr(self, "_location") and self._owns_pending_pin():
+            self._adjust_pin(-1)
+
+    def _adjust_pin(self, change: int) -> None:
+        capacity, store_id, slot = self._location
+        # A fork-inherited file descriptor shares the parent's flock.
+        store = self._issuer if self._owner_pid == _PROCESS_PID else None
+        if store is not None and store._lock_fd is not None:
+            store._adjust_pin(self, slot, change)
+            return
+        try:
+            if os.stat(f"/dev/shm/gs_meta_{store_id}").st_size != capacity * ENTRY_DTYPE.itemsize:
+                raise FileNotFoundError(str(self))
+            store = SharedGopStore.attach(capacity, store_id)
+        except FileNotFoundError:
+            if change > 0:
+                raise
+            return
+        try:
+            store._adjust_pin(self, slot, change)
+        finally:
+            store.close()
+
+
 class SharedGopStore:
     """Cross-process shared GOP store backed by POSIX SharedMemory.
 
@@ -102,13 +178,10 @@ class SharedGopStore:
     SharedMemory block holds the metadata table (index).  File-based
     locking (``flock``) provides cross-process safety under ``spawn`` mode.
 
-    **Capacity sizing:**  ``capacity`` must exceed the maximum number of
-    GOPs that can be "in flight" (queued in the DataLoader + being
-    consumed by the training loop)::
-
-        min_capacity > (prefetch_factor * num_workers + 1) * batch_size * num_cameras
-
-    A recommended formula is ``batch_size * num_cameras * 10``.
+    **Capacity sizing:** Allow one slot per distinct GOP with an outstanding
+    pin, including references held by workers and queued batches. A new GOP
+    raises ``BufferError`` when all slots are pinned. After the main process
+    opens the batch, its views remain readable for the duration of decoding.
 
     Note:
         Do not instantiate this class directly.
@@ -136,6 +209,7 @@ class SharedGopStore:
         self.capacity = capacity
         self.store_id = store_id
         self._is_creator = _create
+        self._cleaned_up = False
 
         # --- Metadata SharedMemory ---
         meta_name = f"gs_meta_{store_id}"
@@ -162,13 +236,15 @@ class SharedGopStore:
             with open(self._lock_path, 'w'):
                 pass
         self._lock_fd = os.open(self._lock_path, os.O_RDWR)
+        self._local_lock = ForkAwareThreadLock()
 
         # --- Monotonic tick counter in a tiny SharedMemory ---
         tick_name = f"gs_tick_{store_id}"
         if _create:
             _cleanup_stale_shm(tick_name)
             self._tick_shm = shared_memory.SharedMemory(name=tick_name, create=True, size=8)
-            np.frombuffer(self._tick_shm.buf, dtype=np.int64)[:] = 0
+            # Keep delayed references distinct across successive stores with the same ID.
+            np.frombuffer(self._tick_shm.buf, dtype=np.int64)[:] = time.monotonic_ns()
         else:
             self._tick_shm = shared_memory.SharedMemory(name=tick_name, create=False)
         self._tick_arr = np.ndarray(1, dtype=np.int64, buffer=self._tick_shm.buf)
@@ -209,18 +285,26 @@ class SharedGopStore:
     #  Locking helpers (flock)
     # ------------------------------------------------------------------ #
 
-    def _lock(self):
-        fcntl.flock(self._lock_fd, fcntl.LOCK_EX)
-
-    def _unlock(self):
-        fcntl.flock(self._lock_fd, fcntl.LOCK_UN)
+    @contextmanager
+    def _locked(self):
+        # The queue feeder can run on a second thread. A discarded reference can
+        # also release a pin while this thread already holds the store's flock.
+        held = getattr(_HELD_LOCKS, "store_ids", ())
+        if self.store_id in held:
+            yield
+            return
+        with self._local_lock:
+            store_ids = (*held, self.store_id)
+            fcntl.flock(self._lock_fd, fcntl.LOCK_EX)
+            _HELD_LOCKS.store_ids = store_ids
+            try:
+                yield
+            finally:
+                _HELD_LOCKS.store_ids = held
+                fcntl.flock(self._lock_fd, fcntl.LOCK_UN)
 
     def _next_tick(self) -> int:
-        """Increment and return the monotonic tick counter.
-
-        Not truly atomic across processes without the lock, but the tick
-        is only used for LRU ordering -- a rare duplicate is harmless.
-        """
+        """Increment the shared tick counter while holding the store lock."""
         self._tick_arr[0] += 1
         return int(self._tick_arr[0])
 
@@ -228,41 +312,53 @@ class SharedGopStore:
     #  Worker API
     # ------------------------------------------------------------------ #
 
-    def lookup(self, video_path: str, frame_id: int) -> Optional[GopRef]:
-        """Lock-free lookup for a cached GOP containing *frame_id*.
+    def lookup(self, video_path: str, frame_id: int, *, pin: bool = True) -> Optional[GopRef]:
+        """Look up the GOP containing *frame_id*. Return ``None`` on a miss.
 
-        Returns a :class:`GopRef` on hit, ``None`` on miss.  Lock-free
-        design means the worst case is a stale miss (one extra disk read),
-        never a correctness issue.
+        The returned reference pins its GOP until :meth:`get_batch` or :meth:`read`
+        opens it. Pickling transfers the pin to the serialized reference.
+        Use ``pin=False`` for a cache-only probe.
         """
         vp_hash = _hash_video_path(video_path)
-        for i in range(self.capacity):
-            e = self._entries[i]
-            if (
-                e['state'] == _STATE_USED
-                and e['video_path_hash'] == vp_hash
-                and e['first_frame_id'] <= frame_id < e['first_frame_id'] + e['gop_len']
-            ):
-                e['access_tick'] = self._next_tick()
+        with self._locked():
+            rows = self._entries
+            hits = np.flatnonzero(
+                (rows['state'] == _STATE_USED)
+                & (rows['video_path_hash'] == vp_hash)
+                & (rows['first_frame_id'] <= frame_id)
+                & (frame_id < np.add(rows['first_frame_id'], rows['gop_len'], dtype=np.int64))
+            )
+            if hits.size:
+                rows['access_tick'][hits[0]] = self._next_tick()
+                ref = self._acquire_ref(int(hits[0]), pin)
                 self._hits += 1
-                return GopRef(
-                    shm_name=e['shm_name'].decode(),
-                    data_size=int(e['data_size']),
-                    first_frame_id=int(e['first_frame_id']),
-                    gop_len=int(e['gop_len']),
-                )
-        self._misses += 1
-        return None
+                return ref
+            self._misses += 1
+            return None
 
-    def put(self, video_path: str, first_frame_id: int, gop_len: int, data: np.ndarray) -> GopRef:
+    def _acquire_ref(self, slot: int, pin: bool) -> GopRef:
+        """Acquire a reference while holding the store lock."""
+        entry = self._entries[slot]
+        name = entry['shm_name'].decode()
+        if pin:
+            pins = int(entry['pins'])
+            if pins == _MAX_PINS:
+                raise OverflowError("SharedGopStore: too many outstanding references to one GOP")
+            name = _PinnedName(name)
+            name._issuer = self
+            entry['pins'] = pins + 1
+            name._location = (self.capacity, self.store_id, slot)
+        return GopRef(name, int(entry['data_size']), int(entry['first_frame_id']), int(entry['gop_len']))
+
+    def put(
+        self, video_path: str, first_frame_id: int, gop_len: int, data: np.ndarray, *, pin: bool = True
+    ) -> GopRef:
         """Store a serialized GOP bundle and return a :class:`GopRef`.
 
-        Holds ``flock`` during eviction + insertion to guarantee atomicity.
-        Performs a double-check after acquiring the lock (another worker
-        may have inserted while we waited).
+        Both a new insertion and a cache hit pin the returned reference by default.
+        Raises ``BufferError`` if all slots have outstanding references.
         """
-        self._lock()
-        try:
+        with self._locked():
             # Skip allocation if an identical GOP — same video, same
             # first_frame_id, same gop_len — is already in the table.
             vp_hash = _hash_video_path(video_path)
@@ -275,20 +371,17 @@ class SharedGopStore:
                     and e['gop_len'] == gop_len
                 ):
                     e['access_tick'] = self._next_tick()
-                    return GopRef(
-                        shm_name=e['shm_name'].decode(),
-                        data_size=int(e['data_size']),
-                        first_frame_id=int(e['first_frame_id']),
-                        gop_len=int(e['gop_len']),
-                    )
+                    return self._acquire_ref(i, pin)
 
             slot_idx = self._find_free_or_evict()
 
-            # Content-addressed naming -- same GOP always gets the same name.
-            shm_name = f"{_SHM_PREFIX}_{self.store_id}_{vp_hash}_{first_frame_id}"
+            # A fresh name keeps older references and cached handles bound to their own bytes,
+            # even when a GOP with the same starting frame is inserted again.
+            tick = self._next_tick()
+            shm_name = f"{_SHM_PREFIX}_{self.store_id}_{tick}_{first_frame_id}"
             data_size = int(data.nbytes)
 
-            # Clean up if same GOP was previously cached then evicted
+            # A previous run with the same store ID may have left this name behind.
             _cleanup_stale_shm(shm_name)
 
             shm = shared_memory.SharedMemory(name=shm_name, create=True, size=data_size)
@@ -300,76 +393,76 @@ class SharedGopStore:
             self._entries[slot_idx]['first_frame_id'] = first_frame_id
             self._entries[slot_idx]['gop_len'] = gop_len
             self._entries[slot_idx]['data_size'] = data_size
-            self._entries[slot_idx]['access_tick'] = self._next_tick()
+            self._entries[slot_idx]['access_tick'] = tick
             self._entries[slot_idx]['shm_name'] = shm_name.encode()
-            # Set state last (acts as publish barrier for lock-free readers)
+            self._entries[slot_idx]['pins'] = 0
             self._entries[slot_idx]['state'] = _STATE_USED
 
             self._puts += 1
-            return GopRef(
-                shm_name=shm_name,
-                data_size=data_size,
-                first_frame_id=first_frame_id,
-                gop_len=gop_len,
-            )
-        finally:
-            self._unlock()
+            return self._acquire_ref(slot_idx, pin)
 
     # ------------------------------------------------------------------ #
     #  Main Process API
     # ------------------------------------------------------------------ #
 
     def read(self, ref: GopRef) -> np.ndarray:
-        """Zero-copy uint8 numpy view of the serialized GOP bundle in shared memory.
+        """Open a single zero-copy uint8 view and release its hand-off pin."""
+        return self.get_batch([ref])[0]
 
-        Caches ``SharedMemory`` handles per-process to avoid repeated
-        ``shm_open()`` system calls.
-        """
-        shm_name = ref.shm_name
+    def _open_view(self, ref: GopRef) -> np.ndarray:
+        shm_name = str(ref.shm_name)
         if shm_name not in self._local_shm_handles:
-            try:
-                shm = shared_memory.SharedMemory(name=shm_name, create=False)
-            except FileNotFoundError:
-                import warnings
-
-                warnings.warn(
-                    f"SharedGopStore: shm block '{shm_name}' not found. "
-                    f"This means a GOP was evicted before the main process "
-                    f"could read it. Increase store capacity "
-                    f"(current: {self.capacity}) — it must exceed "
-                    f"(prefetch_factor * num_workers + 1) * batch_size * num_cameras. "
-                    f"Returning zeros as fallback.",
-                    RuntimeWarning,
-                    stacklevel=2,
-                )
-                return np.zeros(ref.data_size, dtype=np.uint8)
-            self._local_shm_handles[shm_name] = shm
-        else:
-            shm = self._local_shm_handles[shm_name]
-
+            self._local_shm_handles[shm_name] = shared_memory.SharedMemory(name=shm_name, create=False)
+        shm = self._local_shm_handles[shm_name]
         return np.frombuffer(shm.buf[: ref.data_size], dtype=np.uint8)
 
-    def get_batch(self, refs: List[GopRef]) -> List[np.ndarray]:
-        """Read a batch of GOPs from shared memory (zero-copy).
+    def get_batch(self, refs: Sequence[GopRef]) -> List[np.ndarray]:
+        """Return one zero-copy view per input reference, in order.
 
-        Call once per training iteration from the main process.
-        Holds ``flock`` during the entire operation so that no worker can
-        evict a block while handles are being opened.  After opening,
-        orphaned shm blocks (evicted but not yet unlinked) are cleaned up.
-
-        Args:
-            refs: Flat list of :class:`GopRef` from DataLoader workers.
-
-        Returns:
-            List of zero-copy uint8 numpy views, same order as *refs*.
+        Pass the batch as received. Repeated GOPs share the same mapping.
+        If any open fails, no hand-off pins are released and the batch can be retried.
         """
-        self._lock()
-        try:
-            result = [self.read(ref) for ref in refs]
+        refs = tuple(refs)
+        with self._locked():
+            arrays = [self._open_view(ref) for ref in refs]
             self._unlink_orphans()
-            return result
-        finally:
-            self._unlock()
+            with _PIN_STATES:
+                # Reusing one reference for several views consumes one pin. Separate
+                # worker lookups for the same GOP have equal fields but own one pin each.
+                names = (ref.shm_name for ref in refs)
+                pending = {
+                    id(name): name
+                    for name in names
+                    if isinstance(name, _PinnedName) and name._owns_pending_pin()
+                }
+                counts = Counter((name._location[2], str(name)) for name in pending.values())
+                pins = self._entries['pins']
+                for (slot, name), count in counts.items():
+                    if (
+                        slot >= self.capacity
+                        or self._entries['shm_name'][slot] != name.encode()
+                        or pins[slot] < count
+                    ):
+                        raise ValueError(f"Unbalanced GOP acknowledgement: {name}")
+                for (slot, _), count in counts.items():
+                    pins[slot] -= count
+                for name in pending.values():
+                    name._state = "opened"
+                    name._issuer = None
+            return arrays
+
+    def _adjust_pin(self, name: str, slot: int, change: int) -> None:
+        """Account for a discarded reference or another delivery of an issued one."""
+        with self._locked():
+            entry = self._entries[slot]
+            if entry['state'] != _STATE_USED or entry['shm_name'] != name.encode():
+                if change > 0:
+                    raise FileNotFoundError(name)
+                return
+            pins = int(entry['pins']) + change
+            if not 0 <= pins <= _MAX_PINS:
+                raise OverflowError(f"Invalid SharedGopStore pin count for {name}: {pins}")
+            entry['pins'] = pins
 
     # ------------------------------------------------------------------ #
     #  Stats
@@ -401,19 +494,19 @@ class SharedGopStore:
     # ------------------------------------------------------------------ #
 
     def _find_free_or_evict(self) -> int:
-        """Find a FREE slot, or evict the LRU entry.  Must hold flock."""
+        """Find a free slot or evict the least recently used unpinned entry under flock."""
         min_tick = np.iinfo(np.int64).max
-        min_idx = 0
+        min_idx = None
         for i in range(self.capacity):
             if self._entries[i]['state'] == _STATE_FREE:
                 return i
-            if self._entries[i]['access_tick'] < min_tick:
+            if not self._entries[i]['pins'] and self._entries[i]['access_tick'] < min_tick:
                 min_tick = int(self._entries[i]['access_tick'])
                 min_idx = i
 
-        # Evict the LRU slot.  Do NOT unlink the shm block here -- workers
-        # don't know which blocks the main process still needs.  The main
-        # process cleans up orphans in get_batch() -> _unlink_orphans().
+        if min_idx is None:
+            raise BufferError(f"SharedGopStore: all slots are pinned (capacity={self.capacity})")
+        # Leave the block linked until the main process cleans up orphans.
         self._entries[min_idx]['state'] = _STATE_FREE
         self._evictions += 1
         return min_idx
@@ -421,7 +514,7 @@ class SharedGopStore:
     def _unlink_orphans(self):
         """Unlink shm blocks that were evicted but not yet cleaned up.
 
-        Called under flock by :meth:`get_batch`.  Scans ``/dev/shm`` for
+        Called under flock by get_batch. Scans ``/dev/shm`` for
         blocks belonging to this store that are no longer in the metadata
         table.
         """
@@ -457,12 +550,11 @@ class SharedGopStore:
     def cleanup(self) -> None:
         """Unlink **all** SharedMemory blocks and the lock file.
 
-        Call from the main process on shutdown.
+        Call from the main process on shutdown, including after :meth:`close`.
         """
-        # Close local handles (may have live numpy views -> _force_close_shm)
-        for shm in self._local_shm_handles.values():
-            _force_close_shm(shm)
-        self._local_shm_handles.clear()
+        if self._cleaned_up:
+            return  # A new store may now own the same names.
+        self.close()
 
         # Glob-clean ALL shm blocks for this store (catches orphans)
         prefix = f"{_SHM_PREFIX}_{self.store_id}_"
@@ -476,8 +568,6 @@ class SharedGopStore:
                 pass
 
         # Unlink meta and tick SharedMemory
-        _force_close_shm(self._meta_shm)
-        _force_close_shm(self._tick_shm)
         if self._is_creator:
             try:
                 self._meta_shm.unlink()
@@ -488,16 +578,20 @@ class SharedGopStore:
             except FileNotFoundError:
                 pass
             try:
-                os.close(self._lock_fd)
                 os.unlink(self._lock_path)
-            except OSError:
+            except FileNotFoundError:
                 pass
+        self._cleaned_up = True
 
     def close(self) -> None:
         """Close SharedMemory handles **without** unlinking.
 
         Call from worker processes before exit.
         """
+        lock_fd = self._lock_fd
+        if lock_fd is None:
+            return
+        self._lock_fd = None
         for shm in self._local_shm_handles.values():
             _force_close_shm(shm)
         self._local_shm_handles.clear()
@@ -505,7 +599,7 @@ class SharedGopStore:
         _force_close_shm(self._meta_shm)
         _force_close_shm(self._tick_shm)
         try:
-            os.close(self._lock_fd)
+            os.close(lock_fd)
         except OSError:
             pass
 

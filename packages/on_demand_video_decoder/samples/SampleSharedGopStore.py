@@ -68,7 +68,7 @@ def worker_fn(store_id, capacity, tasks, result_queue):
 
     refs = []
     for video_path, frame_id, gop_first_frame, gop_len in tasks:
-        # Step 1: Try lock-free lookup
+        # Step 1: Look up the GOP and pin it for the queue
         ref = store.lookup(video_path, frame_id)
         if ref is not None:
             print(f"  [Worker {pid}] HIT  {video_path} frame={frame_id}")
@@ -176,9 +176,9 @@ def SampleSharedGopStore():
     all_refs = refs_a + refs_b
 
     print(f"\n[Main] Received {len(all_refs)} GopRef references from workers")
-    print(
-        f"[Main] GopRef size: {len(pickle.dumps(all_refs[0]))} bytes " f"(vs ~4096 bytes of actual GOP data)"
-    )
+    serialized_ref = pickle.dumps(all_refs[0])
+    all_refs[0] = pickle.loads(serialized_ref)
+    print(f"[Main] GopRef size: {len(serialized_ref)} bytes (vs ~4096 bytes of actual GOP data)")
 
     # ── 5. get_batch: read shm blocks + orphan cleanup ────────────
     print(f"\n[Main] Resolving {len(all_refs)} references (atomic open + orphan cleanup)...")

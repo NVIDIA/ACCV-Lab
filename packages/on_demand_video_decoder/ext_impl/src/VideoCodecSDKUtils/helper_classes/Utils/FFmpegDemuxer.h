@@ -605,10 +605,14 @@ class FFmpegDemuxer {
             AVPixelFormat recovered = ffmpeg_demuxer_detail::recover_pix_fmt_from_extradata(
                 fmtc->streams[iVideoStream]->codecpar);
             if (recovered != AV_PIX_FMT_NONE) {
-                const char* name = av_get_pix_fmt_name(recovered);
-                LOG(INFO) << "Recovered pix_fmt from SPS extradata: "
-                          << (name ? name : "?");
                 eChromaFormat = recovered;
+                static thread_local bool logged_sps_recovery = false;
+                if (!logged_sps_recovery) {
+                    logged_sps_recovery = true;
+                    const char* name = av_get_pix_fmt_name(recovered);
+                    LOG(INFO) << "Recovered pix_fmt from SPS extradata: "
+                              << (name ? name : "?");
+                }
             }
         }
 

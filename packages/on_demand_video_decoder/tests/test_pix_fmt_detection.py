@@ -65,6 +65,21 @@ def _video_path(name):
     return path
 
 
+def test_sps_recovery_log_once_per_thread(capfd):
+    path = _video_path("h264_avc1_yuv420p.mp4")
+    infos = nvc.GetFastInitInfo([path])
+    infos[0].format = -1  # AV_PIX_FMT_NONE forces SPS recovery on any FFmpeg build.
+
+    message = "Recovered pix_fmt from SPS extradata: yuv420p"
+    # Each single-file decoder reuses its own native demux thread across calls.
+    for _ in range(2):
+        decoder = nvc.CreateGopDecoder(maxfiles=1, iGpu=0)
+        for expected_logs in (1, 0):
+            gop, _, _ = decoder.GetGOPList([path], [0], fastStreamInfos=infos)[0]
+            assert gop.size > 0
+            assert capfd.readouterr().out.count(message) == expected_logs
+
+
 def _expected_plane_strides(pixel_format, luma_width, bytes_per_sample):
     if pixel_format in (PIXEL_FORMAT_NV12, PIXEL_FORMAT_P016):
         # Semi-planar 4:2:0: one Y plane followed by one interleaved UV plane.
